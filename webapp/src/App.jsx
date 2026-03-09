@@ -304,27 +304,52 @@ function getFpGroups(seat) {
   return fp;
 }
 
-function computeModelledSeats(seats, swings, prefFlows, overrides) {
+// Compute implied national ALP 2PP from primary votes and preference flows.
+// Used to derive nat2ppSwing for the uniform swing model.
+function computeNat2pp(prim, flows) {
+  const other = Math.max(0, 100 - prim.alp - prim.coal - prim.grn - prim.teal - prim.on);
+  const a = prim.alp + prim.grn*flows.grn_alp + prim.teal*flows.teal_alp + prim.on*flows.on_alp + other*flows.other_alp;
+  const c = prim.coal + prim.grn*(1-flows.grn_alp) + prim.teal*(1-flows.teal_alp) + prim.on*(1-flows.on_alp) + other*(1-flows.other_alp);
+  return a/(a+c)*100;
+}
+
+// Methodology:
+//  - ALP/Coalition seats (no primary override): uniform national swing — nat2ppSwing is
+//    applied to each seat's actual 2022 ALP 2PP baseline. This correctly models each seat
+//    starting from its own 2022 result rather than treating all seats identically.
+//  - ALP/Coalition seats (primary vote override): TCP is computed from the override
+//    first-preference percentages via the standard preference-flow formula.
+//  - Non-ALP/Coalition seats (GRN, TEAL): swing differential is applied to the seat's
+//    2022 TCP baseline (same approach, already correct).
+//  - tcpPct override: bypasses all calculations; directly sets the 2022 winner's TCP%.
+//    tcpPct > 50 → 2022 winner holds; tcpPct < 50 → challenger wins.
+function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing) {
   return seats.map(seat => {
-    const baseFp = getFpGroups(seat);
     const override = overrides[seat.id];
 
-    // Use seat-level primary overrides if set, otherwise national swing
-    const newFp = {
-      alp:  Math.max(0, override ? (override.alp  ?? (baseFp.alp  + swings.alp))  : (baseFp.alp  + swings.alp)),
-      coal: Math.max(0, override ? (override.coal ?? (baseFp.coal + swings.coal)) : (baseFp.coal + swings.coal)),
-      grn:  Math.max(0, override ? (override.grn  ?? (baseFp.grn  + swings.grn))  : (baseFp.grn  + swings.grn)),
-      teal: Math.max(0, override ? (override.teal ?? (baseFp.teal + swings.teal)) : (baseFp.teal + swings.teal)),
-      on:   Math.max(0, override ? (override.on   ?? (baseFp.on   + swings.on))   : (baseFp.on   + swings.on)),
-    };
-    const explicitTot = newFp.alp + newFp.coal + newFp.grn + newFp.teal + newFp.on;
-    newFp.other = Math.max(0, 100 - explicitTot);
-
-    // For non-ALP/Coal TCP seats, compute effective swings from seat primaries vs 2022 baseline
-    const effAlpSwing  = override ? (newFp.alp  - BASELINE_2022.alp)  : swings.alp;
-    const effCoalSwing = override ? (newFp.coal - BASELINE_2022.coal) : swings.coal;
-    const effGrnSwing  = override ? (newFp.grn  - BASELINE_2022.grn)  : swings.grn;
-    const effTealSwing = override ? (newFp.teal - BASELINE_2022.teal) : swings.teal;
+    // For seats with a primary vote override, derive effective swings from override
+    // primaries relative to the 2022 national baseline (used for non-ALP/Coal branches).
+    let effAlpSwing, effCoalSwing, effGrnSwing, effTealSwing;
+    let newFp = null;
+    if (override) {
+      newFp = {
+        alp:  Math.max(0, override.alp  ?? (BASELINE_2022.alp  + swings.alp)),
+        coal: Math.max(0, override.coal ?? (BASELINE_2022.coal + swings.coal)),
+        grn:  Math.max(0, override.grn  ?? (BASELINE_2022.grn  + swings.grn)),
+        teal: Math.max(0, override.teal ?? (BASELINE_2022.teal + swings.teal)),
+        on:   Math.max(0, override.on   ?? (BASELINE_2022.on   + swings.on)),
+      };
+      newFp.other = Math.max(0, 100 - newFp.alp - newFp.coal - newFp.grn - newFp.teal - newFp.on);
+      effAlpSwing  = newFp.alp  - BASELINE_2022.alp;
+      effCoalSwing = newFp.coal - BASELINE_2022.coal;
+      effGrnSwing  = newFp.grn  - BASELINE_2022.grn;
+      effTealSwing = newFp.teal - BASELINE_2022.teal;
+    } else {
+      effAlpSwing  = swings.alp;
+      effCoalSwing = swings.coal;
+      effGrnSwing  = swings.grn;
+      effTealSwing = swings.teal;
+    }
 
     const tcpP = seat.tcp.map(t => t.party);
     const hasAlp  = tcpP.includes("ALP");
@@ -332,41 +357,71 @@ function computeModelledSeats(seats, swings, prefFlows, overrides) {
     const hasGrn  = tcpP.includes("GRN");
     const hasTeal = tcpP.some(p => ["IND","CA"].includes(p));
 
+    // tcpPct override: represents the 2022 winner's TCP% (seat.tcp[0].party).
+    // >50 means the 2022 winner holds; <50 means the challenger wins.
+    const hasTcpOverride = override?.tcpPct !== null && override?.tcpPct !== undefined;
+
     let projWinnerParty, projWinnerGroup, projWinnerPct, projAlp2pp = null;
 
     if (hasAlp && hasCoal) {
-      const a2 = newFp.alp + newFp.grn * prefFlows.grn_alp + newFp.teal * prefFlows.teal_alp + newFp.on * prefFlows.on_alp + newFp.other * prefFlows.other_alp;
-      const c2 = newFp.coal + newFp.grn * (1 - prefFlows.grn_alp) + newFp.teal * (1 - prefFlows.teal_alp) + newFp.on * (1 - prefFlows.on_alp) + newFp.other * (1 - prefFlows.other_alp);
-      projAlp2pp       = a2 / (a2 + c2) * 100;
-      projWinnerGroup  = projAlp2pp >= 50 ? "alp" : "coalition";
-      projWinnerParty  = projAlp2pp >= 50 ? "ALP" : seat.tcp.find(t => t.party !== "ALP")?.party;
-      projWinnerPct    = projAlp2pp >= 50 ? projAlp2pp : 100 - projAlp2pp;
+      const isAlpWinner = seat.tcp[0].party === "ALP";
+      const baseAlp2pp  = isAlpWinner ? seat.tcp[0].pct : seat.tcp[1].pct;
+
+      if (hasTcpOverride) {
+        // For ALP/Coal seats, tcpPct is ALP 2PP% directly (>50 = ALP wins)
+        projAlp2pp = override.tcpPct;
+      } else if (override) {
+        // Compute 2PP from override first preferences via preference flows
+        const a2 = newFp.alp + newFp.grn*prefFlows.grn_alp + newFp.teal*prefFlows.teal_alp + newFp.on*prefFlows.on_alp + newFp.other*prefFlows.other_alp;
+        const c2 = newFp.coal + newFp.grn*(1-prefFlows.grn_alp) + newFp.teal*(1-prefFlows.teal_alp) + newFp.on*(1-prefFlows.on_alp) + newFp.other*(1-prefFlows.other_alp);
+        projAlp2pp = a2 / (a2 + c2) * 100;
+      } else {
+        // Uniform national swing applied to this seat's 2022 ALP 2PP baseline
+        projAlp2pp = Math.max(0, Math.min(100, baseAlp2pp + nat2ppSwing));
+      }
+      projWinnerGroup = projAlp2pp >= 50 ? "alp" : "coalition";
+      projWinnerParty = projAlp2pp >= 50 ? "ALP" : seat.tcp.find(t => t.party !== "ALP")?.party;
+      projWinnerPct   = projAlp2pp >= 50 ? projAlp2pp : 100 - projAlp2pp;
+
     } else if (hasGrn && hasCoal) {
       const base = seat.tcp.find(t => t.party === "GRN")?.pct ?? 50;
-      const adj  = Math.max(0, Math.min(100, base + effGrnSwing - effCoalSwing));
+      const adj  = hasTcpOverride
+        ? override.tcpPct
+        : Math.max(0, Math.min(100, base + effGrnSwing - effCoalSwing));
       projWinnerGroup = adj >= 50 ? "greens" : "coalition";
       projWinnerParty = adj >= 50 ? "GRN" : seat.tcp.find(t => t.party !== "GRN")?.party;
       projWinnerPct   = adj >= 50 ? adj : 100 - adj;
+
     } else if (hasGrn && hasAlp) {
       const base = seat.tcp.find(t => t.party === "ALP")?.pct ?? 50;
-      const adj  = Math.max(0, Math.min(100, base + effAlpSwing - effGrnSwing));
+      const adj  = hasTcpOverride
+        ? override.tcpPct
+        : Math.max(0, Math.min(100, base + effAlpSwing - effGrnSwing));
       projWinnerGroup = adj >= 50 ? "alp" : "greens";
       projWinnerParty = adj >= 50 ? "ALP" : "GRN";
       projWinnerPct   = adj >= 50 ? adj : 100 - adj;
+      projAlp2pp      = adj;
+
     } else if (hasTeal && hasCoal) {
       const tealP = seat.tcp.find(t => ["IND","CA"].includes(t.party));
       const base  = tealP?.pct ?? 50;
-      const adj   = Math.max(0, Math.min(100, base + effTealSwing - effCoalSwing));
+      const adj   = hasTcpOverride
+        ? override.tcpPct
+        : Math.max(0, Math.min(100, base + effTealSwing - effCoalSwing));
       projWinnerGroup = adj >= 50 ? "teal" : "coalition";
       projWinnerParty = adj >= 50 ? tealP?.party : seat.tcp.find(t => ["LP","LNP","NP","CLP"].includes(t.party))?.party;
       projWinnerPct   = adj >= 50 ? adj : 100 - adj;
+
     } else if (hasTeal && hasAlp) {
       const tealP = seat.tcp.find(t => ["IND","CA"].includes(t.party));
       const base  = tealP?.pct ?? 50;
-      const adj   = Math.max(0, Math.min(100, base + effTealSwing - effAlpSwing));
+      const adj   = hasTcpOverride
+        ? override.tcpPct
+        : Math.max(0, Math.min(100, base + effTealSwing - effAlpSwing));
       projWinnerGroup = adj >= 50 ? "teal" : "alp";
       projWinnerParty = adj >= 50 ? tealP?.party : "ALP";
       projWinnerPct   = adj >= 50 ? adj : 100 - adj;
+
     } else {
       projWinnerGroup = getParty(seat.winner.party).group;
       projWinnerParty = seat.winner.party;
@@ -565,9 +620,13 @@ export default function App() {
   const marginCounts = useMemo(() => { const c={}; SEATS.forEach(s => { const cat=getMarginCat(s.margin); c[cat]=(c[cat]||0)+1; }); return c; }, []);
 
   // ── Modelling ──
+  const nat2ppSwing = useMemo(() =>
+    computeNat2pp(primaries, prefFlows) - NATIONAL_2PP_2022,
+    [primaries, prefFlows]);
+
   const modelledSeats = useMemo(() =>
-    computeModelledSeats(SEATS, swings, prefFlows, seatOverrides),
-    [swings, prefFlows, seatOverrides]);
+    computeModelledSeats(SEATS, swings, prefFlows, seatOverrides, nat2ppSwing),
+    [swings, prefFlows, seatOverrides, nat2ppSwing]);
 
   const projCounts = useMemo(() => {
     const c = {};
@@ -1301,6 +1360,73 @@ export default function App() {
                           <div style={{ fontSize:11, color:"#9CA3AF", marginTop:8 }}>
                             National: ALP {primaries.alp}% · Coal {primaries.coal}% · Grn {primaries.grn}% · Ind {primaries.teal}% · ON {primaries.on}%
                           </div>
+
+                          {/* TCP / Margin override */}
+                          {(() => {
+                            const tcpP = seat.tcp.map(t => t.party);
+                            const isAlpCoal = tcpP.includes("ALP") && tcpP.some(p => ["LP","LNP","NP","CLP"].includes(p));
+                            const isGrnCoal = tcpP.includes("GRN") && tcpP.some(p => ["LP","LNP","NP","CLP"].includes(p));
+                            const isGrnAlp  = tcpP.includes("GRN") && tcpP.includes("ALP");
+                            const isTeal    = tcpP.some(p => ["IND","CA"].includes(p));
+                            // tcpPct = seat.tcp[0].party's TCP% (2022 winner's TCP)
+                            const tcp0 = seat.tcp[0];
+                            const tcp1 = seat.tcp[1];
+                            const tcpLabel = isAlpCoal ? "ALP 2PP %" : isGrnCoal ? "Greens TCP %" : isGrnAlp ? "ALP TCP %" : "Ind. TCP %";
+                            const winLabel = isAlpCoal ? "ALP" : isGrnCoal ? "Greens" : isGrnAlp ? "Labor" : "Independent";
+                            const loseLabel = isAlpCoal ? "Coalition" : isGrnCoal ? "Coalition" : isGrnAlp ? "Greens" : (tcpP.some(p => ["LP","LNP","NP","CLP"].includes(p)) ? "Coalition" : "Labor");
+                            // For ALP/Coal seats: show ALP 2PP% (the standard metric).
+                            // For other seat types: show the 2022 winner's projected TCP%.
+                            const projWinnerPct = ms?.modelled.winnerPct;
+                            const projWinnerParty = ms?.modelled.winnerParty;
+                            const projTcpPct = isAlpCoal
+                              ? (ms?.modelled.projAlp2pp ?? null)
+                              : (projWinnerPct !== undefined
+                                  ? (projWinnerParty === tcp0.party ? projWinnerPct : 100 - projWinnerPct)
+                                  : null);
+                            const ovTcp = ov.tcpPct;
+                            const ovTcpSet = ovTcp !== null && ovTcp !== undefined;
+                            const displayTcp = ovTcpSet ? ovTcp : projTcpPct;
+                            const margin2pp = displayTcp !== null ? Math.abs(displayTcp - 50).toFixed(1) : null;
+                            const tcpWins = displayTcp !== null && displayTcp >= 50;
+                            return (
+                              <div style={{ borderTop:"1px solid #E5E7EB", marginTop:10, paddingTop:10 }}>
+                                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                                  <span style={{ fontSize:11, fontWeight:700, color:"#374151", flex:1 }}>Margin / TCP override</span>
+                                  <span style={{ fontSize:11, color:"#9CA3AF" }}>
+                                    2022: {getParty(tcp0.party).short} {tcp0.pct.toFixed(1)}% vs {getParty(tcp1.party).short} {tcp1.pct.toFixed(1)}%
+                                  </span>
+                                </div>
+                                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                                  <label style={{ fontSize:12, fontWeight:600, color:"#374151", whiteSpace:"nowrap" }}>{tcpLabel}</label>
+                                  <input
+                                    type="number" min={0} max={100} step={0.1}
+                                    value={ovTcpSet ? ovTcp : ""}
+                                    placeholder={projTcpPct?.toFixed(1) ?? "—"}
+                                    onChange={e => updateSeatOverride(+idStr, "tcpPct", e.target.value)}
+                                    style={{ width:72, border: ovTcpSet ? "1px solid #6366F1" : "1px solid #D1D5DB", borderRadius:5, padding:"5px 6px", fontSize:12, textAlign:"center", outline:"none", background: ovTcpSet ? "#EEF2FF" : "#fff" }}
+                                  />
+                                  <span style={{ fontSize:12, color:"#6B7280" }}>%</span>
+                                  {displayTcp !== null && (
+                                    <span style={{ fontSize:12, fontWeight:600, color: tcpWins ? "#059669" : "#1D4ED8" }}>
+                                      {tcpWins ? winLabel : loseLabel} +{margin2pp}pp
+                                    </span>
+                                  )}
+                                  {ovTcpSet && (
+                                    <button
+                                      onClick={() => updateSeatOverride(+idStr, "tcpPct", "")}
+                                      style={{ marginLeft:"auto", fontSize:11, color:"#9CA3AF", background:"none", border:"none", cursor:"pointer", padding:"2px 4px", lineHeight:1 }}
+                                      title="Clear TCP override">✕</button>
+                                  )}
+                                </div>
+                                <div style={{ fontSize:11, color:"#9CA3AF", marginTop:4 }}>
+                                  {`>50% → ${winLabel} wins · <50% → ${loseLabel} wins`}
+                                  {projTcpPct !== null && !ovTcpSet && (
+                                    <span> · Modelled: {projTcpPct.toFixed(1)}%</span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
                       );
                     })}
