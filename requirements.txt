@@ -1,0 +1,23 @@
+# AEC Election Dashboard – Python dependencies
+# Install with: pip install -r requirements.txt
+
+# HTTP requests (download pipeline)
+requests>=2.31.0
+
+# Data processing (used in analysis scripts + later frontend API)
+pandas>=2.0.0
+
+# Geospatial (for boundary processing + ABS data overlay)
+geopandas>=0.14.0
+shapely>=2.0.0
+
+# Web framework for the API layer (Phase 2+)
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+
+# Progress bars (nice for long downloads/loads)
+tqdm>=4.66.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0

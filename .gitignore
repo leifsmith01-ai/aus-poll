@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# AEC raw data (large CSVs – don't commit to Git)
+data/raw/
+data/processed/
+
+# Database (generated – don't commit)
+data/*.db
+
+# Export JSONs (generated – can be committed for small elections,
+# but are large for national booth-level data)
+data/exports/
+
+# Logs
+*.log
+pipeline.log
+
+# Environment / secrets
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Node / Vite
+node_modules/
+webapp/node_modules/
+frontend/node_modules/
+webapp/dist/
+frontend/.next/
+.next/
+*.local
+
+# pytest cache files (generated)
+pytest-cache-files-*/
