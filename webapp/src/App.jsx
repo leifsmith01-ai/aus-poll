@@ -388,8 +388,10 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing) 
         projAlp2pp = override.tcpPct;
       } else if (override) {
         // Compute 2PP from override first preferences via preference flows
-        const a2 = newFp.alp + newFp.grn*prefFlows.grn_alp + newFp.teal*prefFlows.teal_alp + newFp.on*prefFlows.on_alp + newFp.other*prefFlows.other_alp;
-        const c2 = newFp.coal + newFp.grn*(1-prefFlows.grn_alp) + newFp.teal*(1-prefFlows.teal_alp) + newFp.on*(1-prefFlows.on_alp) + newFp.other*(1-prefFlows.other_alp);
+        // Use seat-level preference flows if set, otherwise fall back to national flows
+        const ef = override.prefFlows ?? prefFlows;
+        const a2 = newFp.alp + newFp.grn*ef.grn_alp + newFp.teal*ef.teal_alp + newFp.on*ef.on_alp + newFp.other*ef.other_alp;
+        const c2 = newFp.coal + newFp.grn*(1-ef.grn_alp) + newFp.teal*(1-ef.teal_alp) + newFp.on*(1-ef.on_alp) + newFp.other*(1-ef.other_alp);
         projAlp2pp = a2 / (a2 + c2) * 100;
       } else {
         // Uniform national swing applied to this seat's 2022 ALP 2PP baseline
@@ -597,8 +599,13 @@ export default function App() {
     teal: +(primaries.teal - BASELINE_2022.teal).toFixed(2),
     on:   +(primaries.on   - BASELINE_2022.on  ).toFixed(2),
   };
-  const [seatOverrides,  setSeatOverrides]  = useState({});  // {seatId: {alp,coal,grn,teal,on}}
+  const [seatOverrides,  setSeatOverrides]  = useState({});  // {seatId: {alp,coal,grn,teal,on,prefFlows?}}
   const [overrideSearch, setOverrideSearch] = useState("");
+
+  // ── One Nation seats panel state ──
+  const [expandedOnSeat, setExpandedOnSeat] = useState(null);  // seat id or null
+  const [onSeatSort,     setOnSeatSort]     = useState({ field:"name", dir:"asc" });
+  const [onSeatFilter,   setOnSeatFilter]   = useState("");
 
   const toggleSet = (setter, val) =>
     setter(prev => { const n = new Set(prev); n.has(val) ? n.delete(val) : n.add(val); return n; });
@@ -659,6 +666,28 @@ export default function App() {
   const changedSeats = useMemo(() =>
     modelledSeats.filter(s => s.modelled.changed),
     [modelledSeats]);
+
+  const projectedOnSeats = useMemo(() =>
+    modelledSeats.filter(s => s.modelled.winnerGroup === "one_nation"),
+    [modelledSeats]);
+
+  const sortedOnSeatList = useMemo(() => {
+    let list = [...modelledSeats];
+    if (onSeatFilter) {
+      const q = onSeatFilter.toLowerCase();
+      list = list.filter(s => s.name.toLowerCase().includes(q) || s.state.toLowerCase().includes(q));
+    }
+    list.sort((a, b) => {
+      let cmp = 0;
+      if (onSeatSort.field === "name")    cmp = a.name.localeCompare(b.name);
+      if (onSeatSort.field === "state")   cmp = a.state.localeCompare(b.state) || a.name.localeCompare(b.name);
+      if (onSeatSort.field === "holder")  cmp = getParty(a.winner.party).group.localeCompare(getParty(b.winner.party).group);
+      if (onSeatSort.field === "margin")  cmp = (a.margin ?? 99) - (b.margin ?? 99);
+      if (onSeatSort.field === "proj")    cmp = a.modelled.winnerGroup.localeCompare(b.modelled.winnerGroup);
+      return onSeatSort.dir === "asc" ? cmp : -cmp;
+    });
+    return list;
+  }, [modelledSeats, onSeatSort, onSeatFilter]);
 
   const implied2pp = useMemo(() => {
     const relevant = modelledSeats.filter(s => s.modelled.projAlp2pp !== null);
@@ -750,6 +779,49 @@ export default function App() {
 
   const clearOverride = (seatId) => {
     setSeatOverrides(prev => { const n={...prev}; delete n[seatId]; return n; });
+  };
+
+  const updateSeatPrefFlow = (seatId, key, rawVal) => {
+    const n = rawVal === "" ? null : parseFloat(rawVal);
+    const val = (n !== null && isNaN(n)) ? null : (n !== null ? n / 100 : null);
+    setSeatOverrides(prev => ({
+      ...prev,
+      [seatId]: {
+        ...prev[seatId],
+        prefFlows: { ...(prev[seatId]?.prefFlows ?? {}), [key]: val },
+      },
+    }));
+  };
+
+  const initSeatPrefFlows = (seatId) => {
+    setSeatOverrides(prev => ({
+      ...prev,
+      [seatId]: {
+        ...prev[seatId],
+        prefFlows: { grn_alp: prefFlows.grn_alp, teal_alp: prefFlows.teal_alp, on_alp: prefFlows.on_alp, other_alp: prefFlows.other_alp },
+      },
+    }));
+  };
+
+  const toggleExpandedOnSeat = (seatId) => {
+    setExpandedOnSeat(prev => {
+      const next = prev === seatId ? null : seatId;
+      // Ensure a minimal override exists so pref flows have somewhere to live
+      if (next !== null && !seatOverrides[seatId]) {
+        setSeatOverrides(ov => ({
+          ...ov,
+          [seatId]: { alp: null, coal: null, grn: null, teal: null, on: null },
+        }));
+      }
+      return next;
+    });
+  };
+
+  const handleOnSeatSort = (field) => {
+    setOnSeatSort(prev => ({
+      field,
+      dir: prev.field === field ? (prev.dir === "asc" ? "desc" : "asc") : "asc",
+    }));
   };
 
   const SortTh = ({ k, children }) => (
@@ -1231,6 +1303,182 @@ export default function App() {
                   })}
                 </div>
               </div>
+
+              {/* ── One Nation Seats panel ── */}
+              {(() => {
+                const ON_COLOR = "#B45309";
+                const ON_BG    = "#FEF3C7";
+                const ON_LIGHT = "#FFFBEB";
+
+                const SortColBtn = ({ field, label }) => {
+                  const active = onSeatSort.field === field;
+                  return (
+                    <button
+                      onClick={() => handleOnSeatSort(field)}
+                      style={{ background:"none", border:"none", cursor:"pointer", padding:"4px 6px", fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.05em", color: active ? ON_COLOR : "#9CA3AF", display:"flex", alignItems:"center", gap:3, userSelect:"none", whiteSpace:"nowrap" }}>
+                      {label}
+                      <span style={{ fontSize:10 }}>{active ? (onSeatSort.dir === "asc" ? "↑" : "↓") : "↕"}</span>
+                    </button>
+                  );
+                };
+
+                return (
+                  <div style={{ border:`2px solid ${ON_COLOR}`, borderRadius:12, marginBottom:16, overflow:"hidden" }}>
+                    {/* Orange header */}
+                    <div style={{ background:ON_COLOR, padding:"12px 16px", display:"flex", alignItems:"center", gap:10 }}>
+                      <span style={{ fontWeight:800, fontSize:14, color:"#fff" }}>One Nation Seats</span>
+                      <span style={{ background:"rgba(255,255,255,0.25)", color:"#fff", fontSize:12, fontWeight:700, padding:"2px 10px", borderRadius:10 }}>
+                        {projectedOnSeats.length} projected
+                      </span>
+                      <span style={{ color:"rgba(255,255,255,0.75)", fontSize:12, marginLeft:"auto" }}>
+                        {sortedOnSeatList.length} seats listed
+                      </span>
+                    </div>
+
+                    <div style={{ background:"#fff", padding:"12px 14px" }}>
+                      {/* Search filter */}
+                      <input
+                        value={onSeatFilter}
+                        onChange={e => setOnSeatFilter(e.target.value)}
+                        placeholder="Filter seats by name or state…"
+                        style={{ width:"100%", border:"1px solid #D1D5DB", borderRadius:7, padding:"7px 10px", fontSize:13, boxSizing:"border-box", outline:"none", marginBottom:8 }}
+                      />
+
+                      {/* Column headers */}
+                      <div style={{ display:"grid", gridTemplateColumns:"1fr 60px 90px 70px 90px 24px", gap:4, alignItems:"center", borderBottom:`2px solid ${ON_BG}`, paddingBottom:4, marginBottom:4 }}>
+                        <SortColBtn field="name"   label="Seat" />
+                        <SortColBtn field="state"  label="State" />
+                        <SortColBtn field="holder" label="2022 Holder" />
+                        <SortColBtn field="margin" label="Margin" />
+                        <SortColBtn field="proj"   label="Projected" />
+                        <div />
+                      </div>
+
+                      {/* Seat rows */}
+                      <div style={{ maxHeight:420, overflowY:"auto" }}>
+                        {sortedOnSeatList.map(seat => {
+                          const isOnProj = seat.modelled.winnerGroup === "one_nation";
+                          const isExpanded = expandedOnSeat === seat.id;
+                          const ov = seatOverrides[seat.id] ?? {};
+                          const ms = seat.modelled;
+                          const seatPrefFlows = ov.prefFlows;
+                          const hasSeatPrefFlows = seatPrefFlows && Object.values(seatPrefFlows).some(v => v !== null);
+
+                          return (
+                            <div key={seat.id}>
+                              {/* Collapsed row */}
+                              <div
+                                onClick={() => toggleExpandedOnSeat(seat.id)}
+                                style={{ display:"grid", gridTemplateColumns:"1fr 60px 90px 70px 90px 24px", gap:4, alignItems:"center", padding:"6px 2px", cursor:"pointer", background: isOnProj ? ON_LIGHT : "transparent", borderLeft: isOnProj ? `4px solid ${ON_COLOR}` : "4px solid transparent", borderRadius:4, marginBottom:1 }}>
+                                <span style={{ fontWeight: isOnProj ? 700 : 500, fontSize:13, color:"#111", paddingLeft: isOnProj ? 4 : 8 }}>{seat.name}</span>
+                                <span style={{ fontSize:12, color:"#6B7280" }}>{seat.state}</span>
+                                <div><PartyBadge party={seat.winner.party} /></div>
+                                <span style={{ fontSize:12, color:"#374151" }}>{seat.margin?.toFixed(1)}%</span>
+                                <div>
+                                  {isOnProj
+                                    ? <span style={{ background:ON_COLOR, color:"#fff", fontSize:11, fontWeight:700, padding:"2px 7px", borderRadius:4 }}>One Nation</span>
+                                    : <PartyBadge party={ms.winnerParty} />
+                                  }
+                                </div>
+                                <span style={{ fontSize:12, color:"#9CA3AF", textAlign:"center" }}>{isExpanded ? "▲" : "▼"}</span>
+                              </div>
+
+                              {/* Expanded panel */}
+                              {isExpanded && (
+                                <div style={{ background:ON_LIGHT, border:`1px solid ${ON_BG}`, borderRadius:8, padding:"12px 14px", marginBottom:6, marginLeft:4 }}>
+
+                                  {/* Primary vote inputs */}
+                                  <div style={{ fontSize:11, fontWeight:800, color:ON_COLOR, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:6 }}>Primary votes</div>
+                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6, marginBottom:12 }}>
+                                    {[["ALP","alp","#DC2626"],["Coal","coal","#1D4ED8"],["Grn","grn","#059669"],["Ind","teal","#0891B2"],["ON","on",ON_COLOR]].map(([label, key, color]) => (
+                                      <div key={key} style={{ textAlign:"center" }}>
+                                        <div style={{ fontSize:10, fontWeight:800, color, marginBottom:3, textTransform:"uppercase", letterSpacing:"0.05em" }}>{label}</div>
+                                        <input
+                                          type="number" min={0} max={100} step={0.5}
+                                          value={ov[key] !== null && ov[key] !== undefined ? ov[key] : ""}
+                                          placeholder={primaries[key]?.toFixed(1) ?? "—"}
+                                          onChange={e => updateSeatOverride(seat.id, key, e.target.value)}
+                                          style={{ width:"100%", border:"1px solid #D1D5DB", borderRadius:5, padding:"5px 4px", fontSize:12, textAlign:"center", boxSizing:"border-box", outline:"none" }}
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <div style={{ fontSize:11, color:"#9CA3AF", marginBottom:12 }}>
+                                    National: ALP {primaries.alp}% · Coal {primaries.coal}% · Grn {primaries.grn}% · Ind {primaries.teal}% · ON {primaries.on}%
+                                  </div>
+
+                                  {/* Per-seat preference flows */}
+                                  <div style={{ borderTop:`1px solid ${ON_BG}`, paddingTop:10 }}>
+                                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                                      <span style={{ fontSize:11, fontWeight:800, color:ON_COLOR, textTransform:"uppercase", letterSpacing:"0.06em" }}>Preference flows to ALP</span>
+                                      {hasSeatPrefFlows
+                                        ? <span style={{ fontSize:10, background:ON_COLOR, color:"#fff", padding:"1px 7px", borderRadius:8, fontWeight:600 }}>seat-level</span>
+                                        : (
+                                          <button
+                                            onClick={() => initSeatPrefFlows(seat.id)}
+                                            style={{ fontSize:11, color:ON_COLOR, background:"#fff", border:`1px solid ${ON_COLOR}`, borderRadius:5, padding:"2px 8px", cursor:"pointer", fontWeight:600 }}>
+                                            Customise for this seat
+                                          </button>
+                                        )
+                                      }
+                                      {hasSeatPrefFlows && (
+                                        <button
+                                          onClick={() => setSeatOverrides(prev => { const n={...prev}; delete n[seat.id].prefFlows; return {...n, [seat.id]: {...n[seat.id]}}; })}
+                                          style={{ fontSize:11, color:"#9CA3AF", background:"none", border:"none", cursor:"pointer", padding:"2px 4px" }}>
+                                          Reset to national
+                                        </button>
+                                      )}
+                                    </div>
+                                    {hasSeatPrefFlows ? (
+                                      <div>
+                                        {[["Greens → ALP","grn_alp","#059669"],["Independents → ALP","teal_alp","#0891B2"],["One Nation → ALP","on_alp",ON_COLOR],["Other → ALP","other_alp","#7C3AED"]].map(([label, key, color]) => (
+                                          <PrefInput
+                                            key={key}
+                                            label={label}
+                                            value={seatPrefFlows[key] ?? prefFlows[key]}
+                                            onChange={v => updateSeatPrefFlow(seat.id, key, Math.round(v * 100))}
+                                            color={color}
+                                          />
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <div style={{ fontSize:12, color:"#9CA3AF" }}>
+                                        Using national flows: Grn {Math.round(prefFlows.grn_alp*100)}% · Ind {Math.round(prefFlows.teal_alp*100)}% · ON {Math.round(prefFlows.on_alp*100)}% · Other {Math.round(prefFlows.other_alp*100)}%
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Modelled outcome */}
+                                  <div style={{ borderTop:`1px solid ${ON_BG}`, paddingTop:10, marginTop:10, display:"flex", alignItems:"center", gap:10 }}>
+                                    <span style={{ fontSize:11, fontWeight:700, color:"#374151" }}>Modelled:</span>
+                                    {isOnProj
+                                      ? <span style={{ background:ON_COLOR, color:"#fff", fontSize:12, fontWeight:700, padding:"3px 10px", borderRadius:5 }}>One Nation wins</span>
+                                      : <PartyBadge party={ms.winnerParty} />
+                                    }
+                                    {ms.projAlp2pp !== null && (
+                                      <span style={{ fontSize:12, color:"#6B7280" }}>ALP 2PP {ms.projAlp2pp.toFixed(1)}%</span>
+                                    )}
+                                    {ms.winnerPct !== null && (
+                                      <span style={{ fontSize:12, color:"#6B7280" }}>
+                                        {isOnProj ? `ON ${ms.winnerPct?.toFixed(1)}%` : `margin ${Math.abs(ms.winnerPct - 50).toFixed(1)}pp`}
+                                      </span>
+                                    )}
+                                    <button
+                                      onClick={() => clearOverride(seat.id)}
+                                      style={{ marginLeft:"auto", fontSize:11, color:"#EF4444", background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:5, padding:"3px 8px", cursor:"pointer", fontWeight:600 }}>
+                                      Clear overrides
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Seats changing hands */}
               {changedSeats.length > 0 && (
