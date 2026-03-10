@@ -363,6 +363,22 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing) 
 
     let projWinnerParty, projWinnerGroup, projWinnerPct, projAlp2pp = null;
 
+    // Force winner override: bypass all TCP calculation
+    if (override?.forceGroup) {
+      const fg = override.forceGroup;
+      const forcePartyMap = { alp:"ALP", coalition:"LP", greens:"GRN", teal:"IND", one_nation:"ON", crossbench:"KAP" };
+      return {
+        ...seat,
+        modelled: {
+          winnerParty: forcePartyMap[fg] ?? seat.winner.party,
+          winnerGroup: fg,
+          winnerPct:   null,
+          projAlp2pp:  null,
+          changed:     fg !== getParty(seat.winner.party).group,
+        }
+      };
+    }
+
     if (hasAlp && hasCoal) {
       const isAlpWinner = seat.tcp[0].party === "ALP";
       const baseAlp2pp  = isAlpWinner ? seat.tcp[0].pct : seat.tcp[1].pct;
@@ -722,8 +738,14 @@ export default function App() {
   };
 
   const updateSeatOverride = (seatId, key, rawVal) => {
-    const val = rawVal === "" ? null : parseFloat(rawVal);
-    setSeatOverrides(prev => ({ ...prev, [seatId]: { ...prev[seatId], [key]: isNaN(val) ? null : val } }));
+    let val;
+    if (key === "forceGroup") {
+      val = rawVal === "" ? null : rawVal;
+    } else {
+      const n = rawVal === "" ? null : parseFloat(rawVal);
+      val = (n !== null && isNaN(n)) ? null : n;
+    }
+    setSeatOverrides(prev => ({ ...prev, [seatId]: { ...prev[seatId], [key]: val } }));
   };
 
   const clearOverride = (seatId) => {
@@ -1427,6 +1449,33 @@ export default function App() {
                               </div>
                             );
                           })()}
+
+                          {/* Force projected winner */}
+                          <div style={{ borderTop:"1px solid #E5E7EB", marginTop:10, paddingTop:10 }}>
+                            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                              <span style={{ fontSize:11, fontWeight:700, color:"#374151", flex:1 }}>Force projected winner</span>
+                              {ov.forceGroup && (
+                                <button onClick={() => updateSeatOverride(+idStr, "forceGroup", "")}
+                                  style={{ fontSize:11, color:"#9CA3AF", background:"none", border:"none", cursor:"pointer", padding:"2px 4px", lineHeight:1 }}>
+                                  Clear
+                                </button>
+                              )}
+                            </div>
+                            <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
+                              {GROUP_ORDER.map(g => (
+                                <button key={g}
+                                  onClick={() => updateSeatOverride(+idStr, "forceGroup", ov.forceGroup === g ? "" : g)}
+                                  style={{
+                                    padding:"3px 10px", borderRadius:5, fontSize:11, fontWeight:600, cursor:"pointer",
+                                    background: ov.forceGroup === g ? GROUP_CONFIG[g].color : "#fff",
+                                    color: ov.forceGroup === g ? "#fff" : GROUP_CONFIG[g].color,
+                                    border: `1px solid ${GROUP_CONFIG[g].color}`,
+                                  }}>
+                                  {GROUP_CONFIG[g].label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       );
                     })}
