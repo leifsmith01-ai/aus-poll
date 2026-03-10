@@ -388,8 +388,15 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing) 
         projAlp2pp = override.tcpPct;
       } else if (override) {
         // Compute 2PP from override first preferences via preference flows
-        const a2 = newFp.alp + newFp.grn*prefFlows.grn_alp + newFp.teal*prefFlows.teal_alp + newFp.on*prefFlows.on_alp + newFp.other*prefFlows.other_alp;
-        const c2 = newFp.coal + newFp.grn*(1-prefFlows.grn_alp) + newFp.teal*(1-prefFlows.teal_alp) + newFp.on*(1-prefFlows.on_alp) + newFp.other*(1-prefFlows.other_alp);
+        // Use seat-level pref flow overrides where set, falling back to global
+        const ef = {
+          grn_alp:   override.pref_grn_alp   ?? prefFlows.grn_alp,
+          teal_alp:  override.pref_teal_alp  ?? prefFlows.teal_alp,
+          on_alp:    override.pref_on_alp    ?? prefFlows.on_alp,
+          other_alp: override.pref_other_alp ?? prefFlows.other_alp,
+        };
+        const a2 = newFp.alp + newFp.grn*ef.grn_alp + newFp.teal*ef.teal_alp + newFp.on*ef.on_alp + newFp.other*ef.other_alp;
+        const c2 = newFp.coal + newFp.grn*(1-ef.grn_alp) + newFp.teal*(1-ef.teal_alp) + newFp.on*(1-ef.on_alp) + newFp.other*(1-ef.other_alp);
         projAlp2pp = a2 / (a2 + c2) * 100;
       } else {
         // Uniform national swing applied to this seat's 2022 ALP 2PP baseline
@@ -584,7 +591,7 @@ export default function App() {
   const [polls,       setPolls]       = useState(INITIAL_POLLS);
   const [showAddPoll, setShowAddPoll] = useState(false);
   const [nextPollId,  setNextPollId]  = useState(INITIAL_POLLS.length + 1);
-  const [newPoll,     setNewPoll]     = useState({ pollster:"", date:"", alp:"", coal:"", grn:"", oth:"", tpp:"" });
+  const [newPoll,     setNewPoll]     = useState({ pollster:"", date:"", alp:"", coal:"", grn:"", on:"", tpp:"" });
 
   // ── Model tab state ──
   const [primaries,      setPrimaries]      = useState({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on });
@@ -680,7 +687,7 @@ export default function App() {
     const recent = sortedPolls.slice(0,3);
     if (!recent.length) return null;
     const avg = f => +(recent.reduce((s,p) => s + p[f], 0) / recent.length).toFixed(1);
-    return { alp:avg("alp"), coal:avg("coal"), grn:avg("grn"), oth:avg("oth"), tpp:avg("tpp"), n:recent.length };
+    return { alp:avg("alp"), coal:avg("coal"), grn:avg("grn"), on:avg("on"), oth:avg("oth"), tpp:avg("tpp"), n:recent.length };
   }, [sortedPolls]);
 
   const pollChartData = useMemo(() => {
@@ -689,7 +696,7 @@ export default function App() {
       .map(p => {
         const d = new Date(p.date);
         const label = d.toLocaleDateString("en-AU", { month:"short", day:"numeric" });
-        return { date:label, ALP:p.alp, Coalition:p.coal, Greens:p.grn, "2PP (ALP)":p.tpp };
+        return { date:label, ALP:p.alp, Coalition:p.coal, Greens:p.grn, "One Nation":p.on, "2PP (ALP)":p.tpp };
       });
   }, [polls]);
 
@@ -712,18 +719,18 @@ export default function App() {
   };
 
   const addPoll = () => {
-    const { pollster, date, alp, coal, grn, tpp } = newPoll;
+    const { pollster, date, alp, coal, grn, on, tpp } = newPoll;
     if (!pollster || !date || !alp || !coal || !grn || !tpp) return;
-    const a=+alp, c=+coal, g=+grn;
+    const a=+alp, c=+coal, g=+grn, n=+(on||0);
     setPolls(prev => [...prev, {
       id: nextPollId,
       pollster, date,
-      alp:a, coal:c, grn:g,
-      oth: +(100-a-c-g).toFixed(1),
+      alp:a, coal:c, grn:g, on:n,
+      oth: +(100-a-c-g-n).toFixed(1),
       tpp: +tpp,
     }]);
     setNextPollId(id => id+1);
-    setNewPoll({ pollster:"", date:"", alp:"", coal:"", grn:"", oth:"", tpp:"" });
+    setNewPoll({ pollster:"", date:"", alp:"", coal:"", grn:"", on:"", tpp:"" });
     setShowAddPoll(false);
   };
 
@@ -732,7 +739,10 @@ export default function App() {
   const addSeatOverride = (seatId) => {
     setSeatOverrides(prev => ({
       ...prev,
-      [seatId]: { alp: primaries.alp, coal: primaries.coal, grn: primaries.grn, teal: primaries.teal, on: primaries.on },
+      [seatId]: {
+        alp: primaries.alp, coal: primaries.coal, grn: primaries.grn, teal: primaries.teal, on: primaries.on,
+        pref_grn_alp: null, pref_teal_alp: null, pref_on_alp: null, pref_other_alp: null,
+      },
     }));
     setOverrideSearch("");
   };
@@ -972,8 +982,9 @@ export default function App() {
                   { key:"date",     label:"Date",        type:"date",   placeholder:"" },
                   { key:"alp",      label:"ALP %",       type:"number", placeholder:"e.g. 33" },
                   { key:"coal",     label:"Coalition %", type:"number", placeholder:"e.g. 38" },
-                  { key:"grn",      label:"Greens %",    type:"number", placeholder:"e.g. 13" },
-                  { key:"tpp",      label:"2PP ALP %",   type:"number", placeholder:"e.g. 49" },
+                  { key:"grn",      label:"Greens %",       type:"number", placeholder:"e.g. 13" },
+                  { key:"on",       label:"One Nation %",  type:"number", placeholder:"e.g. 15" },
+                  { key:"tpp",      label:"2PP ALP %",     type:"number", placeholder:"e.g. 49" },
                 ].map(({ key, label, type, placeholder }) => (
                   <div key={key}>
                     <label style={{ fontSize:11, fontWeight:700, color:"#374151", display:"block", marginBottom:3 }}>{label}</label>
@@ -985,7 +996,7 @@ export default function App() {
               </div>
               {newPoll.alp && newPoll.coal && newPoll.grn && (
                 <div style={{ fontSize:12, color:"#6B7280", marginBottom:10 }}>
-                  Other / minor parties: {(100 - (+newPoll.alp||0) - (+newPoll.coal||0) - (+newPoll.grn||0)).toFixed(1)}%
+                  Other / minor parties: {(100 - (+newPoll.alp||0) - (+newPoll.coal||0) - (+newPoll.grn||0) - (+newPoll.on||0)).toFixed(1)}%
                 </div>
               )}
               <button onClick={addPoll}
@@ -1002,13 +1013,14 @@ export default function App() {
                 <div style={{ fontWeight:700, color:"#374151" }}>Latest: {latestPoll.pollster} · {new Date(latestPoll.date).toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"})}</div>
                 {pollAvg && <div style={{ fontSize:12, color:"#6B7280" }}>{pollAvg.n}-poll avg shown in brackets</div>}
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:10 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(6,1fr)", gap:10 }}>
                 {[
-                  { label:"ALP primary",       value:latestPoll.alp,  avg:pollAvg?.alp,  color:"#DC2626", delta: latestPoll.alp - BASELINE_2022.alp },
-                  { label:"Coalition primary",  value:latestPoll.coal, avg:pollAvg?.coal, color:"#1D4ED8", delta: latestPoll.coal - BASELINE_2022.coal },
-                  { label:"Greens primary",     value:latestPoll.grn,  avg:pollAvg?.grn,  color:"#059669", delta: latestPoll.grn - BASELINE_2022.grn },
-                  { label:"Other / minor",      value:latestPoll.oth,  avg:pollAvg?.oth,  color:"#7C3AED", delta: null },
-                  { label:"2PP (ALP)",          value:latestPoll.tpp,  avg:pollAvg?.tpp,  color:"#DC2626", delta: latestPoll.tpp - NATIONAL_2PP_2022 },
+                  { label:"ALP primary",        value:latestPoll.alp,  avg:pollAvg?.alp,  color:"#DC2626", delta: latestPoll.alp - BASELINE_2022.alp },
+                  { label:"Coalition primary",   value:latestPoll.coal, avg:pollAvg?.coal, color:"#1D4ED8", delta: latestPoll.coal - BASELINE_2022.coal },
+                  { label:"Greens primary",      value:latestPoll.grn,  avg:pollAvg?.grn,  color:"#059669", delta: latestPoll.grn - BASELINE_2022.grn },
+                  { label:"One Nation primary",  value:latestPoll.on,   avg:pollAvg?.on,   color:"#B45309", delta: latestPoll.on != null ? latestPoll.on - BASELINE_2022.on : null },
+                  { label:"Other / minor",       value:latestPoll.oth,  avg:pollAvg?.oth,  color:"#7C3AED", delta: null },
+                  { label:"2PP (ALP)",           value:latestPoll.tpp,  avg:pollAvg?.tpp,  color:"#DC2626", delta: latestPoll.tpp - NATIONAL_2PP_2022 },
                 ].map(card => (
                   <div key={card.label} style={{ background:"#F9FAFB", borderRadius:8, border:"1px solid #E5E7EB", padding:"12px 14px" }}>
                     <div style={{ width:20, height:3, background:card.color, borderRadius:2, marginBottom:6 }} />
@@ -1041,7 +1053,8 @@ export default function App() {
                 <ReferenceLine y={50} stroke="#9CA3AF" strokeDasharray="5 5" label={{ value:"50%", fontSize:10, fill:"#9CA3AF", position:"insideRight" }} />
                 <Line type="monotone" dataKey="ALP"        stroke="#DC2626" strokeWidth={2} dot={{ r:3 }} />
                 <Line type="monotone" dataKey="Coalition"  stroke="#1D4ED8" strokeWidth={2} dot={{ r:3 }} />
-                <Line type="monotone" dataKey="Greens"     stroke="#059669" strokeWidth={2} dot={{ r:3 }} />
+                <Line type="monotone" dataKey="Greens"      stroke="#059669" strokeWidth={2} dot={{ r:3 }} />
+                <Line type="monotone" dataKey="One Nation" stroke="#B45309" strokeWidth={2} dot={{ r:3 }} />
                 <Line type="monotone" dataKey="2PP (ALP)"  stroke="#DC2626" strokeWidth={2.5} strokeDasharray="6 3" dot={{ r:4 }} />
               </LineChart>
             </ResponsiveContainer>
@@ -1053,7 +1066,7 @@ export default function App() {
             <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
               <thead>
                 <tr style={{ borderBottom:"1px solid #E5E7EB" }}>
-                  {["Pollster","Date","ALP %","Coalition %","Greens %","Other %","2PP ALP %",""].map((h,i) => (
+                  {["Pollster","Date","ALP %","Coalition %","Greens %","One Nation %","Other %","2PP ALP %",""].map((h,i) => (
                     <th key={i} style={{ padding:"10px 12px", textAlign:"left", fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:"#6B7280", background:"#F9FAFB", whiteSpace:"nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -1065,7 +1078,7 @@ export default function App() {
                     onMouseLeave={e=>e.currentTarget.style.background=i%2===0?"#fff":"#FAFAFA"}>
                     <td style={{ padding:"9px 12px", fontWeight:600 }}>{p.pollster}</td>
                     <td style={{ padding:"9px 12px", color:"#6B7280" }}>{new Date(p.date).toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"})}</td>
-                    {[p.alp, p.coal, p.grn, p.oth].map((v,j) => (
+                    {[p.alp, p.coal, p.grn, p.on, p.oth].map((v,j) => (
                       <td key={j} style={{ padding:"9px 12px" }}>
                         <span style={{ fontWeight:600, color:["#DC2626","#1D4ED8","#059669","#7C3AED"][j] }}>{v}%</span>
                       </td>
@@ -1475,6 +1488,45 @@ export default function App() {
                                 </button>
                               ))}
                             </div>
+                          </div>
+
+                          {/* Per-seat preference flow overrides */}
+                          <div style={{ borderTop:"1px solid #E5E7EB", marginTop:10, paddingTop:10 }}>
+                            <div style={{ fontSize:11, fontWeight:700, color:"#374151", marginBottom:8 }}>
+                              Preference flows — this seat
+                              <span style={{ fontWeight:400, color:"#9CA3AF", marginLeft:6 }}>overrides global sliders for this seat only</span>
+                            </div>
+                            {[
+                              { label:"Greens → ALP",       key:"pref_grn_alp",   color:"#059669", global: prefFlows.grn_alp   },
+                              { label:"Independents → ALP",  key:"pref_teal_alp",  color:"#0891B2", global: prefFlows.teal_alp  },
+                              { label:"One Nation → ALP",   key:"pref_on_alp",    color:"#B45309", global: prefFlows.on_alp    },
+                              { label:"Other → ALP",        key:"pref_other_alp", color:"#7C3AED", global: prefFlows.other_alp },
+                            ].map(({ label, key, color, global: globalVal }) => {
+                              const isSet = ov[key] !== null && ov[key] !== undefined;
+                              const displayVal = isSet ? ov[key] : globalVal;
+                              const pct = Math.round(displayVal * 100);
+                              return (
+                                <div key={key} style={{ marginBottom:8 }}>
+                                  <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:3 }}>
+                                    <span style={{ width:8, height:8, borderRadius:2, background:color, flexShrink:0 }} />
+                                    <span style={{ fontSize:11, fontWeight:600, color:"#374151", flex:1 }}>{label}</span>
+                                    <span style={{ fontSize:12, fontWeight:700, color: isSet ? color : "#9CA3AF" }}>{pct}%</span>
+                                    {isSet && (
+                                      <>
+                                        <span style={{ fontSize:10, color:"#9CA3AF" }}>global: {Math.round(globalVal*100)}%</span>
+                                        <button
+                                          onClick={() => updateSeatOverride(+idStr, key, null)}
+                                          style={{ fontSize:10, color:"#9CA3AF", background:"none", border:"none", cursor:"pointer", padding:"1px 3px" }}
+                                          title="Reset to global">✕</button>
+                                      </>
+                                    )}
+                                  </div>
+                                  <input type="range" min={0} max={100} step={1} value={pct}
+                                    onChange={e => updateSeatOverride(+idStr, key, parseInt(e.target.value)/100)}
+                                    style={{ width:"100%", accentColor: isSet ? color : "#D1D5DB", cursor:"pointer", height:4 }} />
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       );
