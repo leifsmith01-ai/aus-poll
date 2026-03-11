@@ -6,7 +6,9 @@ import { useState, useMemo } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
+  ScatterChart, Scatter, ZAxis,
 } from "recharts";
+import DEMOGRAPHICS from "./data/demographics.js";
 
 // ─── Party config ─────────────────────────────────────────────────────────────
 const PARTY = {
@@ -673,6 +675,14 @@ export default function App() {
   // ── Seat-at-risk table state ──
   const [riskFilter, setRiskFilter] = useState("all"); // "all" | "changing" | "marginal"
 
+  // ── Demographics tab state ──
+  const [demogSortKey,    setDemogSortKey]    = useState("medianHouseholdIncome");
+  const [demogSortDir,    setDemogSortDir]    = useState("desc");
+  const [demogStateFilter,setDemogStateFilter]= useState(new Set(STATES));
+  const [demogClassFilter,setDemogClassFilter]= useState(new Set(["Inner Metropolitan","Outer Metropolitan","Provincial","Rural"]));
+  const [expandedDemogId, setExpandedDemogId] = useState(null);
+  const [demogXMetric,    setDemogXMetric]    = useState("medianHouseholdIncome");
+
   const toggleSet = (setter, val) =>
     setter(prev => { const n = new Set(prev); n.has(val) ? n.delete(val) : n.add(val); return n; });
 
@@ -780,6 +790,69 @@ export default function App() {
     if (riskFilter === "marginal") list = list.filter(s => getModelledMargin(s) < 5);
     return list.sort((a, b) => getModelledMargin(a) - getModelledMargin(b));
   }, [modelledSeats, riskFilter]);
+
+  // ── Demographics helpers ──
+  const getDemog = (id) => DEMOGRAPHICS[id] ?? {};
+
+  const DEMOG_METRICS = [
+    { key:"medianPersonalIncome",   label:"Median Personal Income",    fmt:v=>`$${(v/1000).toFixed(0)}k` },
+    { key:"medianHouseholdIncome",  label:"Median Household Income",   fmt:v=>`$${(v/1000).toFixed(0)}k` },
+    { key:"medianWeeklyRent",       label:"Median Weekly Rent",        fmt:v=>`$${v}` },
+    { key:"medianMonthlyMortgage",  label:"Median Monthly Mortgage",   fmt:v=>`$${v}` },
+    { key:"ownerOutrightPct",       label:"Owner Outright %",          fmt:v=>`${v}%` },
+    { key:"ownerMortgagePct",       label:"Owner w/ Mortgage %",       fmt:v=>`${v}%` },
+    { key:"renterPct",              label:"Renters %",                 fmt:v=>`${v}%` },
+    { key:"bachelorsOrAbovePct",    label:"Bachelor's+ %",             fmt:v=>`${v}%` },
+    { key:"overseasBornPct",        label:"Overseas Born %",           fmt:v=>`${v}%` },
+    { key:"medianAge",              label:"Median Age",                fmt:v=>`${v}` },
+  ];
+
+  const demogWithSeats = useMemo(() =>
+    SEATS.map(s => ({ ...s, demog: getDemog(s.id) })),
+    []);
+
+  const demogFiltered = useMemo(() => {
+    let list = demogWithSeats.filter(s =>
+      demogStateFilter.has(s.state) &&
+      demogClassFilter.has(s.demog.urbanClass ?? "Outer Metropolitan")
+    );
+    list.sort((a, b) => {
+      const av = a.demog[demogSortKey] ?? -Infinity;
+      const bv = b.demog[demogSortKey] ?? -Infinity;
+      const cmp = typeof av === "number" ? av - bv : String(av).localeCompare(String(bv));
+      return demogSortDir === "asc" ? cmp : -cmp;
+    });
+    return list;
+  }, [demogStateFilter, demogClassFilter, demogSortKey, demogSortDir]);
+
+  const demogStats = useMemo(() => {
+    const stats = {};
+    DEMOG_METRICS.forEach(({ key }) => {
+      const vals = demogWithSeats.map(s => s.demog[key]).filter(v => v != null);
+      if (!vals.length) { stats[key] = null; return; }
+      stats[key] = {
+        min: Math.min(...vals),
+        max: Math.max(...vals),
+        avg: vals.reduce((a,b) => a+b, 0) / vals.length,
+      };
+    });
+    return stats;
+  }, [demogWithSeats]);
+
+  const scatterData = useMemo(() => {
+    const mKey = demogXMetric;
+    return demogWithSeats
+      .map(s => {
+        const m = modelledSeats.find(ms => ms.id === s.id);
+        const xVal = s.demog[mKey];
+        const margin = m ? getModelledMargin(m) : null;
+        const group = m ? m.modelled.winnerGroup : getParty(s.winner.party).group;
+        if (xVal == null || margin == null || margin === Infinity) return null;
+        return { x: xVal, y: +(m.modelled.projAlp2pp != null ? m.modelled.projAlp2pp - 50 : m.modelled.winnerPct - 50).toFixed(2),
+                 name: s.name, state: s.state, group, xLabel: xVal };
+      })
+      .filter(Boolean);
+  }, [demogWithSeats, modelledSeats, demogXMetric]);
 
   // ── Polling data ──
   const sortedPolls = useMemo(() => [...polls].sort((a,b) => b.date.localeCompare(a.date)), [polls]);
@@ -911,10 +984,11 @@ export default function App() {
   );
 
   const tabs = [
-    { id:"overview", label:"Overview" },
-    { id:"seats",    label:"Seats" },
-    { id:"polls",    label:"Polls" },
-    { id:"model",    label:`Model${hasChanges?" ●":""}` },
+    { id:"overview",     label:"Overview" },
+    { id:"seats",        label:"Seats" },
+    { id:"polls",        label:"Polls" },
+    { id:"model",        label:`Model${hasChanges?" ●":""}` },
+    { id:"demographics", label:"Demographics" },
   ];
 
   const panelStyle = { background:"#fff", border:"1px solid #E5E7EB", borderRadius:12, padding:"18px 20px", marginBottom:16 };
@@ -1935,6 +2009,261 @@ export default function App() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ══════════════════════ DEMOGRAPHICS TAB ═══════════════════════════════ */}
+      {activeTab === "demographics" && (
+        <div style={{ padding:"20px 24px", maxWidth:1200, margin:"0 auto" }}>
+
+          {/* ── National summary cards ── */}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:20 }}>
+            {[
+              { key:"medianPersonalIncome",  label:"Median Personal Income",  fmt:v=>`$${(v/1000).toFixed(0)}k/yr` },
+              { key:"medianHouseholdIncome", label:"Median Household Income",  fmt:v=>`$${(v/1000).toFixed(0)}k/yr` },
+              { key:"renterPct",             label:"Renters",                  fmt:v=>`${v.toFixed(1)}%` },
+              { key:"bachelorsOrAbovePct",   label:"Bachelor's+",              fmt:v=>`${v.toFixed(1)}%` },
+              { key:"overseasBornPct",       label:"Overseas Born",            fmt:v=>`${v.toFixed(1)}%` },
+              { key:"medianAge",             label:"Median Age",               fmt:v=>`${v}` },
+            ].map(({ key, label, fmt }) => {
+              const s = demogStats[key];
+              if (!s) return null;
+              return (
+                <div key={key} style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:10, padding:"14px 16px" }}>
+                  <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>{label}</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:"#111", marginBottom:4 }}>{fmt(s.avg)}</div>
+                  <div style={{ fontSize:11, color:"#9CA3AF" }}>
+                    Range: {fmt(s.min)} – {fmt(s.max)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ── Filters row ── */}
+          <div style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:10, padding:"12px 16px", marginBottom:14, display:"flex", flexWrap:"wrap", gap:12, alignItems:"center" }}>
+            <span style={{ fontSize:11, fontWeight:700, color:"#6B7280", textTransform:"uppercase" }}>Filter:</span>
+            <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+              {STATES.map(st => (
+                <button key={st} onClick={() => {
+                  setDemogStateFilter(prev => {
+                    const n = new Set(prev);
+                    n.has(st) ? n.delete(st) : n.add(st);
+                    return n;
+                  });
+                }} style={{ padding:"3px 10px", borderRadius:5, fontSize:12, fontWeight:600, cursor:"pointer",
+                  background: demogStateFilter.has(st) ? "#374151" : "#F3F4F6",
+                  color: demogStateFilter.has(st) ? "#fff" : "#6B7280",
+                  border: "1px solid " + (demogStateFilter.has(st) ? "#374151" : "#E5E7EB") }}>
+                  {st}
+                </button>
+              ))}
+            </div>
+            <span style={{ color:"#E5E7EB" }}>|</span>
+            <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+              {["Inner Metropolitan","Outer Metropolitan","Provincial","Rural"].map(cls => (
+                <button key={cls} onClick={() => {
+                  setDemogClassFilter(prev => {
+                    const n = new Set(prev);
+                    n.has(cls) ? n.delete(cls) : n.add(cls);
+                    return n;
+                  });
+                }} style={{ padding:"3px 10px", borderRadius:5, fontSize:12, fontWeight:600, cursor:"pointer",
+                  background: demogClassFilter.has(cls) ? "#1D4ED8" : "#F3F4F6",
+                  color: demogClassFilter.has(cls) ? "#fff" : "#6B7280",
+                  border: "1px solid " + (demogClassFilter.has(cls) ? "#1D4ED8" : "#E5E7EB") }}>
+                  {cls}
+                </button>
+              ))}
+            </div>
+            <span style={{ marginLeft:"auto", fontSize:12, color:"#9CA3AF" }}>{demogFiltered.length} seats</span>
+          </div>
+
+          {/* ── Demographic table ── */}
+          <div style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:10, marginBottom:20, overflow:"hidden" }}>
+            <div style={{ overflowX:"auto", maxHeight:520, overflowY:"auto" }}>
+              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
+                <thead style={{ position:"sticky", top:0, zIndex:2 }}>
+                  <tr>
+                    {[
+                      { k:"name",                label:"Seat" },
+                      { k:"state",               label:"State" },
+                      { k:"winner",              label:"2022 Winner" },
+                      { k:"urbanClass",          label:"Urban Class" },
+                      { k:"medianHouseholdIncome",label:"HH Income" },
+                      { k:"medianPersonalIncome", label:"Personal Inc." },
+                      { k:"medianWeeklyRent",     label:"Wkly Rent" },
+                      { k:"renterPct",            label:"Renters %" },
+                      { k:"ownerMortgagePct",     label:"Mortgage %" },
+                      { k:"bachelorsOrAbovePct",  label:"Bach.+ %" },
+                      { k:"overseasBornPct",      label:"O/seas Born" },
+                      { k:"medianAge",            label:"Med. Age" },
+                    ].map(({ k, label }) => (
+                      <th key={k} onClick={() => {
+                        if (demogSortKey === k) {
+                          setDemogSortDir(d => d === "asc" ? "desc" : "asc");
+                        } else {
+                          setDemogSortKey(k);
+                          setDemogSortDir("desc");
+                        }
+                      }} style={{ padding:"10px 10px", textAlign:"left", fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:"#6B7280", background:"#F9FAFB", cursor:"pointer", userSelect:"none", whiteSpace:"nowrap", borderBottom:"1px solid #E5E7EB" }}>
+                        {label}{" "}
+                        <span style={{ color: demogSortKey===k?"#374151":"#D1D5DB" }}>
+                          {demogSortKey===k ? (demogSortDir==="asc"?"↑":"↓") : "↕"}
+                        </span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {demogFiltered.map(s => {
+                    const pg = getParty(s.winner.party);
+                    const d = s.demog;
+                    const isExpanded = expandedDemogId === s.id;
+                    return (
+                      <>
+                        <tr key={s.id} onClick={() => setExpandedDemogId(prev => prev === s.id ? null : s.id)}
+                          style={{ borderBottom:"1px solid #F3F4F6", cursor:"pointer",
+                            borderLeft: `3px solid ${pg.color}`,
+                            background: isExpanded ? "#F9FAFB" : undefined,
+                            transition:"background 0.1s" }}
+                          onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background="#F9FAFB"; }}
+                          onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background=""; }}>
+                          <td style={{ padding:"8px 10px", fontWeight:600, color:"#111" }}>
+                            {isExpanded ? "▾ " : "▸ "}{s.name}
+                          </td>
+                          <td style={{ padding:"8px 10px", color:"#6B7280" }}>{s.state}</td>
+                          <td style={{ padding:"8px 10px" }}>
+                            <span style={{ background:pg.bg, color:pg.color, fontSize:11, fontWeight:700, padding:"2px 7px", borderRadius:4 }}>
+                              {pg.short}
+                            </span>
+                          </td>
+                          <td style={{ padding:"8px 10px", color:"#6B7280", fontSize:11 }}>{d.urbanClass ?? "—"}</td>
+                          <td style={{ padding:"8px 10px", fontWeight:600 }}>{d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome/1000).toFixed(0)}k` : "—"}</td>
+                          <td style={{ padding:"8px 10px" }}>{d.medianPersonalIncome ? `$${(d.medianPersonalIncome/1000).toFixed(0)}k` : "—"}</td>
+                          <td style={{ padding:"8px 10px" }}>{d.medianWeeklyRent ? `$${d.medianWeeklyRent}` : "—"}</td>
+                          <td style={{ padding:"8px 10px" }}>{d.renterPct != null ? `${d.renterPct}%` : "—"}</td>
+                          <td style={{ padding:"8px 10px" }}>{d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</td>
+                          <td style={{ padding:"8px 10px" }}>{d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</td>
+                          <td style={{ padding:"8px 10px" }}>{d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</td>
+                          <td style={{ padding:"8px 10px" }}>{d.medianAge ?? "—"}</td>
+                        </tr>
+                        {isExpanded && (
+                          <tr key={`${s.id}-exp`}>
+                            <td colSpan={12} style={{ background:"#F9FAFB", padding:"16px 20px", borderBottom:"2px solid #E5E7EB" }}>
+                              <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16 }}>
+                                {/* Income */}
+                                <div>
+                                  <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:8 }}>Income</div>
+                                  <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                    <div><strong>Personal:</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome/1000).toFixed(1)}k/yr` : "—"}</div>
+                                    <div><strong>Household:</strong> {d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome/1000).toFixed(1)}k/yr` : "—"}</div>
+                                    <div><strong>ATO Taxable Income:</strong> {d.avgTaxableIncome ? `$${(d.avgTaxableIncome/1000).toFixed(0)}k` : <span style={{color:"#9CA3AF"}}>n/a</span>}</div>
+                                    <div><strong>Investment Property:</strong> {d.investPropertyPct != null ? `${d.investPropertyPct}%` : <span style={{color:"#9CA3AF"}}>n/a</span>}</div>
+                                  </div>
+                                </div>
+                                {/* Housing */}
+                                <div>
+                                  <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:8 }}>Housing</div>
+                                  <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                    <div><strong>Owner outright:</strong> {d.ownerOutrightPct != null ? `${d.ownerOutrightPct}%` : "—"}</div>
+                                    <div><strong>Owner w/ mortgage:</strong> {d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</div>
+                                    <div><strong>Renters:</strong> {d.renterPct != null ? `${d.renterPct}%` : "—"}</div>
+                                    <div><strong>Weekly rent:</strong> {d.medianWeeklyRent ? `$${d.medianWeeklyRent}/wk` : "—"}</div>
+                                    <div><strong>Monthly mortgage:</strong> {d.medianMonthlyMortgage ? `$${d.medianMonthlyMortgage}/mo` : "—"}</div>
+                                  </div>
+                                </div>
+                                {/* People */}
+                                <div>
+                                  <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:8 }}>People</div>
+                                  <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                    <div><strong>Median age:</strong> {d.medianAge ?? "—"}</div>
+                                    <div><strong>Bachelor's+:</strong> {d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</div>
+                                    <div><strong>Overseas born:</strong> {d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</div>
+                                    <div><strong>AEC class:</strong> {d.urbanClass ?? "—"}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* ── Correlation scatter plot ── */}
+          <div style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:10, padding:"18px 20px" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+              <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF" }}>
+                Correlation Explorer
+              </div>
+              <select value={demogXMetric} onChange={e => setDemogXMetric(e.target.value)}
+                style={{ border:"1px solid #D1D5DB", borderRadius:6, padding:"4px 8px", fontSize:12, fontWeight:600, outline:"none" }}>
+                {DEMOG_METRICS.map(({ key, label }) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+              <span style={{ fontSize:12, color:"#9CA3AF" }}>vs Modelled 2PP Margin (ALP above/below 50%)</span>
+            </div>
+            <ResponsiveContainer width="100%" height={320}>
+              <ScatterChart margin={{ top:10, right:20, bottom:20, left:10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                <XAxis dataKey="x" name="X" type="number" domain={["auto","auto"]}
+                  tickFormatter={v => {
+                    const m = DEMOG_METRICS.find(m => m.key === demogXMetric);
+                    return m ? m.fmt(v) : v;
+                  }}
+                  tick={{ fontSize:11 }} />
+                <YAxis dataKey="y" name="Margin" tickFormatter={v => `${v>0?"+":""}${v.toFixed(1)}`}
+                  tick={{ fontSize:11 }} />
+                <ReferenceLine y={0} stroke="#6B7280" strokeDasharray="4 2" label={{ value:"50%", position:"right", fontSize:10, fill:"#6B7280" }} />
+                <Tooltip cursor={{ strokeDasharray:"3 3" }}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const p = payload[0].payload;
+                    const m = DEMOG_METRICS.find(m => m.key === demogXMetric);
+                    const grpCfg = GROUP_CONFIG[p.group] ?? { color:"#6B7280", label:p.group };
+                    return (
+                      <div style={{ background:"#fff", border:`1px solid ${grpCfg.color}`, borderRadius:8, padding:"8px 12px", fontSize:12, boxShadow:"0 2px 8px rgba(0,0,0,0.1)" }}>
+                        <div style={{ fontWeight:700, marginBottom:4 }}>{p.name} ({p.state})</div>
+                        <div style={{ color:"#6B7280" }}>{m?.label}: <strong>{m ? m.fmt(p.x) : p.x}</strong></div>
+                        <div style={{ color:"#6B7280" }}>2PP margin: <strong>{p.y > 0 ? "+" : ""}{p.y.toFixed(1)}pp</strong></div>
+                        <div style={{ color: grpCfg.color, fontWeight:600, marginTop:2 }}>{grpCfg.label}</div>
+                      </div>
+                    );
+                  }}
+                />
+                <ZAxis range={[40, 40]} />
+                {GROUP_ORDER.map(grp => {
+                  const pts = scatterData.filter(p => p.group === grp);
+                  if (!pts.length) return null;
+                  return (
+                    <Scatter key={grp} name={GROUP_CONFIG[grp]?.label ?? grp} data={pts}
+                      fill={GROUP_CONFIG[grp]?.color ?? "#6B7280"}
+                      fillOpacity={0.7} />
+                  );
+                })}
+              </ScatterChart>
+            </ResponsiveContainer>
+            {/* Legend */}
+            <div style={{ display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap", marginTop:8 }}>
+              {GROUP_ORDER.map(grp => {
+                const pts = scatterData.filter(p => p.group === grp);
+                if (!pts.length) return null;
+                return (
+                  <span key={grp} style={{ fontSize:11, color:"#374151", display:"flex", alignItems:"center", gap:4 }}>
+                    <span style={{ width:10, height:10, borderRadius:"50%", background:GROUP_CONFIG[grp]?.color, display:"inline-block" }} />
+                    {GROUP_CONFIG[grp]?.label}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
         </div>
       )}
     </div>
