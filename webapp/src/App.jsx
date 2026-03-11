@@ -379,6 +379,69 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing) 
       };
     }
 
+    // ON vs ALP branch: ON and ALP are the two final candidates
+    if (override?.tcpMatchup === "on_v_alp") {
+      const ef = override.prefFlows ?? prefFlows;
+      const fp = newFp ?? (() => {
+        const a = Math.max(0, BASELINE_2022.alp + swings.alp);
+        const c = Math.max(0, BASELINE_2022.coal + swings.coal);
+        const g = Math.max(0, BASELINE_2022.grn + swings.grn);
+        const t = Math.max(0, BASELINE_2022.teal + swings.teal);
+        const o = Math.max(0, BASELINE_2022.on + swings.on);
+        return { alp:a, coal:c, grn:g, teal:t, on:o, other:Math.max(0, 100-a-c-g-t-o) };
+      })();
+      // Coal prefs: coal_alp_v_on % to ALP, remainder to ON
+      const alpTcp = fp.alp + fp.grn*ef.grn_alp + fp.teal*ef.teal_alp
+                   + fp.coal*prefFlows.coal_alp_v_on + fp.other*ef.other_alp;
+      const onTcp  = fp.on  + fp.grn*(1-ef.grn_alp) + fp.teal*(1-ef.teal_alp)
+                   + fp.coal*(1-prefFlows.coal_alp_v_on) + fp.other*(1-ef.other_alp);
+      const onPct  = hasTcpOverride ? override.tcpPct : onTcp / (alpTcp + onTcp) * 100;
+      const wGroup = onPct >= 50 ? "one_nation" : "alp";
+      const wParty = onPct >= 50 ? "ON" : "ALP";
+      const wPct   = onPct >= 50 ? onPct : 100 - onPct;
+      return {
+        ...seat,
+        modelled: {
+          winnerParty: wParty, winnerGroup: wGroup, winnerPct: wPct,
+          projAlp2pp: 100 - onPct,
+          changed: wGroup !== getParty(seat.winner.party).group,
+          isOverride: true,
+        },
+      };
+    }
+
+    // ON vs Coalition branch: ON and Coalition are the two final candidates
+    if (override?.tcpMatchup === "on_v_coal") {
+      const ef = override.prefFlows ?? prefFlows;
+      const fp = newFp ?? (() => {
+        const a = Math.max(0, BASELINE_2022.alp + swings.alp);
+        const c = Math.max(0, BASELINE_2022.coal + swings.coal);
+        const g = Math.max(0, BASELINE_2022.grn + swings.grn);
+        const t = Math.max(0, BASELINE_2022.teal + swings.teal);
+        const o = Math.max(0, BASELINE_2022.on + swings.on);
+        return { alp:a, coal:c, grn:g, teal:t, on:o, other:Math.max(0, 100-a-c-g-t-o) };
+      })();
+      // ALP prefs: alp_on_v_coal % to ON, remainder to Coalition
+      const onTcp   = fp.on   + fp.alp*prefFlows.alp_on_v_coal + fp.grn*(1-ef.grn_alp)
+                    + fp.teal*(1-ef.teal_alp) + fp.other*(1-ef.other_alp);
+      const coalTcp = fp.coal + fp.alp*(1-prefFlows.alp_on_v_coal) + fp.grn*ef.grn_alp
+                    + fp.teal*ef.teal_alp + fp.other*ef.other_alp;
+      const onPct   = hasTcpOverride ? override.tcpPct : onTcp / (onTcp + coalTcp) * 100;
+      const coalP   = seat.tcp.find(t => ["LP","LNP","NP","CLP"].includes(t.party))?.party ?? "LP";
+      const wGroup  = onPct >= 50 ? "one_nation" : "coalition";
+      const wParty  = onPct >= 50 ? "ON" : coalP;
+      const wPct    = onPct >= 50 ? onPct : 100 - onPct;
+      return {
+        ...seat,
+        modelled: {
+          winnerParty: wParty, winnerGroup: wGroup, winnerPct: wPct,
+          projAlp2pp: null,
+          changed: wGroup !== getParty(seat.winner.party).group,
+          isOverride: true,
+        },
+      };
+    }
+
     if (hasAlp && hasCoal) {
       const isAlpWinner = seat.tcp[0].party === "ALP";
       const baseAlp2pp  = isAlpWinner ? seat.tcp[0].pct : seat.tcp[1].pct;
@@ -590,7 +653,7 @@ export default function App() {
 
   // ── Model tab state ──
   const [primaries,      setPrimaries]      = useState({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on });
-  const [prefFlows,      setPrefFlows]      = useState({ grn_alp:0.81, teal_alp:0.62, on_alp:0.43, other_alp:0.50 });
+  const [prefFlows,      setPrefFlows]      = useState({ grn_alp:0.81, teal_alp:0.62, on_alp:0.43, other_alp:0.50, coal_alp_v_on:0.10, alp_on_v_coal:0.20 });
   // Derive swings from primaries vs 2022 baseline — used by computeModelledSeats
   const swings = {
     alp:  +(primaries.alp  - BASELINE_2022.alp ).toFixed(2),
@@ -606,6 +669,9 @@ export default function App() {
   const [expandedOnSeat, setExpandedOnSeat] = useState(null);  // seat id or null
   const [onSeatSort,     setOnSeatSort]     = useState({ field:"name", dir:"asc" });
   const [onSeatFilter,   setOnSeatFilter]   = useState("");
+
+  // ── Seat-at-risk table state ──
+  const [riskFilter, setRiskFilter] = useState("all"); // "all" | "changing" | "marginal"
 
   const toggleSet = (setter, val) =>
     setter(prev => { const n = new Set(prev); n.has(val) ? n.delete(val) : n.add(val); return n; });
@@ -699,7 +765,21 @@ export default function App() {
     primaries.alp !== BASELINE_2022.alp || primaries.coal !== BASELINE_2022.coal ||
     primaries.grn !== BASELINE_2022.grn || primaries.teal !== BASELINE_2022.teal || primaries.on !== BASELINE_2022.on ||
     prefFlows.grn_alp !== 0.81 || prefFlows.teal_alp !== 0.62 || prefFlows.on_alp !== 0.43 || prefFlows.other_alp !== 0.50 ||
+    prefFlows.coal_alp_v_on !== 0.10 || prefFlows.alp_on_v_coal !== 0.20 ||
     Object.keys(seatOverrides).length > 0;
+
+  const getModelledMargin = (s) => {
+    if (s.modelled.winnerPct === null) return Infinity; // forceGroup
+    if (s.modelled.projAlp2pp !== null) return Math.abs(s.modelled.projAlp2pp - 50);
+    return Math.abs(s.modelled.winnerPct - 50);
+  };
+
+  const seatsByRisk = useMemo(() => {
+    let list = [...modelledSeats];
+    if (riskFilter === "changing") list = list.filter(s => s.modelled.changed);
+    if (riskFilter === "marginal") list = list.filter(s => getModelledMargin(s) < 5);
+    return list.sort((a, b) => getModelledMargin(a) - getModelledMargin(b));
+  }, [modelledSeats, riskFilter]);
 
   // ── Polling data ──
   const sortedPolls = useMemo(() => [...polls].sort((a,b) => b.date.localeCompare(a.date)), [polls]);
@@ -736,7 +816,7 @@ export default function App() {
 
   const resetModel = () => {
     setPrimaries({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on });
-    setPrefFlows({ grn_alp:0.81, teal_alp:0.62, on_alp:0.43, other_alp:0.50 });
+    setPrefFlows({ grn_alp:0.81, teal_alp:0.62, on_alp:0.43, other_alp:0.50, coal_alp_v_on:0.10, alp_on_v_coal:0.20 });
     setSeatOverrides({});
   };
 
@@ -1223,6 +1303,15 @@ export default function App() {
                   Defaults based on 2022 preference distributions (ON→ALP historically ~43%). Remainder flows to Coalition.
                 </div>
               </div>
+
+              <div style={panelStyle}>
+                <div style={sectionHead}>ON contest flows</div>
+                <PrefInput label="Coal → ALP (ON vs ALP race)"  value={prefFlows.coal_alp_v_on}  onChange={v=>setPrefFlows(f=>({...f,coal_alp_v_on:v}))}  color="#1D4ED8" />
+                <PrefInput label="ALP → ON (ON vs Coal race)"   value={prefFlows.alp_on_v_coal}  onChange={v=>setPrefFlows(f=>({...f,alp_on_v_coal:v}))}  color="#B45309" />
+                <div style={{ fontSize:11, color:"#9CA3AF", borderTop:"1px solid #F3F4F6", paddingTop:8, marginTop:4 }}>
+                  Used when a seat has TCP Matchup set to "ON vs ALP" or "ON vs Coal" in its override.
+                </div>
+              </div>
             </div>
 
             {/* ── Results panel ── */}
@@ -1303,6 +1392,81 @@ export default function App() {
                   })}
                 </div>
               </div>
+
+              {/* ── Seat-at-risk rankings ── */}
+              {(() => {
+                const filterBtnStyle = (active) => ({
+                  padding:"4px 12px", borderRadius:6, fontSize:12, fontWeight:600, cursor:"pointer", border:"1px solid #D1D5DB",
+                  background: active ? "#374151" : "#fff", color: active ? "#fff" : "#374151",
+                });
+                const filtered = riskFilter === "all" ? seatsByRisk
+                  : riskFilter === "changing" ? seatsByRisk.filter(s => s.modelled.changed)
+                  : seatsByRisk.filter(s => getModelledMargin(s) < 5);
+
+                return (
+                  <div style={panelStyle}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12, flexWrap:"wrap" }}>
+                      <span style={{ fontWeight:700, color:"#374151", flex:1 }}>Seat-at-risk rankings</span>
+                      <div style={{ display:"flex", gap:4 }}>
+                        {[["all","All 151"],["changing","Changing"],["marginal","Marginal (<5pp)"]].map(([val, label]) => (
+                          <button key={val} onClick={() => setRiskFilter(val)} style={filterBtnStyle(riskFilter === val)}>{label}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Column headers */}
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 48px 80px 80px 80px 70px", gap:4, borderBottom:"2px solid #F3F4F6", paddingBottom:4, marginBottom:4 }}>
+                      {[["Seat","#374151"],["State","#6B7280"],["2022","#6B7280"],["Projected","#6B7280"],["Margin","#6B7280"],["",""]].map(([label, color], i) => (
+                        <div key={i} style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.05em", color, paddingLeft: i===0?2:0 }}>{label}</div>
+                      ))}
+                    </div>
+
+                    <div style={{ maxHeight:400, overflowY:"auto" }}>
+                      {filtered.map(seat => {
+                        const margin = getModelledMargin(seat);
+                        const isSafe = margin > 10;
+                        const changed = seat.modelled.changed;
+                        const projGroup = seat.modelled.winnerGroup;
+                        const projColor = GROUP_CONFIG[projGroup]?.color ?? "#6B7280";
+                        const baseColor = GROUP_CONFIG[getParty(seat.winner.party).group]?.color ?? "#6B7280";
+
+                        return (
+                          <div key={seat.id} style={{
+                            display:"grid", gridTemplateColumns:"1fr 48px 80px 80px 80px 70px", gap:4, alignItems:"center",
+                            padding:"5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
+                            borderBottom:"1px solid #F9FAFB", opacity: isSafe ? 0.55 : 1,
+                            background: projGroup === "one_nation" && changed ? "#FFFBEB" : "transparent",
+                          }}>
+                            <span style={{ fontWeight: changed ? 700 : 400, fontSize:13, color:"#111", paddingLeft: changed?4:8, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{seat.name}</span>
+                            <span style={{ fontSize:11, color:"#6B7280" }}>{seat.state}</span>
+                            <div><PartyBadge party={seat.winner.party} /></div>
+                            <div>
+                              {changed
+                                ? <PartyBadge party={seat.modelled.winnerParty} />
+                                : <span style={{ fontSize:11, color:"#9CA3AF" }}>holds</span>
+                              }
+                            </div>
+                            <span style={{ fontSize:12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
+                              {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
+                            </span>
+                            <span style={{ fontSize:10, color: changed ? projColor : "#9CA3AF", fontWeight:600 }}>
+                              {changed ? "CHANGED" : ""}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      {filtered.length === 0 && (
+                        <div style={{ padding:"20px 0", textAlign:"center", color:"#9CA3AF", fontSize:13 }}>
+                          No seats match this filter.
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ fontSize:11, color:"#9CA3AF", marginTop:8, borderTop:"1px solid #F3F4F6", paddingTop:8 }}>
+                      {filtered.length} seats shown · Red = &lt;2pp · Amber = &lt;5pp · Faded = safe (&gt;10pp) · Bold left border = projected change
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* ── One Nation Seats panel ── */}
               {(() => {
@@ -1446,6 +1610,23 @@ export default function App() {
                                         Using national flows: Grn {Math.round(prefFlows.grn_alp*100)}% · Ind {Math.round(prefFlows.teal_alp*100)}% · ON {Math.round(prefFlows.on_alp*100)}% · Other {Math.round(prefFlows.other_alp*100)}%
                                       </div>
                                     )}
+                                  </div>
+
+                                  {/* TCP Matchup */}
+                                  <div style={{ borderTop:`1px solid ${ON_BG}`, paddingTop:10, marginTop:10 }}>
+                                    <div style={{ fontSize:11, fontWeight:700, color:ON_COLOR, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:6 }}>TCP Matchup</div>
+                                    <div style={{ display:"flex", gap:5 }}>
+                                      {[["auto","Auto"],["on_v_alp","ON vs ALP"],["on_v_coal","ON vs Coal"]].map(([val, label]) => {
+                                        const active = (ov.tcpMatchup ?? "auto") === val;
+                                        return (
+                                          <button key={val}
+                                            onClick={() => updateSeatOverride(seat.id, "tcpMatchup", val === "auto" ? null : val)}
+                                            style={{ padding:"3px 9px", borderRadius:5, fontSize:11, fontWeight:600, cursor:"pointer", background:active?ON_COLOR:"#fff", color:active?"#fff":ON_COLOR, border:`1px solid ${ON_COLOR}` }}>
+                                            {label}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
                                   </div>
 
                                   {/* Modelled outcome */}
@@ -1697,6 +1878,28 @@ export default function App() {
                               </div>
                             );
                           })()}
+
+                          {/* TCP Matchup override */}
+                          <div style={{ borderTop:"1px solid #E5E7EB", marginTop:10, paddingTop:10 }}>
+                            <div style={{ fontSize:11, fontWeight:700, color:"#374151", marginBottom:6 }}>TCP Matchup</div>
+                            <div style={{ display:"flex", gap:5 }}>
+                              {[["auto","Auto"],["on_v_alp","ON vs ALP"],["on_v_coal","ON vs Coal"]].map(([val, label]) => {
+                                const active = (ov.tcpMatchup ?? "auto") === val;
+                                return (
+                                  <button key={val}
+                                    onClick={() => updateSeatOverride(+idStr, "tcpMatchup", val === "auto" ? null : val)}
+                                    style={{ padding:"3px 9px", borderRadius:5, fontSize:11, fontWeight:600, cursor:"pointer", background: active?"#B45309":"#fff", color: active?"#fff":"#B45309", border:"1px solid #B45309" }}>
+                                    {label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {ov.tcpMatchup && (
+                              <div style={{ fontSize:10, color:"#9CA3AF", marginTop:4 }}>
+                                {ov.tcpMatchup === "on_v_alp" ? "Uses Coal→ALP (ON race) preference flow." : "Uses ALP→ON (vs Coal) preference flow."}
+                              </div>
+                            )}
+                          </div>
 
                           {/* Force projected winner */}
                           <div style={{ borderTop:"1px solid #E5E7EB", marginTop:10, paddingTop:10 }}>
