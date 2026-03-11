@@ -1,15 +1,15 @@
 """
-AEC Election Dashboard – Data Pipeline
-=======================================
+AEC/VEC Election Dashboard – Data Pipeline
+===========================================
 
-Orchestrates the full pipeline:
-  1. Download CSV files from AEC (results.aec.gov.au)
+Orchestrates the full pipeline for federal (AEC) or Victorian state (VEC) elections:
+  1. Download files from AEC/VEC
   2. Parse into clean Python structures
   3. Load into SQLite database
   4. Export to JSON files for the frontend
 
 Usage examples:
-    # Full pipeline for 2022 (download → parse → load → export)
+    # Full federal pipeline for 2022 (download → parse → load → export)
     python main.py --year 2022
 
     # Multiple years
@@ -29,6 +29,19 @@ Usage examples:
 
     # Verbose logging
     python main.py --year 2022 -v
+
+    # ── Victorian state elections ──────────────────────────────
+    # Run VEC pipeline for 2022 VIC state election
+    python main.py --state vic --year 202211
+
+    # Multiple VIC elections
+    python main.py --state vic --year 202211 201811
+
+    # Skip download (use manually placed VEC Excel files)
+    python main.py --state vic --year 202211 --skip-download
+
+    # Export only (database already populated with VEC data)
+    python main.py --state vic --year 202211 --export-only
 """
 
 import argparse
@@ -37,11 +50,13 @@ import sys
 from pathlib import Path
 
 # ── Pipeline modules ─────────────────────────────────────────────────────────
-from pipeline.config import ELECTIONS
+from pipeline.config import ELECTIONS, VIC_ELECTIONS
 from pipeline import download as dl
 from pipeline import parse as ps
 from pipeline import database as db
 from pipeline import export as ex
+from pipeline import vec_download as vdl
+from pipeline import vec_parse as vps
 
 
 # ── Logging setup ─────────────────────────────────────────────────────────────
@@ -144,20 +159,146 @@ def run_pipeline(
     logger.info("All done.")
 
 
+# ── VIC state pipeline ────────────────────────────────────────────────────────
+
+def run_vic_pipeline(
+    election_ids: list[int],
+    skip_download: bool = False,
+    force_download: bool = False,
+    export_only: bool = False,
+) -> None:
+    """Run the full VIC state election pipeline for the given election IDs."""
+    logger = logging.getLogger(__name__)
+
+    # Initialise both schemas
+    logger.info("Initialising database schemas...")
+    db.init_db()
+    db.init_vec_schema()
+
+    for election_id in election_ids:
+        if election_id not in VIC_ELECTIONS:
+            logger.error(
+                "Unknown VIC election_id %d. Valid IDs: %s",
+                election_id, list(VIC_ELECTIONS.keys())
+            )
+            logger.error(
+                "VIC election IDs use YYYYMM format, e.g. 202211 for November 2022."
+            )
+            continue
+
+        logger.info("")
+        logger.info("━" * 60)
+        logger.info("Processing VIC election: %d (%s)",
+                    election_id, VIC_ELECTIONS[election_id]["name"])
+        logger.info("━" * 60)
+
+        if export_only:
+            logger.info("Export-only mode: skipping download and parse.")
+            ex.export_vic_election(election_id)
+            continue
+
+        # ── Step 1: Download ──────────────────────────────────────────────────
+        if skip_download:
+            logger.info("Skipping download (using existing files).")
+            file_paths = vdl.list_local_vec_files(election_id)
+        else:
+            logger.info("Step 1: Downloading VEC data files for %d...", election_id)
+            file_paths = vdl.download_vec_election(election_id, force=force_download)
+
+        if not file_paths:
+            file_paths = vdl.list_local_vec_files(election_id)
+
+        if not file_paths:
+            logger.error(
+                "No VEC data files found for election %d.\n"
+                "  Download options:\n"
+                "  1. Run without --skip-download to attempt automatic download.\n"
+                "  2. Manually download Excel files from vec.vic.gov.au and place\n"
+                "     them in: data/raw/vic/%d/\n"
+                "  3. Use The Tally Room (tallyroom.com.au) CSV data — 2022 is free.\n"
+                "     Place as: data/raw/vic/%d/tally_room_candidates.csv\n"
+                "               data/raw/vic/%d/tally_room_fp.csv\n"
+                "               data/raw/vic/%d/tally_room_tcp.csv",
+                election_id, election_id, election_id, election_id, election_id
+            )
+            continue
+
+        logger.info("  Available files: %s", list(file_paths.keys()))
+
+        # ── Step 2: Parse ─────────────────────────────────────────────────────
+        logger.info("Step 2: Parsing VEC data files for %d...", election_id)
+        parsed = vps.parse_all_vec(file_paths, election_id)
+
+        for key, records in parsed.items():
+            logger.info("  %-12s %d records", key, len(records))
+
+        if not parsed["fp"] and not parsed["tcp"]:
+            logger.error(
+                "No usable data parsed for election %d. "
+                "Check that the VEC files are in the expected format.",
+                election_id
+            )
+            continue
+
+        # ── Step 3: Load into database ────────────────────────────────────────
+        logger.info("Step 3: Loading into database for election %d...", election_id)
+
+        db.upsert_vic_election(election_id)
+
+        # Load districts (derived from FP or TCP records)
+        all_records = parsed["fp"] or parsed["tcp"] or parsed["candidates"]
+        db.load_vic_districts(all_records)
+
+        # Load candidates
+        cand_records = parsed.get("candidates") or parsed["fp"] or parsed["tcp"]
+        db.load_vic_candidates(cand_records)
+
+        if parsed["fp"]:
+            db.load_vic_fp(parsed["fp"])
+        if parsed["tcp"]:
+            db.load_vic_2cp(parsed["tcp"])
+
+        logger.info("Database load complete for election %d.", election_id)
+
+        # ── Step 4: Export to JSON ────────────────────────────────────────────
+        logger.info("Step 4: Exporting JSON files for election %d...", election_id)
+        ex.export_vic_election(election_id)
+
+        logger.info("VIC pipeline complete for election %d ✓", election_id)
+
+    logger.info("")
+    logger.info("All done.")
+
+
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
 def _parse_args():
     parser = argparse.ArgumentParser(
-        description="AEC Election Dashboard – Data Pipeline",
+        description="AEC/VEC Election Dashboard – Data Pipeline",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
+    )
+    parser.add_argument(
+        "--state", "-s",
+        choices=["federal", "vic"],
+        default="federal",
+        help=(
+            "Which jurisdiction to process. "
+            "'federal' uses AEC data (default). "
+            "'vic' uses VEC data for the Victorian Legislative Assembly."
+        ),
     )
     parser.add_argument(
         "--year", "-y",
         nargs="+",
         type=int,
-        default=[2022, 2019],
-        help="Election year(s) to process. Default: 2022 2019",
+        default=None,
+        help=(
+            "Election year(s) / IDs to process. "
+            "Federal default: 2022 2019. "
+            "VIC IDs use YYYYMM format, e.g. 202211 (Nov 2022). "
+            "VIC default: 202211 201811."
+        ),
     )
     parser.add_argument(
         "--skip-download",
@@ -191,18 +332,41 @@ if __name__ == "__main__":
     args = _parse_args()
     setup_logging(args.verbose)
 
+    is_vic = args.state == "vic"
+
     if args.list_files:
-        for year in (args.year or list(ELECTIONS.keys())):
-            files = dl.list_local_files(year)
-            print(f"\n{year}: {len(files)}/{len(dl.FILE_TEMPLATES)} files available")
-            for key, path in files.items():
-                size_kb = Path(path).stat().st_size / 1024
-                print(f"  {key:<28} {Path(path).name}  ({size_kb:.0f} KB)")
+        if is_vic:
+            ids = args.year or list(VIC_ELECTIONS.keys())
+            for eid in ids:
+                files = vdl.list_local_vec_files(eid)
+                cfg = VIC_ELECTIONS.get(eid, {})
+                print(f"\n{eid} ({cfg.get('name', '?')}): {len(files)} file(s)")
+                for key, path in files.items():
+                    size_kb = Path(path).stat().st_size / 1024
+                    print(f"  {key:<28} {Path(path).name}  ({size_kb:.0f} KB)")
+        else:
+            years = args.year or list(ELECTIONS.keys())
+            for year in years:
+                files = dl.list_local_files(year)
+                print(f"\n{year}: {len(files)}/{len(dl.FILE_TEMPLATES)} files available")
+                for key, path in files.items():
+                    size_kb = Path(path).stat().st_size / 1024
+                    print(f"  {key:<28} {Path(path).name}  ({size_kb:.0f} KB)")
         sys.exit(0)
 
-    run_pipeline(
-        years=args.year,
-        skip_download=args.skip_download,
-        force_download=args.force_download,
-        export_only=args.export_only,
-    )
+    if is_vic:
+        election_ids = args.year or [202211, 201811]
+        run_vic_pipeline(
+            election_ids=election_ids,
+            skip_download=args.skip_download,
+            force_download=args.force_download,
+            export_only=args.export_only,
+        )
+    else:
+        years = args.year or [2022, 2019]
+        run_pipeline(
+            years=years,
+            skip_download=args.skip_download,
+            force_download=args.force_download,
+            export_only=args.export_only,
+        )

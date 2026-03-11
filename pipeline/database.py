@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 from contextlib import contextmanager
 
-from .config import ELECTIONS, DB_PATH, COALITION_PARTIES
+from .config import ELECTIONS, VIC_ELECTIONS, DB_PATH, COALITION_PARTIES, VIC_COALITION_PARTIES
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +55,18 @@ def init_db(db_path: str = None) -> None:
     with transaction(db_path) as conn:
         conn.executescript(sql)
     logger.info("Database schema initialised at %s", db_path or DB_PATH)
+
+
+def init_vec_schema(db_path: str = None) -> None:
+    """Apply the VEC extension schema (vec_schema.sql) to the database."""
+    schema_file = Path(__file__).parent.parent / "vec_schema.sql"
+    if not schema_file.exists():
+        raise FileNotFoundError(f"vec_schema.sql not found at {schema_file}")
+
+    sql = schema_file.read_text(encoding="utf-8")
+    with transaction(db_path) as conn:
+        conn.executescript(sql)
+    logger.info("VEC schema initialised at %s", db_path or DB_PATH)
 
 
 # ── Election metadata ─────────────────────────────────────────────────────────
@@ -436,6 +448,217 @@ def get_booth_votes(polling_place_id: int, division_id: int,
             "polling_place_id": polling_place_id,
             "first_prefs": [dict(r) for r in fp],
             "tcp": [dict(r) for r in tcp],
+        }
+    finally:
+        conn.close()
+
+
+# ── VIC state election helpers ────────────────────────────────────────────────
+
+def upsert_vic_election(election_id: int, db_path: str = None) -> None:
+    """Insert or update a VIC state election metadata row."""
+    if election_id not in VIC_ELECTIONS:
+        raise ValueError(f"VIC election {election_id} not in config.")
+
+    cfg = VIC_ELECTIONS[election_id]
+    with transaction(db_path) as conn:
+        # Insert into shared elections table (needed for any cross-table FK references)
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO elections (election_id, event_id, name, election_date)
+            VALUES (?, ?, ?, ?)
+            """,
+            (election_id, cfg["event_id"], cfg["name"], cfg["date"]),
+        )
+        # Insert into VIC-specific elections table
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO vic_elections (election_id, name, election_date, jurisdiction)
+            VALUES (?, ?, ?, ?)
+            """,
+            (election_id, cfg["name"], cfg["date"], cfg["jurisdiction"]),
+        )
+    logger.info("Upserted VIC election: %d (%s)", election_id, cfg["name"])
+
+
+def load_vic_districts(records: list[dict], db_path: str = None) -> None:
+    """Load VIC district (seat) metadata."""
+    if not records:
+        return
+
+    # Deduplicate by (district_id, election_id)
+    seen = set()
+    rows = []
+    for r in records:
+        key = (r["district_id"], r["election_id"])
+        if key not in seen:
+            seen.add(key)
+            rows.append({
+                "district_id":   r["district_id"],
+                "election_id":   r["election_id"],
+                "district_name": r["district_name"],
+                "enrolment":     r.get("enrolment"),
+            })
+
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_districts", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC districts", n)
+
+
+def load_vic_candidates(records: list[dict], db_path: str = None) -> None:
+    """Load VIC candidate records (deduplicated)."""
+    if not records:
+        return
+
+    seen = set()
+    rows = []
+    for r in records:
+        key = (r["candidate_id"], r["election_id"])
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append({k: v for k, v in r.items()
+                     if k in ("candidate_id", "election_id", "district_id",
+                               "surname", "given_name", "party_ab", "party_name",
+                               "ballot_position", "elected")})
+
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_candidates", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC candidates", n)
+
+
+def load_vic_fp(records: list[dict], db_path: str = None) -> None:
+    """Load VIC first-preference district-level vote records."""
+    if not records:
+        return
+    rows = [{k: v for k, v in r.items()
+             if k in ("election_id", "district_id", "candidate_id", "total_votes", "vote_pct")}
+            for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_district_fp", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC FP rows", n)
+
+
+def load_vic_2cp(records: list[dict], db_path: str = None) -> None:
+    """Load VIC two-candidate-preferred district-level vote records."""
+    if not records:
+        return
+    rows = [{k: v for k, v in r.items()
+             if k in ("election_id", "district_id", "candidate_id",
+                      "total_votes", "vote_pct", "elected")}
+            for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_district_2cp", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC 2CP rows", n)
+
+
+def get_vic_districts(election_id: int, db_path: str = None) -> list[dict]:
+    """Return all VIC districts for an election with winner info."""
+    conn = get_connection(db_path)
+    try:
+        rows = conn.execute(
+            """
+            SELECT d.district_id, d.district_name, d.enrolment,
+                   c.candidate_id, c.surname, c.given_name, c.party_ab, c.party_name
+            FROM vic_districts d
+            LEFT JOIN vic_candidates c ON c.district_id = d.district_id
+                                       AND c.election_id = d.election_id
+                                       AND c.elected = 1
+            WHERE d.election_id = ?
+            ORDER BY d.district_name
+            """,
+            (election_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def get_vic_district_results(district_id: int, election_id: int,
+                              db_path: str = None) -> dict:
+    """Return FP and 2CP totals for a single VIC district."""
+    conn = get_connection(db_path)
+    try:
+        fp = conn.execute(
+            """
+            SELECT c.party_ab, c.party_name,
+                   c.surname || ', ' || COALESCE(c.given_name, '') AS candidate_name,
+                   c.elected, f.total_votes, f.vote_pct
+            FROM vic_district_fp f
+            JOIN vic_candidates c ON c.candidate_id = f.candidate_id
+                                  AND c.election_id = f.election_id
+            WHERE f.election_id = ? AND f.district_id = ?
+            ORDER BY f.total_votes DESC
+            """,
+            (election_id, district_id),
+        ).fetchall()
+
+        tcp = conn.execute(
+            """
+            SELECT c.party_ab, c.party_name,
+                   c.surname || ', ' || COALESCE(c.given_name, '') AS candidate_name,
+                   c.elected, t.total_votes, t.vote_pct
+            FROM vic_district_2cp t
+            JOIN vic_candidates c ON c.candidate_id = t.candidate_id
+                                  AND c.election_id = t.election_id
+            WHERE t.election_id = ? AND t.district_id = ?
+            ORDER BY t.total_votes DESC
+            """,
+            (election_id, district_id),
+        ).fetchall()
+
+        return {
+            "district_id": district_id,
+            "election_id": election_id,
+            "first_prefs": [dict(r) for r in fp],
+            "tcp":         [dict(r) for r in tcp],
+        }
+    finally:
+        conn.close()
+
+
+def get_vic_state_summary(election_id: int, db_path: str = None) -> dict:
+    """Return VIC state-level first preference totals by party and seats won."""
+    conn = get_connection(db_path)
+    try:
+        fp_rows = conn.execute(
+            """
+            SELECT c.party_ab, c.party_name,
+                   SUM(f.total_votes) AS total_votes,
+                   COUNT(DISTINCT f.district_id) AS districts_contested
+            FROM vic_district_fp f
+            JOIN vic_candidates c ON c.candidate_id = f.candidate_id
+                                  AND c.election_id = f.election_id
+            WHERE f.election_id = ?
+            GROUP BY c.party_ab
+            ORDER BY total_votes DESC
+            """,
+            (election_id,),
+        ).fetchall()
+
+        total = sum(r["total_votes"] for r in fp_rows) or 1
+        parties = []
+        for r in fp_rows:
+            d = dict(r)
+            d["vote_share_pct"] = round(d["total_votes"] / total * 100, 2) if total else 0
+            parties.append(d)
+
+        seats_won = conn.execute(
+            """
+            SELECT c.party_ab, COUNT(*) AS seats_won
+            FROM vic_candidates c
+            WHERE c.election_id = ? AND c.elected = 1
+            GROUP BY c.party_ab
+            ORDER BY seats_won DESC
+            """,
+            (election_id,),
+        ).fetchall()
+
+        return {
+            "election_id": election_id,
+            "total_votes": total,
+            "parties":     parties,
+            "seats_won":   [dict(r) for r in seats_won],
         }
     finally:
         conn.close()
