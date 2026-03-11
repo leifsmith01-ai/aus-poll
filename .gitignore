@@ -14,6 +14,8 @@ htmlcov/
 
 # AEC raw data (large CSVs – don't commit to Git)
 data/raw/
+!data/raw/vic/
+!data/raw/vic/**
 data/processed/
 
 # Database (generated – don't commit)
