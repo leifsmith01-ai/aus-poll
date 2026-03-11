@@ -17,12 +17,18 @@ import json
 import logging
 from pathlib import Path
 
-from .config import DATA_EXPORTS_DIR, ELECTIONS, COALITION_PARTIES
+from .config import (
+    DATA_EXPORTS_DIR, ELECTIONS, COALITION_PARTIES,
+    VIC_ELECTIONS, VIC_EXPORTS_DIR, VIC_COALITION_PARTIES,
+)
 from .database import (
     get_connection,
     get_all_divisions,
     get_division_summary,
     get_national_summary,
+    get_vic_districts,
+    get_vic_district_results,
+    get_vic_state_summary,
     DB_PATH,
 )
 
@@ -415,3 +421,204 @@ def export_election(election_id: int, db_path: str = None,
     export_preference_flows(election_id, db_path, exports_dir)
 
     logger.info("Export complete for election %d", election_id)
+
+
+# ── VIC State Election Exports ────────────────────────────────────────────────
+
+def export_vic_elections_index(db_path: str = None, exports_dir: str = None) -> None:
+    """Write vic/elections.json listing available VIC state elections."""
+    conn = get_connection(db_path)
+    try:
+        rows = conn.execute(
+            """
+            SELECT election_id, name, election_date, jurisdiction
+            FROM vic_elections
+            ORDER BY election_id DESC
+            """
+        ).fetchall()
+        data = [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+    out = Path(exports_dir or VIC_EXPORTS_DIR) / "elections.json"
+    _write_json(data, out)
+    logger.info("Exported VIC elections index → %s", out)
+
+
+def export_vic_state_summary(election_id: int, db_path: str = None,
+                              exports_dir: str = None) -> None:
+    """Export vic/{election_id}/state_summary.json."""
+    summary = get_vic_state_summary(election_id, db_path)
+
+    # Compute coalition combined figure
+    coalition_total = sum(
+        p["total_votes"] for p in summary["parties"]
+        if p["party_ab"] in VIC_COALITION_PARTIES
+    )
+    coalition_seats = sum(
+        s["seats_won"] for s in summary["seats_won"]
+        if s["party_ab"] in VIC_COALITION_PARTIES
+    )
+    total = summary["total_votes"] or 1
+    summary["coalition_combined"] = {
+        "party_ab":      "COAL",
+        "party_name":    "Coalition (combined)",
+        "total_votes":   coalition_total,
+        "vote_share_pct": _round2(coalition_total / total * 100),
+        "seats_won":     coalition_seats,
+    }
+
+    out = Path(exports_dir or VIC_EXPORTS_DIR) / str(election_id) / "state_summary.json"
+    _write_json(summary, out)
+    logger.info("Exported VIC state summary for %d → %s", election_id, out)
+
+
+def export_vic_districts_list(election_id: int, db_path: str = None,
+                               exports_dir: str = None) -> None:
+    """
+    Export vic/{election_id}/districts.json — lightweight list of all 88 districts
+    with winner, 2CP margin, and first preference breakdown.
+    """
+    conn = get_connection(db_path)
+    try:
+        districts = conn.execute(
+            """
+            SELECT d.district_id, d.district_name, d.enrolment
+            FROM vic_districts d
+            WHERE d.election_id = ?
+            ORDER BY d.district_name
+            """,
+            (election_id,),
+        ).fetchall()
+
+        output = []
+        for dist in districts:
+            dist_id = dist["district_id"]
+
+            # 2CP results
+            tcp_rows = conn.execute(
+                """
+                SELECT c.candidate_id, c.surname, c.given_name, c.party_ab,
+                       c.elected, t.total_votes, t.vote_pct
+                FROM vic_district_2cp t
+                JOIN vic_candidates c ON c.candidate_id = t.candidate_id
+                                     AND c.election_id = t.election_id
+                WHERE t.election_id = ? AND t.district_id = ?
+                ORDER BY t.total_votes DESC
+                """,
+                (election_id, dist_id),
+            ).fetchall()
+
+            # First preference totals by party
+            fp_rows = conn.execute(
+                """
+                SELECT c.party_ab, SUM(f.total_votes) AS total_votes
+                FROM vic_district_fp f
+                JOIN vic_candidates c ON c.candidate_id = f.candidate_id
+                                     AND c.election_id = f.election_id
+                WHERE f.election_id = ? AND f.district_id = ?
+                GROUP BY c.party_ab
+                ORDER BY total_votes DESC
+                """,
+                (election_id, dist_id),
+            ).fetchall()
+
+            tcp_sorted = sorted(tcp_rows, key=lambda r: r["total_votes"], reverse=True)
+            fp_total   = sum(r["total_votes"] for r in fp_rows) or 1
+            tcp_total  = sum(r["total_votes"] for r in tcp_sorted) or 1
+
+            margin_votes = (
+                tcp_sorted[0]["total_votes"] - tcp_sorted[1]["total_votes"]
+                if len(tcp_sorted) >= 2 else None
+            )
+            margin_pct = _round2(margin_votes / tcp_total * 100) if margin_votes is not None else None
+            winner = tcp_sorted[0] if tcp_sorted else None
+
+            output.append({
+                "district_id":   dist_id,
+                "district_name": dist["district_name"],
+                "enrolment":     dist["enrolment"],
+                "winner": {
+                    "candidate_id": winner["candidate_id"] if winner else None,
+                    "name": f"{winner['given_name']} {winner['surname']}" if winner else None,
+                    "party_ab": winner["party_ab"] if winner else None,
+                } if winner else None,
+                "tcp": [
+                    {
+                        "candidate_id": r["candidate_id"],
+                        "name": f"{r['given_name']} {r['surname']}",
+                        "party_ab": r["party_ab"],
+                        "votes": r["total_votes"],
+                        "pct": _round2(r["total_votes"] / tcp_total * 100),
+                    }
+                    for r in tcp_sorted
+                ],
+                "margin_votes": margin_votes,
+                "margin_pct":   margin_pct,
+                "first_prefs": [
+                    {
+                        "party_ab": r["party_ab"],
+                        "votes":    r["total_votes"],
+                        "pct":      _round2(r["total_votes"] / fp_total * 100),
+                    }
+                    for r in fp_rows[:6]
+                ],
+            })
+
+    finally:
+        conn.close()
+
+    out = Path(exports_dir or VIC_EXPORTS_DIR) / str(election_id) / "districts.json"
+    _write_json(output, out)
+    logger.info(
+        "Exported %d VIC districts for election %d → %s", len(output), election_id, out
+    )
+
+
+def export_vic_district_detail(district_id: int, election_id: int,
+                                db_path: str = None, exports_dir: str = None) -> None:
+    """Export vic/{election_id}/districts/{district_id}.json."""
+    detail = get_vic_district_results(district_id, election_id, db_path)
+    out = (
+        Path(exports_dir or VIC_EXPORTS_DIR)
+        / str(election_id)
+        / "districts"
+        / f"{district_id}.json"
+    )
+    _write_json(detail, out)
+
+
+def export_all_vic_district_details(election_id: int, db_path: str = None,
+                                     exports_dir: str = None) -> None:
+    """Export individual JSON files for all VIC districts in an election."""
+    conn = get_connection(db_path)
+    try:
+        district_ids = [
+            r["district_id"]
+            for r in conn.execute(
+                "SELECT district_id FROM vic_districts WHERE election_id = ?",
+                (election_id,)
+            ).fetchall()
+        ]
+    finally:
+        conn.close()
+
+    logger.info("Exporting detail files for %d VIC districts (election %d)...",
+                len(district_ids), election_id)
+    for dist_id in district_ids:
+        export_vic_district_detail(dist_id, election_id, db_path, exports_dir)
+
+
+def export_vic_election(election_id: int, db_path: str = None,
+                        exports_dir: str = None) -> None:
+    """Run the full VIC export pipeline for one election."""
+    logger.info("═" * 60)
+    logger.info("Starting full VIC export for election %d", election_id)
+    logger.info("═" * 60)
+
+    export_vic_elections_index(db_path, exports_dir)
+    export_vic_state_summary(election_id, db_path, exports_dir)
+    export_vic_districts_list(election_id, db_path, exports_dir)
+    export_all_vic_district_details(election_id, db_path, exports_dir)
+
+    logger.info("VIC export complete for election %d", election_id)

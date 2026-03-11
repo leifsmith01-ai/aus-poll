@@ -1,4 +1,4 @@
-# AEC Election Dashboard – Python dependencies
+# AEC/VEC Election Dashboard – Python dependencies
 # Install with: pip install -r requirements.txt
 
 # HTTP requests (download pipeline)
@@ -6,6 +6,9 @@ requests>=2.31.0
 
 # Data processing (used in analysis scripts + later frontend API)
 pandas>=2.0.0
+
+# Excel file reading (for VEC data — pandas uses openpyxl under the hood)
+openpyxl>=3.1.0
 
 # Geospatial (for boundary processing + ABS data overlay)
 geopandas>=0.14.0
