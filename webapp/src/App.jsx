@@ -449,10 +449,10 @@ const ELECTION_DATA = {
     label:"Victoria 2022", jurisdiction:"Victoria",
     chamber:"Legislative Assembly", date:"26 November 2022",
     totalSeats:88, majority:45, twopp:57.3,
-    seats:VIC_2022_SEATS_STD,
+    seats:VIC_SEATS,
     counts:{ alp:56, coalition:26, greens:4, teal:2, one_nation:0, crossbench:0 },
     incumbent:"Daniel Andrews (ALP)", incumbentParty:"ALP",
-    modelEnabled:false,
+    modelEnabled:true,
   },
   qld_2024: {
     label:"Queensland 2024", jurisdiction:"Queensland",
@@ -759,6 +759,161 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing) 
   });
 }
 
+// ─── VIC 2022 full seat data (88 LA districts, VEC official 2PP results) ──────
+// Source: VEC 2022 State Election — vec.vic.gov.au
+// Format: [id, name, state, winnerParty, winnerName, tcp1Party, tcp2Party, margin]
+const _VS = [
+  [9001,"Altona","VIC","ALP","Juliana Addison","ALP","LP",28.1],
+  [9002,"Albert Park","VIC","ALP","Nina Taylor","ALP","LP",11.15],
+  [9003,"Ashwood","VIC","ALP","Labor MP","ALP","LP",6.15],
+  [9004,"Bass","VIC","ALP","Labor MP","ALP","LP",0.24],
+  [9005,"Bayswater","VIC","ALP","Labor MP","ALP","LP",4.23],
+  [9006,"Bellarine","VIC","ALP","Labor MP","ALP","LP",8.46],
+  [9007,"Benambra","VIC","LP","Bill Tilley","LP","ALP",13.26],
+  [9008,"Bendigo East","VIC","ALP","Labor MP","ALP","LP",10.91],
+  [9009,"Bendigo West","VIC","ALP","Labor MP","ALP","LP",14.35],
+  [9010,"Bentleigh","VIC","ALP","Labor MP","ALP","LP",8.04],
+  [9011,"Berwick","VIC","LP","Brad Battin","LP","ALP",4.71],
+  [9012,"Box Hill","VIC","ALP","Paul Hamer","ALP","LP",7.23],
+  [9013,"Brighton","VIC","LP","James Newbury","LP","ALP",4.21],
+  [9014,"Broadmeadows","VIC","ALP","Labor MP","ALP","LP",15.45],
+  [9015,"Brunswick","VIC","GRN","Tim Read","GRN","ALP",11.1],
+  [9016,"Bulleen","VIC","LP","Matthew Guy","LP","ALP",5.94],
+  [9017,"Bundoora","VIC","ALP","Labor MP","ALP","LP",12.74],
+  [9018,"Carrum","VIC","ALP","Labor MP","ALP","LP",9.94],
+  [9019,"Caulfield","VIC","LP","David Southwick","LP","ALP",2.07],
+  [9020,"Clarinda","VIC","ALP","Labor MP","ALP","LP",10.37],
+  [9021,"Cranbourne","VIC","ALP","Labor MP","ALP","LP",9.0],
+  [9022,"Croydon","VIC","LP","David Hodgett","LP","ALP",1.37],
+  [9023,"Dandenong","VIC","ALP","Labor MP","ALP","LP",19.11],
+  [9024,"Eildon","VIC","LP","Cindy McLeish","LP","ALP",7.08],
+  [9025,"Eltham","VIC","ALP","Labor MP","ALP","LP",9.0],
+  [9026,"Essendon","VIC","ALP","Labor MP","ALP","LP",12.45],
+  [9027,"Eureka","VIC","ALP","Labor MP","ALP","LP",7.17],
+  [9028,"Euroa","VIC","NP","Steph Ryan","NP","ALP",9.93],
+  [9029,"Evelyn","VIC","LP","Nick McGowan","LP","ALP",5.21],
+  [9030,"Footscray","VIC","ALP","Katie Hall","ALP","LP",25.66],
+  [9031,"Frankston","VIC","ALP","Labor MP","ALP","LP",8.66],
+  [9032,"Geelong","VIC","ALP","Labor MP","ALP","LP",14.71],
+  [9033,"Gippsland East","VIC","NP","Tim Bull","NP","ALP",23.92],
+  [9034,"Gippsland South","VIC","NP","Danny O'Brien","NP","ALP",15.25],
+  [9035,"Glen Waverley","VIC","ALP","Labor MP","ALP","LP",3.3],
+  [9036,"Greenvale","VIC","ALP","Labor MP","ALP","LP",6.92],
+  [9037,"Hastings","VIC","ALP","Labor MP","ALP","LP",1.35],
+  [9038,"Hawthorn","VIC","LP","John Pesutto","LP","ALP",1.74],
+  [9039,"Ivanhoe","VIC","ALP","Labor MP","ALP","LP",12.75],
+  [9040,"Kalkallo","VIC","ALP","Labor MP","ALP","LP",16.43],
+  [9041,"Kew","VIC","LP","David Davis","LP","ALP",3.98],
+  [9042,"Kororoit","VIC","ALP","Labor MP","ALP","LP",14.25],
+  [9043,"Lara","VIC","ALP","Labor MP","ALP","LP",16.15],
+  [9044,"Laverton","VIC","ALP","Labor MP","ALP","LP",18.01],
+  [9045,"Lowan","VIC","NP","Emma Kealy","NP","ALP",21.61],
+  [9046,"Macedon","VIC","ALP","Labor MP","ALP","LP",9.54],
+  [9047,"Malvern","VIC","LP","Michael O'Brien","LP","ALP",8.28],
+  [9048,"Melbourne","VIC","ALP","Labor MP","ALP","LP",25.01],
+  [9049,"Melton","VIC","ALP","Labor MP","ALP","LP",4.59],
+  [9050,"Mildura","VIC","IND","Ali Cupper","IND","NP",8.5],
+  [9051,"Mill Park","VIC","ALP","Labor MP","ALP","LP",11.43],
+  [9052,"Monbulk","VIC","ALP","Labor MP","ALP","LP",7.55],
+  [9053,"Mordialloc","VIC","ALP","Labor MP","ALP","LP",8.19],
+  [9054,"Mornington","VIC","LP","Chris Crewther","LP","ALP",8.28],
+  [9055,"Morwell","VIC","NP","Martin Cameron","NP","ALP",4.42],
+  [9056,"Mulgrave","VIC","ALP","Labor MP","ALP","LP",10.2],
+  [9057,"Murray Plains","VIC","NP","Peter Walsh","NP","ALP",22.89],
+  [9058,"Narre Warren North","VIC","ALP","Labor MP","ALP","LP",9.16],
+  [9059,"Narre Warren South","VIC","ALP","Labor MP","ALP","LP",8.5],
+  [9060,"Nepean","VIC","LP","Sam Groth","LP","ALP",6.68],
+  [9061,"Niddrie","VIC","ALP","Labor MP","ALP","LP",6.69],
+  [9062,"Northcote","VIC","GRN","Kat Theophanous","GRN","ALP",5.0],
+  [9063,"Oakleigh","VIC","ALP","Labor MP","ALP","LP",13.48],
+  [9064,"Ovens Valley","VIC","NP","Tim McCurdy","NP","ALP",17.97],
+  [9065,"Pakenham","VIC","ALP","Labor MP","ALP","LP",0.39],
+  [9066,"Pascoe Vale","VIC","ALP","Labor MP","ALP","LP",22.25],
+  [9067,"Point Cook","VIC","ALP","Labor MP","ALP","LP",8.34],
+  [9068,"Polwarth","VIC","LP","Martha Haylett","LP","ALP",1.79],
+  [9069,"Prahran","VIC","GRN","Sam Hibbins","GRN","LP",2.2],
+  [9070,"Preston","VIC","ALP","Labor MP","ALP","LP",19.67],
+  [9071,"Richmond","VIC","GRN","Gabrielle De Vietri","GRN","ALP",3.1],
+  [9072,"Ringwood","VIC","ALP","Labor MP","ALP","LP",7.53],
+  [9073,"Ripon","VIC","ALP","Labor MP","ALP","LP",2.99],
+  [9074,"Rowville","VIC","LP","Richard Riordan","LP","ALP",3.67],
+  [9075,"Sandringham","VIC","LP","Brad Battin","LP","ALP",5.15],
+  [9076,"Shepparton","VIC","IND","Kim O'Keeffe","IND","ALP",4.8],
+  [9077,"South Barwon","VIC","ALP","Labor MP","ALP","LP",9.8],
+  [9078,"South-West Coast","VIC","LP","Roma Britnell","LP","ALP",8.05],
+  [9079,"St Albans","VIC","ALP","Labor MP","ALP","LP",9.56],
+  [9080,"Sunbury","VIC","ALP","Labor MP","ALP","LP",6.41],
+  [9081,"Sydenham","VIC","ALP","Labor MP","ALP","LP",8.73],
+  [9082,"Tarneit","VIC","ALP","Labor MP","ALP","LP",12.58],
+  [9083,"Thomastown","VIC","ALP","Labor MP","ALP","LP",16.0],
+  [9084,"Warrandyte","VIC","LP","Ryan Smith","LP","ALP",4.15],
+  [9085,"Wendouree","VIC","ALP","Labor MP","ALP","LP",13.46],
+  [9086,"Werribee","VIC","ALP","Labor MP","ALP","LP",10.5],
+  [9087,"Williamstown","VIC","ALP","Melissa Horne","ALP","LP",13.44],
+  [9088,"Yan Yean","VIC","ALP","Labor MP","ALP","LP",4.45],
+];
+// VIC 2022 statewide primary vote % baseline
+const VIC_BASELINE_2022 = { alp:38.1, lp:25.3, np:5.8, grn:12.2, ind:5.5 };
+const VIC_2PP_2022 = 57.3; // ALP 2PP at 2022 VIC election
+
+const VIC_SEATS = _VS.map(([id,name,state,wp,wn,t1,t2,m]) => ({
+  id, name, state, margin:m,
+  winner: { party:wp, name:wn },
+  tcp: [{party:t1, pct:+(50+m/2).toFixed(2)}, {party:t2, pct:+(50-m/2).toFixed(2)}],
+}));
+
+function computeVic2pp(primaries, prefFlows) {
+  const { alp, lp, np, grn, ind } = primaries;
+  const others = Math.max(0, 100 - alp - lp - np - grn - ind);
+  return alp + grn * prefFlows.grn_alp + ind * prefFlows.ind_alp + others * prefFlows.other_alp;
+}
+
+// VIC uniform swing model — applies statewide 2PP swing to each seat's 2022 margin
+function computeModelledSeatsVic(vicSeats, swings, prefFlows) {
+  const newPrim = {
+    alp: Math.max(0, VIC_BASELINE_2022.alp + swings.alp),
+    lp:  Math.max(0, VIC_BASELINE_2022.lp  + swings.lp),
+    np:  Math.max(0, VIC_BASELINE_2022.np  + swings.np),
+    grn: Math.max(0, VIC_BASELINE_2022.grn + swings.grn),
+    ind: Math.max(0, VIC_BASELINE_2022.ind + swings.ind),
+  };
+  const new2pp = computeVic2pp(newPrim, prefFlows);
+  const vic2ppSwing = new2pp - VIC_2PP_2022;
+
+  return vicSeats.map(seat => {
+    const t1 = seat.tcp[0].party, t2 = seat.tcp[1].party;
+    let swingToT1 = 0;
+    if (t1 === "ALP" && ["LP","NP"].includes(t2)) {
+      swingToT1 = vic2ppSwing;
+    } else if (["LP","NP"].includes(t1) && t2 === "ALP") {
+      swingToT1 = -vic2ppSwing;
+    } else if (t1 === "GRN" && t2 === "ALP") {
+      swingToT1 = (swings.grn - swings.alp) / 2;
+    } else if (t1 === "GRN" && ["LP","NP"].includes(t2)) {
+      swingToT1 = (swings.grn - (t2 === "LP" ? swings.lp : swings.np)) / 2;
+    } else if (t1 === "IND") {
+      swingToT1 = (t2 === "ALP" ? -1 : 1) * vic2ppSwing * 0.3;
+    }
+    const newMargin = seat.margin + swingToT1;
+    const holds = newMargin > 0;
+    const projWinnerParty = holds ? t1 : t2;
+    const projWinnerGroup = getParty(projWinnerParty).group;
+    const projAlp2pp = (t1 === "ALP" || t2 === "ALP")
+      ? (t1 === "ALP" ? 50 + newMargin : 50 - newMargin)
+      : null;
+    return {
+      ...seat,
+      modelled: {
+        winnerParty: projWinnerParty,
+        winnerGroup: projWinnerGroup,
+        winnerPct: 50 + Math.abs(newMargin),
+        projAlp2pp,
+        changed: projWinnerParty !== seat.winner.party,
+      },
+    };
+  });
+}
+
 // ─── Small reusable components ────────────────────────────────────────────────
 function PartyBadge({ party }) {
   const p = getParty(party);
@@ -916,6 +1071,10 @@ export default function App() {
   const [expandedSeatTabDemogId, setExpandedSeatTabDemogId] = useState(null);
   const [demogSectionOpen, setDemogSectionOpen] = useState(false);
 
+  // ── VIC model state ──
+  const [vicPrimaries, setVicPrimaries] = useState({ alp:38.1, lp:25.3, np:5.8, grn:12.2, ind:5.5 });
+  const [vicPrefFlows, setVicPrefFlows] = useState({ grn_alp:0.85, ind_alp:0.60, other_alp:0.43 });
+
   // ── Demographics tab state ──
   const [demogSortKey,    setDemogSortKey]    = useState("medianHouseholdIncome");
   const [demogSortDir,    setDemogSortDir]    = useState("desc");
@@ -1011,6 +1170,44 @@ export default function App() {
     if (!relevant.length) return null;
     return relevant.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / relevant.length;
   }, [modelledSeats]);
+
+  // ── VIC modelling ──
+  const vicModelledSeats = useMemo(() => {
+    const s = {
+      alp: +(vicPrimaries.alp - VIC_BASELINE_2022.alp).toFixed(2),
+      lp:  +(vicPrimaries.lp  - VIC_BASELINE_2022.lp ).toFixed(2),
+      np:  +(vicPrimaries.np  - VIC_BASELINE_2022.np ).toFixed(2),
+      grn: +(vicPrimaries.grn - VIC_BASELINE_2022.grn).toFixed(2),
+      ind: +(vicPrimaries.ind - VIC_BASELINE_2022.ind).toFixed(2),
+    };
+    return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows);
+  }, [vicPrimaries, vicPrefFlows]);
+
+  const vicProjCounts = useMemo(() => {
+    const c = {};
+    vicModelledSeats.forEach(s => { const g=s.modelled.winnerGroup; c[g]=(c[g]||0)+1; });
+    return c;
+  }, [vicModelledSeats]);
+
+  const vicBaseCounts = useMemo(() => {
+    const c = {};
+    VIC_SEATS.forEach(s => { const g=getParty(s.winner.party).group; c[g]=(c[g]||0)+1; });
+    return c;
+  }, []);
+
+  const vicChangedSeats = useMemo(() =>
+    vicModelledSeats.filter(s => s.modelled.changed),
+    [vicModelledSeats]);
+
+  const vicImplied2pp = useMemo(() => {
+    const rel = vicModelledSeats.filter(s => s.modelled.projAlp2pp !== null);
+    if (!rel.length) return null;
+    return rel.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / rel.length;
+  }, [vicModelledSeats]);
+
+  const vicHasChanges = vicPrimaries.alp !== 38.1 || vicPrimaries.lp !== 25.3 ||
+    vicPrimaries.np !== 5.8 || vicPrimaries.grn !== 12.2 || vicPrimaries.ind !== 5.5 ||
+    vicPrefFlows.grn_alp !== 0.85 || vicPrefFlows.ind_alp !== 0.60 || vicPrefFlows.other_alp !== 0.43;
 
   const hasChanges =
     primaries.alp !== BASELINE_2022.alp || primaries.coal !== BASELINE_2022.coal ||
@@ -1648,11 +1845,11 @@ export default function App() {
               </div>
               <p style={{ color:"#6B7280", fontSize:13, margin:0 }}>
                 {el.modelEnabled
-                  ? "Adjust primary vote swings and preference flows to model different election outcomes."
+                  ? `${el.date} · ${el.chamber} · Adjust primary vote swings and preference flows.`
                   : `${el.date} · ${el.chamber} · ${el.totalSeats} seats · Majority: ${el.majority}`}
               </p>
             </div>
-            {el.modelEnabled && (
+            {el.modelEnabled && selectedModelId === "federal_2022" && (
               <div style={{ display:"flex", gap:8 }}>
                 {hasChanges && (
                   <button onClick={resetModel}
@@ -1734,8 +1931,8 @@ export default function App() {
             );
           })()}
 
-          {/* ── Federal scenario builder (modelEnabled) ── */}
-          {el.modelEnabled && <div style={{ display:"grid", gridTemplateColumns:"320px 1fr", gap:16, alignItems:"start" }}>
+          {/* ── Federal scenario builder ── */}
+          {el.modelEnabled && selectedModelId === "federal_2022" && <div style={{ display:"grid", gridTemplateColumns:"320px 1fr", gap:16, alignItems:"start" }}>
 
             {/* ── Controls panel ── */}
             <div>
@@ -2451,7 +2648,167 @@ export default function App() {
             </div>
           </div>}
 
-          {el.modelEnabled && (
+          {/* ── VIC scenario builder ── */}
+          {el.modelEnabled && selectedModelId === "vic_2022" && <div style={{ display:"grid", gridTemplateColumns:"320px 1fr", gap:16, alignItems:"start" }}>
+
+            {/* ── VIC Controls panel ── */}
+            <div>
+              <div style={panelStyle}>
+                <div style={sectionHead}>Primary vote %</div>
+                <PrimaryInput label="ALP"          value={vicPrimaries.alp} onChange={v=>setVicPrimaries(p=>({...p,alp:v}))} color="#DC2626" baseline={VIC_BASELINE_2022.alp} />
+                <PrimaryInput label="Liberal"       value={vicPrimaries.lp}  onChange={v=>setVicPrimaries(p=>({...p,lp:v}))}  color="#1D4ED8" baseline={VIC_BASELINE_2022.lp}  />
+                <PrimaryInput label="Nationals"     value={vicPrimaries.np}  onChange={v=>setVicPrimaries(p=>({...p,np:v}))}  color="#065F46" baseline={VIC_BASELINE_2022.np}  />
+                <PrimaryInput label="Greens"        value={vicPrimaries.grn} onChange={v=>setVicPrimaries(p=>({...p,grn:v}))} color="#059669" baseline={VIC_BASELINE_2022.grn} />
+                <PrimaryInput label="Independents"  value={vicPrimaries.ind} onChange={v=>setVicPrimaries(p=>({...p,ind:v}))} color="#0891B2" baseline={VIC_BASELINE_2022.ind} />
+                {(() => {
+                  const entered = +(vicPrimaries.alp + vicPrimaries.lp + vicPrimaries.np + vicPrimaries.grn + vicPrimaries.ind).toFixed(1);
+                  const other   = +(100 - entered).toFixed(1);
+                  const overLimit = entered > 100;
+                  return (
+                    <div style={{ borderTop:"1px solid #F3F4F6", paddingTop:10, marginTop:4, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                      <span style={{ fontSize:12, color:"#6B7280" }}>Other / minor parties</span>
+                      <span style={{ fontSize:13, fontWeight:700, color: overLimit ? "#DC2626" : "#374151" }}>
+                        {overLimit ? `−${Math.abs(other).toFixed(1)}% ⚠` : `${other}%`}
+                      </span>
+                    </div>
+                  );
+                })()}
+                <div style={{ fontSize:11, color:"#9CA3AF", marginTop:6 }}>
+                  2022 result: ALP {VIC_BASELINE_2022.alp}% · Lib {VIC_BASELINE_2022.lp}% · Nat {VIC_BASELINE_2022.np}% · Grn {VIC_BASELINE_2022.grn}% · Ind {VIC_BASELINE_2022.ind}%
+                </div>
+              </div>
+
+              <div style={panelStyle}>
+                <div style={sectionHead}>Preference flows to ALP</div>
+                <PrefInput label="Greens → ALP"       value={vicPrefFlows.grn_alp}   onChange={v=>setVicPrefFlows(f=>({...f,grn_alp:v}))}   color="#059669" />
+                <PrefInput label="Independents → ALP"  value={vicPrefFlows.ind_alp}  onChange={v=>setVicPrefFlows(f=>({...f,ind_alp:v}))}   color="#0891B2" />
+                <PrefInput label="Other → ALP"         value={vicPrefFlows.other_alp} onChange={v=>setVicPrefFlows(f=>({...f,other_alp:v}))} color="#7C3AED" />
+                <div style={{ fontSize:11, color:"#9CA3AF", borderTop:"1px solid #F3F4F6", paddingTop:8, marginTop:4 }}>
+                  Defaults based on 2022 VIC preference distributions. Remainder flows to Liberal/Nationals.
+                </div>
+              </div>
+
+              {vicHasChanges && (
+                <button onClick={() => { setVicPrimaries({ alp:38.1, lp:25.3, np:5.8, grn:12.2, ind:5.5 }); setVicPrefFlows({ grn_alp:0.85, ind_alp:0.60, other_alp:0.43 }); }}
+                  style={{ width:"100%", padding:"8px", background:"#FEF2F2", color:"#DC2626", border:"1px solid #FECACA", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600, marginBottom:16 }}>
+                  Reset VIC model
+                </button>
+              )}
+            </div>
+
+            {/* ── VIC Results panel ── */}
+            <div>
+              {/* Summary stat cards */}
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:14 }}>
+                <div style={{ ...panelStyle, marginBottom:0, textAlign:"center" }}>
+                  <div style={{ fontSize:11, fontWeight:700, color:"#6B7280", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:4 }}>Implied 2PP (ALP)</div>
+                  {vicImplied2pp !== null ? (
+                    <>
+                      <div style={{ fontSize:30, fontWeight:800, color: vicImplied2pp>=50?"#059669":"#DC2626" }}>{vicImplied2pp.toFixed(1)}%</div>
+                      <div style={{ fontSize:12, color:"#6B7280", marginTop:2 }}>
+                        {vicImplied2pp>=50 ? `▲ +${(vicImplied2pp-VIC_2PP_2022).toFixed(1)} vs 2022` : `▼ ${(vicImplied2pp-VIC_2PP_2022).toFixed(1)} vs 2022`}
+                      </div>
+                    </>
+                  ) : <div style={{ fontSize:20, color:"#9CA3AF" }}>—</div>}
+                </div>
+                <div style={{ ...panelStyle, marginBottom:0, textAlign:"center" }}>
+                  <div style={{ fontSize:11, fontWeight:700, color:"#6B7280", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:4 }}>Seats changing</div>
+                  <div style={{ fontSize:30, fontWeight:800, color: vicChangedSeats.length>0?"#F59E0B":"#6B7280" }}>{vicChangedSeats.length}</div>
+                  <div style={{ fontSize:12, color:"#6B7280", marginTop:2 }}>of 88 modelled</div>
+                </div>
+                <div style={{ ...panelStyle, marginBottom:0, textAlign:"center" }}>
+                  <div style={{ fontSize:11, fontWeight:700, color:"#6B7280", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:4 }}>Majority</div>
+                  {(() => {
+                    const alpProj = vicProjCounts.alp || 0;
+                    const coalProj = (vicProjCounts.coalition || 0);
+                    const projMaj = alpProj >= 45 ? "ALP majority" : coalProj >= 45 ? "Coalition majority" : "Hung parliament";
+                    const majColor = alpProj >= 45 ? "#059669" : coalProj >= 45 ? "#1D4ED8" : "#F59E0B";
+                    return (
+                      <>
+                        <div style={{ fontSize:16, fontWeight:800, color:majColor, marginTop:4 }}>{projMaj}</div>
+                        <div style={{ fontSize:12, color:"#6B7280", marginTop:2 }}>45 seats needed</div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Tally comparison */}
+              <div style={panelStyle}>
+                <div style={{ fontWeight:700, color:"#374151", marginBottom:12 }}>Seat composition</div>
+                <div style={{ marginBottom:8 }}>
+                  <div style={{ fontSize:12, color:"#6B7280", marginBottom:4 }}>2022 result</div>
+                  <TallyBar seats={VIC_SEATS} />
+                </div>
+                <div>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                    <div style={{ fontSize:12, color:"#6B7280" }}>Projected</div>
+                    {vicHasChanges && <span style={{ fontSize:11, background:"#FEF3C7", color:"#92400E", padding:"1px 6px", borderRadius:10, fontWeight:600 }}>scenario active</span>}
+                  </div>
+                  <TallyBar seats={vicModelledSeats} useModelled={true} />
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))", gap:8, marginTop:8 }}>
+                  {GROUP_ORDER.map(g => {
+                    const base = vicBaseCounts[g] || 0;
+                    const proj = vicProjCounts[g] || 0;
+                    const delta = proj - base;
+                    if (!base && !proj) return null;
+                    return (
+                      <div key={g} style={{ background:"#F9FAFB", borderRadius:8, border:"1px solid #E5E7EB", padding:"10px 12px" }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:4 }}>
+                          <span style={{ width:9, height:9, borderRadius:2, background:GROUP_CONFIG[g].color, display:"inline-block" }} />
+                          <span style={{ fontSize:11, fontWeight:700, color:"#374151" }}>{GROUP_CONFIG[g].label}</span>
+                        </div>
+                        <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
+                          <span style={{ fontSize:22, fontWeight:800, color:"#111" }}>{proj}</span>
+                          <span style={{ fontSize:12, color:"#6B7280" }}>/ {base} base</span>
+                        </div>
+                        {delta !== 0 && (
+                          <div style={{ fontSize:12, fontWeight:700, color:delta>0?"#059669":"#DC2626", marginTop:2 }}>
+                            {delta>0?"+":""}{delta} seats
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Seat-at-risk table */}
+              <div style={panelStyle}>
+                <div style={{ fontWeight:700, color:"#374151", marginBottom:12 }}>Seats at risk (tightest 25)</div>
+                <div style={{ maxHeight:440, overflowY:"auto" }}>
+                  {[...vicModelledSeats].sort((a,b) => a.margin - b.margin).slice(0,25).map(seat => {
+                    const base = getParty(seat.winner.party);
+                    const proj = getParty(seat.modelled.winnerParty);
+                    const changed = seat.modelled.changed;
+                    return (
+                      <div key={seat.id} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 0", borderBottom:"1px solid #F3F4F6", background: changed ? "#FFF7ED" : "transparent" }}>
+                        <div style={{ width:3, height:28, background: changed ? proj.color : base.color, borderRadius:2, flexShrink:0 }} />
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontWeight:600, fontSize:13, display:"flex", alignItems:"center", gap:6 }}>
+                            {seat.name}
+                            {changed && <span style={{ fontSize:10, background:"#FEF3C7", color:"#92400E", padding:"1px 5px", borderRadius:8, fontWeight:700 }}>CHANGES</span>}
+                          </div>
+                          <div style={{ fontSize:11, color:"#6B7280" }}>{seat.tcp[0].party} vs {seat.tcp[1].party}</div>
+                        </div>
+                        <PartyBadge party={seat.winner.party} />
+                        {changed && <><span style={{ fontSize:11, color:"#6B7280" }}>→</span><PartyBadge party={seat.modelled.winnerParty} /></>}
+                        <span style={{ fontWeight:700, fontSize:13, color:MARGIN_COLOR[getMarginCat(seat.margin)], minWidth:40, textAlign:"right" }}>
+                          {seat.margin.toFixed(1)}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ fontSize:11, color:"#9CA3AF", marginTop:8, paddingTop:8, borderTop:"1px solid #F3F4F6" }}>
+                  Uniform swing model · VEC 2022 official results · 88 Legislative Assembly districts
+                </div>
+              </div>
+            </div>
+          </div>}
+
+          {selectedModelId === "federal_2022" && (
           <>{/* ── Demographics Overview (collapsible) ── */}
           <div style={{ marginTop:8 }}>
             <button onClick={() => setDemogSectionOpen(o => !o)}
