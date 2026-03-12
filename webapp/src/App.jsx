@@ -880,7 +880,9 @@ export default function App() {
   const [sortKey,      setSortKey]      = useState("margin");
   const [sortDir,      setSortDir]      = useState("asc");
   const [activeTab,    setActiveTab]    = useState("overview");
-  const [selectedElectionId, setSelectedElectionId] = useState("federal_2022");
+  // Overview uses all elections; Model uses only elections with a full model built
+  const [selectedOverviewId, setSelectedOverviewId] = useState("federal_2022");
+  const [selectedModelId,    setSelectedModelId]    = useState("federal_2022");
 
   // ── Polls tab state ──
   const [polls,       setPolls]       = useState(INITIAL_POLLS);
@@ -1247,12 +1249,12 @@ export default function App() {
             {t.label}
           </button>
         ))}
-        <span style={{ marginLeft:"auto", color:"#6B7280", fontSize:12 }}>{ELECTION_DATA[selectedElectionId].label} · sample data</span>
+        <span style={{ marginLeft:"auto", color:"#6B7280", fontSize:12 }}>{ELECTION_DATA[selectedModelId].label} · sample data</span>
       </div>
 
       {/* ══════════════════════ OVERVIEW TAB ══════════════════════════════════ */}
       {activeTab === "overview" && (() => {
-        const el = ELECTION_DATA[selectedElectionId];
+        const el = ELECTION_DATA[selectedOverviewId];
         const tallySeats = el.counts ? mkSeatsFromCounts(el.counts) : el.seats;
         const tightest = [...el.seats].sort((a,b) => a.margin - b.margin).slice(0, 10);
         const alpCount  = el.counts ? el.counts.alp      : el.seats.filter(s => getParty(s.winner.party).group === "alp").length;
@@ -1267,7 +1269,7 @@ export default function App() {
           <div style={{ padding:"20px 24px", maxWidth:900, margin:"0 auto" }}>
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10, marginBottom:4 }}>
               <h1 style={{ fontSize:22, fontWeight:800, margin:0 }}>{el.jurisdiction} Election Results</h1>
-              <select value={selectedElectionId} onChange={e => setSelectedElectionId(e.target.value)}
+              <select value={selectedOverviewId} onChange={e => setSelectedOverviewId(e.target.value)}
                 style={{ border:"1px solid #D1D5DB", borderRadius:7, padding:"6px 10px", fontSize:13, fontWeight:700, outline:"none", background:"#fff", cursor:"pointer" }}>
                 {ELECTION_OPTIONS.map(id => <option key={id} value={id}>{ELECTION_DATA[id].label}</option>)}
               </select>
@@ -1625,11 +1627,13 @@ export default function App() {
 
       {/* ══════════════════════ MODEL TAB ═════════════════════════════════════ */}
       {activeTab === "model" && (() => {
-        const el = ELECTION_DATA[selectedElectionId];
+        const el = ELECTION_DATA[selectedModelId];
+        // Only show elections that have a full scenario builder built
+        const modelElectionOptions = ELECTION_OPTIONS.filter(id => ELECTION_DATA[id].modelEnabled);
         const elSelector = (
-          <select value={selectedElectionId} onChange={e => setSelectedElectionId(e.target.value)}
+          <select value={selectedModelId} onChange={e => setSelectedModelId(e.target.value)}
             style={{ border:"1px solid #D1D5DB", borderRadius:7, padding:"6px 10px", fontSize:13, fontWeight:700, outline:"none", background:"#fff", cursor:"pointer" }}>
-            {ELECTION_OPTIONS.map(id => <option key={id} value={id}>{ELECTION_DATA[id].label}</option>)}
+            {modelElectionOptions.map(id => <option key={id} value={id}>{ELECTION_DATA[id].label}</option>)}
           </select>
         );
         return (
@@ -1721,7 +1725,7 @@ export default function App() {
                   <div style={{ fontSize:14, color:"#6B7280", marginBottom:12 }}>
                     The full scenario builder is only available for the Federal election model.
                   </div>
-                  <button onClick={() => setSelectedElectionId("federal_2022")}
+                  <button onClick={() => setSelectedModelId("federal_2022")}
                     style={{ padding:"8px 18px", background:"#1D4ED8", color:"#fff", border:"none", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600 }}>
                     Switch to Federal 2022 →
                   </button>
