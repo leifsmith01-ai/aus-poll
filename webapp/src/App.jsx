@@ -317,6 +317,203 @@ const INITIAL_POLLS = [
   { id:68, pollster:"RedBridge Group",   date:"2026-02-26", alp:32,   coal:19,   grn:12,   on:28,   tpp:54   },
 ];
 
+// ─── Election data ────────────────────────────────────────────────────────────
+// Helper: build a seat object from a flat tuple
+const mkSeat = (id, name, state, party, winner, margin) =>
+  ({ id, name, state, margin, winner: { party, name: winner } });
+
+// Helper: build a virtual full-seat array from group counts for TallyBar
+const mkSeatsFromCounts = counts => {
+  const G2P = { alp:"ALP", coalition:"LP", greens:"GRN", teal:"IND", one_nation:"ON", crossbench:"IND" };
+  let vid = 99000;
+  return Object.entries(counts).flatMap(([g, n]) =>
+    Array.from({ length: n }, () => ({ id: vid++, winner: { party: G2P[g] ?? "IND" } }))
+  );
+};
+
+// NSW 2023 — representative marginal seats
+const NSW_2023_SEATS = [
+  [8001,"Penrith",        "NSW","ALP","Karen McKeown",       0.3],
+  [8002,"East Hills",     "NSW","ALP","Cameron Murphy",      0.6],
+  [8003,"Ryde",           "NSW","ALP","Jordan Lane",         0.8],
+  [8004,"Monaro",         "NSW","LP", "Nichole Overall",     0.7],
+  [8005,"Heathcote",      "NSW","LP", "Lee Evans",           1.1],
+  [8006,"Strathfield",    "NSW","ALP","Zac Poole",           1.2],
+  [8007,"Gosford",        "NSW","LP", "Adam Crouch",         2.3],
+  [8008,"Keira",          "NSW","ALP","Ryan Park",           3.0],
+  [8009,"Newtown",        "NSW","GRN","Jenny Leong",         8.1],
+  [8010,"Balmain",        "NSW","GRN","Kobi Shetty",         7.3],
+].map(([id,nm,st,wp,wn,m]) => mkSeat(id,nm,st,wp,wn,m));
+
+// QLD 2024 — representative marginal seats
+const QLD_2024_SEATS = [
+  [8101,"Mount Ommaney",  "QLD","LNP","Jacob Madsen",        0.3],
+  [8102,"Inala",          "QLD","ALP","Shayne Sutton",        0.4],
+  [8103,"Oodgeroo",       "QLD","LNP","Mark Robinson",       0.5],
+  [8104,"Macalister",     "QLD","LNP","Laura Gerber",        0.8],
+  [8105,"Greenslopes",    "QLD","LNP","Brent Mickelberg",    1.1],
+  [8106,"South Brisbane", "QLD","GRN","Amy MacMahon",        1.3],
+  [8107,"McConnel",       "QLD","LNP","David Janetzki",      1.5],
+  [8108,"Everton",        "QLD","LNP","Tim Mander",          2.0],
+  [8109,"Toohey",         "QLD","ALP","Peter Russo",         2.5],
+  [8110,"Maiwar",         "QLD","GRN","Michael Berkman",     5.1],
+].map(([id,nm,st,wp,wn,m]) => mkSeat(id,nm,st,wp,wn,m));
+
+// WA 2025 — representative marginal seats
+const WA_2025_SEATS = [
+  [8201,"Carine",         "WA", "LP", "David Honey",         0.4],
+  [8202,"Vasse",          "WA", "LP", "Libby Mettam",        0.8],
+  [8203,"Kalamunda",      "WA", "LP", "Peter Rundle",        0.9],
+  [8204,"Bateman",        "WA", "LP", "David Michael",       1.0],
+  [8205,"Roe",            "WA", "NP", "Peter Rundle",        1.2],
+  [8206,"Moore",          "WA", "LP", "Shane Love",          1.5],
+  [8207,"Bicton",         "WA", "ALP","Lisa O'Malley",       2.5],
+  [8208,"Dawesville",     "WA", "ALP","Matthew Hughes",      3.1],
+  [8209,"Churchlands",    "WA", "LP", "Sean L'Estrange",     2.2],
+].map(([id,nm,st,wp,wn,m]) => mkSeat(id,nm,st,wp,wn,m));
+
+// SA 2022 — representative marginal seats
+const SA_2022_SEATS = [
+  [8301,"King",           "SA", "ALP","Dana Wortley",        0.1],
+  [8302,"Gibson",         "SA", "ALP","Eddie Hughes",        0.4],
+  [8303,"Heysen",         "SA", "LP", "Josh Teague",         0.3],
+  [8304,"Newland",        "SA", "ALP","Blair Boyer",         0.6],
+  [8305,"Florey",         "SA", "ALP","Frances Bedford",     1.0],
+  [8306,"Colton",         "SA", "LP", "Jeff Brock",          1.8],
+  [8307,"Morialta",       "SA", "LP", "John Gardner",        2.0],
+  [8308,"Waite",          "SA", "LP", "Sam Duluk",           2.5],
+  [8309,"Adelaide",       "SA", "ALP","Lucy Hood",           3.0],
+].map(([id,nm,st,wp,wn,m]) => mkSeat(id,nm,st,wp,wn,m));
+
+// TAS 2024 — representative seats (Hare-Clark approximated)
+const TAS_2024_SEATS = [
+  [8401,"Bass (1)",       "TAS","LP", "Sarah Courtney",      0.2],
+  [8402,"Darwin (1)",     "TAS","LP", "Madeleine Ogilvie",   0.3],
+  [8403,"Braddon (1)",    "TAS","LP", "Felix Ellis",         0.4],
+  [8404,"Clark (1)",      "TAS","GRN","Rosalie Woodruff",    0.5],
+  [8405,"Lyons (1)",      "TAS","ALP","Dean Winter",         0.8],
+  [8406,"Franklin (1)",   "TAS","ALP","David O'Byrne",       1.1],
+  [8407,"Bass (2)",       "TAS","ALP","Michelle O'Byrne",    1.2],
+  [8408,"Braddon (2)",    "TAS","LP", "Roger Jaensch",       1.5],
+  [8409,"Lyons (2)",      "TAS","LP", "Mark Shelton",        2.0],
+].map(([id,nm,st,wp,wn,m]) => mkSeat(id,nm,st,wp,wn,m));
+
+// ACT 2024 — representative seats (multi-member electorates approximated)
+const ACT_2024_SEATS = [
+  [8501,"Ginninderra (1)","ACT","LP", "Elizabeth Lee",       0.4],
+  [8502,"Brindabella (1)","ACT","ALP","Joy Burch",           0.5],
+  [8503,"Ginninderra (2)","ACT","GRN","Rebecca Vassarotti",  0.6],
+  [8504,"Murrumbidgee (1)","ACT","LP","Jeremy Hanson",       0.8],
+  [8505,"Kurrajong (1)", "ACT","ALP","Andrew Barr",          1.2],
+  [8506,"Brindabella (2)","ACT","LP","Mark Parton",          1.5],
+  [8507,"Kurrajong (2)", "ACT","GRN","Shane Rattenbury",     1.8],
+  [8508,"Murrumbidgee (2)","ACT","ALP","Mick Gentleman",     2.0],
+].map(([id,nm,st,wp,wn,m]) => mkSeat(id,nm,st,wp,wn,m));
+
+// NT 2024 — representative marginal seats
+const NT_2024_SEATS = [
+  [8601,"Blain",          "NT", "CLP","Bill Yan",            0.3],
+  [8602,"Casuarina",      "NT", "ALP","Selena Uibo",         0.4],
+  [8603,"Arafura",        "NT", "CLP","Chansey Paech",       0.6],
+  [8604,"Karama",         "NT", "CLP","Kate Worden",         0.5],
+  [8605,"Fannie Bay",     "NT", "ALP","Eva Lawler",          0.8],
+  [8606,"Johnston",       "NT", "CLP","Wayne Gyemore",       1.2],
+  [8607,"Nhulunbuy",      "NT", "ALP","Yingiya Guyula",      2.0],
+  [8608,"Namatjira",      "NT", "CLP","Mark Turner",         1.5],
+].map(([id,nm,st,wp,wn,m]) => mkSeat(id,nm,st,wp,wn,m));
+
+// VIC 2022 — use existing VIC_SEATS_KNOWN (14 seats already defined)
+// Transform to standard seat format for reuse
+const VIC_2022_SEATS_STD = VIC_SEATS_KNOWN.map(([id,name,party,,,,margin]) =>
+  mkSeat(id, name, "VIC", party, "", margin ?? 5));
+
+const ELECTION_DATA = {
+  federal_2022: {
+    label:"Federal 2022", jurisdiction:"Federal",
+    chamber:"House of Representatives", date:"21 May 2022",
+    totalSeats:151, majority:76, twopp:52.13,
+    seats:SEATS, counts:null,
+    incumbent:"Anthony Albanese (ALP)", incumbentParty:"ALP",
+    modelEnabled:true,
+  },
+  nsw_2023: {
+    label:"NSW 2023", jurisdiction:"New South Wales",
+    chamber:"Legislative Assembly", date:"25 March 2023",
+    totalSeats:93, majority:47, twopp:53.2,
+    seats:NSW_2023_SEATS,
+    counts:{ alp:45, coalition:44, greens:3, teal:0, one_nation:0, crossbench:1 },
+    incumbent:"Chris Minns (ALP)", incumbentParty:"ALP",
+    modelEnabled:false,
+  },
+  vic_2022: {
+    label:"Victoria 2022", jurisdiction:"Victoria",
+    chamber:"Legislative Assembly", date:"26 November 2022",
+    totalSeats:88, majority:45, twopp:57.3,
+    seats:VIC_2022_SEATS_STD,
+    counts:{ alp:56, coalition:26, greens:4, teal:2, one_nation:0, crossbench:0 },
+    incumbent:"Daniel Andrews (ALP)", incumbentParty:"ALP",
+    modelEnabled:false,
+  },
+  qld_2024: {
+    label:"Queensland 2024", jurisdiction:"Queensland",
+    chamber:"Legislative Assembly", date:"26 October 2024",
+    totalSeats:93, majority:47, twopp:53.7,
+    seats:QLD_2024_SEATS,
+    counts:{ alp:27, coalition:51, greens:7, teal:0, one_nation:0, crossbench:8 },
+    incumbent:"David Crisafulli (LNP)", incumbentParty:"LNP",
+    modelEnabled:false,
+  },
+  wa_2025: {
+    label:"W. Australia 2025", jurisdiction:"Western Australia",
+    chamber:"Legislative Assembly", date:"8 March 2025",
+    totalSeats:59, majority:30, twopp:63.1,
+    seats:WA_2025_SEATS,
+    counts:{ alp:46, coalition:10, greens:2, teal:1, one_nation:0, crossbench:0 },
+    incumbent:"Roger Cook (ALP)", incumbentParty:"ALP",
+    modelEnabled:false,
+  },
+  sa_2022: {
+    label:"South Aus. 2022", jurisdiction:"South Australia",
+    chamber:"House of Assembly", date:"19 March 2022",
+    totalSeats:47, majority:24, twopp:54.9,
+    seats:SA_2022_SEATS,
+    counts:{ alp:26, coalition:17, greens:0, teal:2, one_nation:0, crossbench:2 },
+    incumbent:"Peter Malinauskas (ALP)", incumbentParty:"ALP",
+    modelEnabled:false,
+  },
+  tas_2024: {
+    label:"Tasmania 2024", jurisdiction:"Tasmania",
+    chamber:"House of Assembly", date:"23 March 2024",
+    totalSeats:35, majority:18, twopp:null,
+    seats:TAS_2024_SEATS,
+    counts:{ alp:10, coalition:15, greens:7, teal:3, one_nation:0, crossbench:0 },
+    incumbent:"Jeremy Rockliff (Liberal)", incumbentParty:"LP",
+    modelEnabled:false,
+  },
+  act_2024: {
+    label:"ACT 2024", jurisdiction:"Australian Capital Territory",
+    chamber:"Legislative Assembly", date:"19 October 2024",
+    totalSeats:25, majority:13, twopp:null,
+    seats:ACT_2024_SEATS,
+    counts:{ alp:9, coalition:9, greens:7, teal:0, one_nation:0, crossbench:0 },
+    incumbent:"Andrew Barr (ALP)", incumbentParty:"ALP",
+    modelEnabled:false,
+  },
+  nt_2024: {
+    label:"N. Territory 2024", jurisdiction:"Northern Territory",
+    chamber:"Legislative Assembly", date:"24 August 2024",
+    totalSeats:25, majority:13, twopp:null,
+    seats:NT_2024_SEATS,
+    counts:{ alp:8, coalition:17, greens:0, teal:0, one_nation:0, crossbench:0 },
+    incumbent:"Lia Finocchiaro (CLP)", incumbentParty:"CLP",
+    modelEnabled:false,
+  },
+};
+const ELECTION_OPTIONS = [
+  "federal_2022","nsw_2023","vic_2022","qld_2024",
+  "wa_2025","sa_2022","tas_2024","act_2024","nt_2024",
+];
+
 // ─── Helper functions ─────────────────────────────────────────────────────────
 function getMarginCat(m) {
   if (m == null) return "marginal";
@@ -683,6 +880,9 @@ export default function App() {
   const [sortKey,      setSortKey]      = useState("margin");
   const [sortDir,      setSortDir]      = useState("asc");
   const [activeTab,    setActiveTab]    = useState("overview");
+  // Overview uses all elections; Model uses only elections with a full model built
+  const [selectedOverviewId, setSelectedOverviewId] = useState("federal_2022");
+  const [selectedModelId,    setSelectedModelId]    = useState("federal_2022");
 
   // ── Polls tab state ──
   const [polls,       setPolls]       = useState(INITIAL_POLLS);
@@ -1049,49 +1249,79 @@ export default function App() {
             {t.label}
           </button>
         ))}
-        <span style={{ marginLeft:"auto", color:"#6B7280", fontSize:12 }}>2022 Federal Election · sample data</span>
+        <span style={{ marginLeft:"auto", color:"#6B7280", fontSize:12 }}>{ELECTION_DATA[selectedModelId].label} · sample data</span>
       </div>
 
       {/* ══════════════════════ OVERVIEW TAB ══════════════════════════════════ */}
-      {activeTab === "overview" && (
-        <div style={{ padding:"20px 24px", maxWidth:900, margin:"0 auto" }}>
-          <h1 style={{ fontSize:22, fontWeight:800, marginBottom:2 }}>2022 Federal Election</h1>
-          <p style={{ color:"#6B7280", marginBottom:18 }}>21 May 2022 · House of Representatives · {SEATS.length} seats (sample)</p>
-          <TallyBar seats={SEATS} />
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:10, marginBottom:18 }}>
-            {[
-              { label:"Labor seats",     value:SEATS.filter(s=>getParty(s.winner.party).group==="alp").length,       color:"#DC2626" },
-              { label:"Coalition seats", value:SEATS.filter(s=>getParty(s.winner.party).group==="coalition").length, color:"#1D4ED8" },
-              { label:"Crossbench",      value:SEATS.filter(s=>!["alp","coalition"].includes(getParty(s.winner.party).group)).length, color:"#059669" },
-              { label:"Marginal (<5%)",  value:SEATS.filter(s=>s.margin<5).length,                                  color:"#F59E0B" },
-              { label:"Very marginal",   value:SEATS.filter(s=>s.margin<2).length,                                  color:"#EF4444" },
-            ].map(card => (
-              <div key={card.label} style={{ background:"#fff", borderRadius:10, border:"1px solid #E5E7EB", padding:"14px 16px" }}>
-                <div style={{ width:24, height:3, background:card.color, borderRadius:2, marginBottom:8 }} />
-                <div style={{ fontSize:26, fontWeight:800, color:"#111" }}>{card.value}</div>
-                <div style={{ fontSize:12, color:"#6B7280", marginTop:2 }}>{card.label}</div>
-              </div>
-            ))}
-          </div>
-          <div style={panelStyle}>
-            <div style={{ fontWeight:700, marginBottom:12, color:"#374151" }}>10 tightest seats</div>
-            {[...SEATS].sort((a,b)=>a.margin-b.margin).slice(0,10).map(s => {
-              const p = getParty(s.winner.party);
-              return (
-                <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"7px 0", borderBottom:"1px solid #F3F4F6" }}>
-                  <div style={{ width:3, height:34, background:p.color, borderRadius:2, flexShrink:0 }} />
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontWeight:600, fontSize:13 }}>{s.name} <span style={{ color:"#9CA3AF", fontWeight:400 }}>({s.state})</span></div>
-                    <div style={{ fontSize:11, color:"#6B7280" }}>{s.winner.name}</div>
-                  </div>
-                  <PartyBadge party={s.winner.party} />
-                  <span style={{ fontWeight:700, color:MARGIN_COLOR[getMarginCat(s.margin)], minWidth:40, textAlign:"right" }}>{s.margin.toFixed(1)}%</span>
+      {activeTab === "overview" && (() => {
+        const el = ELECTION_DATA[selectedOverviewId];
+        const tallySeats = el.counts ? mkSeatsFromCounts(el.counts) : el.seats;
+        const tightest = [...el.seats].sort((a,b) => a.margin - b.margin).slice(0, 10);
+        const alpCount  = el.counts ? el.counts.alp      : el.seats.filter(s => getParty(s.winner.party).group === "alp").length;
+        const coalCount = el.counts ? el.counts.coalition : el.seats.filter(s => getParty(s.winner.party).group === "coalition").length;
+        const crossCount = el.counts
+          ? Object.entries(el.counts).filter(([g]) => g !== "alp" && g !== "coalition").reduce((a,[,v]) => a+v, 0)
+          : el.seats.filter(s => !["alp","coalition"].includes(getParty(s.winner.party).group)).length;
+        const marginalCount  = el.seats.filter(s => s.margin < 5).length;
+        const veryMargCount  = el.seats.filter(s => s.margin < 2).length;
+        const incumbentColor = GROUP_CONFIG[PARTY[el.incumbentParty]?.group]?.color ?? "#374151";
+        return (
+          <div style={{ padding:"20px 24px", maxWidth:900, margin:"0 auto" }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10, marginBottom:4 }}>
+              <h1 style={{ fontSize:22, fontWeight:800, margin:0 }}>{el.jurisdiction} Election Results</h1>
+              <select value={selectedOverviewId} onChange={e => setSelectedOverviewId(e.target.value)}
+                style={{ border:"1px solid #D1D5DB", borderRadius:7, padding:"6px 10px", fontSize:13, fontWeight:700, outline:"none", background:"#fff", cursor:"pointer" }}>
+                {ELECTION_OPTIONS.map(id => <option key={id} value={id}>{ELECTION_DATA[id].label}</option>)}
+              </select>
+            </div>
+            <p style={{ color:"#6B7280", marginBottom:18 }}>
+              {el.date} · {el.chamber} · {el.totalSeats} seats
+              {el.twopp ? ` · ${el.twopp}% 2PP (ALP)` : ""}
+              {" · "}<span style={{ fontWeight:600, color:incumbentColor }}>{el.incumbent}</span>
+            </p>
+            <TallyBar seats={tallySeats} />
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:10, marginBottom:18 }}>
+              {[
+                { label:`${GROUP_CONFIG.alp.label} seats`,       value:alpCount,      color:GROUP_CONFIG.alp.color },
+                { label:`${GROUP_CONFIG.coalition.label} seats`,  value:coalCount,     color:GROUP_CONFIG.coalition.color },
+                { label:"Crossbench",                             value:crossCount,    color:"#059669" },
+                { label:`Marginal (<5%)${el.counts?" *":""}`,     value:marginalCount, color:"#F59E0B" },
+                { label:`Very marginal${el.counts?" *":""}`,      value:veryMargCount, color:"#EF4444" },
+              ].map(card => (
+                <div key={card.label} style={{ background:"#fff", borderRadius:10, border:"1px solid #E5E7EB", padding:"14px 16px" }}>
+                  <div style={{ width:24, height:3, background:card.color, borderRadius:2, marginBottom:8 }} />
+                  <div style={{ fontSize:26, fontWeight:800, color:"#111" }}>{card.value}</div>
+                  <div style={{ fontSize:12, color:"#6B7280", marginTop:2 }}>{card.label}</div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+            <div style={panelStyle}>
+              <div style={{ fontWeight:700, marginBottom:12, color:"#374151" }}>
+                {tightest.length > 0 ? `${Math.min(tightest.length, 10)} tightest seats` : "No seat data available"}
+              </div>
+              {tightest.map(s => {
+                const p = getParty(s.winner.party);
+                return (
+                  <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"7px 0", borderBottom:"1px solid #F3F4F6" }}>
+                    <div style={{ width:3, height:34, background:p.color, borderRadius:2, flexShrink:0 }} />
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontWeight:600, fontSize:13 }}>{s.name} <span style={{ color:"#9CA3AF", fontWeight:400 }}>({s.state})</span></div>
+                      <div style={{ fontSize:11, color:"#6B7280" }}>{s.winner.name}</div>
+                    </div>
+                    <PartyBadge party={s.winner.party} />
+                    <span style={{ fontWeight:700, color:MARGIN_COLOR[getMarginCat(s.margin)], minWidth:40, textAlign:"right" }}>{s.margin.toFixed(1)}%</span>
+                  </div>
+                );
+              })}
+              {el.counts && (
+                <div style={{ fontSize:11, color:"#9CA3AF", marginTop:8, paddingTop:8, borderTop:"1px solid #F3F4F6" }}>
+                  * Showing representative marginal seats only · Full seat-by-seat data not available for state elections
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ══════════════════════ SEATS TAB ═════════════════════════════════════ */}
       {activeTab === "seats" && (
@@ -1396,30 +1626,116 @@ export default function App() {
       )}
 
       {/* ══════════════════════ MODEL TAB ═════════════════════════════════════ */}
-      {activeTab === "model" && (
+      {activeTab === "model" && (() => {
+        const el = ELECTION_DATA[selectedModelId];
+        // Only show elections that have a full scenario builder built
+        const modelElectionOptions = ELECTION_OPTIONS.filter(id => ELECTION_DATA[id].modelEnabled);
+        const elSelector = (
+          <select value={selectedModelId} onChange={e => setSelectedModelId(e.target.value)}
+            style={{ border:"1px solid #D1D5DB", borderRadius:7, padding:"6px 10px", fontSize:13, fontWeight:700, outline:"none", background:"#fff", cursor:"pointer" }}>
+            {modelElectionOptions.map(id => <option key={id} value={id}>{ELECTION_DATA[id].label}</option>)}
+          </select>
+        );
+        return (
         <div style={{ padding:"20px 24px", maxWidth:1200, margin:"0 auto" }}>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16, flexWrap:"wrap", gap:10 }}>
             <div>
-              <h2 style={{ fontSize:20, fontWeight:800, margin:0 }}>Scenario Builder</h2>
-              <p style={{ color:"#6B7280", fontSize:13, margin:"4px 0 0" }}>Adjust primary vote swings and preference flows to model different election outcomes.</p>
+              <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:4 }}>
+                <h2 style={{ fontSize:20, fontWeight:800, margin:0 }}>
+                  {el.modelEnabled ? "Scenario Builder" : `${el.label} — Results`}
+                </h2>
+                {elSelector}
+              </div>
+              <p style={{ color:"#6B7280", fontSize:13, margin:0 }}>
+                {el.modelEnabled
+                  ? "Adjust primary vote swings and preference flows to model different election outcomes."
+                  : `${el.date} · ${el.chamber} · ${el.totalSeats} seats · Majority: ${el.majority}`}
+              </p>
             </div>
-            <div style={{ display:"flex", gap:8 }}>
-              {hasChanges && (
-                <button onClick={resetModel}
-                  style={{ padding:"7px 14px", background:"#FEF2F2", color:"#DC2626", border:"1px solid #FECACA", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600 }}>
-                  Reset model
-                </button>
-              )}
-              {polls.length > 0 && (
-                <button onClick={loadFromPoll}
-                  style={{ padding:"7px 14px", background:"#F0F9FF", color:"#0369A1", border:"1px solid #BAE6FD", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600 }}>
-                  Load from latest poll
-                </button>
-              )}
-            </div>
+            {el.modelEnabled && (
+              <div style={{ display:"flex", gap:8 }}>
+                {hasChanges && (
+                  <button onClick={resetModel}
+                    style={{ padding:"7px 14px", background:"#FEF2F2", color:"#DC2626", border:"1px solid #FECACA", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600 }}>
+                    Reset model
+                  </button>
+                )}
+                {polls.length > 0 && (
+                  <button onClick={loadFromPoll}
+                    style={{ padding:"7px 14px", background:"#F0F9FF", color:"#0369A1", border:"1px solid #BAE6FD", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600 }}>
+                    Load from latest poll
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
-          <div style={{ display:"grid", gridTemplateColumns:"320px 1fr", gap:16, alignItems:"start" }}>
+          {/* ── State election results view ── */}
+          {!el.modelEnabled && (() => {
+            const tallySeats = mkSeatsFromCounts(el.counts);
+            const tightest = [...el.seats].sort((a,b) => a.margin - b.margin).slice(0, 10);
+            return (
+              <div style={{ maxWidth:900 }}>
+                <div style={panelStyle}>
+                  <div style={{ fontWeight:700, color:"#374151", marginBottom:12 }}>Seat composition</div>
+                  <TallyBar seats={tallySeats} />
+                  <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))", gap:8, marginTop:16 }}>
+                    {GROUP_ORDER.map(g => {
+                      const n = el.counts[g];
+                      if (!n) return null;
+                      return (
+                        <div key={g} style={{ background:"#F9FAFB", borderRadius:8, border:"1px solid #E5E7EB", padding:"10px 12px" }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:4 }}>
+                            <span style={{ width:9, height:9, borderRadius:2, background:GROUP_CONFIG[g].color, display:"inline-block" }} />
+                            <span style={{ fontSize:11, fontWeight:700, color:"#374151" }}>{GROUP_CONFIG[g].label}</span>
+                          </div>
+                          <div style={{ fontSize:22, fontWeight:800, color:"#111" }}>{n}</div>
+                          <div style={{ fontSize:11, color:"#9CA3AF" }}>of {el.totalSeats} seats</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {el.twopp && (
+                    <div style={{ marginTop:12, fontSize:13, color:"#6B7280" }}>
+                      2PP (ALP): <strong style={{ color: el.twopp >= 50 ? "#059669" : "#DC2626" }}>{el.twopp}%</strong>
+                    </div>
+                  )}
+                </div>
+                <div style={panelStyle}>
+                  <div style={{ fontWeight:700, color:"#374151", marginBottom:12 }}>Key marginal seats</div>
+                  {tightest.map(s => {
+                    const p = getParty(s.winner.party);
+                    return (
+                      <div key={s.id} style={{ display:"flex", alignItems:"center", gap:10, padding:"7px 0", borderBottom:"1px solid #F3F4F6" }}>
+                        <div style={{ width:3, height:34, background:p.color, borderRadius:2, flexShrink:0 }} />
+                        <div style={{ flex:1 }}>
+                          <div style={{ fontWeight:600, fontSize:13 }}>{s.name} <span style={{ color:"#9CA3AF", fontWeight:400 }}>({s.state})</span></div>
+                          <div style={{ fontSize:11, color:"#6B7280" }}>{s.winner.name}</div>
+                        </div>
+                        <PartyBadge party={s.winner.party} />
+                        <span style={{ fontWeight:700, color:MARGIN_COLOR[getMarginCat(s.margin)], minWidth:40, textAlign:"right" }}>{s.margin.toFixed(1)}%</span>
+                      </div>
+                    );
+                  })}
+                  <div style={{ fontSize:11, color:"#9CA3AF", marginTop:8, paddingTop:8, borderTop:"1px solid #F3F4F6" }}>
+                    Representative marginal seats only · Full seat-by-seat data not available for state elections
+                  </div>
+                </div>
+                <div style={{ ...panelStyle, background:"#F9FAFB", textAlign:"center", padding:"20px 24px" }}>
+                  <div style={{ fontSize:14, color:"#6B7280", marginBottom:12 }}>
+                    The full scenario builder is only available for the Federal election model.
+                  </div>
+                  <button onClick={() => setSelectedModelId("federal_2022")}
+                    style={{ padding:"8px 18px", background:"#1D4ED8", color:"#fff", border:"none", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600 }}>
+                    Switch to Federal 2022 →
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ── Federal scenario builder (modelEnabled) ── */}
+          {el.modelEnabled && <div style={{ display:"grid", gridTemplateColumns:"320px 1fr", gap:16, alignItems:"start" }}>
 
             {/* ── Controls panel ── */}
             <div>
@@ -2133,9 +2449,10 @@ export default function App() {
                 )}
               </div>
             </div>
-          </div>
+          </div>}
 
-          {/* ── Demographics Overview (collapsible) ── */}
+          {el.modelEnabled && (
+          <>{/* ── Demographics Overview (collapsible) ── */}
           <div style={{ marginTop:8 }}>
             <button onClick={() => setDemogSectionOpen(o => !o)}
               style={{ display:"flex", alignItems:"center", gap:8, width:"100%", background:"#fff", border:"1px solid #E5E7EB", borderRadius:12, padding:"14px 20px", cursor:"pointer", textAlign:"left", fontWeight:700, fontSize:14, color:"#374151" }}>
@@ -2375,9 +2692,11 @@ export default function App() {
               </div>
             )}
           </div>
+          </>)}
 
         </div>
-      )}
+        );
+      })()}
 
       {/* ══════════════════════ VICTORIA TAB ══════════════════════════════════ */}
       {activeTab === "victoria" && (
