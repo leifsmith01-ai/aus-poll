@@ -711,6 +711,10 @@ export default function App() {
 
   // ── Seat-at-risk table state ──
   const [riskFilter, setRiskFilter] = useState("all"); // "all" | "changing" | "marginal"
+  const [modelStateFilter, setModelStateFilter] = useState(""); // "" = All States
+  const [expandedModelSeatId, setExpandedModelSeatId] = useState(null);
+  const [expandedSeatTabDemogId, setExpandedSeatTabDemogId] = useState(null);
+  const [demogSectionOpen, setDemogSectionOpen] = useState(false);
 
   // ── Demographics tab state ──
   const [demogSortKey,    setDemogSortKey]    = useState("medianHouseholdIncome");
@@ -1025,7 +1029,6 @@ export default function App() {
     { id:"seats",        label:"Seats" },
     { id:"polls",        label:"Polls" },
     { id:"model",        label:`Model${hasChanges?" ●":""}` },
-    { id:"demographics", label:"Demographics" },
     { id:"victoria",     label:"Victoria" },
   ];
 
@@ -1165,33 +1168,73 @@ export default function App() {
                     ) : filtered.map((s,i) => {
                       const p = getParty(s.winner.party);
                       const cat = getMarginCat(s.margin);
+                      const isExpanded = expandedSeatTabDemogId === s.id;
+                      const d = getDemog(s.id);
                       return (
-                        <tr key={s.id} style={{ background:i%2===0?"#fff":"#FAFAFA", borderBottom:"1px solid #F3F4F6" }}
-                          onMouseEnter={e=>e.currentTarget.style.background="#EFF6FF"}
-                          onMouseLeave={e=>e.currentTarget.style.background=i%2===0?"#fff":"#FAFAFA"}>
-                          <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}>
-                            <div style={{ display:"flex", alignItems:"center", gap:7 }}>
-                              <div style={{ width:3, height:30, background:p.color, borderRadius:2, flexShrink:0 }} />
-                              <div>
-                                <div style={{ fontWeight:700, color:"#111" }}>{s.name}</div>
-                                <div style={{ fontSize:11, color:"#9CA3AF" }}>ID {s.id}</div>
+                        <>
+                          <tr key={s.id}
+                            onClick={() => setExpandedSeatTabDemogId(prev => prev === s.id ? null : s.id)}
+                            style={{ background: isExpanded ? "#EFF6FF" : i%2===0?"#fff":"#FAFAFA", borderBottom: isExpanded ? "none" : "1px solid #F3F4F6", cursor:"pointer" }}
+                            onMouseEnter={e=>{ if (!isExpanded) e.currentTarget.style.background="#EFF6FF"; }}
+                            onMouseLeave={e=>{ if (!isExpanded) e.currentTarget.style.background=i%2===0?"#fff":"#FAFAFA"; }}>
+                            <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}>
+                              <div style={{ display:"flex", alignItems:"center", gap:7 }}>
+                                <div style={{ width:3, height:30, background:p.color, borderRadius:2, flexShrink:0 }} />
+                                <div>
+                                  <div style={{ fontWeight:700, color:"#111" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</div>
+                                  <div style={{ fontSize:11, color:"#9CA3AF" }}>ID {s.id}</div>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td style={{ padding:"9px 12px" }}>
-                            <span style={{ background:"#F3F4F6", color:"#374151", fontWeight:600, fontSize:12, padding:"2px 7px", borderRadius:4 }}>{s.state}</span>
-                          </td>
-                          <td style={{ padding:"9px 12px" }}><PartyBadge party={s.winner.party} /></td>
-                          <td style={{ padding:"9px 12px", color:"#374151" }}>{s.winner.name}</td>
-                          <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}><TcpBar tcp={s.tcp} winnerParty={s.winner.party} /></td>
-                          <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}><MarginDot margin={s.margin} /></td>
-                          <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}><SwingBadge swing={s.swing} /></td>
-                          <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}>
-                            <span style={{ fontSize:11, fontWeight:600, padding:"3px 8px", borderRadius:20, background:MARGIN_COLOR[cat]+"20", color:MARGIN_COLOR[cat] }}>
-                              {cat==="very_marginal"?"Very marginal":cat==="marginal"?"Marginal":cat==="fairly_safe"?"Fairly safe":"Safe"}
-                            </span>
-                          </td>
-                        </tr>
+                            </td>
+                            <td style={{ padding:"9px 12px" }}>
+                              <span style={{ background:"#F3F4F6", color:"#374151", fontWeight:600, fontSize:12, padding:"2px 7px", borderRadius:4 }}>{s.state}</span>
+                            </td>
+                            <td style={{ padding:"9px 12px" }}><PartyBadge party={s.winner.party} /></td>
+                            <td style={{ padding:"9px 12px", color:"#374151" }}>{s.winner.name}</td>
+                            <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}><TcpBar tcp={s.tcp} winnerParty={s.winner.party} /></td>
+                            <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}><MarginDot margin={s.margin} /></td>
+                            <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}><SwingBadge swing={s.swing} /></td>
+                            <td style={{ padding:"9px 12px", whiteSpace:"nowrap" }}>
+                              <span style={{ fontSize:11, fontWeight:600, padding:"3px 8px", borderRadius:20, background:MARGIN_COLOR[cat]+"20", color:MARGIN_COLOR[cat] }}>
+                                {cat==="very_marginal"?"Very marginal":cat==="marginal"?"Marginal":cat==="fairly_safe"?"Fairly safe":"Safe"}
+                              </span>
+                            </td>
+                          </tr>
+                          {isExpanded && (
+                            <tr key={`${s.id}-demog`}>
+                              <td colSpan={8} style={{ background:"#F0F9FF", padding:"14px 20px", borderBottom:"2px solid #BFDBFE" }}>
+                                <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16 }}>
+                                  <div>
+                                    <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>Income</div>
+                                    <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                      <div><strong>Personal:</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome/1000).toFixed(1)}k/yr` : "—"}</div>
+                                      <div><strong>Household:</strong> {d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome/1000).toFixed(1)}k/yr` : "—"}</div>
+                                      <div><strong>ATO Taxable:</strong> {d.avgTaxableIncome ? `$${(d.avgTaxableIncome/1000).toFixed(0)}k` : <span style={{color:"#9CA3AF"}}>n/a</span>}</div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>Housing</div>
+                                    <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                      <div><strong>Renters:</strong> {d.renterPct != null ? `${d.renterPct}%` : "—"}</div>
+                                      <div><strong>Weekly rent:</strong> {d.medianWeeklyRent ? `$${d.medianWeeklyRent}/wk` : "—"}</div>
+                                      <div><strong>Owner w/ mortgage:</strong> {d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</div>
+                                      <div><strong>Owner outright:</strong> {d.ownerOutrightPct != null ? `${d.ownerOutrightPct}%` : "—"}</div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>People</div>
+                                    <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                      <div><strong>Median age:</strong> {d.medianAge ?? "—"}</div>
+                                      <div><strong>Bachelor's+:</strong> {d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</div>
+                                      <div><strong>Overseas born:</strong> {d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</div>
+                                      <div><strong>AEC class:</strong> {d.urbanClass ?? "—"}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
                       );
                     })}
                   </tbody>
@@ -1511,14 +1554,20 @@ export default function App() {
                   padding:"4px 12px", borderRadius:6, fontSize:12, fontWeight:600, cursor:"pointer", border:"1px solid #D1D5DB",
                   background: active ? "#374151" : "#fff", color: active ? "#fff" : "#374151",
                 });
-                const filtered = riskFilter === "all" ? seatsByRisk
+                const filtered = (riskFilter === "all" ? seatsByRisk
                   : riskFilter === "changing" ? seatsByRisk.filter(s => s.modelled.changed)
-                  : seatsByRisk.filter(s => getModelledMargin(s) < 5);
+                  : seatsByRisk.filter(s => getModelledMargin(s) < 5))
+                  .filter(s => !modelStateFilter || s.state === modelStateFilter);
 
                 return (
                   <div style={panelStyle}>
                     <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12, flexWrap:"wrap" }}>
                       <span style={{ fontWeight:700, color:"#374151", flex:1 }}>Seat-at-risk rankings</span>
+                      <select value={modelStateFilter} onChange={e => setModelStateFilter(e.target.value)}
+                        style={{ border:"1px solid #D1D5DB", borderRadius:6, padding:"4px 8px", fontSize:12, fontWeight:600, outline:"none", background:"#fff" }}>
+                        <option value="">All States</option>
+                        {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
                       <div style={{ display:"flex", gap:4 }}>
                         {[["all","All 151"],["changing","Changing"],["marginal","Marginal (<5pp)"]].map(([val, label]) => (
                           <button key={val} onClick={() => setRiskFilter(val)} style={filterBtnStyle(riskFilter === val)}>{label}</button>
@@ -1540,30 +1589,68 @@ export default function App() {
                         const changed = seat.modelled.changed;
                         const projGroup = seat.modelled.winnerGroup;
                         const projColor = GROUP_CONFIG[projGroup]?.color ?? "#6B7280";
-                        const baseColor = GROUP_CONFIG[getParty(seat.winner.party).group]?.color ?? "#6B7280";
+                        const isExpanded = expandedModelSeatId === seat.id;
+                        const d = getDemog(seat.id);
 
                         return (
-                          <div key={seat.id} style={{
-                            display:"grid", gridTemplateColumns:"1fr 48px 80px 80px 80px 70px", gap:4, alignItems:"center",
-                            padding:"5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
-                            borderBottom:"1px solid #F9FAFB", opacity: isSafe ? 0.55 : 1,
-                            background: projGroup === "one_nation" && changed ? "#FFFBEB" : "transparent",
-                          }}>
-                            <span style={{ fontWeight: changed ? 700 : 400, fontSize:13, color:"#111", paddingLeft: changed?4:8, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{seat.name}</span>
-                            <span style={{ fontSize:11, color:"#6B7280" }}>{seat.state}</span>
-                            <div><PartyBadge party={seat.winner.party} /></div>
-                            <div>
-                              {changed
-                                ? <PartyBadge party={seat.modelled.winnerParty} />
-                                : <span style={{ fontSize:11, color:"#9CA3AF" }}>holds</span>
-                              }
+                          <div key={seat.id}>
+                            <div onClick={() => setExpandedModelSeatId(prev => prev === seat.id ? null : seat.id)}
+                              style={{
+                                display:"grid", gridTemplateColumns:"1fr 48px 80px 80px 80px 70px", gap:4, alignItems:"center",
+                                padding:"5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
+                                borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
+                                opacity: isSafe ? 0.55 : 1,
+                                background: isExpanded ? "#F0F9FF" : projGroup === "one_nation" && changed ? "#FFFBEB" : "transparent",
+                                cursor:"pointer",
+                              }}>
+                              <span style={{ fontWeight: changed ? 700 : 400, fontSize:13, color:"#111", paddingLeft: changed?4:8, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+                                {isExpanded ? "▾ " : "▸ "}{seat.name}
+                              </span>
+                              <span style={{ fontSize:11, color:"#6B7280" }}>{seat.state}</span>
+                              <div><PartyBadge party={seat.winner.party} /></div>
+                              <div>
+                                {changed
+                                  ? <PartyBadge party={seat.modelled.winnerParty} />
+                                  : <span style={{ fontSize:11, color:"#9CA3AF" }}>holds</span>
+                                }
+                              </div>
+                              <span style={{ fontSize:12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
+                                {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
+                              </span>
+                              <span style={{ fontSize:10, color: changed ? projColor : "#9CA3AF", fontWeight:600 }}>
+                                {changed ? "CHANGED" : ""}
+                              </span>
                             </div>
-                            <span style={{ fontSize:12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
-                              {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
-                            </span>
-                            <span style={{ fontSize:10, color: changed ? projColor : "#9CA3AF", fontWeight:600 }}>
-                              {changed ? "CHANGED" : ""}
-                            </span>
+                            {isExpanded && (
+                              <div style={{ background:"#F8FAFC", borderBottom:"1px solid #E5E7EB", padding:"12px 16px", marginBottom:2 }}>
+                                <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16 }}>
+                                  <div>
+                                    <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>Income</div>
+                                    <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                      <div><strong>Personal:</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome/1000).toFixed(1)}k/yr` : "—"}</div>
+                                      <div><strong>Household:</strong> {d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome/1000).toFixed(1)}k/yr` : "—"}</div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>Housing</div>
+                                    <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                      <div><strong>Renters:</strong> {d.renterPct != null ? `${d.renterPct}%` : "—"}</div>
+                                      <div><strong>Weekly rent:</strong> {d.medianWeeklyRent ? `$${d.medianWeeklyRent}/wk` : "—"}</div>
+                                      <div><strong>Owner w/ mortgage:</strong> {d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</div>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>People</div>
+                                    <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                      <div><strong>Median age:</strong> {d.medianAge ?? "—"}</div>
+                                      <div><strong>Bachelor's+:</strong> {d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</div>
+                                      <div><strong>Overseas born:</strong> {d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</div>
+                                      <div><strong>AEC class:</strong> {d.urbanClass ?? "—"}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -1574,7 +1661,7 @@ export default function App() {
                       )}
                     </div>
                     <div style={{ fontSize:11, color:"#9CA3AF", marginTop:8, borderTop:"1px solid #F3F4F6", paddingTop:8 }}>
-                      {filtered.length} seats shown · Red = &lt;2pp · Amber = &lt;5pp · Faded = safe (&gt;10pp) · Bold left border = projected change
+                      {filtered.length} seats shown · Red = &lt;2pp · Amber = &lt;5pp · Faded = safe (&gt;10pp) · Bold left border = projected change · Click row to expand demographics
                     </div>
                   </div>
                 );
@@ -2047,259 +2134,246 @@ export default function App() {
               </div>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* ══════════════════════ DEMOGRAPHICS TAB ═══════════════════════════════ */}
-      {activeTab === "demographics" && (
-        <div style={{ padding:"20px 24px", maxWidth:1200, margin:"0 auto" }}>
+          {/* ── Demographics Overview (collapsible) ── */}
+          <div style={{ marginTop:8 }}>
+            <button onClick={() => setDemogSectionOpen(o => !o)}
+              style={{ display:"flex", alignItems:"center", gap:8, width:"100%", background:"#fff", border:"1px solid #E5E7EB", borderRadius:12, padding:"14px 20px", cursor:"pointer", textAlign:"left", fontWeight:700, fontSize:14, color:"#374151" }}>
+              <span style={{ fontSize:16 }}>{demogSectionOpen ? "▾" : "▸"}</span>
+              Demographics Overview
+              <span style={{ fontSize:12, fontWeight:400, color:"#9CA3AF", marginLeft:4 }}>— seat-level census data</span>
+            </button>
+            {demogSectionOpen && (
+              <div style={{ background:"#fff", border:"1px solid #E5E7EB", borderTopWidth:0, borderRadius:"0 0 12px 12px", padding:"20px" }}>
 
-          {/* ── National summary cards ── */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:20 }}>
-            {[
-              { key:"medianPersonalIncome",  label:"Median Personal Income",  fmt:v=>`$${(v/1000).toFixed(0)}k/yr` },
-              { key:"medianHouseholdIncome", label:"Median Household Income",  fmt:v=>`$${(v/1000).toFixed(0)}k/yr` },
-              { key:"renterPct",             label:"Renters",                  fmt:v=>`${v.toFixed(1)}%` },
-              { key:"bachelorsOrAbovePct",   label:"Bachelor's+",              fmt:v=>`${v.toFixed(1)}%` },
-              { key:"overseasBornPct",       label:"Overseas Born",            fmt:v=>`${v.toFixed(1)}%` },
-              { key:"medianAge",             label:"Median Age",               fmt:v=>`${v}` },
-            ].map(({ key, label, fmt }) => {
-              const s = demogStats[key];
-              if (!s) return null;
-              return (
-                <div key={key} style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:10, padding:"14px 16px" }}>
-                  <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>{label}</div>
-                  <div style={{ fontSize:22, fontWeight:800, color:"#111", marginBottom:4 }}>{fmt(s.avg)}</div>
-                  <div style={{ fontSize:11, color:"#9CA3AF" }}>
-                    Range: {fmt(s.min)} – {fmt(s.max)}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* ── Filters row ── */}
-          <div style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:10, padding:"12px 16px", marginBottom:14, display:"flex", flexWrap:"wrap", gap:12, alignItems:"center" }}>
-            <span style={{ fontSize:11, fontWeight:700, color:"#6B7280", textTransform:"uppercase" }}>Filter:</span>
-            <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-              {STATES.map(st => (
-                <button key={st} onClick={() => {
-                  setDemogStateFilter(prev => {
-                    const n = new Set(prev);
-                    n.has(st) ? n.delete(st) : n.add(st);
-                    return n;
-                  });
-                }} style={{ padding:"3px 10px", borderRadius:5, fontSize:12, fontWeight:600, cursor:"pointer",
-                  background: demogStateFilter.has(st) ? "#374151" : "#F3F4F6",
-                  color: demogStateFilter.has(st) ? "#fff" : "#6B7280",
-                  border: "1px solid " + (demogStateFilter.has(st) ? "#374151" : "#E5E7EB") }}>
-                  {st}
-                </button>
-              ))}
-            </div>
-            <span style={{ color:"#E5E7EB" }}>|</span>
-            <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-              {["Inner Metropolitan","Outer Metropolitan","Provincial","Rural"].map(cls => (
-                <button key={cls} onClick={() => {
-                  setDemogClassFilter(prev => {
-                    const n = new Set(prev);
-                    n.has(cls) ? n.delete(cls) : n.add(cls);
-                    return n;
-                  });
-                }} style={{ padding:"3px 10px", borderRadius:5, fontSize:12, fontWeight:600, cursor:"pointer",
-                  background: demogClassFilter.has(cls) ? "#1D4ED8" : "#F3F4F6",
-                  color: demogClassFilter.has(cls) ? "#fff" : "#6B7280",
-                  border: "1px solid " + (demogClassFilter.has(cls) ? "#1D4ED8" : "#E5E7EB") }}>
-                  {cls}
-                </button>
-              ))}
-            </div>
-            <span style={{ marginLeft:"auto", fontSize:12, color:"#9CA3AF" }}>{demogFiltered.length} seats</span>
-          </div>
-
-          {/* ── Demographic table ── */}
-          <div style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:10, marginBottom:20, overflow:"hidden" }}>
-            <div style={{ overflowX:"auto", maxHeight:520, overflowY:"auto" }}>
-              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
-                <thead style={{ position:"sticky", top:0, zIndex:2 }}>
-                  <tr>
-                    {[
-                      { k:"name",                label:"Seat" },
-                      { k:"state",               label:"State" },
-                      { k:"winner",              label:"2022 Winner" },
-                      { k:"urbanClass",          label:"Urban Class" },
-                      { k:"medianHouseholdIncome",label:"HH Income" },
-                      { k:"medianPersonalIncome", label:"Personal Inc." },
-                      { k:"medianWeeklyRent",     label:"Wkly Rent" },
-                      { k:"renterPct",            label:"Renters %" },
-                      { k:"ownerMortgagePct",     label:"Mortgage %" },
-                      { k:"bachelorsOrAbovePct",  label:"Bach.+ %" },
-                      { k:"overseasBornPct",      label:"O/seas Born" },
-                      { k:"medianAge",            label:"Med. Age" },
-                    ].map(({ k, label }) => (
-                      <th key={k} onClick={() => {
-                        if (demogSortKey === k) {
-                          setDemogSortDir(d => d === "asc" ? "desc" : "asc");
-                        } else {
-                          setDemogSortKey(k);
-                          setDemogSortDir("desc");
-                        }
-                      }} style={{ padding:"10px 10px", textAlign:"left", fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:"#6B7280", background:"#F9FAFB", cursor:"pointer", userSelect:"none", whiteSpace:"nowrap", borderBottom:"1px solid #E5E7EB" }}>
-                        {label}{" "}
-                        <span style={{ color: demogSortKey===k?"#374151":"#D1D5DB" }}>
-                          {demogSortKey===k ? (demogSortDir==="asc"?"↑":"↓") : "↕"}
-                        </span>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {demogFiltered.map(s => {
-                    const pg = getParty(s.winner.party);
-                    const d = s.demog;
-                    const isExpanded = expandedDemogId === s.id;
+                {/* National summary cards */}
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:20 }}>
+                  {[
+                    { key:"medianPersonalIncome",  label:"Median Personal Income",  fmt:v=>`$${(v/1000).toFixed(0)}k/yr` },
+                    { key:"medianHouseholdIncome", label:"Median Household Income",  fmt:v=>`$${(v/1000).toFixed(0)}k/yr` },
+                    { key:"renterPct",             label:"Renters",                  fmt:v=>`${v.toFixed(1)}%` },
+                    { key:"bachelorsOrAbovePct",   label:"Bachelor's+",              fmt:v=>`${v.toFixed(1)}%` },
+                    { key:"overseasBornPct",       label:"Overseas Born",            fmt:v=>`${v.toFixed(1)}%` },
+                    { key:"medianAge",             label:"Median Age",               fmt:v=>`${v}` },
+                  ].map(({ key, label, fmt }) => {
+                    const s = demogStats[key];
+                    if (!s) return null;
                     return (
-                      <>
-                        <tr key={s.id} onClick={() => setExpandedDemogId(prev => prev === s.id ? null : s.id)}
-                          style={{ borderBottom:"1px solid #F3F4F6", cursor:"pointer",
-                            borderLeft: `3px solid ${pg.color}`,
-                            background: isExpanded ? "#F9FAFB" : undefined,
-                            transition:"background 0.1s" }}
-                          onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background="#F9FAFB"; }}
-                          onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background=""; }}>
-                          <td style={{ padding:"8px 10px", fontWeight:600, color:"#111" }}>
-                            {isExpanded ? "▾ " : "▸ "}{s.name}
-                          </td>
-                          <td style={{ padding:"8px 10px", color:"#6B7280" }}>{s.state}</td>
-                          <td style={{ padding:"8px 10px" }}>
-                            <span style={{ background:pg.bg, color:pg.color, fontSize:11, fontWeight:700, padding:"2px 7px", borderRadius:4 }}>
-                              {pg.short}
-                            </span>
-                          </td>
-                          <td style={{ padding:"8px 10px", color:"#6B7280", fontSize:11 }}>{d.urbanClass ?? "—"}</td>
-                          <td style={{ padding:"8px 10px", fontWeight:600 }}>{d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome/1000).toFixed(0)}k` : "—"}</td>
-                          <td style={{ padding:"8px 10px" }}>{d.medianPersonalIncome ? `$${(d.medianPersonalIncome/1000).toFixed(0)}k` : "—"}</td>
-                          <td style={{ padding:"8px 10px" }}>{d.medianWeeklyRent ? `$${d.medianWeeklyRent}` : "—"}</td>
-                          <td style={{ padding:"8px 10px" }}>{d.renterPct != null ? `${d.renterPct}%` : "—"}</td>
-                          <td style={{ padding:"8px 10px" }}>{d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</td>
-                          <td style={{ padding:"8px 10px" }}>{d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</td>
-                          <td style={{ padding:"8px 10px" }}>{d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</td>
-                          <td style={{ padding:"8px 10px" }}>{d.medianAge ?? "—"}</td>
-                        </tr>
-                        {isExpanded && (
-                          <tr key={`${s.id}-exp`}>
-                            <td colSpan={12} style={{ background:"#F9FAFB", padding:"16px 20px", borderBottom:"2px solid #E5E7EB" }}>
-                              <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16 }}>
-                                {/* Income */}
-                                <div>
-                                  <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:8 }}>Income</div>
-                                  <div style={{ fontSize:12, lineHeight:1.8 }}>
-                                    <div><strong>Personal:</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome/1000).toFixed(1)}k/yr` : "—"}</div>
-                                    <div><strong>Household:</strong> {d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome/1000).toFixed(1)}k/yr` : "—"}</div>
-                                    <div><strong>ATO Taxable Income:</strong> {d.avgTaxableIncome ? `$${(d.avgTaxableIncome/1000).toFixed(0)}k` : <span style={{color:"#9CA3AF"}}>n/a</span>}</div>
-                                    <div><strong>Investment Property:</strong> {d.investPropertyPct != null ? `${d.investPropertyPct}%` : <span style={{color:"#9CA3AF"}}>n/a</span>}</div>
-                                  </div>
-                                </div>
-                                {/* Housing */}
-                                <div>
-                                  <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:8 }}>Housing</div>
-                                  <div style={{ fontSize:12, lineHeight:1.8 }}>
-                                    <div><strong>Owner outright:</strong> {d.ownerOutrightPct != null ? `${d.ownerOutrightPct}%` : "—"}</div>
-                                    <div><strong>Owner w/ mortgage:</strong> {d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</div>
-                                    <div><strong>Renters:</strong> {d.renterPct != null ? `${d.renterPct}%` : "—"}</div>
-                                    <div><strong>Weekly rent:</strong> {d.medianWeeklyRent ? `$${d.medianWeeklyRent}/wk` : "—"}</div>
-                                    <div><strong>Monthly mortgage:</strong> {d.medianMonthlyMortgage ? `$${d.medianMonthlyMortgage}/mo` : "—"}</div>
-                                  </div>
-                                </div>
-                                {/* People */}
-                                <div>
-                                  <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:8 }}>People</div>
-                                  <div style={{ fontSize:12, lineHeight:1.8 }}>
-                                    <div><strong>Median age:</strong> {d.medianAge ?? "—"}</div>
-                                    <div><strong>Bachelor's+:</strong> {d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</div>
-                                    <div><strong>Overseas born:</strong> {d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</div>
-                                    <div><strong>AEC class:</strong> {d.urbanClass ?? "—"}</div>
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* ── Correlation scatter plot ── */}
-          <div style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:10, padding:"18px 20px" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
-              <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF" }}>
-                Correlation Explorer
-              </div>
-              <select value={demogXMetric} onChange={e => setDemogXMetric(e.target.value)}
-                style={{ border:"1px solid #D1D5DB", borderRadius:6, padding:"4px 8px", fontSize:12, fontWeight:600, outline:"none" }}>
-                {DEMOG_METRICS.map(({ key, label }) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-              <span style={{ fontSize:12, color:"#9CA3AF" }}>vs Modelled 2PP Margin (ALP above/below 50%)</span>
-            </div>
-            <ResponsiveContainer width="100%" height={320}>
-              <ScatterChart margin={{ top:10, right:20, bottom:20, left:10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                <XAxis dataKey="x" name="X" type="number" domain={["auto","auto"]}
-                  tickFormatter={v => {
-                    const m = DEMOG_METRICS.find(m => m.key === demogXMetric);
-                    return m ? m.fmt(v) : v;
-                  }}
-                  tick={{ fontSize:11 }} />
-                <YAxis dataKey="y" name="Margin" tickFormatter={v => `${v>0?"+":""}${v.toFixed(1)}`}
-                  tick={{ fontSize:11 }} />
-                <ReferenceLine y={0} stroke="#6B7280" strokeDasharray="4 2" label={{ value:"50%", position:"right", fontSize:10, fill:"#6B7280" }} />
-                <Tooltip cursor={{ strokeDasharray:"3 3" }}
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const p = payload[0].payload;
-                    const m = DEMOG_METRICS.find(m => m.key === demogXMetric);
-                    const grpCfg = GROUP_CONFIG[p.group] ?? { color:"#6B7280", label:p.group };
-                    return (
-                      <div style={{ background:"#fff", border:`1px solid ${grpCfg.color}`, borderRadius:8, padding:"8px 12px", fontSize:12, boxShadow:"0 2px 8px rgba(0,0,0,0.1)" }}>
-                        <div style={{ fontWeight:700, marginBottom:4 }}>{p.name} ({p.state})</div>
-                        <div style={{ color:"#6B7280" }}>{m?.label}: <strong>{m ? m.fmt(p.x) : p.x}</strong></div>
-                        <div style={{ color:"#6B7280" }}>2PP margin: <strong>{p.y > 0 ? "+" : ""}{p.y.toFixed(1)}pp</strong></div>
-                        <div style={{ color: grpCfg.color, fontWeight:600, marginTop:2 }}>{grpCfg.label}</div>
+                      <div key={key} style={{ background:"#F9FAFB", border:"1px solid #E5E7EB", borderRadius:10, padding:"14px 16px" }}>
+                        <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>{label}</div>
+                        <div style={{ fontSize:22, fontWeight:800, color:"#111", marginBottom:4 }}>{fmt(s.avg)}</div>
+                        <div style={{ fontSize:11, color:"#9CA3AF" }}>Range: {fmt(s.min)} – {fmt(s.max)}</div>
                       </div>
                     );
-                  }}
-                />
-                <ZAxis range={[40, 40]} />
-                {GROUP_ORDER.map(grp => {
-                  const pts = scatterData.filter(p => p.group === grp);
-                  if (!pts.length) return null;
-                  return (
-                    <Scatter key={grp} name={GROUP_CONFIG[grp]?.label ?? grp} data={pts}
-                      fill={GROUP_CONFIG[grp]?.color ?? "#6B7280"}
-                      fillOpacity={0.7} />
-                  );
-                })}
-              </ScatterChart>
-            </ResponsiveContainer>
-            {/* Legend */}
-            <div style={{ display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap", marginTop:8 }}>
-              {GROUP_ORDER.map(grp => {
-                const pts = scatterData.filter(p => p.group === grp);
-                if (!pts.length) return null;
-                return (
-                  <span key={grp} style={{ fontSize:11, color:"#374151", display:"flex", alignItems:"center", gap:4 }}>
-                    <span style={{ width:10, height:10, borderRadius:"50%", background:GROUP_CONFIG[grp]?.color, display:"inline-block" }} />
-                    {GROUP_CONFIG[grp]?.label}
-                  </span>
-                );
-              })}
-            </div>
+                  })}
+                </div>
+
+                {/* Filters row */}
+                <div style={{ background:"#F9FAFB", border:"1px solid #E5E7EB", borderRadius:10, padding:"12px 16px", marginBottom:14, display:"flex", flexWrap:"wrap", gap:12, alignItems:"center" }}>
+                  <span style={{ fontSize:11, fontWeight:700, color:"#6B7280", textTransform:"uppercase" }}>Filter:</span>
+                  <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                    {STATES.map(st => (
+                      <button key={st} onClick={() => toggleSet(setDemogStateFilter, st)}
+                        style={{ padding:"3px 10px", borderRadius:5, fontSize:12, fontWeight:600, cursor:"pointer",
+                          background: demogStateFilter.has(st) ? "#374151" : "#F3F4F6",
+                          color: demogStateFilter.has(st) ? "#fff" : "#6B7280",
+                          border: "1px solid " + (demogStateFilter.has(st) ? "#374151" : "#E5E7EB") }}>
+                        {st}
+                      </button>
+                    ))}
+                  </div>
+                  <span style={{ color:"#E5E7EB" }}>|</span>
+                  <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                    {["Inner Metropolitan","Outer Metropolitan","Provincial","Rural"].map(cls => (
+                      <button key={cls} onClick={() => toggleSet(setDemogClassFilter, cls)}
+                        style={{ padding:"3px 10px", borderRadius:5, fontSize:12, fontWeight:600, cursor:"pointer",
+                          background: demogClassFilter.has(cls) ? "#1D4ED8" : "#F3F4F6",
+                          color: demogClassFilter.has(cls) ? "#fff" : "#6B7280",
+                          border: "1px solid " + (demogClassFilter.has(cls) ? "#1D4ED8" : "#E5E7EB") }}>
+                        {cls}
+                      </button>
+                    ))}
+                  </div>
+                  <span style={{ marginLeft:"auto", fontSize:12, color:"#9CA3AF" }}>{demogFiltered.length} seats</span>
+                </div>
+
+                {/* Demographic table */}
+                <div style={{ border:"1px solid #E5E7EB", borderRadius:10, marginBottom:20, overflow:"hidden" }}>
+                  <div style={{ overflowX:"auto", maxHeight:520, overflowY:"auto" }}>
+                    <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
+                      <thead style={{ position:"sticky", top:0, zIndex:2 }}>
+                        <tr>
+                          {[
+                            { k:"name",                label:"Seat" },
+                            { k:"state",               label:"State" },
+                            { k:"winner",              label:"2022 Winner" },
+                            { k:"urbanClass",          label:"Urban Class" },
+                            { k:"medianHouseholdIncome",label:"HH Income" },
+                            { k:"medianPersonalIncome", label:"Personal Inc." },
+                            { k:"medianWeeklyRent",     label:"Wkly Rent" },
+                            { k:"renterPct",            label:"Renters %" },
+                            { k:"ownerMortgagePct",     label:"Mortgage %" },
+                            { k:"bachelorsOrAbovePct",  label:"Bach.+ %" },
+                            { k:"overseasBornPct",      label:"O/seas Born" },
+                            { k:"medianAge",            label:"Med. Age" },
+                          ].map(({ k, label }) => (
+                            <th key={k} onClick={() => {
+                              if (demogSortKey === k) {
+                                setDemogSortDir(d => d === "asc" ? "desc" : "asc");
+                              } else {
+                                setDemogSortKey(k);
+                                setDemogSortDir("desc");
+                              }
+                            }} style={{ padding:"10px 10px", textAlign:"left", fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:"#6B7280", background:"#F9FAFB", cursor:"pointer", userSelect:"none", whiteSpace:"nowrap", borderBottom:"1px solid #E5E7EB" }}>
+                              {label}{" "}
+                              <span style={{ color: demogSortKey===k?"#374151":"#D1D5DB" }}>
+                                {demogSortKey===k ? (demogSortDir==="asc"?"↑":"↓") : "↕"}
+                              </span>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {demogFiltered.map(s => {
+                          const pg = getParty(s.winner.party);
+                          const d = s.demog;
+                          const isExpanded = expandedDemogId === s.id;
+                          return (
+                            <>
+                              <tr key={s.id} onClick={() => setExpandedDemogId(prev => prev === s.id ? null : s.id)}
+                                style={{ borderBottom:"1px solid #F3F4F6", cursor:"pointer",
+                                  borderLeft: `3px solid ${pg.color}`,
+                                  background: isExpanded ? "#F9FAFB" : undefined,
+                                  transition:"background 0.1s" }}
+                                onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background="#F9FAFB"; }}
+                                onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background=""; }}>
+                                <td style={{ padding:"8px 10px", fontWeight:600, color:"#111" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</td>
+                                <td style={{ padding:"8px 10px", color:"#6B7280" }}>{s.state}</td>
+                                <td style={{ padding:"8px 10px" }}>
+                                  <span style={{ background:pg.bg, color:pg.color, fontSize:11, fontWeight:700, padding:"2px 7px", borderRadius:4 }}>{pg.short}</span>
+                                </td>
+                                <td style={{ padding:"8px 10px", color:"#6B7280", fontSize:11 }}>{d.urbanClass ?? "—"}</td>
+                                <td style={{ padding:"8px 10px", fontWeight:600 }}>{d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome/1000).toFixed(0)}k` : "—"}</td>
+                                <td style={{ padding:"8px 10px" }}>{d.medianPersonalIncome ? `$${(d.medianPersonalIncome/1000).toFixed(0)}k` : "—"}</td>
+                                <td style={{ padding:"8px 10px" }}>{d.medianWeeklyRent ? `$${d.medianWeeklyRent}` : "—"}</td>
+                                <td style={{ padding:"8px 10px" }}>{d.renterPct != null ? `${d.renterPct}%` : "—"}</td>
+                                <td style={{ padding:"8px 10px" }}>{d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</td>
+                                <td style={{ padding:"8px 10px" }}>{d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</td>
+                                <td style={{ padding:"8px 10px" }}>{d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</td>
+                                <td style={{ padding:"8px 10px" }}>{d.medianAge ?? "—"}</td>
+                              </tr>
+                              {isExpanded && (
+                                <tr key={`${s.id}-exp`}>
+                                  <td colSpan={12} style={{ background:"#F9FAFB", padding:"16px 20px", borderBottom:"2px solid #E5E7EB" }}>
+                                    <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16 }}>
+                                      <div>
+                                        <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:8 }}>Income</div>
+                                        <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                          <div><strong>Personal:</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome/1000).toFixed(1)}k/yr` : "—"}</div>
+                                          <div><strong>Household:</strong> {d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome/1000).toFixed(1)}k/yr` : "—"}</div>
+                                          <div><strong>ATO Taxable Income:</strong> {d.avgTaxableIncome ? `$${(d.avgTaxableIncome/1000).toFixed(0)}k` : <span style={{color:"#9CA3AF"}}>n/a</span>}</div>
+                                          <div><strong>Investment Property:</strong> {d.investPropertyPct != null ? `${d.investPropertyPct}%` : <span style={{color:"#9CA3AF"}}>n/a</span>}</div>
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:8 }}>Housing</div>
+                                        <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                          <div><strong>Owner outright:</strong> {d.ownerOutrightPct != null ? `${d.ownerOutrightPct}%` : "—"}</div>
+                                          <div><strong>Owner w/ mortgage:</strong> {d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</div>
+                                          <div><strong>Renters:</strong> {d.renterPct != null ? `${d.renterPct}%` : "—"}</div>
+                                          <div><strong>Weekly rent:</strong> {d.medianWeeklyRent ? `$${d.medianWeeklyRent}/wk` : "—"}</div>
+                                          <div><strong>Monthly mortgage:</strong> {d.medianMonthlyMortgage ? `$${d.medianMonthlyMortgage}/mo` : "—"}</div>
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:8 }}>People</div>
+                                        <div style={{ fontSize:12, lineHeight:1.8 }}>
+                                          <div><strong>Median age:</strong> {d.medianAge ?? "—"}</div>
+                                          <div><strong>Bachelor's+:</strong> {d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</div>
+                                          <div><strong>Overseas born:</strong> {d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</div>
+                                          <div><strong>AEC class:</strong> {d.urbanClass ?? "—"}</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Correlation scatter plot */}
+                <div style={{ border:"1px solid #E5E7EB", borderRadius:10, padding:"18px 20px" }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+                    <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF" }}>Correlation Explorer</div>
+                    <select value={demogXMetric} onChange={e => setDemogXMetric(e.target.value)}
+                      style={{ border:"1px solid #D1D5DB", borderRadius:6, padding:"4px 8px", fontSize:12, fontWeight:600, outline:"none" }}>
+                      {DEMOG_METRICS.map(({ key, label }) => (
+                        <option key={key} value={key}>{label}</option>
+                      ))}
+                    </select>
+                    <span style={{ fontSize:12, color:"#9CA3AF" }}>vs Modelled 2PP Margin (ALP above/below 50%)</span>
+                  </div>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <ScatterChart margin={{ top:10, right:20, bottom:20, left:10 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                      <XAxis dataKey="x" name="X" type="number" domain={["auto","auto"]}
+                        tickFormatter={v => {
+                          const m = DEMOG_METRICS.find(m => m.key === demogXMetric);
+                          return m ? m.fmt(v) : v;
+                        }}
+                        tick={{ fontSize:11 }} />
+                      <YAxis dataKey="y" name="Margin" tickFormatter={v => `${v>0?"+":""}${v.toFixed(1)}`}
+                        tick={{ fontSize:11 }} />
+                      <ReferenceLine y={0} stroke="#6B7280" strokeDasharray="4 2" label={{ value:"50%", position:"right", fontSize:10, fill:"#6B7280" }} />
+                      <Tooltip cursor={{ strokeDasharray:"3 3" }}
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const p = payload[0].payload;
+                          const m = DEMOG_METRICS.find(m => m.key === demogXMetric);
+                          const grpCfg = GROUP_CONFIG[p.group] ?? { color:"#6B7280", label:p.group };
+                          return (
+                            <div style={{ background:"#fff", border:`1px solid ${grpCfg.color}`, borderRadius:8, padding:"8px 12px", fontSize:12, boxShadow:"0 2px 8px rgba(0,0,0,0.1)" }}>
+                              <div style={{ fontWeight:700, marginBottom:4 }}>{p.name} ({p.state})</div>
+                              <div style={{ color:"#6B7280" }}>{m?.label}: <strong>{m ? m.fmt(p.x) : p.x}</strong></div>
+                              <div style={{ color:"#6B7280" }}>2PP margin: <strong>{p.y > 0 ? "+" : ""}{p.y.toFixed(1)}pp</strong></div>
+                              <div style={{ color: grpCfg.color, fontWeight:600, marginTop:2 }}>{grpCfg.label}</div>
+                            </div>
+                          );
+                        }}
+                      />
+                      <ZAxis range={[40, 40]} />
+                      {GROUP_ORDER.map(grp => {
+                        const pts = scatterData.filter(p => p.group === grp);
+                        if (!pts.length) return null;
+                        return (
+                          <Scatter key={grp} name={GROUP_CONFIG[grp]?.label ?? grp} data={pts}
+                            fill={GROUP_CONFIG[grp]?.color ?? "#6B7280"}
+                            fillOpacity={0.7} />
+                        );
+                      })}
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                  <div style={{ display:"flex", gap:14, justifyContent:"center", flexWrap:"wrap", marginTop:8 }}>
+                    {GROUP_ORDER.map(grp => {
+                      const pts = scatterData.filter(p => p.group === grp);
+                      if (!pts.length) return null;
+                      return (
+                        <span key={grp} style={{ fontSize:11, color:"#374151", display:"flex", alignItems:"center", gap:4 }}>
+                          <span style={{ width:10, height:10, borderRadius:"50%", background:GROUP_CONFIG[grp]?.color, display:"inline-block" }} />
+                          {GROUP_CONFIG[grp]?.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+
+              </div>
+            )}
           </div>
 
         </div>
