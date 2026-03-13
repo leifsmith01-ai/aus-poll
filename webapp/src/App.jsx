@@ -1427,7 +1427,6 @@ export default function App() {
     { id:"seats",        label:"Seats" },
     { id:"polls",        label:"Polls" },
     { id:"model",        label:`Model${hasChanges?" ●":""}` },
-    { id:"victoria",     label:"Victoria" },
   ];
 
   const panelStyle = { background:"#fff", border:"1px solid #E5E7EB", borderRadius:12, padding:"18px 20px", marginBottom:16 };
@@ -1447,7 +1446,6 @@ export default function App() {
             {t.label}
           </button>
         ))}
-        <span style={{ marginLeft:"auto", color:"#6B7280", fontSize:12 }}>{ELECTION_DATA[selectedModelId].label} · sample data</span>
       </div>
 
       {/* ══════════════════════ OVERVIEW TAB ══════════════════════════════════ */}
@@ -1826,8 +1824,7 @@ export default function App() {
       {/* ══════════════════════ MODEL TAB ═════════════════════════════════════ */}
       {activeTab === "model" && (() => {
         const el = ELECTION_DATA[selectedModelId];
-        // Only show elections that have a full scenario builder built
-        const modelElectionOptions = ELECTION_OPTIONS.filter(id => ELECTION_DATA[id].modelEnabled);
+        const modelElectionOptions = ELECTION_OPTIONS;
         const elSelector = (
           <select value={selectedModelId} onChange={e => setSelectedModelId(e.target.value)}
             style={{ border:"1px solid #D1D5DB", borderRadius:7, padding:"6px 10px", fontSize:13, fontWeight:700, outline:"none", background:"#fff", cursor:"pointer" }}>
@@ -1919,14 +1916,10 @@ export default function App() {
                     Representative marginal seats only · Full seat-by-seat data not available for state elections
                   </div>
                 </div>
-                <div style={{ ...panelStyle, background:"#F9FAFB", textAlign:"center", padding:"20px 24px" }}>
-                  <div style={{ fontSize:14, color:"#6B7280", marginBottom:12 }}>
-                    The full scenario builder is only available for the Federal election model.
+                <div style={{ ...panelStyle, background:"#F9FAFB", padding:"16px 20px" }}>
+                  <div style={{ fontSize:13, color:"#6B7280" }}>
+                    Interactive scenario builders are available for <strong>Federal 2022</strong> and <strong>Victoria 2022</strong>. Select them from the dropdown above.
                   </div>
-                  <button onClick={() => setSelectedModelId("federal_2022")}
-                    style={{ padding:"8px 18px", background:"#1D4ED8", color:"#fff", border:"none", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600 }}>
-                    Switch to Federal 2022 →
-                  </button>
                 </div>
               </div>
             );
@@ -3056,8 +3049,8 @@ export default function App() {
         );
       })()}
 
-      {/* ══════════════════════ VICTORIA TAB ══════════════════════════════════ */}
-      {activeTab === "victoria" && (
+      {/* victoria tab removed — see Model tab → Victoria 2022 dropdown option */}
+      {false && (
         <div style={{ padding:"20px 24px", maxWidth:960, margin:"0 auto" }}>
           <h1 style={{ fontSize:22, fontWeight:800, marginBottom:2 }}>2022 Victorian State Election</h1>
           <p style={{ color:"#6B7280", marginBottom:18 }}>
