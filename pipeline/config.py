@@ -459,6 +459,7 @@ STATE_REGISTRY = {
         "schema_file":       "nsw_schema.sql",
         "seats":             93,
         "system":            "preferential",
+        "booth_level":       True,   # NSWEC publishes booth-level results
     },
     "qld": {
         "elections":         QLD_ELECTIONS,
@@ -469,6 +470,7 @@ STATE_REGISTRY = {
         "schema_file":       "qld_schema.sql",
         "seats":             93,
         "system":            "preferential",
+        "booth_level":       True,   # ECQ publishes booth-level results
     },
     "wa": {
         "elections":         WA_ELECTIONS,
@@ -479,6 +481,7 @@ STATE_REGISTRY = {
         "schema_file":       "wa_schema.sql",
         "seats":             59,
         "system":            "preferential",
+        "booth_level":       True,   # WAEC publishes booth-level results
     },
     "sa": {
         "elections":         SA_ELECTIONS,
@@ -489,6 +492,7 @@ STATE_REGISTRY = {
         "schema_file":       "sa_schema.sql",
         "seats":             47,
         "system":            "preferential",
+        "booth_level":       True,   # ECSA publishes booth-level results
     },
     "tas": {
         "elections":         TAS_ELECTIONS,
@@ -499,6 +503,7 @@ STATE_REGISTRY = {
         "schema_file":       "tas_schema.sql",
         "seats":             25,
         "system":            "hare-clark",
+        "booth_level":       False,  # Hare-Clark: no meaningful booth-level breakdown
     },
     "act": {
         "elections":         ACT_ELECTIONS,
@@ -509,6 +514,7 @@ STATE_REGISTRY = {
         "schema_file":       "act_schema.sql",
         "seats":             25,
         "system":            "hare-clark",
+        "booth_level":       False,  # Hare-Clark: no meaningful booth-level breakdown
     },
     "nt": {
         "elections":         NT_ELECTIONS,
@@ -519,5 +525,6 @@ STATE_REGISTRY = {
         "schema_file":       "nt_schema.sql",
         "seats":             25,
         "system":            "optional-preferential",
+        "booth_level":       True,   # NTEC publishes booth-level results
     },
 }

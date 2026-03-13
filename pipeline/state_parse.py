@@ -806,3 +806,290 @@ def parse_state_election(state_ab: str, file_paths: dict[str, str],
             f"Unknown state '{state_ab}'. Supported: {list(_PARSERS)}"
         )
     return _PARSERS[key](file_paths, election_id)
+
+
+# ── Booth-level parsing ───────────────────────────────────────────────────────
+#
+# Booth-level file roles (in addition to the district-level roles above):
+#   'polling_places'  — booth list with lat/lon (CSV)
+#   'booth_fp'        — first preferences by polling place × candidate (CSV)
+#   'booth_tcp'       — TCP by polling place × candidate (CSV)
+#
+# Each EC uses slightly different column names; _find_col handles the variance.
+#
+# The functions return three lists:
+#   polling_places — dicts for load_state_polling_places()
+#   booth_fp       — dicts for load_state_booth_fp()
+#   booth_2cp      — dicts for load_state_booth_2cp()
+#
+# district_id assignment relies on district_lookup derived from previously
+# parsed district records.  Pass the 'districts' list from parse_state_election()
+# as district_records.
+
+
+def parse_state_booths(state_ab: str,
+                        file_paths: dict[str, str],
+                        election_id: int,
+                        district_records: list[dict],
+                        candidate_records: list[dict]) -> dict:
+    """
+    Parse booth-level data files for NSW, QLD, WA, SA, or NT.
+
+    Args:
+        state_ab:          'nsw', 'qld', 'wa', 'sa', or 'nt'
+        file_paths:        {role: path} dict — should include 'polling_places',
+                           'booth_fp', and/or 'booth_tcp' keys.
+        election_id:       YYYYMM identifier
+        district_records:  district dicts from parse_state_election()
+        candidate_records: candidate dicts from parse_state_election()
+
+    Returns:
+        dict with keys 'polling_places', 'booth_fp', 'booth_2cp'
+    """
+    _BOOTH_STATES = {"nsw", "qld", "wa", "sa", "nt"}
+    key = state_ab.lower()
+    if key not in _BOOTH_STATES:
+        raise ValueError(
+            f"{state_ab.upper()} does not support booth-level data. "
+            f"Only {sorted(_BOOTH_STATES)} have booth tables."
+        )
+
+    result = {"polling_places": [], "booth_fp": [], "booth_2cp": []}
+
+    if not file_paths:
+        logger.warning("%s %d: No booth files to parse.", state_ab.upper(), election_id)
+        return result
+
+    # Build lookups from already-parsed district/candidate records
+    dist_lookup: dict[str, int] = {
+        d["district_name"].upper(): d["district_id"]
+        for d in district_records
+    }
+    # (district_id, surname_upper) → candidate_id
+    cand_lookup: dict[tuple, int] = {
+        (c["district_id"], c["surname"].upper()): c["candidate_id"]
+        for c in candidate_records
+    }
+
+    # ── Polling places ──────────────────────────────────────────────────────
+    pp_path = file_paths.get("polling_places") or file_paths.get("booths")
+    if pp_path:
+        result["polling_places"] = _parse_polling_places_csv(
+            pp_path, election_id, dist_lookup
+        )
+    else:
+        logger.info(
+            "%s %d: No polling_places file — booth coordinates will be NULL. "
+            "Place a CSV with booth names and lat/lon as 'polling_places' role.",
+            state_ab.upper(), election_id
+        )
+
+    # Build pp_lookup: (district_id, name_upper) → polling_place_id
+    # If polling_places were parsed, use those; otherwise derive IDs on-the-fly
+    # from booth_fp rows.
+    pp_id_lookup: dict[tuple, int] = {
+        (p["district_id"], p["polling_place_name"].upper()): p["polling_place_id"]
+        for p in result["polling_places"]
+    }
+
+    # ── Booth FP ────────────────────────────────────────────────────────────
+    fp_path = file_paths.get("booth_fp") or file_paths.get("booth_first_prefs")
+    if fp_path:
+        result["booth_fp"], new_pp = _parse_booth_fp_csv(
+            fp_path, election_id, dist_lookup, cand_lookup, pp_id_lookup
+        )
+        # Add any polling places discovered from FP data that weren't in the
+        # polling_places file
+        existing_pp_ids = {p["polling_place_id"] for p in result["polling_places"]}
+        for pp in new_pp:
+            if pp["polling_place_id"] not in existing_pp_ids:
+                result["polling_places"].append(pp)
+                existing_pp_ids.add(pp["polling_place_id"])
+                pp_id_lookup[(pp["district_id"], pp["polling_place_name"].upper())] = \
+                    pp["polling_place_id"]
+
+    # ── Booth TCP ────────────────────────────────────────────────────────────
+    tcp_path = file_paths.get("booth_tcp") or file_paths.get("booth_2cp")
+    if tcp_path:
+        include_exhausted = key == "nt"
+        result["booth_2cp"] = _parse_booth_tcp_csv(
+            tcp_path, election_id, dist_lookup, cand_lookup, pp_id_lookup,
+            include_exhausted=include_exhausted
+        )
+
+    logger.info(
+        "%s %d booths — polling_places: %d  booth_fp: %d  booth_2cp: %d",
+        state_ab.upper(), election_id,
+        len(result["polling_places"]),
+        len(result["booth_fp"]),
+        len(result["booth_2cp"]),
+    )
+    return result
+
+
+def _parse_polling_places_csv(path: str, election_id: int,
+                               dist_lookup: dict[str, int]) -> list[dict]:
+    """Parse a polling places CSV into booth metadata records."""
+    rows = _read_csv(path)
+    places = []
+    next_id = 1
+    seen_ids: set[int] = set()
+
+    for row in rows:
+        id_col   = _find_col(row, "polling_place_id", "booth_id", "place_id", "id")
+        name_col = _find_col(row, "polling_place_name", "booth_name", "place_name", "name")
+        dist_col = _find_col(row, "district", "electorate", "division")
+        prem_col = _find_col(row, "premises", "venue", "building")
+        addr_col = _find_col(row, "address", "street")
+        sub_col  = _find_col(row, "suburb", "locality", "town", "city")
+        post_col = _find_col(row, "postcode", "post_code", "zip")
+        lat_col  = _find_col(row, "latitude", "lat")
+        lon_col  = _find_col(row, "longitude", "lon", "lng", "long")
+
+        name  = row.get(name_col, "").strip() if name_col else ""
+        dname = row.get(dist_col, "").strip().upper() if dist_col else ""
+        did   = dist_lookup.get(dname)
+
+        if not name:
+            continue
+
+        pp_id_raw = _safe_int(row.get(id_col)) if id_col else None
+        if pp_id_raw and pp_id_raw not in seen_ids:
+            pp_id = pp_id_raw
+        else:
+            pp_id = next_id
+        seen_ids.add(pp_id)
+        next_id = max(next_id, pp_id) + 1
+
+        places.append({
+            "polling_place_id":   pp_id,
+            "election_id":        election_id,
+            "district_id":        did,
+            "polling_place_name": name,
+            "premises_name":      row.get(prem_col, "").strip() or None if prem_col else None,
+            "address":            row.get(addr_col, "").strip() or None if addr_col else None,
+            "suburb":             row.get(sub_col, "").strip() or None if sub_col else None,
+            "postcode":           row.get(post_col, "").strip() or None if post_col else None,
+            "latitude":           _safe_float(row.get(lat_col)) if lat_col else None,
+            "longitude":          _safe_float(row.get(lon_col)) if lon_col else None,
+        })
+    return places
+
+
+def _parse_booth_fp_csv(path: str, election_id: int,
+                          dist_lookup: dict[str, int],
+                          cand_lookup: dict[tuple, int],
+                          pp_id_lookup: dict[tuple, int]
+                          ) -> tuple[list[dict], list[dict]]:
+    """
+    Parse a booth first-preferences CSV.
+
+    Returns (fp_records, new_polling_places) where new_polling_places contains
+    any booths discovered in this file that weren't in the polling_places file.
+    """
+    rows = _read_csv(path)
+    fp_records: list[dict] = []
+    new_pp: list[dict] = []
+    synthetic_pp_id = 90000  # high range to avoid collisions with real IDs
+
+    for row in rows:
+        dist_col  = _find_col(row, "district", "electorate", "division")
+        pp_col    = _find_col(row, "polling_place", "booth", "place")
+        sur_col   = _find_col(row, "surname", "last", "candidate")
+        ord_col   = _find_col(row, "ordinary", "ordinary_votes")
+        pre_col   = _find_col(row, "prepoll", "pre_poll", "early", "declaration")
+        tot_col   = _find_col(row, "total", "total_votes")
+
+        dname   = row.get(dist_col, "").strip().upper() if dist_col else ""
+        pp_name = row.get(pp_col, "").strip() if pp_col else ""
+        surname = row.get(sur_col, "").strip().upper() if sur_col else ""
+
+        did = dist_lookup.get(dname)
+        cid = cand_lookup.get((did, surname)) if did else None
+
+        if cid is None or not pp_name:
+            continue
+
+        pp_key = (did, pp_name.upper())
+        if pp_key not in pp_id_lookup:
+            pp_id_lookup[pp_key] = synthetic_pp_id
+            new_pp.append({
+                "polling_place_id":   synthetic_pp_id,
+                "election_id":        election_id,
+                "district_id":        did,
+                "polling_place_name": pp_name,
+                "premises_name":      None,
+                "address":            None,
+                "suburb":             None,
+                "postcode":           None,
+                "latitude":           None,
+                "longitude":          None,
+            })
+            synthetic_pp_id += 1
+
+        pp_id = pp_id_lookup[pp_key]
+        ord_v = _safe_int(row.get(ord_col)) or 0 if ord_col else 0
+        pre_v = _safe_int(row.get(pre_col)) or 0 if pre_col else 0
+        tot_v = _safe_int(row.get(tot_col)) or (ord_v + pre_v) if tot_col else (ord_v + pre_v)
+
+        fp_records.append({
+            "election_id":      election_id,
+            "district_id":      did,
+            "polling_place_id": pp_id,
+            "candidate_id":     cid,
+            "ordinary_votes":   ord_v,
+            "prepoll_votes":    pre_v,
+            "total_votes":      tot_v,
+        })
+
+    return fp_records, new_pp
+
+
+def _parse_booth_tcp_csv(path: str, election_id: int,
+                           dist_lookup: dict[str, int],
+                           cand_lookup: dict[tuple, int],
+                           pp_id_lookup: dict[tuple, int],
+                           include_exhausted: bool = False) -> list[dict]:
+    """Parse a booth TCP (two-candidate preferred) CSV."""
+    rows = _read_csv(path)
+    tcp_records: list[dict] = []
+
+    for row in rows:
+        dist_col = _find_col(row, "district", "electorate", "division")
+        pp_col   = _find_col(row, "polling_place", "booth", "place")
+        sur_col  = _find_col(row, "surname", "last", "candidate")
+        ord_col  = _find_col(row, "ordinary", "ordinary_votes")
+        pre_col  = _find_col(row, "prepoll", "pre_poll", "early")
+        tot_col  = _find_col(row, "total", "total_votes")
+        exh_col  = _find_col(row, "exhaust", "informal") if include_exhausted else None
+
+        dname   = row.get(dist_col, "").strip().upper() if dist_col else ""
+        pp_name = row.get(pp_col, "").strip() if pp_col else ""
+        surname = row.get(sur_col, "").strip().upper() if sur_col else ""
+
+        did   = dist_lookup.get(dname)
+        cid   = cand_lookup.get((did, surname)) if did else None
+        pp_id = pp_id_lookup.get((did, pp_name.upper())) if did else None
+
+        if cid is None or pp_id is None:
+            continue
+
+        ord_v = _safe_int(row.get(ord_col)) or 0 if ord_col else 0
+        pre_v = _safe_int(row.get(pre_col)) or 0 if pre_col else 0
+        tot_v = _safe_int(row.get(tot_col)) or (ord_v + pre_v) if tot_col else (ord_v + pre_v)
+
+        rec = {
+            "election_id":      election_id,
+            "district_id":      did,
+            "polling_place_id": pp_id,
+            "candidate_id":     cid,
+            "ordinary_votes":   ord_v,
+            "prepoll_votes":    pre_v,
+            "total_votes":      tot_v,
+        }
+        if include_exhausted and exh_col:
+            rec["exhausted_votes"] = _safe_int(row.get(exh_col)) or 0
+
+        tcp_records.append(rec)
+
+    return tcp_records

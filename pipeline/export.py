@@ -33,6 +33,8 @@ from .database import (
     get_state_districts,
     get_state_district_results,
     get_state_summary,
+    get_state_polling_places,
+    get_state_booth_votes,
     DB_PATH,
 )
 
@@ -777,6 +779,130 @@ def export_all_state_district_details(state_ab: str, election_id: int,
         export_state_district_detail(state_ab, dist_id, election_id, db_path, exports_dir)
 
 
+def export_state_booths_geojson(state_ab: str, election_id: int,
+                                 db_path: str = None,
+                                 exports_dir: str = None) -> None:
+    """Export {state_ab}/{election_id}/booths.geojson with all polling places.
+
+    Each feature includes the booth's coordinates (if available) and a
+    'properties' object with the FP vote totals per candidate party.
+    Only available for NSW, QLD, WA, SA, NT (booth_level states).
+    """
+    _BOOTH_STATES = {"nsw", "qld", "wa", "sa", "nt"}
+    if state_ab.lower() not in _BOOTH_STATES:
+        logger.debug(
+            "%s does not have booth-level data — skipping booths GeoJSON export.",
+            state_ab.upper()
+        )
+        return
+
+    cfg = STATE_REGISTRY[state_ab.lower()]
+    places = get_state_polling_places(state_ab, election_id, db_path=db_path)
+
+    features = []
+    for p in places:
+        booth_votes = get_state_booth_votes(
+            state_ab,
+            p["polling_place_id"],
+            p["district_id"],
+            election_id,
+            db_path=db_path,
+        )
+        fp_rows = booth_votes.get("first_prefs", [])
+        fp_total = sum(r.get("total_votes", 0) for r in fp_rows) or 1
+
+        properties = {
+            "polling_place_id":   p["polling_place_id"],
+            "polling_place_name": p["polling_place_name"],
+            "district_id":        p["district_id"],
+            "suburb":             p.get("suburb"),
+            "total_votes":        sum(r.get("total_votes", 0) for r in fp_rows),
+            "fp": [
+                {
+                    "party_ab":  r.get("party_ab"),
+                    "candidate": f"{r.get('surname', '')} {r.get('given_name', '')}".strip(),
+                    "votes":     r.get("total_votes", 0),
+                    "pct":       _round2(r.get("total_votes", 0) / fp_total * 100),
+                }
+                for r in fp_rows
+            ],
+        }
+
+        lat = p.get("latitude")
+        lon = p.get("longitude")
+        geometry = (
+            {"type": "Point", "coordinates": [lon, lat]}
+            if lat is not None and lon is not None
+            else None
+        )
+
+        features.append({
+            "type":       "Feature",
+            "geometry":   geometry,
+            "properties": properties,
+        })
+
+    geojson = {
+        "type":     "FeatureCollection",
+        "features": features,
+    }
+
+    base = Path(exports_dir or cfg["exports_dir"])
+    out = base / str(election_id) / "booths.geojson"
+    _write_json(geojson, out)
+    logger.info(
+        "Exported %d %s booths GeoJSON for election %d → %s",
+        len(features), state_ab.upper(), election_id, out
+    )
+
+
+def export_state_booth_detail(state_ab: str, polling_place_id: int,
+                               district_id: int, election_id: int,
+                               db_path: str = None,
+                               exports_dir: str = None) -> None:
+    """Export {state_ab}/{election_id}/booths/{polling_place_id}.json."""
+    _BOOTH_STATES = {"nsw", "qld", "wa", "sa", "nt"}
+    if state_ab.lower() not in _BOOTH_STATES:
+        return
+    cfg = STATE_REGISTRY[state_ab.lower()]
+    detail = get_state_booth_votes(
+        state_ab, polling_place_id, district_id, election_id, db_path
+    )
+    out = (
+        Path(exports_dir or cfg["exports_dir"])
+        / str(election_id)
+        / "booths"
+        / f"{polling_place_id}.json"
+    )
+    _write_json(detail, out)
+
+
+def export_all_state_booth_details(state_ab: str, election_id: int,
+                                    db_path: str = None,
+                                    exports_dir: str = None) -> None:
+    """Export individual JSON files for all booths in a state election."""
+    _BOOTH_STATES = {"nsw", "qld", "wa", "sa", "nt"}
+    if state_ab.lower() not in _BOOTH_STATES:
+        logger.debug(
+            "%s does not have booth-level data — skipping per-booth JSON export.",
+            state_ab.upper()
+        )
+        return
+
+    places = get_state_polling_places(state_ab, election_id, db_path=db_path)
+    logger.info("Exporting detail files for %d %s booths (election %d)...",
+                len(places), state_ab.upper(), election_id)
+    for p in places:
+        export_state_booth_detail(
+            state_ab,
+            p["polling_place_id"],
+            p["district_id"],
+            election_id,
+            db_path,
+            exports_dir,
+        )
+
+
 def export_state_election(state_ab: str, election_id: int,
                            db_path: str = None, exports_dir: str = None) -> None:
     """Run the full export pipeline for one state/territory election.
@@ -786,6 +912,8 @@ def export_state_election(state_ab: str, election_id: int,
       data/exports/{state_ab}/{election_id}/summary.json
       data/exports/{state_ab}/{election_id}/districts.json
       data/exports/{state_ab}/{election_id}/districts/{district_id}.json
+      data/exports/{state_ab}/{election_id}/booths.geojson    (booth states only)
+      data/exports/{state_ab}/{election_id}/booths/{id}.json  (booth states only)
     """
     logger.info("═" * 60)
     logger.info("Starting full %s export for election %d", state_ab.upper(), election_id)
@@ -795,5 +923,10 @@ def export_state_election(state_ab: str, election_id: int,
     export_state_summary(state_ab, election_id, db_path, exports_dir)
     export_state_districts_list(state_ab, election_id, db_path, exports_dir)
     export_all_state_district_details(state_ab, election_id, db_path, exports_dir)
+
+    # Booth-level exports (NSW, QLD, WA, SA, NT only)
+    if state_ab.lower() in {"nsw", "qld", "wa", "sa", "nt"}:
+        export_state_booths_geojson(state_ab, election_id, db_path, exports_dir)
+        export_all_state_booth_details(state_ab, election_id, db_path, exports_dir)
 
     logger.info("%s export complete for election %d", state_ab.upper(), election_id)

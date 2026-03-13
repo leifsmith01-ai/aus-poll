@@ -1005,3 +1005,161 @@ def get_state_summary(state_ab: str, election_id: int,
         }
     finally:
         conn.close()
+
+
+# ── State booth-level helpers ─────────────────────────────────────────────────
+#
+# Booth-level data (polling places, booth FP, booth 2CP) is only available for
+# states that use single-member preferential or optional-preferential voting:
+# NSW, QLD, WA, SA, NT.
+#
+# Hare-Clark states (TAS, ACT) do not have booth-level tables — check
+# STATE_REGISTRY['tas']['booth_level'] before calling these functions.
+
+_BOOTH_LEVEL_STATES = {"nsw", "qld", "wa", "sa", "nt"}
+
+
+def _require_booth_state(state_ab: str) -> None:
+    if state_ab.lower() not in _BOOTH_LEVEL_STATES:
+        raise ValueError(
+            f"{state_ab.upper()} does not have booth-level tables. "
+            f"Booth data is only available for: {sorted(_BOOTH_LEVEL_STATES)}"
+        )
+
+
+def load_state_polling_places(state_ab: str, records: list[dict],
+                               db_path: str = None) -> None:
+    """Load polling place (booth) metadata into {state_ab}_polling_places."""
+    _require_booth_state(state_ab)
+    if not records:
+        return
+    table = f"{state_ab.lower()}_polling_places"
+    allowed = {
+        "polling_place_id", "election_id", "district_id", "polling_place_name",
+        "premises_name", "address", "suburb", "postcode", "latitude", "longitude",
+    }
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s polling places", n, state_ab.upper())
+
+
+def load_state_booth_fp(state_ab: str, records: list[dict],
+                         db_path: str = None) -> None:
+    """Load booth-level first-preference votes into {state_ab}_booth_fp."""
+    _require_booth_state(state_ab)
+    if not records:
+        return
+    table = f"{state_ab.lower()}_booth_fp"
+    allowed = {
+        "election_id", "district_id", "polling_place_id", "candidate_id",
+        "ordinary_votes", "prepoll_votes", "total_votes",
+    }
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s booth FP rows", n, state_ab.upper())
+
+
+def load_state_booth_2cp(state_ab: str, records: list[dict],
+                          db_path: str = None) -> None:
+    """Load booth-level TCP votes into {state_ab}_booth_2cp."""
+    _require_booth_state(state_ab)
+    if not records:
+        return
+    table = f"{state_ab.lower()}_booth_2cp"
+    # NT has exhausted_votes; others don't — only insert columns present in records
+    base_allowed = {
+        "election_id", "district_id", "polling_place_id", "candidate_id",
+        "ordinary_votes", "prepoll_votes", "total_votes",
+    }
+    nt_extra = {"exhausted_votes"}
+    allowed = base_allowed | (nt_extra if state_ab.lower() == "nt" else set())
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s booth 2CP rows", n, state_ab.upper())
+
+
+def get_state_polling_places(state_ab: str, election_id: int,
+                              district_id: int = None,
+                              db_path: str = None) -> list[dict]:
+    """Return polling places for a state election, optionally filtered by district."""
+    _require_booth_state(state_ab)
+    ab = state_ab.lower()
+    conn = get_connection(db_path)
+    try:
+        if district_id is not None:
+            rows = conn.execute(
+                f"""
+                SELECT polling_place_id, polling_place_name, premises_name,
+                       address, suburb, postcode, latitude, longitude, district_id
+                FROM {ab}_polling_places
+                WHERE election_id = ? AND district_id = ?
+                ORDER BY polling_place_name
+                """,
+                (election_id, district_id),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                f"""
+                SELECT polling_place_id, polling_place_name, premises_name,
+                       address, suburb, postcode, latitude, longitude, district_id
+                FROM {ab}_polling_places
+                WHERE election_id = ?
+                ORDER BY district_id, polling_place_name
+                """,
+                (election_id,),
+            ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def get_state_booth_votes(state_ab: str, polling_place_id: int,
+                           district_id: int, election_id: int,
+                           db_path: str = None) -> dict:
+    """Return FP and 2CP vote totals for a single booth."""
+    _require_booth_state(state_ab)
+    ab = state_ab.lower()
+    conn = get_connection(db_path)
+    try:
+        fp = conn.execute(
+            f"""
+            SELECT c.candidate_id, c.surname, c.given_name, c.party_ab,
+                   c.ballot_position,
+                   b.ordinary_votes, b.prepoll_votes, b.total_votes
+            FROM {ab}_booth_fp b
+            JOIN {ab}_candidates c ON c.candidate_id = b.candidate_id
+                                   AND c.election_id = b.election_id
+            WHERE b.election_id = ? AND b.district_id = ?
+              AND b.polling_place_id = ?
+            ORDER BY c.ballot_position
+            """,
+            (election_id, district_id, polling_place_id),
+        ).fetchall()
+
+        extra_cols = ", b.exhausted_votes" if ab == "nt" else ""
+        tcp = conn.execute(
+            f"""
+            SELECT c.candidate_id, c.surname, c.given_name, c.party_ab,
+                   b.ordinary_votes, b.prepoll_votes, b.total_votes{extra_cols}
+            FROM {ab}_booth_2cp b
+            JOIN {ab}_candidates c ON c.candidate_id = b.candidate_id
+                                   AND c.election_id = b.election_id
+            WHERE b.election_id = ? AND b.district_id = ?
+              AND b.polling_place_id = ?
+            ORDER BY b.total_votes DESC
+            """,
+            (election_id, district_id, polling_place_id),
+        ).fetchall()
+
+        return {
+            "polling_place_id": polling_place_id,
+            "district_id":      district_id,
+            "election_id":      election_id,
+            "first_prefs":      [dict(r) for r in fp],
+            "tcp":              [dict(r) for r in tcp],
+        }
+    finally:
+        conn.close()

@@ -73,6 +73,57 @@ CREATE TABLE IF NOT EXISTS sa_district_2cp (
     FOREIGN KEY (election_id) REFERENCES sa_elections(election_id)
 );
 
+-- ── SA Polling Places (booths) ─────────────────────────────
+-- ECSA publishes booth-level results as part of their official results.
+CREATE TABLE IF NOT EXISTS sa_polling_places (
+    polling_place_id   INTEGER NOT NULL,
+    election_id        INTEGER NOT NULL,
+    district_id        INTEGER NOT NULL,
+    polling_place_name TEXT    NOT NULL,
+    premises_name      TEXT,
+    address            TEXT,
+    suburb             TEXT,
+    postcode           TEXT,
+    latitude           REAL,
+    longitude          REAL,
+    PRIMARY KEY (polling_place_id, election_id),
+    FOREIGN KEY (election_id) REFERENCES sa_elections(election_id),
+    FOREIGN KEY (district_id, election_id)
+        REFERENCES sa_districts(district_id, election_id)
+);
+
+-- ── SA Booth First Preferences ─────────────────────────────
+CREATE TABLE IF NOT EXISTS sa_booth_fp (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id      INTEGER NOT NULL,
+    district_id      INTEGER NOT NULL,
+    polling_place_id INTEGER NOT NULL,
+    candidate_id     INTEGER NOT NULL,
+    ordinary_votes   INTEGER NOT NULL DEFAULT 0,
+    prepoll_votes    INTEGER NOT NULL DEFAULT 0,
+    total_votes      INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (election_id, district_id, polling_place_id, candidate_id),
+    FOREIGN KEY (election_id) REFERENCES sa_elections(election_id),
+    FOREIGN KEY (polling_place_id, election_id)
+        REFERENCES sa_polling_places(polling_place_id, election_id)
+);
+
+-- ── SA Booth Two-Candidate Preferred ───────────────────────
+CREATE TABLE IF NOT EXISTS sa_booth_2cp (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id      INTEGER NOT NULL,
+    district_id      INTEGER NOT NULL,
+    polling_place_id INTEGER NOT NULL,
+    candidate_id     INTEGER NOT NULL,
+    ordinary_votes   INTEGER NOT NULL DEFAULT 0,
+    prepoll_votes    INTEGER NOT NULL DEFAULT 0,
+    total_votes      INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (election_id, district_id, polling_place_id, candidate_id),
+    FOREIGN KEY (election_id) REFERENCES sa_elections(election_id),
+    FOREIGN KEY (polling_place_id, election_id)
+        REFERENCES sa_polling_places(polling_place_id, election_id)
+);
+
 -- ── Indexes ────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_sa_fp_election_district
     ON sa_district_fp(election_id, district_id);
@@ -80,3 +131,9 @@ CREATE INDEX IF NOT EXISTS idx_sa_2cp_election_district
     ON sa_district_2cp(election_id, district_id);
 CREATE INDEX IF NOT EXISTS idx_sa_candidates_election_district
     ON sa_candidates(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_sa_pp_election_district
+    ON sa_polling_places(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_sa_booth_fp_place
+    ON sa_booth_fp(election_id, district_id, polling_place_id);
+CREATE INDEX IF NOT EXISTS idx_sa_booth_2cp_place
+    ON sa_booth_2cp(election_id, district_id, polling_place_id);
