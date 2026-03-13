@@ -130,9 +130,18 @@ def list_local_state_files(state_ab: str, election_id: int) -> dict[str, str]:
     Return a dict of {role: path} for any result files already present in
     data/raw/{state}/{election_id}/.
 
-    Role keys follow the same convention as vec_download.list_local_vec_files:
-      'candidates', 'fp', 'tcp', 'results'
-    Additional files found are keyed as 'extra_0', 'extra_1', ...
+    District-level roles:
+      'candidates'       — candidate list
+      'fp'               — first preferences by district
+      'tcp'              — two-candidate preferred by district
+      'results'          — combined results (district level)
+
+    Booth-level roles (NSW, QLD, WA, SA, NT):
+      'polling_places'   — booth list with lat/lon
+      'booth_fp'         — first preferences by booth × candidate
+      'booth_tcp'        — TCP by booth × candidate
+
+    Additional unrecognised files are keyed as 'extra_0', 'extra_1', ...
     """
     d = _raw_dir(state_ab, election_id)
     if not d.exists():
@@ -146,12 +155,29 @@ def list_local_state_files(state_ab: str, election_id: int) -> dict[str, str]:
             continue
         name = p.name.lower()
 
-        if any(kw in name for kw in ("candidate", "cand")):
-            found["candidates"] = str(p)
-        elif any(kw in name for kw in ("first_pref", "firstpref", "fp", "primary")):
+        # Booth-level files (must be checked before broader district patterns)
+        if any(kw in name for kw in ("polling_place", "pollingplace", "booth_list",
+                                      "boothlist", "venues", "locations")):
+            found.setdefault("polling_places", str(p))
+        elif any(kw in name for kw in ("booth_fp", "boothfp", "booth_first",
+                                        "boothfirst", "fp_by_booth", "fpbybooth",
+                                        "fp_polling", "firstpref_booth")):
+            found.setdefault("booth_fp", str(p))
+        elif any(kw in name for kw in ("booth_tcp", "boothtcp", "booth_2cp",
+                                        "booth2cp", "tcp_by_booth", "tcpbybooth",
+                                        "tcp_polling", "2cp_booth")):
+            found.setdefault("booth_tcp", str(p))
+        # District-level files
+        elif any(kw in name for kw in ("candidate", "cand")):
+            found.setdefault("candidates", str(p))
+        elif any(kw in name for kw in ("first_pref", "firstpref", "fp_district",
+                                        "fpdist", "primary_district")):
             found.setdefault("fp", str(p))
-        elif any(kw in name for kw in ("two_cand", "twocand", "tcp", "2cp", "2candidate")):
+        elif any(kw in name for kw in ("two_cand", "twocand", "tcp", "2cp",
+                                        "2candidate", "tcp_district")):
             found.setdefault("tcp", str(p))
+        elif any(kw in name for kw in ("fp", "first", "primary")):
+            found.setdefault("fp", str(p))
         elif "result" in name:
             found.setdefault("results", str(p))
         else:

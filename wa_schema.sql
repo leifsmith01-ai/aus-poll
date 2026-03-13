@@ -73,6 +73,57 @@ CREATE TABLE IF NOT EXISTS wa_district_2cp (
     FOREIGN KEY (election_id) REFERENCES wa_elections(election_id)
 );
 
+-- ── WA Polling Places (booths) ─────────────────────────────
+-- WAEC publishes booth locations and results files per election.
+CREATE TABLE IF NOT EXISTS wa_polling_places (
+    polling_place_id   INTEGER NOT NULL,
+    election_id        INTEGER NOT NULL,
+    district_id        INTEGER NOT NULL,
+    polling_place_name TEXT    NOT NULL,
+    premises_name      TEXT,
+    address            TEXT,
+    suburb             TEXT,
+    postcode           TEXT,
+    latitude           REAL,
+    longitude          REAL,
+    PRIMARY KEY (polling_place_id, election_id),
+    FOREIGN KEY (election_id) REFERENCES wa_elections(election_id),
+    FOREIGN KEY (district_id, election_id)
+        REFERENCES wa_districts(district_id, election_id)
+);
+
+-- ── WA Booth First Preferences ─────────────────────────────
+CREATE TABLE IF NOT EXISTS wa_booth_fp (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id      INTEGER NOT NULL,
+    district_id      INTEGER NOT NULL,
+    polling_place_id INTEGER NOT NULL,
+    candidate_id     INTEGER NOT NULL,
+    ordinary_votes   INTEGER NOT NULL DEFAULT 0,
+    prepoll_votes    INTEGER NOT NULL DEFAULT 0,
+    total_votes      INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (election_id, district_id, polling_place_id, candidate_id),
+    FOREIGN KEY (election_id) REFERENCES wa_elections(election_id),
+    FOREIGN KEY (polling_place_id, election_id)
+        REFERENCES wa_polling_places(polling_place_id, election_id)
+);
+
+-- ── WA Booth Two-Candidate Preferred ───────────────────────
+CREATE TABLE IF NOT EXISTS wa_booth_2cp (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id      INTEGER NOT NULL,
+    district_id      INTEGER NOT NULL,
+    polling_place_id INTEGER NOT NULL,
+    candidate_id     INTEGER NOT NULL,
+    ordinary_votes   INTEGER NOT NULL DEFAULT 0,
+    prepoll_votes    INTEGER NOT NULL DEFAULT 0,
+    total_votes      INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (election_id, district_id, polling_place_id, candidate_id),
+    FOREIGN KEY (election_id) REFERENCES wa_elections(election_id),
+    FOREIGN KEY (polling_place_id, election_id)
+        REFERENCES wa_polling_places(polling_place_id, election_id)
+);
+
 -- ── Indexes ────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_wa_fp_election_district
     ON wa_district_fp(election_id, district_id);
@@ -80,3 +131,9 @@ CREATE INDEX IF NOT EXISTS idx_wa_2cp_election_district
     ON wa_district_2cp(election_id, district_id);
 CREATE INDEX IF NOT EXISTS idx_wa_candidates_election_district
     ON wa_candidates(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_wa_pp_election_district
+    ON wa_polling_places(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_wa_booth_fp_place
+    ON wa_booth_fp(election_id, district_id, polling_place_id);
+CREATE INDEX IF NOT EXISTS idx_wa_booth_2cp_place
+    ON wa_booth_2cp(election_id, district_id, polling_place_id);

@@ -417,6 +417,33 @@ def run_state_pipeline(
             if parsed["tcp"]:
                 db.load_state_2cp(state_ab, parsed["tcp"])
 
+        # ── Booth-level data (NSW, QLD, WA, SA, NT only) ──────────────────────
+        if cfg.get("booth_level") and not hare_clark:
+            booth_file_keys = {"polling_places", "booth_fp", "booth_tcp"}
+            booth_files = {k: v for k, v in file_paths.items() if k in booth_file_keys}
+
+            if booth_files:
+                logger.info("Step 3b: Parsing booth-level data for %s %d...",
+                            state_ab.upper(), election_id)
+                booth_parsed = sps.parse_state_booths(
+                    state_ab, booth_files, election_id,
+                    parsed["districts"], parsed["candidates"]
+                )
+
+                if booth_parsed["polling_places"]:
+                    db.load_state_polling_places(state_ab, booth_parsed["polling_places"])
+                if booth_parsed["booth_fp"]:
+                    db.load_state_booth_fp(state_ab, booth_parsed["booth_fp"])
+                if booth_parsed["booth_2cp"]:
+                    db.load_state_booth_2cp(state_ab, booth_parsed["booth_2cp"])
+            else:
+                logger.info(
+                    "No booth-level files found for %s %d. "
+                    "To add booth data, place CSV files named 'polling_places', "
+                    "'booth_fp', and 'booth_tcp' in data/raw/%s/%d/",
+                    state_ab.upper(), election_id, state_ab, election_id
+                )
+
         logger.info("Database load complete for %s %d.", state_ab.upper(), election_id)
 
         # ── Step 4: Export to JSON ────────────────────────────────────────────
