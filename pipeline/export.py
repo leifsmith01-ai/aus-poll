@@ -20,6 +20,7 @@ from pathlib import Path
 from .config import (
     DATA_EXPORTS_DIR, ELECTIONS, COALITION_PARTIES,
     VIC_ELECTIONS, VIC_EXPORTS_DIR, VIC_COALITION_PARTIES,
+    STATE_REGISTRY,
 )
 from .database import (
     get_connection,
@@ -29,6 +30,9 @@ from .database import (
     get_vic_districts,
     get_vic_district_results,
     get_vic_state_summary,
+    get_state_districts,
+    get_state_district_results,
+    get_state_summary,
     DB_PATH,
 )
 
@@ -622,3 +626,174 @@ def export_vic_election(election_id: int, db_path: str = None,
     export_all_vic_district_details(election_id, db_path, exports_dir)
 
     logger.info("VIC export complete for election %d", election_id)
+
+
+# ── Generic state/territory exports ───────────────────────────────────────────
+#
+# Mirrors the VEC export structure but is parameterised by state_ab.
+# Output path: data/exports/{state_ab}/{election_id}/
+#   elections.json      – list of all known elections for this state
+#   summary.json        – state-wide party totals + seats won
+#   districts.json      – list of all districts with winner info
+#   districts/
+#     {district_id}.json – per-district FP + TCP (or party_seats for Hare-Clark)
+
+
+def export_state_elections_index(state_ab: str, db_path: str = None,
+                                  exports_dir: str = None) -> None:
+    """Export {state_ab}/elections.json listing all known elections."""
+    cfg = STATE_REGISTRY[state_ab.lower()]
+    elections = cfg["elections"]
+
+    conn = get_connection(db_path)
+    table = f"{state_ab.lower()}_elections"
+    try:
+        rows = conn.execute(
+            f"SELECT election_id, name, election_date FROM {table} ORDER BY election_id DESC"
+        ).fetchall()
+    except Exception:
+        rows = []
+    finally:
+        conn.close()
+
+    loaded_ids = {r["election_id"] for r in rows}
+    output = []
+    for eid, ecfg in sorted(elections.items(), reverse=True):
+        output.append({
+            "election_id":   eid,
+            "name":          ecfg["name"],
+            "date":          ecfg["date"],
+            "jurisdiction":  ecfg["jurisdiction"],
+            "loaded":        eid in loaded_ids,
+        })
+
+    base = Path(exports_dir or cfg["exports_dir"])
+    _write_json(output, base / "elections.json")
+    logger.info("Exported %s elections index (%d entries)", state_ab.upper(), len(output))
+
+
+def export_state_summary(state_ab: str, election_id: int,
+                          db_path: str = None, exports_dir: str = None) -> None:
+    """Export {state_ab}/{election_id}/summary.json."""
+    cfg = STATE_REGISTRY[state_ab.lower()]
+    summary = get_state_summary(state_ab, election_id, db_path)
+    out = Path(exports_dir or cfg["exports_dir"]) / str(election_id) / "summary.json"
+    _write_json(summary, out)
+    logger.info("Exported %s %d summary → %s", state_ab.upper(), election_id, out)
+
+
+def export_state_districts_list(state_ab: str, election_id: int,
+                                 db_path: str = None, exports_dir: str = None) -> None:
+    """Export {state_ab}/{election_id}/districts.json."""
+    cfg = STATE_REGISTRY[state_ab.lower()]
+    hare_clark = cfg["system"] == "hare-clark"
+    districts = get_state_districts(state_ab, election_id, db_path)
+
+    if hare_clark:
+        # For Hare-Clark, enrich with party seat summary per district
+        output = []
+        for d in districts:
+            detail = get_state_district_results(
+                state_ab, d["district_id"], election_id, db_path
+            )
+            output.append({
+                "district_id":       d["district_id"],
+                "district_name":     d["district_name"],
+                "enrolment":         d.get("enrolment"),
+                "seats_in_district": d.get("seats_in_district", 5),
+                "party_seats":       detail.get("party_seats", []),
+            })
+    else:
+        output = []
+        for d in districts:
+            # Fetch FP summary for top candidates
+            detail = get_state_district_results(
+                state_ab, d["district_id"], election_id, db_path
+            )
+            fp_rows = detail.get("first_prefs", [])
+            fp_total = sum(r.get("total_votes", 0) for r in fp_rows) or 1
+            output.append({
+                "district_id":   d["district_id"],
+                "district_name": d["district_name"],
+                "enrolment":     d.get("enrolment"),
+                "winner_party":  d.get("party_ab"),
+                "winner_name":   (
+                    f"{d.get('surname', '')} {d.get('given_name', '')}".strip()
+                    if d.get("surname") else None
+                ),
+                "top_candidates": [
+                    {
+                        "party_ab": r.get("party_ab"),
+                        "votes":    r.get("total_votes"),
+                        "pct":      _round2(r.get("total_votes", 0) / fp_total * 100),
+                    }
+                    for r in fp_rows[:4]
+                ],
+            })
+
+    base = Path(exports_dir or cfg["exports_dir"])
+    out = base / str(election_id) / "districts.json"
+    _write_json(output, out)
+    logger.info("Exported %d %s districts for election %d → %s",
+                len(output), state_ab.upper(), election_id, out)
+
+
+def export_state_district_detail(state_ab: str, district_id: int,
+                                  election_id: int,
+                                  db_path: str = None,
+                                  exports_dir: str = None) -> None:
+    """Export {state_ab}/{election_id}/districts/{district_id}.json."""
+    cfg = STATE_REGISTRY[state_ab.lower()]
+    detail = get_state_district_results(state_ab, district_id, election_id, db_path)
+    out = (
+        Path(exports_dir or cfg["exports_dir"])
+        / str(election_id)
+        / "districts"
+        / f"{district_id}.json"
+    )
+    _write_json(detail, out)
+
+
+def export_all_state_district_details(state_ab: str, election_id: int,
+                                       db_path: str = None,
+                                       exports_dir: str = None) -> None:
+    """Export individual JSON files for all districts in a state election."""
+    ab = state_ab.lower()
+    conn = get_connection(db_path)
+    try:
+        district_ids = [
+            r["district_id"]
+            for r in conn.execute(
+                f"SELECT district_id FROM {ab}_districts WHERE election_id = ?",
+                (election_id,)
+            ).fetchall()
+        ]
+    finally:
+        conn.close()
+
+    logger.info("Exporting detail files for %d %s districts (election %d)...",
+                len(district_ids), state_ab.upper(), election_id)
+    for dist_id in district_ids:
+        export_state_district_detail(state_ab, dist_id, election_id, db_path, exports_dir)
+
+
+def export_state_election(state_ab: str, election_id: int,
+                           db_path: str = None, exports_dir: str = None) -> None:
+    """Run the full export pipeline for one state/territory election.
+
+    Generates:
+      data/exports/{state_ab}/elections.json
+      data/exports/{state_ab}/{election_id}/summary.json
+      data/exports/{state_ab}/{election_id}/districts.json
+      data/exports/{state_ab}/{election_id}/districts/{district_id}.json
+    """
+    logger.info("═" * 60)
+    logger.info("Starting full %s export for election %d", state_ab.upper(), election_id)
+    logger.info("═" * 60)
+
+    export_state_elections_index(state_ab, db_path, exports_dir)
+    export_state_summary(state_ab, election_id, db_path, exports_dir)
+    export_state_districts_list(state_ab, election_id, db_path, exports_dir)
+    export_all_state_district_details(state_ab, election_id, db_path, exports_dir)
+
+    logger.info("%s export complete for election %d", state_ab.upper(), election_id)

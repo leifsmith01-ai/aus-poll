@@ -12,7 +12,10 @@ import logging
 from pathlib import Path
 from contextlib import contextmanager
 
-from .config import ELECTIONS, VIC_ELECTIONS, DB_PATH, COALITION_PARTIES, VIC_COALITION_PARTIES
+from .config import (
+    ELECTIONS, VIC_ELECTIONS, DB_PATH, COALITION_PARTIES, VIC_COALITION_PARTIES,
+    STATE_REGISTRY,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -656,6 +659,346 @@ def get_vic_state_summary(election_id: int, db_path: str = None) -> dict:
 
         return {
             "election_id": election_id,
+            "total_votes": total,
+            "parties":     parties,
+            "seats_won":   [dict(r) for r in seats_won],
+        }
+    finally:
+        conn.close()
+
+
+# ── Generic state/territory election helpers ──────────────────────────────────
+#
+# These functions support NSW, QLD, WA, SA, TAS, ACT, and NT state elections.
+# Each state has its own set of {state_ab}_* schema tables (e.g. nsw_elections,
+# nsw_districts, etc.) but the pipeline logic is identical, parameterised by
+# state_ab.  Use the STATE_REGISTRY in config.py to look up election configs.
+#
+# Supported state_ab values: 'nsw', 'qld', 'wa', 'sa', 'tas', 'act', 'nt'
+
+
+def _validate_state(state_ab: str) -> dict:
+    """Return the STATE_REGISTRY entry for state_ab, raising ValueError if unknown."""
+    key = state_ab.lower()
+    if key not in STATE_REGISTRY:
+        raise ValueError(
+            f"Unknown state '{state_ab}'. Valid values: {list(STATE_REGISTRY)}"
+        )
+    return STATE_REGISTRY[key]
+
+
+def init_state_schema(state_ab: str, db_path: str = None) -> None:
+    """Apply the {state_ab}_schema.sql extension to the database."""
+    cfg = _validate_state(state_ab)
+    schema_file = Path(__file__).parent.parent / cfg["schema_file"]
+    if not schema_file.exists():
+        raise FileNotFoundError(
+            f"{cfg['schema_file']} not found at {schema_file}"
+        )
+    sql = schema_file.read_text(encoding="utf-8")
+    with transaction(db_path) as conn:
+        conn.executescript(sql)
+    logger.info("%s schema initialised at %s", state_ab.upper(), db_path or DB_PATH)
+
+
+def upsert_state_election(state_ab: str, election_id: int,
+                           db_path: str = None) -> None:
+    """Insert or update a state election metadata row in {state_ab}_elections."""
+    cfg = _validate_state(state_ab)
+    elections = cfg["elections"]
+    if election_id not in elections:
+        raise ValueError(
+            f"Election {election_id} not found in {state_ab.upper()} config. "
+            f"Valid IDs: {list(elections)}"
+        )
+    ecfg = elections[election_id]
+    table = f"{state_ab.lower()}_elections"
+    with transaction(db_path) as conn:
+        conn.execute(
+            f"""
+            INSERT OR REPLACE INTO {table}
+                (election_id, name, election_date, jurisdiction)
+            VALUES (?, ?, ?, ?)
+            """,
+            (election_id, ecfg["name"], ecfg["date"], ecfg["jurisdiction"]),
+        )
+    logger.info(
+        "Upserted %s election: %d (%s)", state_ab.upper(), election_id, ecfg["name"]
+    )
+
+
+def load_state_districts(state_ab: str, records: list[dict],
+                          db_path: str = None) -> None:
+    """Load district (seat/electorate) metadata into {state_ab}_districts."""
+    if not records:
+        return
+    table = f"{state_ab.lower()}_districts"
+    # Hare-Clark states (TAS, ACT) may include seats_in_district; others don't.
+    hare_clark = _validate_state(state_ab)["system"] == "hare-clark"
+
+    seen = set()
+    rows = []
+    for r in records:
+        key = (r["district_id"], r["election_id"])
+        if key in seen:
+            continue
+        seen.add(key)
+        row = {
+            "district_id":   r["district_id"],
+            "election_id":   r["election_id"],
+            "district_name": r["district_name"],
+            "enrolment":     r.get("enrolment"),
+        }
+        if hare_clark:
+            row["seats_in_district"] = r.get("seats_in_district", 5)
+        rows.append(row)
+
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s districts", n, state_ab.upper())
+
+
+def load_state_candidates(state_ab: str, records: list[dict],
+                           db_path: str = None) -> None:
+    """Load candidate records into {state_ab}_candidates (deduplicated)."""
+    if not records:
+        return
+    table = f"{state_ab.lower()}_candidates"
+    seen = set()
+    rows = []
+    for r in records:
+        key = (r["candidate_id"], r["election_id"])
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append({k: v for k, v in r.items()
+                     if k in ("candidate_id", "election_id", "district_id",
+                               "surname", "given_name", "party_ab", "party_name",
+                               "ballot_position", "elected")})
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s candidates", n, state_ab.upper())
+
+
+def load_state_fp(state_ab: str, records: list[dict],
+                  db_path: str = None) -> None:
+    """Load first-preference district-level vote records into {state_ab}_district_fp."""
+    if not records:
+        return
+    table = f"{state_ab.lower()}_district_fp"
+    rows = [{k: v for k, v in r.items()
+             if k in ("election_id", "district_id", "candidate_id",
+                      "total_votes", "vote_pct")}
+            for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s FP rows", n, state_ab.upper())
+
+
+def load_state_2cp(state_ab: str, records: list[dict],
+                   db_path: str = None) -> None:
+    """Load two-candidate-preferred records into {state_ab}_district_2cp.
+
+    Not applicable to Hare-Clark states (TAS, ACT) — use load_state_party_seats
+    for those instead.
+    """
+    cfg = _validate_state(state_ab)
+    if cfg["system"] == "hare-clark":
+        raise ValueError(
+            f"{state_ab.upper()} uses Hare-Clark; there is no 2CP table. "
+            "Use load_state_party_seats() instead."
+        )
+    if not records:
+        return
+    table = f"{state_ab.lower()}_district_2cp"
+    rows = [{k: v for k, v in r.items()
+             if k in ("election_id", "district_id", "candidate_id",
+                      "total_votes", "vote_pct", "elected")}
+            for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s 2CP rows", n, state_ab.upper())
+
+
+def load_state_party_seats(state_ab: str, records: list[dict],
+                            db_path: str = None) -> None:
+    """Load party seat totals per district into {state_ab}_district_party_seats.
+
+    Only applicable to Hare-Clark states (TAS, ACT).
+    """
+    cfg = _validate_state(state_ab)
+    if cfg["system"] != "hare-clark":
+        raise ValueError(
+            f"{state_ab.upper()} does not use Hare-Clark; use load_state_2cp() instead."
+        )
+    if not records:
+        return
+    table = f"{state_ab.lower()}_district_party_seats"
+    rows = [{k: v for k, v in r.items()
+             if k in ("election_id", "district_id", "party_ab",
+                      "seats_won", "total_fp_votes")}
+            for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s party-seats rows", n, state_ab.upper())
+
+
+# ── Generic state query helpers ───────────────────────────────────────────────
+
+def get_state_districts(state_ab: str, election_id: int,
+                         db_path: str = None) -> list[dict]:
+    """Return all districts for a state election with elected candidate info."""
+    ab = state_ab.lower()
+    hare_clark = _validate_state(state_ab)["system"] == "hare-clark"
+    conn = get_connection(db_path)
+    try:
+        if hare_clark:
+            rows = conn.execute(
+                f"""
+                SELECT d.district_id, d.district_name, d.enrolment,
+                       d.seats_in_district
+                FROM {ab}_districts d
+                WHERE d.election_id = ?
+                ORDER BY d.district_name
+                """,
+                (election_id,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                f"""
+                SELECT d.district_id, d.district_name, d.enrolment,
+                       c.candidate_id, c.surname, c.given_name,
+                       c.party_ab, c.party_name
+                FROM {ab}_districts d
+                LEFT JOIN {ab}_candidates c
+                       ON c.district_id = d.district_id
+                      AND c.election_id = d.election_id
+                      AND c.elected = 1
+                WHERE d.election_id = ?
+                ORDER BY d.district_name
+                """,
+                (election_id,),
+            ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def get_state_district_results(state_ab: str, district_id: int,
+                                election_id: int,
+                                db_path: str = None) -> dict:
+    """Return FP (and 2CP if applicable) totals for a single district."""
+    ab = state_ab.lower()
+    hare_clark = _validate_state(state_ab)["system"] == "hare-clark"
+    conn = get_connection(db_path)
+    try:
+        fp = conn.execute(
+            f"""
+            SELECT c.party_ab, c.party_name,
+                   c.surname || ', ' || COALESCE(c.given_name, '') AS candidate_name,
+                   c.elected, f.total_votes, f.vote_pct
+            FROM {ab}_district_fp f
+            JOIN {ab}_candidates c ON c.candidate_id = f.candidate_id
+                                   AND c.election_id = f.election_id
+            WHERE f.election_id = ? AND f.district_id = ?
+            ORDER BY f.total_votes DESC
+            """,
+            (election_id, district_id),
+        ).fetchall()
+
+        result: dict = {
+            "district_id": district_id,
+            "election_id": election_id,
+            "first_prefs": [dict(r) for r in fp],
+        }
+
+        if not hare_clark:
+            tcp = conn.execute(
+                f"""
+                SELECT c.party_ab, c.party_name,
+                       c.surname || ', ' || COALESCE(c.given_name, '') AS candidate_name,
+                       c.elected, t.total_votes, t.vote_pct
+                FROM {ab}_district_2cp t
+                JOIN {ab}_candidates c ON c.candidate_id = t.candidate_id
+                                       AND c.election_id = t.election_id
+                WHERE t.election_id = ? AND t.district_id = ?
+                ORDER BY t.total_votes DESC
+                """,
+                (election_id, district_id),
+            ).fetchall()
+            result["tcp"] = [dict(r) for r in tcp]
+        else:
+            party_seats = conn.execute(
+                f"""
+                SELECT party_ab, seats_won, total_fp_votes
+                FROM {ab}_district_party_seats
+                WHERE election_id = ? AND district_id = ?
+                ORDER BY seats_won DESC
+                """,
+                (election_id, district_id),
+            ).fetchall()
+            result["party_seats"] = [dict(r) for r in party_seats]
+
+        return result
+    finally:
+        conn.close()
+
+
+def get_state_summary(state_ab: str, election_id: int,
+                       db_path: str = None) -> dict:
+    """Return state-level first preference totals by party and seats won."""
+    ab = state_ab.lower()
+    hare_clark = _validate_state(state_ab)["system"] == "hare-clark"
+    conn = get_connection(db_path)
+    try:
+        fp_rows = conn.execute(
+            f"""
+            SELECT c.party_ab, c.party_name,
+                   SUM(f.total_votes) AS total_votes,
+                   COUNT(DISTINCT f.district_id) AS districts_contested
+            FROM {ab}_district_fp f
+            JOIN {ab}_candidates c ON c.candidate_id = f.candidate_id
+                                   AND c.election_id = f.election_id
+            WHERE f.election_id = ?
+            GROUP BY c.party_ab
+            ORDER BY total_votes DESC
+            """,
+            (election_id,),
+        ).fetchall()
+
+        total = sum(r["total_votes"] for r in fp_rows) or 1
+        parties = []
+        for r in fp_rows:
+            d = dict(r)
+            d["vote_share_pct"] = round(d["total_votes"] / total * 100, 2)
+            parties.append(d)
+
+        if hare_clark:
+            seats_won = conn.execute(
+                f"""
+                SELECT party_ab, SUM(seats_won) AS seats_won
+                FROM {ab}_district_party_seats
+                WHERE election_id = ?
+                GROUP BY party_ab
+                ORDER BY seats_won DESC
+                """,
+                (election_id,),
+            ).fetchall()
+        else:
+            seats_won = conn.execute(
+                f"""
+                SELECT party_ab, COUNT(*) AS seats_won
+                FROM {ab}_candidates
+                WHERE election_id = ? AND elected = 1
+                GROUP BY party_ab
+                ORDER BY seats_won DESC
+                """,
+                (election_id,),
+            ).fetchall()
+
+        return {
+            "election_id": election_id,
+            "state_ab":    state_ab.upper(),
             "total_votes": total,
             "parties":     parties,
             "seats_won":   [dict(r) for r in seats_won],

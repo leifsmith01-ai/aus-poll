@@ -1,0 +1,89 @@
+-- ============================================================
+-- NTEC (Northern Territory Electoral Commission) — Extension Schema
+-- ============================================================
+-- Applied on top of schema.sql via database.init_state_schema('nt').
+-- Uses nt_* tables to keep NT election data separate from the
+-- federal AEC pipeline tables and other states.
+--
+-- Election system: Single-member electorates, preferential voting
+-- Legislature: NT Legislative Assembly (25 seats)
+-- Electoral commission: NTEC — ntec.nt.gov.au
+-- Note: The NT is unicameral (no upper house).
+-- Main conservative party: CLP (Country Liberal Party)
+-- Note: NT uses optional preferential voting (preferences optional,
+--       not compulsory as in most other Australian jurisdictions).
+--
+-- election_id convention: YYYYMM, e.g. 202408 for August 2024
+-- ============================================================
+
+-- ── NT election metadata ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS nt_elections (
+    election_id   INTEGER PRIMARY KEY,  -- e.g. 202408
+    name          TEXT    NOT NULL,
+    election_date TEXT    NOT NULL,     -- ISO-8601 YYYY-MM-DD
+    jurisdiction  TEXT    NOT NULL DEFAULT 'nt_territory',
+    created_at    TEXT    DEFAULT (datetime('now'))
+);
+
+-- ── NT Districts (25 Legislative Assembly seats) ───────────
+CREATE TABLE IF NOT EXISTS nt_districts (
+    district_id   INTEGER NOT NULL,
+    election_id   INTEGER NOT NULL,
+    district_name TEXT    NOT NULL,
+    enrolment     INTEGER,
+    PRIMARY KEY (district_id, election_id),
+    FOREIGN KEY (election_id) REFERENCES nt_elections(election_id)
+);
+
+-- ── NT Candidates ──────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS nt_candidates (
+    candidate_id    INTEGER NOT NULL,
+    election_id     INTEGER NOT NULL,
+    district_id     INTEGER NOT NULL,
+    surname         TEXT    NOT NULL,
+    given_name      TEXT,
+    party_ab        TEXT,
+    party_name      TEXT,
+    ballot_position INTEGER,
+    elected         INTEGER DEFAULT 0,
+    PRIMARY KEY (candidate_id, election_id),
+    FOREIGN KEY (election_id) REFERENCES nt_elections(election_id),
+    FOREIGN KEY (district_id, election_id)
+        REFERENCES nt_districts(district_id, election_id)
+);
+
+-- ── NT First Preferences (district-level) ──────────────────
+CREATE TABLE IF NOT EXISTS nt_district_fp (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id  INTEGER NOT NULL,
+    district_id  INTEGER NOT NULL,
+    candidate_id INTEGER NOT NULL,
+    total_votes  INTEGER NOT NULL DEFAULT 0,
+    vote_pct     REAL,
+    UNIQUE (election_id, district_id, candidate_id),
+    FOREIGN KEY (election_id) REFERENCES nt_elections(election_id)
+);
+
+-- ── NT Two-Candidate Preferred (district-level) ────────────
+-- Note: because NT uses optional preferential voting, 2CP counts
+-- may include exhausted ballots; this is tracked separately via
+-- the total_formal_votes column in nt_districts if needed.
+CREATE TABLE IF NOT EXISTS nt_district_2cp (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id  INTEGER NOT NULL,
+    district_id  INTEGER NOT NULL,
+    candidate_id INTEGER NOT NULL,
+    total_votes  INTEGER NOT NULL DEFAULT 0,
+    vote_pct     REAL,
+    elected      INTEGER DEFAULT 0,
+    UNIQUE (election_id, district_id, candidate_id),
+    FOREIGN KEY (election_id) REFERENCES nt_elections(election_id)
+);
+
+-- ── Indexes ────────────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS idx_nt_fp_election_district
+    ON nt_district_fp(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_nt_2cp_election_district
+    ON nt_district_2cp(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_nt_candidates_election_district
+    ON nt_candidates(election_id, district_id);

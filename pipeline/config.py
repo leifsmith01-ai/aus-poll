@@ -141,3 +141,383 @@ VIC_PARTIES = {
 
 # Coalition partners in VIC (Liberal + Nationals, no LNP/CLP in VIC)
 VIC_COALITION_PARTIES = {"LP", "NP"}
+
+
+# ─── NSW State Elections ──────────────────────────────────────────────────────
+# Electoral commission: NSWEC — nswec.com.au
+# Legislature: Legislative Assembly (93 seats), single-member preferential
+NSW_ELECTIONS = {
+    202303: {
+        "name": "2023 NSW State Election",
+        "date": "2023-03-25",
+        "jurisdiction": "nsw_state",
+        "event_id": 991323,
+        "results_page_url": "https://www.elections.nsw.gov.au/elections/state-elections/2023-nsw-state-election/results",
+    },
+    201903: {
+        "name": "2019 NSW State Election",
+        "date": "2019-03-23",
+        "jurisdiction": "nsw_state",
+        "event_id": 991319,
+        "results_page_url": "https://www.elections.nsw.gov.au/elections/state-elections/2019-nsw-state-election/results",
+    },
+    201503: {
+        "name": "2015 NSW State Election",
+        "date": "2015-03-28",
+        "jurisdiction": "nsw_state",
+        "event_id": 991315,
+        "results_page_url": "https://www.elections.nsw.gov.au/elections/state-elections/2015-nsw-state-election/results",
+    },
+}
+
+NSW_RAW_DIR     = os.path.join(BASE_DIR, "data", "raw", "nsw")
+NSW_EXPORTS_DIR = os.path.join(DATA_EXPORTS_DIR, "nsw")
+
+NSW_PARTIES = {
+    "ALP":  "Australian Labor Party",
+    "LIB":  "Liberal Party of Australia",
+    "NAT":  "The Nationals",
+    "GRN":  "The Greens",
+    "IND":  "Independent",
+    "ON":   "Pauline Hanson's One Nation",
+    "TFF":  "Shooters, Fishers and Farmers",
+    "CDP":  "Christian Democratic Party",
+    "UAP":  "United Australia Party",
+}
+
+NSW_COALITION_PARTIES = {"LIB", "NAT"}
+
+
+# ─── QLD State Elections ──────────────────────────────────────────────────────
+# Electoral commission: ECQ — ecq.qld.gov.au
+# Legislature: Legislative Assembly (93 seats), unicameral, single-member preferential
+# Main conservative party: LNP (Liberal National Party, merged 2008)
+QLD_ELECTIONS = {
+    202410: {
+        "name": "2024 Queensland State Election",
+        "date": "2024-10-26",
+        "jurisdiction": "qld_state",
+        "event_id": 992424,
+        "results_page_url": "https://results.ecq.qld.gov.au/elections/state/State2024/",
+    },
+    202010: {
+        "name": "2020 Queensland State Election",
+        "date": "2020-10-31",
+        "jurisdiction": "qld_state",
+        "event_id": 992420,
+        "results_page_url": "https://results.ecq.qld.gov.au/elections/state/State2020/",
+    },
+    201711: {
+        "name": "2017 Queensland State Election",
+        "date": "2017-11-25",
+        "jurisdiction": "qld_state",
+        "event_id": 992417,
+        "results_page_url": "https://results.ecq.qld.gov.au/elections/state/State2017/",
+    },
+}
+
+QLD_RAW_DIR     = os.path.join(BASE_DIR, "data", "raw", "qld")
+QLD_EXPORTS_DIR = os.path.join(DATA_EXPORTS_DIR, "qld")
+
+QLD_PARTIES = {
+    "ALP":  "Australian Labor Party",
+    "LNP":  "Liberal National Party of Queensland",
+    "GRN":  "The Greens",
+    "IND":  "Independent",
+    "ON":   "Pauline Hanson's One Nation",
+    "KAP":  "Katter's Australian Party",
+    "UAP":  "United Australia Party",
+}
+
+QLD_COALITION_PARTIES = {"LNP"}
+
+
+# ─── WA State Elections ───────────────────────────────────────────────────────
+# Electoral commission: WAEC — elections.wa.gov.au
+# Legislature: Legislative Assembly (59 seats), single-member preferential
+WA_ELECTIONS = {
+    202503: {
+        "name": "2025 Western Australian State Election",
+        "date": "2025-03-08",
+        "jurisdiction": "wa_state",
+        "event_id": 993325,
+        "results_page_url": "https://www.elections.wa.gov.au/elections/state/2025stateelection",
+    },
+    202103: {
+        "name": "2021 Western Australian State Election",
+        "date": "2021-03-13",
+        "jurisdiction": "wa_state",
+        "event_id": 993321,
+        "results_page_url": "https://www.elections.wa.gov.au/elections/state/2021stateelection",
+    },
+    201703: {
+        "name": "2017 Western Australian State Election",
+        "date": "2017-03-11",
+        "jurisdiction": "wa_state",
+        "event_id": 993317,
+        "results_page_url": "https://www.elections.wa.gov.au/elections/state/2017stateelection",
+    },
+}
+
+WA_RAW_DIR     = os.path.join(BASE_DIR, "data", "raw", "wa")
+WA_EXPORTS_DIR = os.path.join(DATA_EXPORTS_DIR, "wa")
+
+WA_PARTIES = {
+    "ALP":  "Australian Labor Party",
+    "LIB":  "Liberal Party of Australia",
+    "NAT":  "The Nationals WA",
+    "GRN":  "The Greens (WA)",
+    "IND":  "Independent",
+    "ON":   "Pauline Hanson's One Nation",
+    "UAP":  "United Australia Party",
+}
+
+WA_COALITION_PARTIES = {"LIB", "NAT"}
+
+
+# ─── SA State Elections ───────────────────────────────────────────────────────
+# Electoral commission: ECSA — ecsa.sa.gov.au
+# Legislature: House of Assembly (47 seats), single-member preferential
+SA_ELECTIONS = {
+    202203: {
+        "name": "2022 South Australian State Election",
+        "date": "2022-03-19",
+        "jurisdiction": "sa_state",
+        "event_id": 994422,
+        "results_page_url": "https://www.ecsa.sa.gov.au/elections/state-elections/2022-state-election",
+    },
+    201803: {
+        "name": "2018 South Australian State Election",
+        "date": "2018-03-17",
+        "jurisdiction": "sa_state",
+        "event_id": 994418,
+        "results_page_url": "https://www.ecsa.sa.gov.au/elections/state-elections/2018-state-election",
+    },
+    201403: {
+        "name": "2014 South Australian State Election",
+        "date": "2014-03-15",
+        "jurisdiction": "sa_state",
+        "event_id": 994414,
+        "results_page_url": "https://www.ecsa.sa.gov.au/elections/state-elections/2014-state-election",
+    },
+}
+
+SA_RAW_DIR     = os.path.join(BASE_DIR, "data", "raw", "sa")
+SA_EXPORTS_DIR = os.path.join(DATA_EXPORTS_DIR, "sa")
+
+SA_PARTIES = {
+    "ALP":    "Australian Labor Party",
+    "LIB":    "Liberal Party of Australia",
+    "GRN":    "The Greens (SA)",
+    "IND":    "Independent",
+    "ON":     "Pauline Hanson's One Nation",
+    "SABEST": "SA Best",
+    "SAPP":   "SA Prosperity Party",
+    "FF":     "Family First",
+}
+
+SA_COALITION_PARTIES = {"LIB"}
+
+
+# ─── TAS State Elections ──────────────────────────────────────────────────────
+# Electoral commission: TEC — tec.tas.gov.au
+# Legislature: House of Assembly (5 electorates × 5 members = 25 seats)
+# Voting system: Hare-Clark proportional representation (multi-member)
+TAS_ELECTIONS = {
+    202403: {
+        "name": "2024 Tasmanian State Election",
+        "date": "2024-03-23",
+        "jurisdiction": "tas_state",
+        "event_id": 995524,
+        "results_page_url": "https://www.tec.tas.gov.au/info/elections/2024StateElection/",
+    },
+    202105: {
+        "name": "2021 Tasmanian State Election",
+        "date": "2021-05-01",
+        "jurisdiction": "tas_state",
+        "event_id": 995521,
+        "results_page_url": "https://www.tec.tas.gov.au/info/elections/2021StateElection/",
+    },
+    201803: {
+        "name": "2018 Tasmanian State Election",
+        "date": "2018-03-03",
+        "jurisdiction": "tas_state",
+        "event_id": 995518,
+        "results_page_url": "https://www.tec.tas.gov.au/info/elections/2018StateElection/",
+    },
+}
+
+TAS_RAW_DIR     = os.path.join(BASE_DIR, "data", "raw", "tas")
+TAS_EXPORTS_DIR = os.path.join(DATA_EXPORTS_DIR, "tas")
+
+TAS_PARTIES = {
+    "ALP":  "Australian Labor Party",
+    "LIB":  "Liberal Party of Australia",
+    "GRN":  "The Greens (Tas)",
+    "IND":  "Independent",
+    "JLN":  "Jacqui Lambie Network",
+}
+
+TAS_COALITION_PARTIES = {"LIB"}
+
+
+# ─── ACT Elections ────────────────────────────────────────────────────────────
+# Electoral commission: ACT Electoral Commission — elections.act.gov.au
+# Legislature: ACT Legislative Assembly (5 electorates × 5 members = 25 seats)
+# Voting system: Hare-Clark proportional representation (multi-member)
+# Note: ACT is unicameral; no upper house.
+ACT_ELECTIONS = {
+    202410: {
+        "name": "2024 ACT Legislative Assembly Election",
+        "date": "2024-10-19",
+        "jurisdiction": "act_territory",
+        "event_id": 996624,
+        "results_page_url": "https://www.elections.act.gov.au/elections_and_voting/2024_legislative_assembly_election",
+    },
+    202010: {
+        "name": "2020 ACT Legislative Assembly Election",
+        "date": "2020-10-17",
+        "jurisdiction": "act_territory",
+        "event_id": 996620,
+        "results_page_url": "https://www.elections.act.gov.au/elections_and_voting/2020_legislative_assembly_election",
+    },
+    201610: {
+        "name": "2016 ACT Legislative Assembly Election",
+        "date": "2016-10-15",
+        "jurisdiction": "act_territory",
+        "event_id": 996616,
+        "results_page_url": "https://www.elections.act.gov.au/elections_and_voting/2016_legislative_assembly_election",
+    },
+}
+
+ACT_RAW_DIR     = os.path.join(BASE_DIR, "data", "raw", "act")
+ACT_EXPORTS_DIR = os.path.join(DATA_EXPORTS_DIR, "act")
+
+ACT_PARTIES = {
+    "ALP":  "Australian Labor Party",
+    "LIB":  "Canberra Liberals",
+    "GRN":  "ACT Greens",
+    "IND":  "Independent",
+}
+
+ACT_COALITION_PARTIES = {"LIB"}
+
+
+# ─── NT Elections ─────────────────────────────────────────────────────────────
+# Electoral commission: NTEC — ntec.nt.gov.au
+# Legislature: NT Legislative Assembly (25 seats), unicameral
+# Voting system: Single-member electorates, optional preferential voting
+# Main conservative party: CLP (Country Liberal Party)
+NT_ELECTIONS = {
+    202408: {
+        "name": "2024 Northern Territory Election",
+        "date": "2024-08-24",
+        "jurisdiction": "nt_territory",
+        "event_id": 997724,
+        "results_page_url": "https://ntec.nt.gov.au/elections/2024-northern-territory-election",
+    },
+    202008: {
+        "name": "2020 Northern Territory Election",
+        "date": "2020-08-22",
+        "jurisdiction": "nt_territory",
+        "event_id": 997720,
+        "results_page_url": "https://ntec.nt.gov.au/elections/2020-northern-territory-election",
+    },
+    201608: {
+        "name": "2016 Northern Territory Election",
+        "date": "2016-08-27",
+        "jurisdiction": "nt_territory",
+        "event_id": 997716,
+        "results_page_url": "https://ntec.nt.gov.au/elections/2016-northern-territory-election",
+    },
+}
+
+NT_RAW_DIR     = os.path.join(BASE_DIR, "data", "raw", "nt")
+NT_EXPORTS_DIR = os.path.join(DATA_EXPORTS_DIR, "nt")
+
+NT_PARTIES = {
+    "ALP":  "Australian Labor Party",
+    "CLP":  "Country Liberal Party",
+    "GRN":  "The Greens",
+    "IND":  "Independent",
+    "TDU":  "Territory David Crisafulli",  # placeholder — minor NT parties vary
+}
+
+NT_COALITION_PARTIES = {"CLP"}
+
+
+# ─── Unified state elections registry ────────────────────────────────────────
+# Maps state abbreviation (lower-case) to its elections dict and config.
+# Useful for generic pipeline dispatching (e.g. main.py --state nsw).
+STATE_REGISTRY = {
+    "nsw": {
+        "elections":         NSW_ELECTIONS,
+        "parties":           NSW_PARTIES,
+        "coalition_parties": NSW_COALITION_PARTIES,
+        "raw_dir":           NSW_RAW_DIR,
+        "exports_dir":       NSW_EXPORTS_DIR,
+        "schema_file":       "nsw_schema.sql",
+        "seats":             93,
+        "system":            "preferential",
+    },
+    "qld": {
+        "elections":         QLD_ELECTIONS,
+        "parties":           QLD_PARTIES,
+        "coalition_parties": QLD_COALITION_PARTIES,
+        "raw_dir":           QLD_RAW_DIR,
+        "exports_dir":       QLD_EXPORTS_DIR,
+        "schema_file":       "qld_schema.sql",
+        "seats":             93,
+        "system":            "preferential",
+    },
+    "wa": {
+        "elections":         WA_ELECTIONS,
+        "parties":           WA_PARTIES,
+        "coalition_parties": WA_COALITION_PARTIES,
+        "raw_dir":           WA_RAW_DIR,
+        "exports_dir":       WA_EXPORTS_DIR,
+        "schema_file":       "wa_schema.sql",
+        "seats":             59,
+        "system":            "preferential",
+    },
+    "sa": {
+        "elections":         SA_ELECTIONS,
+        "parties":           SA_PARTIES,
+        "coalition_parties": SA_COALITION_PARTIES,
+        "raw_dir":           SA_RAW_DIR,
+        "exports_dir":       SA_EXPORTS_DIR,
+        "schema_file":       "sa_schema.sql",
+        "seats":             47,
+        "system":            "preferential",
+    },
+    "tas": {
+        "elections":         TAS_ELECTIONS,
+        "parties":           TAS_PARTIES,
+        "coalition_parties": TAS_COALITION_PARTIES,
+        "raw_dir":           TAS_RAW_DIR,
+        "exports_dir":       TAS_EXPORTS_DIR,
+        "schema_file":       "tas_schema.sql",
+        "seats":             25,
+        "system":            "hare-clark",
+    },
+    "act": {
+        "elections":         ACT_ELECTIONS,
+        "parties":           ACT_PARTIES,
+        "coalition_parties": ACT_COALITION_PARTIES,
+        "raw_dir":           ACT_RAW_DIR,
+        "exports_dir":       ACT_EXPORTS_DIR,
+        "schema_file":       "act_schema.sql",
+        "seats":             25,
+        "system":            "hare-clark",
+    },
+    "nt": {
+        "elections":         NT_ELECTIONS,
+        "parties":           NT_PARTIES,
+        "coalition_parties": NT_COALITION_PARTIES,
+        "raw_dir":           NT_RAW_DIR,
+        "exports_dir":       NT_EXPORTS_DIR,
+        "schema_file":       "nt_schema.sql",
+        "seats":             25,
+        "system":            "optional-preferential",
+    },
+}

@@ -1,9 +1,10 @@
 """
-AEC/VEC Election Dashboard – Data Pipeline
-===========================================
+AEC/VEC/State Election Dashboard – Data Pipeline
+=================================================
 
-Orchestrates the full pipeline for federal (AEC) or Victorian state (VEC) elections:
-  1. Download files from AEC/VEC
+Orchestrates the full pipeline for federal (AEC), Victorian (VEC), or any
+other state/territory election:
+  1. Download files from the relevant electoral commission
   2. Parse into clean Python structures
   3. Load into SQLite database
   4. Export to JSON files for the frontend
@@ -42,6 +43,34 @@ Usage examples:
 
     # Export only (database already populated with VEC data)
     python main.py --state vic --year 202211 --export-only
+
+    # ── Other state/territory elections ───────────────────────
+    # All other states follow the same pattern as VIC above.
+    # Supported --state values: nsw, qld, wa, sa, tas, act, nt
+    #
+    # NSW 2023 election
+    python main.py --state nsw --year 202303
+    #
+    # QLD 2024 election
+    python main.py --state qld --year 202410
+    #
+    # WA 2025 election
+    python main.py --state wa --year 202503
+    #
+    # SA 2022 election
+    python main.py --state sa --year 202203
+    #
+    # TAS 2024 election (Hare-Clark)
+    python main.py --state tas --year 202403
+    #
+    # ACT 2024 election (Hare-Clark)
+    python main.py --state act --year 202410
+    #
+    # NT 2024 election
+    python main.py --state nt --year 202408
+    #
+    # List locally available files for a state
+    python main.py --state nsw --list-files
 """
 
 import argparse
@@ -50,13 +79,15 @@ import sys
 from pathlib import Path
 
 # ── Pipeline modules ─────────────────────────────────────────────────────────
-from pipeline.config import ELECTIONS, VIC_ELECTIONS
+from pipeline.config import ELECTIONS, VIC_ELECTIONS, STATE_REGISTRY
 from pipeline import download as dl
 from pipeline import parse as ps
 from pipeline import database as db
 from pipeline import export as ex
 from pipeline import vec_download as vdl
 from pipeline import vec_parse as vps
+from pipeline import state_download as sdl
+from pipeline import state_parse as sps
 
 
 # ── Logging setup ─────────────────────────────────────────────────────────────
@@ -270,6 +301,136 @@ def run_vic_pipeline(
     logger.info("All done.")
 
 
+# ── Generic state/territory pipeline ─────────────────────────────────────────
+
+def run_state_pipeline(
+    state_ab: str,
+    election_ids: list[int],
+    skip_download: bool = False,
+    force_download: bool = False,
+    export_only: bool = False,
+) -> None:
+    """Run the full pipeline for a non-VIC state/territory election."""
+    logger = logging.getLogger(__name__)
+    state_ab = state_ab.lower()
+
+    if state_ab not in STATE_REGISTRY:
+        logger.error(
+            "Unknown state '%s'. Supported states: %s",
+            state_ab, list(STATE_REGISTRY)
+        )
+        sys.exit(1)
+
+    cfg = STATE_REGISTRY[state_ab]
+    elections = cfg["elections"]
+
+    # Initialise both the base schema and the state-specific schema
+    logger.info("Initialising database schemas...")
+    db.init_db()
+    db.init_state_schema(state_ab)
+
+    for election_id in election_ids:
+        if election_id not in elections:
+            logger.error(
+                "Unknown %s election_id %d. Valid IDs: %s",
+                state_ab.upper(), election_id, list(elections)
+            )
+            logger.error(
+                "%s election IDs use YYYYMM format, e.g. %d.",
+                state_ab.upper(), next(iter(elections))
+            )
+            continue
+
+        logger.info("")
+        logger.info("━" * 60)
+        logger.info("Processing %s election: %d (%s)",
+                    state_ab.upper(), election_id, elections[election_id]["name"])
+        logger.info("━" * 60)
+
+        if export_only:
+            logger.info("Export-only mode: skipping download and parse.")
+            ex.export_state_election(state_ab, election_id)
+            continue
+
+        # ── Step 1: Download ──────────────────────────────────────────────────
+        if skip_download:
+            logger.info("Skipping download (using existing files).")
+            file_paths = sdl.list_local_state_files(state_ab, election_id)
+        else:
+            logger.info("Step 1: Downloading %s data files for %d...",
+                        state_ab.upper(), election_id)
+            file_paths = sdl.download_state_election(
+                state_ab, election_id, force=force_download
+            )
+
+        if not file_paths:
+            file_paths = sdl.list_local_state_files(state_ab, election_id)
+
+        if not file_paths:
+            raw_dir = cfg["raw_dir"]
+            logger.error(
+                "No data files found for %s %d.\n"
+                "  Options:\n"
+                "  1. Run without --skip-download to attempt automatic download.\n"
+                "  2. Manually download files from %s\n"
+                "     and place them in: %s/%d/",
+                state_ab.upper(), election_id,
+                elections[election_id].get("results_page_url", "the electoral commission website"),
+                raw_dir, election_id,
+            )
+            continue
+
+        logger.info("  Available files: %s", list(file_paths.keys()))
+
+        # ── Step 2: Parse ─────────────────────────────────────────────────────
+        logger.info("Step 2: Parsing %s data files for %d...",
+                    state_ab.upper(), election_id)
+        parsed = sps.parse_state_election(state_ab, file_paths, election_id)
+
+        for key, records in parsed.items():
+            logger.info("  %-12s %d records", key, len(records))
+
+        if not parsed["fp"] and not parsed["candidates"]:
+            logger.error(
+                "No usable data parsed for %s %d. "
+                "Check that files are in the expected format.",
+                state_ab.upper(), election_id
+            )
+            continue
+
+        # ── Step 3: Load into database ────────────────────────────────────────
+        logger.info("Step 3: Loading into database for %s %d...",
+                    state_ab.upper(), election_id)
+
+        db.upsert_state_election(state_ab, election_id)
+        db.load_state_districts(state_ab, parsed["districts"] or parsed["fp"] or parsed["candidates"])
+        db.load_state_candidates(state_ab, parsed["candidates"])
+
+        if parsed["fp"]:
+            db.load_state_fp(state_ab, parsed["fp"])
+
+        hare_clark = cfg["system"] == "hare-clark"
+        if hare_clark:
+            if parsed["party_seats"]:
+                db.load_state_party_seats(state_ab, parsed["party_seats"])
+        else:
+            if parsed["tcp"]:
+                db.load_state_2cp(state_ab, parsed["tcp"])
+
+        logger.info("Database load complete for %s %d.", state_ab.upper(), election_id)
+
+        # ── Step 4: Export to JSON ────────────────────────────────────────────
+        logger.info("Step 4: Exporting JSON files for %s %d...",
+                    state_ab.upper(), election_id)
+        ex.export_state_election(state_ab, election_id)
+
+        logger.info("%s pipeline complete for election %d ✓",
+                    state_ab.upper(), election_id)
+
+    logger.info("")
+    logger.info("All done.")
+
+
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
 def _parse_args():
@@ -278,14 +439,17 @@ def _parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
+    _state_choices = ["federal", "vic"] + list(STATE_REGISTRY.keys())
     parser.add_argument(
         "--state", "-s",
-        choices=["federal", "vic"],
+        choices=_state_choices,
         default="federal",
         help=(
             "Which jurisdiction to process. "
             "'federal' uses AEC data (default). "
-            "'vic' uses VEC data for the Victorian Legislative Assembly."
+            "'vic' uses VEC data for the Victorian Legislative Assembly. "
+            "Other supported states: nsw, qld, wa, sa, tas, act, nt. "
+            "State election IDs use YYYYMM format (e.g. 202303 for NSW March 2023)."
         ),
     )
     parser.add_argument(
@@ -332,7 +496,10 @@ if __name__ == "__main__":
     args = _parse_args()
     setup_logging(args.verbose)
 
-    is_vic = args.state == "vic"
+    state = args.state.lower()
+    is_vic = state == "vic"
+    is_federal = state == "federal"
+    is_other_state = state in STATE_REGISTRY
 
     if args.list_files:
         if is_vic:
@@ -341,6 +508,16 @@ if __name__ == "__main__":
                 files = vdl.list_local_vec_files(eid)
                 cfg = VIC_ELECTIONS.get(eid, {})
                 print(f"\n{eid} ({cfg.get('name', '?')}): {len(files)} file(s)")
+                for key, path in files.items():
+                    size_kb = Path(path).stat().st_size / 1024
+                    print(f"  {key:<28} {Path(path).name}  ({size_kb:.0f} KB)")
+        elif is_other_state:
+            scfg = STATE_REGISTRY[state]
+            ids = args.year or list(scfg["elections"].keys())
+            for eid in ids:
+                files = sdl.list_local_state_files(state, eid)
+                ecfg = scfg["elections"].get(eid, {})
+                print(f"\n{eid} ({ecfg.get('name', '?')}): {len(files)} file(s)")
                 for key, path in files.items():
                     size_kb = Path(path).stat().st_size / 1024
                     print(f"  {key:<28} {Path(path).name}  ({size_kb:.0f} KB)")
@@ -357,6 +534,17 @@ if __name__ == "__main__":
     if is_vic:
         election_ids = args.year or [202211, 201811]
         run_vic_pipeline(
+            election_ids=election_ids,
+            skip_download=args.skip_download,
+            force_download=args.force_download,
+            export_only=args.export_only,
+        )
+    elif is_other_state:
+        scfg = STATE_REGISTRY[state]
+        default_ids = sorted(scfg["elections"].keys(), reverse=True)[:2]
+        election_ids = args.year or default_ids
+        run_state_pipeline(
+            state_ab=state,
             election_ids=election_ids,
             skip_download=args.skip_download,
             force_download=args.force_download,
