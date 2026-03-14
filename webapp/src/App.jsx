@@ -81,6 +81,10 @@ const MARGIN_COLOR = {very_marginal:"#DC2626",marginal:"#F59E0B",fairly_safe:"#1
 const BASELINE_2022 = { alp:32.6, coal:35.7, grn:12.2, teal:5.1, on:4.7 };
 const NATIONAL_2PP_2022 = 52.13; // ALP 2PP at 2022 election
 
+// 2025 actual national primary vote % and 2PP (baseline for post-election tracking)
+const BASELINE_2025 = { alp:34.6, coal:31.8, grn:12.2, teal:4.5, on:6.4 };
+const NATIONAL_2PP_2025 = 55.2; // ALP 2PP at 2025 election
+
 // Seat-level 2022 ON first-preference %, extracted from AEC results.
 // Seats omitted here use the national baseline (4.7%) + national ON swing.
 const ON_FP_2022 = {
@@ -144,9 +148,66 @@ const ON_FP_2022 = {
   324:  5.3, // Nicholls
 };
 
-// Estimate seat-level ON first preference using 2022 seat baseline + national swing.
+// Seat-level 2025 ON first-preference %, proportionally scaled from 2022 (6.4/4.7 ≈ 1.36).
+// Replace with actual AEC data once pipeline has downloaded 2025 results.
+const ON_FP_2025 = {
+  // QLD — regional seats
+  166: 18.8, // Hinkler
+  178: 15.3, // Wide Bay
+  158: 14.3, // Dawson
+  157: 13.8, // Capricornia
+  126: 14.3, // Hunter (NSW)
+  167: 12.5, // Kennedy
+  165: 11.8, // Herbert
+  311: 11.7, // Flynn
+  312: 13.3, // Durack (WA)
+  306: 11.0, // Lingiari (NT)
+  243: 10.4, // O'Connor (WA)
+  168: 11.0, // Leichhardt
+  138: 12.9, // Page (NSW)
+  170: 10.9, // Maranoa
+  316: 10.6, // Wright
+  139: 11.0, // Parkes (NSW)
+  135: 10.8, // New England (NSW)
+  239:  9.5, // Forrest (WA)
+  213:  9.5, // Gippsland (VIC)
+  302:  8.9, // Longman
+  250:  8.9, // Riverina (NSW)
+  236:  8.9, // Canning (WA)
+  249: 10.2, // Paterson (NSW)
+  115:  9.9, // Dobell (NSW)
+  130: 10.1, // Lyne (NSW)
+  162:  9.4, // Forde
+  304:  9.3, // Blair
+  193:  9.8, // Braddon (TAS)
+  180:  9.8, // Barker (SA)
+  305:  7.9, // Hasluck (WA)
+  183:  9.3, // Grey (SA)
+  146:  9.3, // Robertson (NSW)
+  175:  8.6, // Petrie
+  145:  9.7, // Richmond (NSW)
+  161:  8.3, // Fisher
+  171:  8.2, // McPherson
+  310:  8.0, // Bonner
+  155:  7.9, // Bowman
+  148:  9.5, // Shortland (NSW)
+  117:  8.2, // Eden-Monaro (NSW)
+  192:  8.7, // Bass (TAS)
+  252:  7.8, // Dickson
+  242:  7.5, // Moore (WA)
+  160:  7.6, // Fairfax
+  172:  7.2, // Moncrieff
+  307:  7.2, // Solomon (NT)
+  196:  8.3, // Lyons (TAS)
+  224:  8.3, // Mallee (VIC)
+  324:  7.2, // Nicholls (VIC)
+  164:  6.3, // Groom
+  163:  6.1, // Griffith
+};
+
+// Estimate seat-level ON first preference using 2025 seat baseline + national swing.
 function estimateSeatOnFp(seatId, swings) {
-  const base = ON_FP_2022[seatId] ?? BASELINE_2022.on;
+  const base = ON_FP_2025[seatId] ?? BASELINE_2025.on;
   return Math.max(0, base + swings.on);
 }
 
@@ -305,7 +366,172 @@ const _S=[
   [247,"Swan","WA","ALP","Zaneta Mascarenhas","ALP","LP",17.55],
   [248,"Tangney","WA","ALP","Sam Lim","ALP","LP",4.76],
 ];
-const SEATS=_S.map(([id,name,state,wp,wn,t1,t2,m])=>({
+const SEATS_2022=_S.map(([id,name,state,wp,wn,t1,t2,m])=>({
+  id,name,state,margin:m,swing:0,fp:[],
+  winner:{party:wp,name:wn},
+  tcp:[{party:t1,pct:+(50+m/2).toFixed(2)},{party:t2,pct:+(50-m/2).toFixed(2)}]
+}));
+
+// ── 2025 seat data: uniform +3.07pp swing applied from 2022 baseline ──────────
+// Known overrides: Dickson (LP→ALP, Peter Dutton lost to Ali France),
+//                  Aston (ALP held via 2023 by-election, Mary Doyle)
+// Seat count: ALP 86, Coalition 50, Greens+GVIC 1, Others 14 (actual: ALP 94)
+// Non-uniform real swing (esp. stronger in QLD) means uniform model underestimates.
+// Run `python main.py --year 2025` once AEC event_id 29581 is verified.
+const _S25=[
+  [318,"Bean","ACT","ALP","David Smith","ALP","LP",28.96],
+  [101,"Canberra","ACT","ALP","Alicia Payne","ALP","GRN",27.46],
+  [102,"Fenner","ACT","ALP","Andrew Leigh","ALP","LP",34.46],
+  [103,"Banks","NSW","LP","David Coleman","LP","ALP",3.33],
+  [104,"Barton","NSW","ALP","Linda Burney","ALP","LP",34.16],
+  [105,"Bennelong","NSW","ALP","Jerome Laxale","ALP","LP",5.03],
+  [106,"Berowra","NSW","LP","Julian Leeser","LP","ALP",16.47],
+  [107,"Blaxland","NSW","ALP","Jason Clare","ALP","LP",32.94],
+  [108,"Bradfield","NSW","LP","Paul Fletcher","LP","IND",5.4],
+  [109,"Calare","NSW","NP","Andrew Gee","NP","IND",16.29],
+  [111,"Chifley","NSW","ALP","Ed Husic","ALP","LP",30.0],
+  [112,"Cook","NSW","LP","Scott Morrison","LP","ALP",21.82],
+  [113,"Cowper","NSW","NP","Pat Conaghan","NP","IND",1.58],
+  [114,"Cunningham","NSW","ALP","Alison Byrnes","ALP","LP",32.47],
+  [115,"Dobell","NSW","ALP","Emma Mcbride","ALP","LP",16.11],
+  [117,"Eden-Monaro","NSW","ALP","Kristy Mcbain","ALP","LP",19.47],
+  [118,"Farrer","NSW","LP","Sussan Ley","LP","ALP",29.64],
+  [119,"Fowler","NSW","IND","Dai Le","IND","ALP",6.32],
+  [120,"Gilmore","NSW","ALP","Fiona Phillips","ALP","LP",3.4],
+  [121,"Grayndler","NSW","ALP","Anthony Albanese","ALP","GRN",37.17],
+  [122,"Greenway","NSW","ALP","Michelle Rowland","ALP","LP",26.13],
+  [124,"Hughes","NSW","LP","Jenny Ware","LP","ALP",10.94],
+  [125,"Hume","NSW","LP","Angus Taylor","LP","ALP",12.37],
+  [126,"Hunter","NSW","ALP","Dan Repacholi","ALP","NP",11.12],
+  [127,"Kingsford Smith","NSW","ALP","Matt Thistlethwaite","ALP","LP",32.07],
+  [128,"Lindsay","NSW","LP","Melissa Mcintosh","LP","ALP",9.61],
+  [130,"Lyne","NSW","NP","David Gillespie","NP","ALP",24.52],
+  [131,"Macarthur","NSW","ALP","Mike Freelander","ALP","LP",20.12],
+  [132,"Mackellar","NSW","IND","Sophie Scamps","IND","LP",8.08],
+  [133,"Macquarie","NSW","ALP","Susan Templeman","ALP","LP",18.61],
+  [315,"McMahon","NSW","ALP","Chris Bowen","ALP","LP",22.05],
+  [134,"Mitchell","NSW","LP","Alex Hawke","LP","ALP",18.31],
+  [135,"New England","NSW","NP","Barnaby Joyce","NP","ALP",29.8],
+  [136,"Newcastle","NSW","ALP","Sharon Claydon","ALP","LP",39.03],
+  [137,"North Sydney","NSW","IND","Kylea Jane Tink","IND","LP",8.9],
+  [138,"Page","NSW","NP","Kevin Hogan","NP","ALP",18.4],
+  [139,"Parkes","NSW","NP","Mark Coulton","NP","ALP",32.61],
+  [140,"Parramatta","NSW","ALP","Andrew Charlton","ALP","LP",12.2],
+  [249,"Paterson","NSW","ALP","Meryl Swanson","ALP","LP",9.69],
+  [144,"Reid","NSW","ALP","Sally Sitou","ALP","LP",13.46],
+  [145,"Richmond","NSW","ALP","Justine Elliot","ALP","NP",19.53],
+  [250,"Riverina","NSW","NP","Michael Mccormack","NP","ALP",26.62],
+  [146,"Robertson","NSW","ALP","Gordon Reid","ALP","LP",7.59],
+  [148,"Shortland","NSW","ALP","Pat Conroy","ALP","LP",14.71],
+  [149,"Sydney","NSW","ALP","Tanya Plibersek","ALP","GRN",36.44],
+  [151,"Warringah","NSW","IND","Zali Steggall","IND","LP",24.98],
+  [251,"Watson","NSW","ALP","Tony Burke","ALP","LP",33.27],
+  [152,"Wentworth","NSW","IND","Allegra Spender","IND","LP",11.45],
+  [153,"Werriwa","NSW","ALP","Anne Maree Stanley","ALP","LP",14.71],
+  [150,"Whitlam","NSW","ALP","Stephen Jones","ALP","LP",23.22],
+  [306,"Lingiari","NT","ALP","Marion Scrymgour","ALP","CLP",4.96],
+  [307,"Solomon","NT","ALP","Luke Gosling","ALP","CLP",21.8],
+  [304,"Blair","QLD","ALP","Shayne Neumann","ALP","LNP",13.53],
+  [310,"Bonner","QLD","LNP","Ross Vasta","LNP","ALP",3.75],
+  [155,"Bowman","QLD","LNP","Henry Pike","LNP","ALP",7.95],
+  [156,"Brisbane","QLD","GRN","Stephen Bates","GRN","LNP",10.54],
+  [157,"Capricornia","QLD","LNP","Michelle Landry","LNP","ALP",10.11],
+  [158,"Dawson","QLD","LNP","Andrew Willcox","LNP","ALP",17.76],
+  [252,"Dickson","QLD","ALP","Ali France","ALP","LP",1.69],
+  [159,"Fadden","QLD","LNP","Stuart Robert","LNP","ALP",18.18],
+  [160,"Fairfax","QLD","LNP","Ted O'brien","LNP","ALP",14.83],
+  [161,"Fisher","QLD","LNP","Andrew Wallace","LNP","ALP",14.27],
+  [311,"Flynn","QLD","LNP","Colin Boyce","LNP","ALP",4.57],
+  [162,"Forde","QLD","LNP","Bert Van Manen","LNP","ALP",5.4],
+  [163,"Griffith","QLD","GRN","Max Chandler-mather","GRN","LNP",23.98],
+  [164,"Groom","QLD","LNP","Garth Hamilton","LNP","IND",10.7],
+  [165,"Herbert","QLD","LNP","Phillip Thompson","LNP","ALP",20.48],
+  [166,"Hinkler","QLD","LNP","Keith Pitt","LNP","ALP",17.08],
+  [167,"Kennedy","QLD","KAP","Bob Katter","KAP","LNP",29.26],
+  [168,"Leichhardt","QLD","LNP","Warren Entsch","LNP","ALP",3.81],
+  [169,"Lilley","QLD","ALP","Anika Wells","ALP","LNP",24.15],
+  [302,"Longman","QLD","LNP","Terry Young","LNP","ALP",3.09],
+  [170,"Maranoa","QLD","LNP","David Littleproud","LNP","ALP",41.17],
+  [171,"McPherson","QLD","LNP","Karen Andrews","LNP","ALP",15.6],
+  [172,"Moncrieff","QLD","LNP","Angie Bell","LNP","ALP",19.32],
+  [173,"Moreton","QLD","ALP","Graham Perrett","ALP","LNP",21.25],
+  [174,"Oxley","QLD","ALP","Milton Dick","ALP","LNP",26.26],
+  [175,"Petrie","QLD","LNP","Luke Howarth","LNP","ALP",5.8],
+  [176,"Rankin","QLD","ALP","Jim Chalmers","ALP","LNP",21.25],
+  [177,"Ryan","QLD","GRN","Elizabeth Watson-brown","GRN","LNP",8.36],
+  [178,"Wide Bay","QLD","LNP","Llew O'brien","LNP","ALP",19.62],
+  [316,"Wright","QLD","LNP","Scott Buchholz","LNP","ALP",18.72],
+  [179,"Adelaide","SA","ALP","Steve Georganas","ALP","LP",26.9],
+  [180,"Barker","SA","LP","Tony Pasin","LP","ALP",30.17],
+  [182,"Boothby","SA","ALP","Louise Miller-frost","ALP","LP",9.62],
+  [183,"Grey","SA","LP","Rowan Ramsey","LP","ALP",17.06],
+  [185,"Hindmarsh","SA","ALP","Mark Butler","ALP","LP",20.96],
+  [186,"Kingston","SA","ALP","Amanda Rishworth","ALP","LP",35.77],
+  [187,"Makin","SA","ALP","Tony Zappia","ALP","LP",24.67],
+  [188,"Mayo","SA","XEN","Rebekha Sharkie","XEN","LP",27.59],
+  [325,"Spence","SA","ALP","Matt Burnell","ALP","LP",28.87],
+  [190,"Sturt","SA","ALP","ALP Member","LP","ALP",2.17],
+  [192,"Bass","TAS","ALP","ALP Member","LP","ALP",0.2],
+  [193,"Braddon","TAS","LP","Gavin Pearce","LP","ALP",12.99],
+  [319,"Clark","TAS","IND","Andrew Wilkie","IND","ALP",44.72],
+  [195,"Franklin","TAS","ALP","Julie Collins","ALP","LP",30.47],
+  [196,"Lyons","TAS","ALP","Brian Mitchell","ALP","LP",4.9],
+  [197,"Aston","VIC","ALP","Mary Doyle","ALP","LP",6.81],
+  [198,"Ballarat","VIC","ALP","Catherine King","ALP","LP",29.02],
+  [200,"Bendigo","VIC","ALP","Lisa Chesters","ALP","LP",27.28],
+  [201,"Bruce","VIC","ALP","Julian Hill","ALP","LP",16.24],
+  [203,"Calwell","VIC","ALP","Maria Vamvakinou","ALP","LP",27.86],
+  [204,"Casey","VIC","ALP","ALP Member","LP","ALP",0.11],
+  [205,"Chisholm","VIC","ALP","Carina Garland","ALP","LP",15.89],
+  [320,"Cooper","VIC","ALP","Ged Kearney","ALP","GVIC",20.42],
+  [328,"Corangamite","VIC","ALP","Libby Coker","ALP","LP",18.28],
+  [208,"Corio","VIC","ALP","Richard Marles","ALP","LP",28.75],
+  [209,"Deakin","VIC","ALP","ALP Member","LP","ALP",2.7],
+  [210,"Dunkley","VIC","ALP","Peta Murphy","ALP","LP",15.61],
+  [211,"Flinders","VIC","LP","Zoe Mckenzie","LP","ALP",10.33],
+  [321,"Fraser","VIC","ALP","Daniel Mulino","ALP","LP",36.08],
+  [212,"Gellibrand","VIC","ALP","Tim Watts","ALP","LP",26.15],
+  [213,"Gippsland","VIC","NP","Darren Chester","NP","ALP",38.06],
+  [214,"Goldstein","VIC","IND","Zoe Daniel","IND","LP",8.81],
+  [309,"Gorton","VIC","ALP","Brendan O'connor","ALP","LP",23.01],
+  [326,"Hawke","VIC","ALP","Sam Rae","ALP","LP",18.32],
+  [215,"Higgins","VIC","ALP","Michelle Ananda-rajah","ALP","LP",7.2],
+  [216,"Holt","VIC","ALP","Cassandra Fernando","ALP","LP",17.31],
+  [217,"Hotham","VIC","ALP","Clare O'neil","ALP","LP",31.57],
+  [218,"Indi","VIC","IND","Helen Haines","IND","LP",20.95],
+  [219,"Isaacs","VIC","ALP","Mark Dreyfus","ALP","LP",16.77],
+  [220,"Jagajaga","VIC","ALP","Kate Thwaites","ALP","LP",27.76],
+  [221,"Kooyong","VIC","IND","Monique Ryan","IND","LP",8.96],
+  [223,"La Trobe","VIC","LP","Jason Wood","LP","ALP",14.31],
+  [222,"Lalor","VIC","ALP","Joanne Ryan","ALP","LP",28.72],
+  [322,"Macnamara","VIC","ALP","Josh Burns","ALP","LP",27.57],
+  [224,"Mallee","VIC","NP","Anne Webster","NP","ALP",34.9],
+  [225,"Maribyrnong","VIC","ALP","Bill Shorten","ALP","LP",27.96],
+  [226,"McEwen","VIC","ALP","Rob Mitchell","ALP","LP",9.63],
+  [228,"Melbourne","VIC","GVIC","Adam Bandt","GVIC","ALP",23.37],
+  [229,"Menzies","VIC","ALP","ALP Member","LP","ALP",1.71],
+  [323,"Monash","VIC","LP","Russell Broadbent","LP","ALP",2.72],
+  [324,"Nicholls","VIC","NP","Sam Birrell","NP","IND",4.55],
+  [232,"Scullin","VIC","ALP","Andrew Giles","ALP","LP",34.24],
+  [233,"Wannon","VIC","LP","Dan Tehan","LP","IND",4.78],
+  [234,"Wills","VIC","ALP","Peter Khalil","ALP","GVIC",20.21],
+  [235,"Brand","WA","ALP","Madeleine King","ALP","LP",36.49],
+  [317,"Burt","WA","ALP","Matt Keogh","ALP","LP",33.5],
+  [236,"Canning","WA","LP","Andrew Hastie","LP","ALP",4.1],
+  [237,"Cowan","WA","ALP","Anne Aly","ALP","LP",24.7],
+  [238,"Curtin","WA","IND","Kate Chaney","IND","LP",5.6],
+  [312,"Durack","WA","LP","Melissa Price","LP","ALP",5.47],
+  [239,"Forrest","WA","LP","Nola Marino","LP","ALP",5.51],
+  [240,"Fremantle","WA","ALP","Josh Wilson","ALP","LP",36.84],
+  [305,"Hasluck","WA","ALP","Tania Lawrence","ALP","LP",15.07],
+  [242,"Moore","WA","ALP","ALP Member","LP","ALP",1.75],
+  [243,"O'Connor","WA","LP","Rick Wilson","LP","ALP",10.88],
+  [244,"Pearce","WA","ALP","Tracey Roberts","ALP","LP",21.15],
+  [245,"Perth","WA","ALP","Patrick Gorman","ALP","LP",32.67],
+  [247,"Swan","WA","ALP","Zaneta Mascarenhas","ALP","LP",20.62],
+  [248,"Tangney","WA","ALP","Sam Lim","ALP","LP",7.83],
+];
+const SEATS=_S25.map(([id,name,state,wp,wn,t1,t2,m])=>({
   id,name,state,margin:m,swing:0,fp:[],
   winner:{party:wp,name:wn},
   tcp:[{party:t1,pct:+(50+m/2).toFixed(2)},{party:t2,pct:+(50-m/2).toFixed(2)}]
@@ -866,13 +1092,22 @@ const VIC_SEATS = _VS.map(([id,name,state,wp,wn,t1,t2,m]) => ({
 }));
 
 const ELECTION_DATA = {
+  federal_2025: {
+    label:"Federal 2025", jurisdiction:"Federal",
+    chamber:"House of Representatives", date:"3 May 2025",
+    totalSeats:151, majority:76, twopp:55.2,
+    seats:SEATS,
+    counts:{ alp:94, coalition:42, grn:4, teal:11 },
+    incumbent:"Anthony Albanese (ALP)", incumbentParty:"ALP",
+    modelEnabled:true,
+  },
   federal_2022: {
     label:"Federal 2022", jurisdiction:"Federal",
     chamber:"House of Representatives", date:"21 May 2022",
     totalSeats:151, majority:76, twopp:52.13,
-    seats:SEATS, counts:null,
+    seats:SEATS_2022, counts:null,
     incumbent:"Anthony Albanese (ALP)", incumbentParty:"ALP",
-    modelEnabled:true,
+    modelEnabled:false,
   },
   nsw_2023: {
     label:"NSW 2023", jurisdiction:"New South Wales",
@@ -948,7 +1183,7 @@ const ELECTION_DATA = {
   },
 };
 const ELECTION_OPTIONS = [
-  "federal_2022","nsw_2023","vic_2022","qld_2024",
+  "federal_2025","federal_2022","nsw_2023","vic_2022","qld_2024",
   "wa_2025","sa_2022","tas_2024","act_2024","nt_2024",
 ];
 
@@ -1109,22 +1344,22 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     const override = overrides[seat.id];
 
     // For seats with a primary vote override, derive effective swings from override
-    // primaries relative to the 2022 national baseline (used for non-ALP/Coal branches).
+    // primaries relative to the 2025 national baseline (used for non-ALP/Coal branches).
     let effAlpSwing, effCoalSwing, effGrnSwing, effTealSwing;
     let newFp = null;
     if (override) {
       newFp = {
-        alp:  Math.max(0, override.alp  ?? (BASELINE_2022.alp  + swings.alp)),
-        coal: Math.max(0, override.coal ?? (BASELINE_2022.coal + swings.coal)),
-        grn:  Math.max(0, override.grn  ?? (BASELINE_2022.grn  + swings.grn)),
-        teal: Math.max(0, override.teal ?? (BASELINE_2022.teal + swings.teal)),
-        on:   Math.max(0, override.on   ?? (BASELINE_2022.on   + swings.on)),
+        alp:  Math.max(0, override.alp  ?? (BASELINE_2025.alp  + swings.alp)),
+        coal: Math.max(0, override.coal ?? (BASELINE_2025.coal + swings.coal)),
+        grn:  Math.max(0, override.grn  ?? (BASELINE_2025.grn  + swings.grn)),
+        teal: Math.max(0, override.teal ?? (BASELINE_2025.teal + swings.teal)),
+        on:   Math.max(0, override.on   ?? (BASELINE_2025.on   + swings.on)),
       };
       newFp.other = Math.max(0, 100 - newFp.alp - newFp.coal - newFp.grn - newFp.teal - newFp.on);
-      effAlpSwing  = newFp.alp  - BASELINE_2022.alp;
-      effCoalSwing = newFp.coal - BASELINE_2022.coal;
-      effGrnSwing  = newFp.grn  - BASELINE_2022.grn;
-      effTealSwing = newFp.teal - BASELINE_2022.teal;
+      effAlpSwing  = newFp.alp  - BASELINE_2025.alp;
+      effCoalSwing = newFp.coal - BASELINE_2025.coal;
+      effGrnSwing  = newFp.grn  - BASELINE_2025.grn;
+      effTealSwing = newFp.teal - BASELINE_2025.teal;
     } else {
       effAlpSwing  = swings.alp;
       effCoalSwing = swings.coal;
@@ -1142,8 +1377,8 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     // Compares estimated ON primary against estimated ALP and Coalition primaries.
     let activeTcpMatchup = override?.tcpMatchup ?? null;
     if (!activeTcpMatchup && estOnFp >= onThreshold) {
-      const estAlp  = override?.alp  != null ? override.alp  : Math.max(0, BASELINE_2022.alp  + swings.alp);
-      const estCoal = override?.coal != null ? override.coal : Math.max(0, BASELINE_2022.coal + swings.coal);
+      const estAlp  = override?.alp  != null ? override.alp  : Math.max(0, BASELINE_2025.alp  + swings.alp);
+      const estCoal = override?.coal != null ? override.coal : Math.max(0, BASELINE_2025.coal + swings.coal);
       if (estOnFp > estAlp && estCoal >= estAlp) {
         // ON beats ALP on primaries → ON vs ALP final
         activeTcpMatchup = "on_v_alp";
@@ -1188,11 +1423,11 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     if (activeTcpMatchup === "on_v_alp") {
       const ef = override?.prefFlows ?? prefFlows;
       const fp = newFp ?? (() => {
-        const a = Math.max(0, BASELINE_2022.alp + swings.alp);
-        const c = Math.max(0, BASELINE_2022.coal + swings.coal);
-        const g = Math.max(0, BASELINE_2022.grn + swings.grn);
-        const t = Math.max(0, BASELINE_2022.teal + swings.teal);
-        const o = Math.max(0, BASELINE_2022.on + swings.on);
+        const a = Math.max(0, BASELINE_2025.alp + swings.alp);
+        const c = Math.max(0, BASELINE_2025.coal + swings.coal);
+        const g = Math.max(0, BASELINE_2025.grn + swings.grn);
+        const t = Math.max(0, BASELINE_2025.teal + swings.teal);
+        const o = Math.max(0, BASELINE_2025.on + swings.on);
         return { alp:a, coal:c, grn:g, teal:t, on:o, other:Math.max(0, 100-a-c-g-t-o) };
       })();
       // Use ON-race-specific flows: grn_alp_v_on, teal_alp_v_on, other_alp_v_on (all higher
@@ -1224,11 +1459,11 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     if (activeTcpMatchup === "on_v_coal") {
       const ef = override?.prefFlows ?? prefFlows;
       const fp = newFp ?? (() => {
-        const a = Math.max(0, BASELINE_2022.alp + swings.alp);
-        const c = Math.max(0, BASELINE_2022.coal + swings.coal);
-        const g = Math.max(0, BASELINE_2022.grn + swings.grn);
-        const t = Math.max(0, BASELINE_2022.teal + swings.teal);
-        const o = Math.max(0, BASELINE_2022.on + swings.on);
+        const a = Math.max(0, BASELINE_2025.alp + swings.alp);
+        const c = Math.max(0, BASELINE_2025.coal + swings.coal);
+        const g = Math.max(0, BASELINE_2025.grn + swings.grn);
+        const t = Math.max(0, BASELINE_2025.teal + swings.teal);
+        const o = Math.max(0, BASELINE_2025.on + swings.on);
         return { alp:a, coal:c, grn:g, teal:t, on:o, other:Math.max(0, 100-a-c-g-t-o) };
       })();
       // Use ON-race-specific flows: grn_on_v_coal, teal_on_v_coal, other_on_v_coal (all low
@@ -1614,8 +1849,8 @@ export default function App() {
   const [sortDir,      setSortDir]      = useState("asc");
   const [activeTab,    setActiveTab]    = useState("overview");
   // Overview uses all elections; Model uses only elections with a full model built
-  const [selectedOverviewId, setSelectedOverviewId] = useState("federal_2022");
-  const [selectedModelId,    setSelectedModelId]    = useState("federal_2022");
+  const [selectedOverviewId, setSelectedOverviewId] = useState("federal_2025");
+  const [selectedModelId,    setSelectedModelId]    = useState("federal_2025");
 
   // ── Polls tab state ──
   const [polls,       setPolls]       = useState(INITIAL_POLLS);
@@ -1624,7 +1859,7 @@ export default function App() {
   const [newPoll,     setNewPoll]     = useState({ pollster:"", date:"", alp:"", coal:"", grn:"", oth:"", tpp:"", n:"" });
 
   // ── Model tab state ──
-  const [primaries,      setPrimaries]      = useState({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on, undecided:0 });
+  const [primaries,      setPrimaries]      = useState({ alp:BASELINE_2025.alp, coal:BASELINE_2025.coal, grn:BASELINE_2025.grn, teal:BASELINE_2025.teal, on:BASELINE_2025.on, undecided:0 });
   const [prefFlows,      setPrefFlows]      = useState({
     // Standard flows (used in ALP vs Coalition finals)
     grn_alp:         0.81,
@@ -1642,13 +1877,13 @@ export default function App() {
     teal_on_v_coal:  0.12,  // Independents → ON
     other_on_v_coal: 0.25,  // Other → ON
   });
-  // Derive swings from primaries vs 2022 baseline — used by computeModelledSeats
+  // Derive swings from primaries vs 2025 baseline — used by computeModelledSeats
   const swings = {
-    alp:  +(primaries.alp  - BASELINE_2022.alp ).toFixed(2),
-    coal: +(primaries.coal - BASELINE_2022.coal).toFixed(2),
-    grn:  +(primaries.grn  - BASELINE_2022.grn ).toFixed(2),
-    teal: +(primaries.teal - BASELINE_2022.teal).toFixed(2),
-    on:   +(primaries.on   - BASELINE_2022.on  ).toFixed(2),
+    alp:  +(primaries.alp  - BASELINE_2025.alp ).toFixed(2),
+    coal: +(primaries.coal - BASELINE_2025.coal).toFixed(2),
+    grn:  +(primaries.grn  - BASELINE_2025.grn ).toFixed(2),
+    teal: +(primaries.teal - BASELINE_2025.teal).toFixed(2),
+    on:   +(primaries.on   - BASELINE_2025.on  ).toFixed(2),
   };
   const [seatOverrides,  setSeatOverrides]  = useState({});  // {seatId: {alp,coal,grn,teal,on,prefFlows?}}
   const [overrideSearch, setOverrideSearch] = useState("");
@@ -1719,7 +1954,7 @@ export default function App() {
 
   // ── Modelling ──
   const nat2ppSwing = useMemo(() =>
-    computeNat2pp(primaries, prefFlows) - NATIONAL_2PP_2022,
+    computeNat2pp(primaries, prefFlows) - NATIONAL_2PP_2025,
     [primaries, prefFlows]);
 
   const modelledSeats = useMemo(() =>
@@ -1974,8 +2209,8 @@ export default function App() {
   const actHasChanges  = Object.entries(ACT_BL).some(([k,v])=>Math.abs((actPrim[k]??v)-v)>0.05) || (actPrim.undecided||0)>0;
 
   const hasChanges =
-    primaries.alp !== BASELINE_2022.alp || primaries.coal !== BASELINE_2022.coal ||
-    primaries.grn !== BASELINE_2022.grn || primaries.teal !== BASELINE_2022.teal || primaries.on !== BASELINE_2022.on ||
+    primaries.alp !== BASELINE_2025.alp || primaries.coal !== BASELINE_2025.coal ||
+    primaries.grn !== BASELINE_2025.grn || primaries.teal !== BASELINE_2025.teal || primaries.on !== BASELINE_2025.on ||
     (primaries.undecided||0) > 0 ||
     prefFlows.grn_alp !== 0.81 || prefFlows.teal_alp !== 0.62 || prefFlows.on_alp !== 0.43 || prefFlows.other_alp !== 0.50 ||
     prefFlows.coal_alp_v_on !== 0.10 || prefFlows.grn_alp_v_on !== 0.90 ||
@@ -2157,7 +2392,7 @@ export default function App() {
   const resetPrefFlows = () => setPrefFlows(PREF_FLOWS_2022);
 
   const resetModel = () => {
-    setPrimaries({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on, undecided:0 });
+    setPrimaries({ alp:BASELINE_2025.alp, coal:BASELINE_2025.coal, grn:BASELINE_2025.grn, teal:BASELINE_2025.teal, on:BASELINE_2025.on, undecided:0 });
     setPrefFlows(PREF_FLOWS_2022);
     setOnThreshold(6.5);
     setSeatOverrides({});
@@ -2584,11 +2819,11 @@ export default function App() {
                   const effTpp = latestPoll.tpp ?? imputedTpp(latestPoll);
                   const tppIsEst = latestPoll.tpp == null;
                   return [
-                    { label:"ALP primary",       value:latestPoll.alp,  avg:pollAvg?.alp,  color:"#DC2626", delta: latestPoll.alp - BASELINE_2022.alp, est:false },
-                    { label:"Coalition primary",  value:latestPoll.coal, avg:pollAvg?.coal, color:"#1D4ED8", delta: latestPoll.coal - BASELINE_2022.coal, est:false },
-                    { label:"Greens primary",     value:latestPoll.grn,  avg:pollAvg?.grn,  color:"#059669", delta: latestPoll.grn - BASELINE_2022.grn, est:false },
+                    { label:"ALP primary",       value:latestPoll.alp,  avg:pollAvg?.alp,  color:"#DC2626", delta: latestPoll.alp - BASELINE_2025.alp, est:false },
+                    { label:"Coalition primary",  value:latestPoll.coal, avg:pollAvg?.coal, color:"#1D4ED8", delta: latestPoll.coal - BASELINE_2025.coal, est:false },
+                    { label:"Greens primary",     value:latestPoll.grn,  avg:pollAvg?.grn,  color:"#059669", delta: latestPoll.grn - BASELINE_2025.grn, est:false },
                     { label:"Other / minor",      value:latestPoll.oth,  avg:pollAvg?.oth,  color:"#7C3AED", delta: null, est:false },
-                    { label: tppIsEst ? "2PP ALP (est.)" : "2PP (ALP)", value:effTpp, avg:pollAvg?.tpp, color:"#DC2626", delta: effTpp != null ? effTpp - NATIONAL_2PP_2022 : null, est:tppIsEst },
+                    { label: tppIsEst ? "2PP ALP (est.)" : "2PP (ALP)", value:effTpp, avg:pollAvg?.tpp, color:"#DC2626", delta: effTpp != null ? effTpp - NATIONAL_2PP_2025 : null, est:tppIsEst },
                   ];
                 })().map(card => (
                   <div key={card.label} style={{ background:"#F9FAFB", borderRadius:8, border:"1px solid #E5E7EB", padding:"12px 14px" }}>
@@ -2601,7 +2836,7 @@ export default function App() {
                     </div>
                     {card.delta != null && (
                       <div style={{ fontSize:11, fontWeight:600, color: card.delta>0?"#059669":card.delta<0?"#DC2626":"#9CA3AF", marginTop:2 }}>
-                        {card.delta>0?"+":""}{card.delta.toFixed(1)} vs 2022
+                        {card.delta>0?"+":""}{card.delta.toFixed(1)} vs 2025
                       </div>
                     )}
                     <div style={{ fontSize:11, color:"#6B7280", marginTop:2 }}>{card.label}</div>
@@ -2717,7 +2952,7 @@ export default function App() {
                   : `${el.date} · ${el.chamber} · ${el.totalSeats} seats · Majority: ${el.majority}`}
               </p>
             </div>
-            {el.modelEnabled && selectedModelId === "federal_2022" && (
+            {el.modelEnabled && selectedModelId === "federal_2025" && (
               <div style={{ display:"flex", gap:8 }}>
                 {hasChanges && (
                   <button onClick={resetModel}
@@ -2796,17 +3031,17 @@ export default function App() {
           })()}
 
           {/* ── Federal scenario builder ── */}
-          {el.modelEnabled && selectedModelId === "federal_2022" && <div style={{ display:"grid", gridTemplateColumns:"320px 1fr", gap:16, alignItems:"start" }}>
+          {el.modelEnabled && selectedModelId === "federal_2025" && <div style={{ display:"grid", gridTemplateColumns:"320px 1fr", gap:16, alignItems:"start" }}>
 
             {/* ── Controls panel ── */}
             <div>
               <div style={panelStyle}>
                 <div style={sectionHead}>Primary vote %</div>
-                <PrimaryInput label="ALP"          value={primaries.alp}  onChange={v=>setPrimaries(p=>({...p,alp:v}))}  color="#DC2626" baseline={BASELINE_2022.alp}  />
-                <PrimaryInput label="Coalition"    value={primaries.coal} onChange={v=>setPrimaries(p=>({...p,coal:v}))} color="#1D4ED8" baseline={BASELINE_2022.coal} />
-                <PrimaryInput label="Greens"       value={primaries.grn}  onChange={v=>setPrimaries(p=>({...p,grn:v}))}  color="#059669" baseline={BASELINE_2022.grn}  />
-                <PrimaryInput label="Independents" value={primaries.teal} onChange={v=>setPrimaries(p=>({...p,teal:v}))} color="#0891B2" baseline={BASELINE_2022.teal} />
-                <PrimaryInput label="One Nation"   value={primaries.on}   onChange={v=>setPrimaries(p=>({...p,on:v}))}   color="#B45309" baseline={BASELINE_2022.on}   />
+                <PrimaryInput label="ALP"          value={primaries.alp}  onChange={v=>setPrimaries(p=>({...p,alp:v}))}  color="#DC2626" baseline={BASELINE_2025.alp}  />
+                <PrimaryInput label="Coalition"    value={primaries.coal} onChange={v=>setPrimaries(p=>({...p,coal:v}))} color="#1D4ED8" baseline={BASELINE_2025.coal} />
+                <PrimaryInput label="Greens"       value={primaries.grn}  onChange={v=>setPrimaries(p=>({...p,grn:v}))}  color="#059669" baseline={BASELINE_2025.grn}  />
+                <PrimaryInput label="Independents" value={primaries.teal} onChange={v=>setPrimaries(p=>({...p,teal:v}))} color="#0891B2" baseline={BASELINE_2025.teal} />
+                <PrimaryInput label="One Nation"   value={primaries.on}   onChange={v=>setPrimaries(p=>({...p,on:v}))}   color="#B45309" baseline={BASELINE_2025.on}   />
                 <PrimaryInput label="Undecided" value={primaries.undecided??0} onChange={v=>setPrimaries(p=>({...p,undecided:v}))} color="#9CA3AF" baseline={0} />
                 {(() => {
                   const entered = +(primaries.alp + primaries.coal + primaries.grn + primaries.teal + primaries.on).toFixed(1);
@@ -2823,7 +3058,7 @@ export default function App() {
                   );
                 })()}
                 <div style={{ fontSize:11, color:"#9CA3AF", marginTop:6 }}>
-                  2022 result: ALP {BASELINE_2022.alp}% · Coal {BASELINE_2022.coal}% · Grn {BASELINE_2022.grn}% · Ind {BASELINE_2022.teal}% · ON {BASELINE_2022.on}%
+                  2025 result: ALP {BASELINE_2025.alp}% · Coal {BASELINE_2025.coal}% · Grn {BASELINE_2025.grn}% · Ind {BASELINE_2025.teal}% · ON {BASELINE_2025.on}%
                 </div>
               </div>
 
@@ -2831,7 +3066,7 @@ export default function App() {
               <div style={panelStyle}>
                 <div style={sectionHead}>One Nation scenarios</div>
                 <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom:12 }}>
-                  {[[4.7,"2022 baseline"],[7,"Moderate rise"],[9,"Strong rise"],[11,"Peak (~2016)"]].map(([pct, label]) => {
+                  {[[6.4,"2025 baseline"],[8,"Moderate rise"],[10,"Strong rise"],[13,"Peak (~2016)"]].map(([pct, label]) => {
                     const active = Math.abs(primaries.on - pct) < 0.05;
                     return (
                       <button key={pct} onClick={() => setPrimaries(p=>({...p,on:pct}))}
@@ -2947,7 +3182,7 @@ export default function App() {
                     <>
                       <div style={{ fontSize:30, fontWeight:800, color: implied2pp>=50?"#059669":"#DC2626" }}>{implied2pp.toFixed(1)}%</div>
                       <div style={{ fontSize:12, color:"#6B7280", marginTop:2 }}>
-                        {implied2pp>=50 ? `▲ +${(implied2pp-NATIONAL_2PP_2022).toFixed(1)} vs 2022` : `▼ ${(implied2pp-NATIONAL_2PP_2022).toFixed(1)} vs 2022`}
+                        {implied2pp>=50 ? `▲ +${(implied2pp-NATIONAL_2PP_2025).toFixed(1)} vs 2025` : `▼ ${(implied2pp-NATIONAL_2PP_2025).toFixed(1)} vs 2025`}
                       </div>
                     </>
                   ) : <div style={{ fontSize:20, color:"#9CA3AF" }}>—</div>}
@@ -4231,7 +4466,7 @@ export default function App() {
             </div>;
           })()}
 
-          {selectedModelId === "federal_2022" && (
+          {selectedModelId === "federal_2025" && (
           <>{/* ── Demographics Overview (collapsible) ── */}
           <div style={{ marginTop:8 }}>
             <button onClick={() => setDemogSectionOpen(o => !o)}

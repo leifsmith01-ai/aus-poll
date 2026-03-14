@@ -9,6 +9,12 @@ Each election has a consistent set of CSV/Excel files following standard naming 
 # ─── Election event IDs ──────────────────────────────────────────────────────
 # These are the AEC internal event IDs used in all file/URL naming.
 ELECTIONS = {
+    2025: {
+        "event_id": 29581,   # Verify at results.aec.gov.au — update if URL returns 404
+        "name": "2025 Australian Federal Election",
+        "date": "2025-05-03",
+        "results_base_url": "https://results.aec.gov.au/29581/Website/Downloads",
+    },
     2022: {
         "event_id": 27966,
         "name": "2022 Australian Federal Election",
