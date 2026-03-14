@@ -709,6 +709,109 @@ function getFpGroups(seat) {
   return fp;
 }
 
+// ── Seat elasticity model ────────────────────────────────────────────────────
+// Marginal seats historically swing more than safe seats. Based on 2016→2019
+// and 2019→2022 federal elections, a simple multiplier is applied to the national
+// 2PP swing before adding it to each seat's baseline:
+//   ≤5pp margin  (knife-edge):  1.30× — these seats are ultra-sensitive to swing
+//   6–10pp       (marginal):    1.15×
+//   11–20pp      (competitive): 1.00× — no adjustment needed
+//   >20pp        (safe):        0.80× — safe seats absorb less swing
+function seatElasticityMult(alp2pp) {
+  const m = Math.abs(alp2pp - 50);
+  if (m <= 5)  return 1.30;
+  if (m <= 10) return 1.15;
+  if (m <= 20) return 1.00;
+  return 0.80;
+}
+
+// ── Uncertainty quantification ────────────────────────────────────────────────
+// Standard normal CDF approximation (Abramowitz & Stegun 26.2.17, max error 7.5e-8).
+function normCDF(x) {
+  const t    = 1 / (1 + 0.2316419 * Math.abs(x));
+  const poly = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+  const pdf  = Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+  const p    = 1 - pdf * poly;
+  return x >= 0 ? p : 1 - p;
+}
+
+// Compute ALP seat-count distribution by integrating over a normal distribution
+// of national 2PP swing uncertainty (swingStd pp). Uses a 40-point grid over
+// ±3σ to evaluate the seat-count CDF, then reads off quantiles.
+//
+// Per-seat ALP win probability = Φ((base + ε·μ − 50) / (ε·σ))
+// where ε is the elasticity multiplier and μ is nat2ppSwing.
+// Non-ALP/Coal seats are held at their 2022 winner.
+function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity) {
+  const COALITION = new Set(["LP","LNP","NP","CLP"]);
+
+  const alpCoalSeats = seats.filter(s => {
+    const parties = s.tcp.map(t => t.party);
+    return parties.includes("ALP") && parties.some(p => COALITION.has(p));
+  });
+  const nonAlpCoalAlp = seats.filter(s => {
+    const parties = s.tcp.map(t => t.party);
+    return !(parties.includes("ALP") && parties.some(p => COALITION.has(p))) && s.winner.party === "ALP";
+  }).length;
+
+  // Per-seat win probabilities (analytical)
+  const seatWinProbs = {};
+  seats.forEach(s => { seatWinProbs[s.id] = s.winner.party === "ALP" ? 1.0 : 0.0; });
+  let alpMeanSeats = nonAlpCoalAlp;
+  alpCoalSeats.forEach(seat => {
+    const base = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
+    const eps  = useElasticity ? seatElasticityMult(base) : 1.0;
+    const p    = normCDF((base + eps * nat2ppSwing - 50) / (eps * swingStd));
+    seatWinProbs[seat.id] = Math.round(p * 1000) / 1000;
+    alpMeanSeats += p;
+  });
+
+  // Seat-count CDF via 40-point numerical integration over ±3σ
+  const N_GRID = 40;
+  const gridDeltas = Array.from({ length: N_GRID }, (_, i) =>
+    nat2ppSwing + swingStd * (-3 + 6 * i / (N_GRID - 1))
+  );
+  const gridPdfs = gridDeltas.map(d =>
+    Math.exp(-0.5 * ((d - nat2ppSwing) / swingStd) ** 2)
+  );
+  const totalPdf = gridPdfs.reduce((s, p) => s + p, 0);
+
+  const seatCountCdf = {};
+  gridDeltas.forEach((delta, gi) => {
+    const w = gridPdfs[gi] / totalPdf;
+    let count = nonAlpCoalAlp;
+    alpCoalSeats.forEach(seat => {
+      const base = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
+      const eps  = useElasticity ? seatElasticityMult(base) : 1.0;
+      if (base + eps * delta >= 50) count++;
+    });
+    seatCountCdf[count] = (seatCountCdf[count] ?? 0) + w;
+  });
+
+  const sorted = Object.keys(seatCountCdf).map(Number).sort((a, b) => a - b);
+  let cum = 0;
+  const cdf = sorted.map(c => { cum += seatCountCdf[c]; return { c, cum }; });
+  const quantile = p => (cdf.find(({ cum }) => cum >= p) ?? cdf[cdf.length - 1]).c;
+  const pMajority = sorted.filter(c => c >= 76).reduce((s, c) => s + seatCountCdf[c], 0);
+
+  const alpVar = alpCoalSeats.reduce((s, seat) => {
+    const p = seatWinProbs[seat.id];
+    return s + p * (1 - p);
+  }, 0);
+
+  return {
+    alpMean:     Math.round(alpMeanSeats * 10) / 10,
+    alpStd:      Math.round(Math.sqrt(alpVar) * 10) / 10,
+    alpP05:      quantile(0.05),
+    alpP25:      quantile(0.25),
+    alpP50:      quantile(0.50),
+    alpP75:      quantile(0.75),
+    alpP95:      quantile(0.95),
+    pMajority:   Math.round(pMajority * 100),
+    seatWinProbs,
+  };
+}
+
 // Compute implied national ALP 2PP from primary votes and preference flows.
 // Used to derive nat2ppSwing for the uniform swing model.
 function computeNat2pp(prim, flows) {
@@ -732,7 +835,7 @@ function computeNat2pp(prim, flows) {
 //    baseline + national swing) exceeds onThreshold, the model automatically determines
 //    whether the seat enters an ON vs ALP or ON vs Coalition TCP. Manual tcpMatchup
 //    overrides always take precedence over auto-detection.
-function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, onThreshold) {
+function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, onThreshold, useElasticity = false) {
   return seats.map(seat => {
     const override = overrides[seat.id];
 
@@ -898,8 +1001,10 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         const c2 = newFp.coal + newFp.grn*(1-ef.grn_alp) + newFp.teal*(1-ef.teal_alp) + newFp.on*(1-ef.on_alp) + newFp.other*(1-ef.other_alp);
         projAlp2pp = a2 / (a2 + c2) * 100;
       } else {
-        // Uniform national swing applied to this seat's 2022 ALP 2PP baseline
-        projAlp2pp = Math.max(0, Math.min(100, baseAlp2pp + nat2ppSwing));
+        // Uniform national swing applied to this seat's 2022 ALP 2PP baseline.
+        // With elasticity enabled, marginal seats swing proportionally more.
+        const eps = useElasticity ? seatElasticityMult(baseAlp2pp) : 1.0;
+        projAlp2pp = Math.max(0, Math.min(100, baseAlp2pp + nat2ppSwing * eps));
       }
       projWinnerGroup = projAlp2pp >= 50 ? "alp" : "coalition";
       projWinnerParty = projAlp2pp >= 50 ? "ALP" : seat.tcp.find(t => t.party !== "ALP")?.party;
@@ -1187,6 +1292,8 @@ export default function App() {
   const [onSeatSort,        setOnSeatSort]        = useState({ field:"name", dir:"asc" });
   const [onSeatFilter,      setOnSeatFilter]      = useState("");
   const [onThreshold,       setOnThreshold]       = useState(6.5);   // % ON primary to auto-detect TCP
+  const [useElasticity,     setUseElasticity]     = useState(false); // apply seat-level swing elasticity
+  const [swingStd,          setSwingStd]          = useState(1.5);   // polling uncertainty (pp std dev)
   const [onCompetitiveOnly, setOnCompetitiveOnly] = useState(false); // filter panel to competitive seats only
   const [showAdvancedFlows, setShowAdvancedFlows] = useState(false); // show/hide advanced ON race flows
 
@@ -1250,8 +1357,12 @@ export default function App() {
     [primaries, prefFlows]);
 
   const modelledSeats = useMemo(() =>
-    computeModelledSeats(SEATS, swings, prefFlows, seatOverrides, nat2ppSwing, onThreshold),
-    [swings, prefFlows, seatOverrides, nat2ppSwing, onThreshold]);
+    computeModelledSeats(SEATS, swings, prefFlows, seatOverrides, nat2ppSwing, onThreshold, useElasticity),
+    [swings, prefFlows, seatOverrides, nat2ppSwing, onThreshold, useElasticity]);
+
+  const uncertainty = useMemo(() =>
+    computeUncertainty(SEATS, nat2ppSwing, swingStd, useElasticity),
+    [nat2ppSwing, swingStd, useElasticity]);
 
   const projCounts = useMemo(() => {
     const c = {};
@@ -2297,6 +2408,100 @@ export default function App() {
                 </div>
               </div>
 
+              {/* ── Uncertainty / confidence interval panel ── */}
+              <div style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:12, padding:"14px 18px", marginBottom:14 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12 }}>
+                  <span style={{ fontWeight:700, color:"#374151" }}>Seat-count uncertainty</span>
+                  <span style={{ fontSize:11, color:"#6B7280", background:"#F3F4F6", padding:"2px 7px", borderRadius:10 }}>
+                    ±{swingStd}pp swing σ
+                  </span>
+                </div>
+
+                {/* ALP seat count distribution */}
+                <div style={{ marginBottom:12 }}>
+                  <div style={{ fontSize:12, color:"#6B7280", marginBottom:4 }}>ALP projected seats (with uncertainty)</div>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:8, marginBottom:4 }}>
+                    <span style={{ fontSize:28, fontWeight:800, color:"#DC2626" }}>{uncertainty.alpMean}</span>
+                    <span style={{ fontSize:13, color:"#6B7280" }}>seats (mean)</span>
+                    <span style={{ fontSize:13, color:"#9CA3AF" }}>±{uncertainty.alpStd}</span>
+                  </div>
+                  <div style={{ fontSize:12, color:"#374151", marginBottom:2 }}>
+                    <span style={{ color:"#6B7280" }}>80% CI: </span>
+                    <strong>{uncertainty.alpP10 ?? uncertainty.alpP25}–{uncertainty.alpP90 ?? uncertainty.alpP75}</strong>
+                    &nbsp;seats
+                    <span style={{ marginLeft:10, color:"#6B7280" }}>95% CI: </span>
+                    <strong>{uncertainty.alpP05}–{uncertainty.alpP95}</strong>
+                    &nbsp;seats
+                  </div>
+                  <div style={{ fontSize:12, color:"#374151", marginTop:4 }}>
+                    <span style={{ color:"#6B7280" }}>P(ALP majority ≥76): </span>
+                    <strong style={{ color: uncertainty.pMajority >= 50 ? "#DC2626" : "#1D4ED8" }}>
+                      {uncertainty.pMajority}%
+                    </strong>
+                  </div>
+                </div>
+
+                {/* Visual quantile bar */}
+                <div style={{ position:"relative", height:20, background:"#F3F4F6", borderRadius:6, overflow:"hidden", marginBottom:10 }}>
+                  {/* 95% CI bar */}
+                  <div style={{
+                    position:"absolute",
+                    left:`${Math.max(0,(uncertainty.alpP05 - 50) / 101 * 100)}%`,
+                    width:`${Math.min(100,(uncertainty.alpP95 - uncertainty.alpP05) / 101 * 100)}%`,
+                    height:"100%", background:"#FECACA", borderRadius:4,
+                  }} />
+                  {/* 80% CI bar */}
+                  <div style={{
+                    position:"absolute",
+                    left:`${Math.max(0,(uncertainty.alpP25 - 50) / 101 * 100)}%`,
+                    width:`${Math.min(100,(uncertainty.alpP75 - uncertainty.alpP25) / 101 * 100)}%`,
+                    height:"100%", background:"#FCA5A5",
+                  }} />
+                  {/* Median marker */}
+                  <div style={{
+                    position:"absolute",
+                    left:`${Math.max(0,(uncertainty.alpP50 - 50) / 101 * 100)}%`,
+                    width:2, height:"100%", background:"#DC2626",
+                  }} />
+                  {/* Majority threshold at 76 seats */}
+                  <div style={{
+                    position:"absolute",
+                    left:`${(76 - 50) / 101 * 100}%`,
+                    width:1, height:"100%", background:"#6B7280",
+                  }} title="76 seats = majority" />
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between", fontSize:10, color:"#9CA3AF" }}>
+                  <span>{uncertainty.alpP05}</span>
+                  <span style={{ color:"#DC2626", fontWeight:700 }}>{uncertainty.alpP50} median</span>
+                  <span>76 maj.</span>
+                  <span>{uncertainty.alpP95}</span>
+                </div>
+
+                {/* Model options */}
+                <div style={{ borderTop:"1px solid #F3F4F6", marginTop:12, paddingTop:10 }}>
+                  <div style={{ fontSize:12, fontWeight:600, color:"#374151", marginBottom:8 }}>Model options</div>
+                  <label style={{ display:"flex", alignItems:"center", gap:8, fontSize:12, color:"#374151", cursor:"pointer", marginBottom:8 }}>
+                    <input type="checkbox" checked={useElasticity} onChange={e => setUseElasticity(e.target.checked)} />
+                    Seat elasticity (marginal seats swing more)
+                    <span style={{ fontSize:11, color:"#9CA3AF" }}>
+                      {useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}
+                    </span>
+                  </label>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, fontSize:12, color:"#374151" }}>
+                    <label style={{ minWidth:130 }}>Swing uncertainty (σ):</label>
+                    <input
+                      type="range" min={0.5} max={4} step={0.25} value={swingStd}
+                      onChange={e => setSwingStd(+e.target.value)}
+                      style={{ flex:1 }}
+                    />
+                    <span style={{ minWidth:36, fontWeight:600 }}>{swingStd}pp</span>
+                  </div>
+                  <div style={{ fontSize:11, color:"#9CA3AF", marginTop:4 }}>
+                    Typical Australian federal election polling MAE ≈ 1–2pp nationally.
+                  </div>
+                </div>
+              </div>
+
               {/* ── Seat-at-risk rankings ── */}
               {(() => {
                 const filterBtnStyle = (active) => ({
@@ -2326,7 +2531,7 @@ export default function App() {
 
                     {/* Column headers */}
                     <div style={{ display:"grid", gridTemplateColumns:"1fr 48px 80px 80px 80px 70px", gap:4, borderBottom:"2px solid #F3F4F6", paddingBottom:4, marginBottom:4 }}>
-                      {[["Seat","#374151"],["State","#6B7280"],["2022","#6B7280"],["Projected","#6B7280"],["Margin","#6B7280"],["",""]].map(([label, color], i) => (
+                      {[["Seat","#374151"],["State","#6B7280"],["2022","#6B7280"],["Projected","#6B7280"],["Margin","#6B7280"],["ALP win%","#6B7280"],["",""]].map(([label, color], i) => (
                         <div key={i} style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.05em", color, paddingLeft: i===0?2:0 }}>{label}</div>
                       ))}
                     </div>
@@ -2341,11 +2546,12 @@ export default function App() {
                         const isExpanded = expandedModelSeatId === seat.id;
                         const d = getDemog(seat.id);
 
+                        const seatWinProb = uncertainty.seatWinProbs[seat.id];
                         return (
                           <div key={seat.id}>
                             <div onClick={() => setExpandedModelSeatId(prev => prev === seat.id ? null : seat.id)}
                               style={{
-                                display:"grid", gridTemplateColumns:"1fr 48px 80px 80px 80px 70px", gap:4, alignItems:"center",
+                                display:"grid", gridTemplateColumns:"1fr 48px 80px 80px 80px 52px 60px", gap:4, alignItems:"center",
                                 padding:"5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
                                 borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
                                 opacity: isSafe ? 0.55 : 1,
@@ -2365,6 +2571,15 @@ export default function App() {
                               </div>
                               <span style={{ fontSize:12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
                                 {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
+                              </span>
+                              <span style={{ fontSize:11, fontWeight:700, color:
+                                seatWinProb == null ? "#9CA3AF"
+                                : seatWinProb >= 0.85 ? "#DC2626"
+                                : seatWinProb >= 0.60 ? "#F59E0B"
+                                : seatWinProb >= 0.40 ? "#6B7280"
+                                : "#1D4ED8"
+                              }}>
+                                {seatWinProb != null ? `${Math.round(seatWinProb * 100)}%` : "—"}
                               </span>
                               <span style={{ fontSize:10, color: changed ? projColor : "#9CA3AF", fontWeight:600 }}>
                                 {changed ? "CHANGED" : ""}
