@@ -66,7 +66,7 @@ const GROUP_CONFIG = {
   alp:        { label:"Labor",              color:"#DC2626" },
   coalition:  { label:"Coalition",          color:"#1D4ED8" },
   greens:     { label:"Greens",             color:"#059669" },
-  teal:       { label:"Independents",       color:"#0891B2" },
+  teal:       { label:"Teal Ind.",           color:"#0891B2" },
   one_nation: { label:"One Nation",         color:"#B45309" },
   crossbench: { label:"Other Crossbench",   color:"#7C3AED" },
 };
@@ -626,6 +626,12 @@ const _QLD = [
   [7233,"Gympie",       "QLD","LNP","Tony Perrett",     "LNP","ALP", 8.0],
   [7234,"Buderim",      "QLD","LNP","Brent Mickelberg", "LNP","ALP", 7.0],
   [7235,"Caloundra",    "QLD","LNP","Jason Hunt",       "LNP","ALP", 6.5],
+  // LNP seats where One Nation is the TCP challenger (rural/regional QLD)
+  [7261,"Mirani",       "QLD","LNP","Glenn Butcher",    "LNP","ON",  1.8],
+  [7262,"Condamine",    "QLD","LNP","Pat Weir",         "LNP","ON",  2.6],
+  [7263,"Callide",      "QLD","LNP","Colin Boyce",      "LNP","ON",  3.5],
+  [7264,"Hinchinbrook", "QLD","LNP","Nick Dametto",     "LNP","ON",  4.5],
+  [7265,"Southern Downs","QLD","LNP","James Lister",    "LNP","ON",  5.5],
   // ALP safe
   [7241,"Bundaberg",    "QLD","ALP","Tom Smith",        "ALP","LNP",10.0],
   [7242,"Rockhampton",  "QLD","ALP","Barry O'Rourke",   "ALP","LNP",12.0],
@@ -1409,6 +1415,7 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
     const isGrn1  = t1 === "GRN";
     const isGrn2  = t2 === "GRN";
     const isInd1  = !isAlp1 && !isCoal1 && !isGrn1;
+    const isInd2  = !isAlp2 && !isCoal2 && !isGrn2;
 
     let swingToT1 = 0;
     if      (isAlp1 && isCoal2)  swingToT1 =  swing2pp;
@@ -1417,6 +1424,7 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
     else if (isGrn1 && isCoal2)  swingToT1 =  (swings.grn - (swings.lp ?? swings.lnp ?? swings.clp ?? 0)) / 2;
     else if (isAlp1 && isGrn2)   swingToT1 =  (swings.alp - swings.grn) / 2;
     else if (isCoal1 && isGrn2)  swingToT1 = -(swings.grn - (swings.lp ?? swings.lnp ?? swings.clp ?? 0)) / 2;
+    else if (isCoal1 && isInd2)  swingToT1 = -swing2pp * 0.3;  // Coal drop benefits ON/IND challenger
     else if (isInd1)             swingToT1 =  (isAlp2 ? -1 : 1) * swing2pp * 0.3;
 
     const newMargin       = seat.margin + swingToT1;
