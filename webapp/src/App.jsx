@@ -1617,7 +1617,7 @@ export default function App() {
   const [newPoll,     setNewPoll]     = useState({ pollster:"", date:"", alp:"", coal:"", grn:"", oth:"", tpp:"" });
 
   // ── Model tab state ──
-  const [primaries,      setPrimaries]      = useState({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on });
+  const [primaries,      setPrimaries]      = useState({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on, undecided:0 });
   const [prefFlows,      setPrefFlows]      = useState({
     // Standard flows (used in ALP vs Coalition finals)
     grn_alp:         0.81,
@@ -1664,7 +1664,7 @@ export default function App() {
   const [demogSectionOpen, setDemogSectionOpen] = useState(false);
 
   // ── VIC model state ──
-  const [vicPrimaries, setVicPrimaries] = useState({ alp:38.1, lp:25.3, np:5.8, grn:12.2, ind:5.5 });
+  const [vicPrimaries, setVicPrimaries] = useState({ alp:38.1, lp:25.3, np:5.8, grn:12.2, ind:5.5, undecided:0 });
   const [vicPrefFlows, setVicPrefFlows] = useState({ grn_alp:0.85, ind_alp:0.60, other_alp:0.43 });
 
   // ── Demographics tab state ──
@@ -1817,6 +1817,7 @@ export default function App() {
 
   const vicHasChanges = vicPrimaries.alp !== 38.1 || vicPrimaries.lp !== 25.3 ||
     vicPrimaries.np !== 5.8 || vicPrimaries.grn !== 12.2 || vicPrimaries.ind !== 5.5 ||
+    (vicPrimaries.undecided||0) > 0 ||
     vicPrefFlows.grn_alp !== 0.85 || vicPrefFlows.ind_alp !== 0.60 || vicPrefFlows.other_alp !== 0.43;
 
   // ── NSW 2023 model state ──────────────────────────────────────────────────
@@ -1824,7 +1825,7 @@ export default function App() {
   const NSW_BL = { alp:37.6, lp:28.6, np:8.4, grn:10.4, ind:8.5 };
   const NSW_2PP = 53.2;
   const NSW_COAL = new Set(["LP","NP"]);
-  const [nswPrim, setNswPrim] = useState({ ...NSW_BL });
+  const [nswPrim, setNswPrim] = useState({ ...NSW_BL, undecided:0 });
   const [nswFlows, setNswFlows] = useState({ grn_alp:0.88, ind_alp:0.55, other_alp:0.45 });
   const nswModelledSeats = useMemo(() => {
     const s = { alp:nswPrim.alp-NSW_BL.alp, lp:nswPrim.lp-NSW_BL.lp, np:nswPrim.np-NSW_BL.np, grn:nswPrim.grn-NSW_BL.grn };
@@ -1840,14 +1841,14 @@ export default function App() {
   const nswBaseCounts  = useMemo(() => { const c={}; NSW_SEATS.forEach(s=>{ const g=getParty(s.winner.party).group; c[g]=(c[g]||0)+1; }); return c; }, []);
   const nswChanged     = useMemo(() => nswModelledSeats.filter(s=>s.modelled.changed), [nswModelledSeats]);
   const nswImplied2pp  = useMemo(() => { const r=nswModelledSeats.filter(s=>s.modelled.projAlp2pp!==null); return r.length ? r.reduce((sum,s)=>sum+s.modelled.projAlp2pp,0)/r.length : null; }, [nswModelledSeats]);
-  const nswHasChanges  = Object.entries(NSW_BL).some(([k,v])=>Math.abs((nswPrim[k]??v)-v)>0.05) || nswFlows.grn_alp!==0.88||nswFlows.ind_alp!==0.55||nswFlows.other_alp!==0.45;
+  const nswHasChanges  = Object.entries(NSW_BL).some(([k,v])=>Math.abs((nswPrim[k]??v)-v)>0.05) || (nswPrim.undecided||0)>0 || nswFlows.grn_alp!==0.88||nswFlows.ind_alp!==0.55||nswFlows.other_alp!==0.45;
 
   // ── QLD 2024 model state ──────────────────────────────────────────────────
   // Baselines: ALP 33.4  LNP 40.3  GRN 11.5  IND/other 14.8  ALP 2PP 46.3
   const QLD_BL = { alp:33.4, lnp:40.3, grn:11.5, ind:5.5 };
   const QLD_2PP = 46.3;
   const QLD_COAL = new Set(["LNP"]);
-  const [qldPrim, setQldPrim] = useState({ ...QLD_BL });
+  const [qldPrim, setQldPrim] = useState({ ...QLD_BL, undecided:0 });
   const [qldFlows, setQldFlows] = useState({ grn_alp:0.82, ind_alp:0.50, other_alp:0.40 });
   const qldModelledSeats = useMemo(() => {
     const s = { alp:qldPrim.alp-QLD_BL.alp, lnp:qldPrim.lnp-QLD_BL.lnp, grn:qldPrim.grn-QLD_BL.grn };
@@ -1863,14 +1864,14 @@ export default function App() {
   const qldBaseCounts  = useMemo(() => { const c={}; QLD_SEATS.forEach(s=>{ const g=getParty(s.winner.party).group; c[g]=(c[g]||0)+1; }); return c; }, []);
   const qldChanged     = useMemo(() => qldModelledSeats.filter(s=>s.modelled.changed), [qldModelledSeats]);
   const qldImplied2pp  = useMemo(() => { const r=qldModelledSeats.filter(s=>s.modelled.projAlp2pp!==null); return r.length ? r.reduce((sum,s)=>sum+s.modelled.projAlp2pp,0)/r.length : null; }, [qldModelledSeats]);
-  const qldHasChanges  = Object.entries(QLD_BL).some(([k,v])=>Math.abs((qldPrim[k]??v)-v)>0.05) || qldFlows.grn_alp!==0.82||qldFlows.ind_alp!==0.50||qldFlows.other_alp!==0.40;
+  const qldHasChanges  = Object.entries(QLD_BL).some(([k,v])=>Math.abs((qldPrim[k]??v)-v)>0.05) || (qldPrim.undecided||0)>0 || qldFlows.grn_alp!==0.82||qldFlows.ind_alp!==0.50||qldFlows.other_alp!==0.40;
 
   // ── WA 2025 model state ───────────────────────────────────────────────────
   // Baselines: ALP 55.0  LP 18.5  NP 4.5  GRN 11.0  IND 5.0  other 6.0  2PP 63.1
   const WA_BL = { alp:55.0, lp:18.5, np:4.5, grn:11.0, ind:5.0 };
   const WA_2PP = 63.1;
   const WA_COAL = new Set(["LP","NP"]);
-  const [waPrim, setWaPrim] = useState({ ...WA_BL });
+  const [waPrim, setWaPrim] = useState({ ...WA_BL, undecided:0 });
   const [waFlows, setWaFlows] = useState({ grn_alp:0.86, ind_alp:0.58, other_alp:0.44 });
   const waModelledSeats = useMemo(() => {
     const s = { alp:waPrim.alp-WA_BL.alp, lp:waPrim.lp-WA_BL.lp, np:waPrim.np-WA_BL.np, grn:waPrim.grn-WA_BL.grn };
@@ -1886,14 +1887,14 @@ export default function App() {
   const waBaseCounts   = useMemo(() => { const c={}; WA_SEATS.forEach(s=>{ const g=getParty(s.winner.party).group; c[g]=(c[g]||0)+1; }); return c; }, []);
   const waChanged      = useMemo(() => waModelledSeats.filter(s=>s.modelled.changed), [waModelledSeats]);
   const waImplied2pp   = useMemo(() => { const r=waModelledSeats.filter(s=>s.modelled.projAlp2pp!==null); return r.length ? r.reduce((sum,s)=>sum+s.modelled.projAlp2pp,0)/r.length : null; }, [waModelledSeats]);
-  const waHasChanges   = Object.entries(WA_BL).some(([k,v])=>Math.abs((waPrim[k]??v)-v)>0.05) || waFlows.grn_alp!==0.86||waFlows.ind_alp!==0.58||waFlows.other_alp!==0.44;
+  const waHasChanges   = Object.entries(WA_BL).some(([k,v])=>Math.abs((waPrim[k]??v)-v)>0.05) || (waPrim.undecided||0)>0 || waFlows.grn_alp!==0.86||waFlows.ind_alp!==0.58||waFlows.other_alp!==0.44;
 
   // ── SA 2022 model state ───────────────────────────────────────────────────
   // Baselines: ALP 38.3  LP 34.8  GRN 7.3  IND 12.1  other 7.5  2PP 54.9
   const SA_BL = { alp:38.3, lp:34.8, grn:7.3, ind:12.1 };
   const SA_2PP = 54.9;
   const SA_COAL = new Set(["LP"]);
-  const [saPrim, setSaPrim] = useState({ ...SA_BL });
+  const [saPrim, setSaPrim] = useState({ ...SA_BL, undecided:0 });
   const [saFlows, setSaFlows] = useState({ grn_alp:0.84, ind_alp:0.52, other_alp:0.45 });
   const saModelledSeats = useMemo(() => {
     const s = { alp:saPrim.alp-SA_BL.alp, lp:saPrim.lp-SA_BL.lp, grn:saPrim.grn-SA_BL.grn };
@@ -1909,14 +1910,14 @@ export default function App() {
   const saBaseCounts   = useMemo(() => { const c={}; SA_SEATS.forEach(s=>{ const g=getParty(s.winner.party).group; c[g]=(c[g]||0)+1; }); return c; }, []);
   const saChanged      = useMemo(() => saModelledSeats.filter(s=>s.modelled.changed), [saModelledSeats]);
   const saImplied2pp   = useMemo(() => { const r=saModelledSeats.filter(s=>s.modelled.projAlp2pp!==null); return r.length ? r.reduce((sum,s)=>sum+s.modelled.projAlp2pp,0)/r.length : null; }, [saModelledSeats]);
-  const saHasChanges   = Object.entries(SA_BL).some(([k,v])=>Math.abs((saPrim[k]??v)-v)>0.05) || saFlows.grn_alp!==0.84||saFlows.ind_alp!==0.52||saFlows.other_alp!==0.45;
+  const saHasChanges   = Object.entries(SA_BL).some(([k,v])=>Math.abs((saPrim[k]??v)-v)>0.05) || (saPrim.undecided||0)>0 || saFlows.grn_alp!==0.84||saFlows.ind_alp!==0.52||saFlows.other_alp!==0.45;
 
   // ── NT 2024 model state ───────────────────────────────────────────────────
   // Baselines: ALP 30.5  CLP 40.5  GRN 5.5  IND 12.5  other 11.0
   const NT_BL  = { alp:30.5, clp:40.5, grn:5.5, ind:12.5 };
   const NT_2PP = 45.0;  // approximate (NT doesn't publish official 2PP)
   const NT_COAL = new Set(["CLP"]);
-  const [ntPrim, setNtPrim] = useState({ ...NT_BL });
+  const [ntPrim, setNtPrim] = useState({ ...NT_BL, undecided:0 });
   const [ntFlows, setNtFlows] = useState({ grn_alp:0.80, ind_alp:0.45, other_alp:0.40 });
   const ntModelledSeats = useMemo(() => {
     const s = { alp:ntPrim.alp-NT_BL.alp, clp:ntPrim.clp-NT_BL.clp, grn:ntPrim.grn-NT_BL.grn };
@@ -1931,12 +1932,12 @@ export default function App() {
   const ntProjCounts   = useMemo(() => { const c={}; ntModelledSeats.forEach(s=>{ const g=s.modelled.winnerGroup; c[g]=(c[g]||0)+1; }); return c; }, [ntModelledSeats]);
   const ntBaseCounts   = useMemo(() => { const c={}; NT_SEATS.forEach(s=>{ const g=getParty(s.winner.party).group; c[g]=(c[g]||0)+1; }); return c; }, []);
   const ntChanged      = useMemo(() => ntModelledSeats.filter(s=>s.modelled.changed), [ntModelledSeats]);
-  const ntHasChanges   = Object.entries(NT_BL).some(([k,v])=>Math.abs((ntPrim[k]??v)-v)>0.05) || ntFlows.grn_alp!==0.80||ntFlows.ind_alp!==0.45||ntFlows.other_alp!==0.40;
+  const ntHasChanges   = Object.entries(NT_BL).some(([k,v])=>Math.abs((ntPrim[k]??v)-v)>0.05) || (ntPrim.undecided||0)>0 || ntFlows.grn_alp!==0.80||ntFlows.ind_alp!==0.45||ntFlows.other_alp!==0.40;
 
   // ── TAS 2024 model state (Hare-Clark) ─────────────────────────────────────
   // Baselines per electorate in TAS_ELECTORATES; statewide: LP 36  ALP 28  GRN 12  IND 10  other 14
   const TAS_BL = { lp:36, alp:28, grn:12, ind:10 };
-  const [tasPrim, setTasPrim] = useState({ ...TAS_BL });
+  const [tasPrim, setTasPrim] = useState({ ...TAS_BL, undecided:0 });
   const tasProjected = useMemo(() => {
     const electorates = TAS_ELECTORATES.map(el => ({
       ...el,
@@ -1947,12 +1948,12 @@ export default function App() {
     }));
     return allocateHareClark(electorates, tasPrim);
   }, [tasPrim]);
-  const tasHasChanges  = Object.entries(TAS_BL).some(([k,v])=>Math.abs((tasPrim[k]??v)-v)>0.05);
+  const tasHasChanges  = Object.entries(TAS_BL).some(([k,v])=>Math.abs((tasPrim[k]??v)-v)>0.05) || (tasPrim.undecided||0)>0;
 
   // ── ACT 2024 model state (Hare-Clark) ─────────────────────────────────────
   // Baselines per electorate in ACT_ELECTORATES; statewide: ALP 34  LP 31  GRN 21  IND 9  other 5
   const ACT_BL = { alp:34, lp:31, grn:21, ind:9 };
-  const [actPrim, setActPrim] = useState({ ...ACT_BL });
+  const [actPrim, setActPrim] = useState({ ...ACT_BL, undecided:0 });
   const actProjected = useMemo(() => {
     const electorates = ACT_ELECTORATES.map(el => ({
       ...el,
@@ -1963,11 +1964,12 @@ export default function App() {
     }));
     return allocateHareClark(electorates, actPrim);
   }, [actPrim]);
-  const actHasChanges  = Object.entries(ACT_BL).some(([k,v])=>Math.abs((actPrim[k]??v)-v)>0.05);
+  const actHasChanges  = Object.entries(ACT_BL).some(([k,v])=>Math.abs((actPrim[k]??v)-v)>0.05) || (actPrim.undecided||0)>0;
 
   const hasChanges =
     primaries.alp !== BASELINE_2022.alp || primaries.coal !== BASELINE_2022.coal ||
     primaries.grn !== BASELINE_2022.grn || primaries.teal !== BASELINE_2022.teal || primaries.on !== BASELINE_2022.on ||
+    (primaries.undecided||0) > 0 ||
     prefFlows.grn_alp !== 0.81 || prefFlows.teal_alp !== 0.62 || prefFlows.on_alp !== 0.43 || prefFlows.other_alp !== 0.50 ||
     prefFlows.coal_alp_v_on !== 0.10 || prefFlows.grn_alp_v_on !== 0.90 ||
     prefFlows.teal_alp_v_on !== 0.75 || prefFlows.other_alp_v_on !== 0.60 ||
@@ -2086,7 +2088,7 @@ export default function App() {
   };
 
   const resetModel = () => {
-    setPrimaries({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on });
+    setPrimaries({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on, undecided:0 });
     setPrefFlows({
       grn_alp:0.81, teal_alp:0.62, on_alp:0.43, other_alp:0.50,
       coal_alp_v_on:0.10, grn_alp_v_on:0.90, teal_alp_v_on:0.75, other_alp_v_on:0.60,
@@ -2712,10 +2714,12 @@ export default function App() {
                 <PrimaryInput label="Greens"       value={primaries.grn}  onChange={v=>setPrimaries(p=>({...p,grn:v}))}  color="#059669" baseline={BASELINE_2022.grn}  />
                 <PrimaryInput label="Independents" value={primaries.teal} onChange={v=>setPrimaries(p=>({...p,teal:v}))} color="#0891B2" baseline={BASELINE_2022.teal} />
                 <PrimaryInput label="One Nation"   value={primaries.on}   onChange={v=>setPrimaries(p=>({...p,on:v}))}   color="#B45309" baseline={BASELINE_2022.on}   />
+                <PrimaryInput label="Undecided" value={primaries.undecided??0} onChange={v=>setPrimaries(p=>({...p,undecided:v}))} color="#9CA3AF" baseline={0} />
                 {(() => {
                   const entered = +(primaries.alp + primaries.coal + primaries.grn + primaries.teal + primaries.on).toFixed(1);
-                  const other   = +(100 - entered).toFixed(1);
-                  const overLimit = entered > 100;
+                  const undecided = +(primaries.undecided ?? 0);
+                  const other   = +(100 - entered - undecided).toFixed(1);
+                  const overLimit = entered + undecided > 100;
                   return (
                     <div style={{ borderTop:"1px solid #F3F4F6", paddingTop:10, marginTop:4, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                       <span style={{ fontSize:12, color:"#6B7280" }}>Other / minor parties</span>
@@ -3686,10 +3690,12 @@ export default function App() {
                 <PrimaryInput label="Nationals"     value={vicPrimaries.np}  onChange={v=>setVicPrimaries(p=>({...p,np:v}))}  color="#065F46" baseline={VIC_BASELINE_2022.np}  />
                 <PrimaryInput label="Greens"        value={vicPrimaries.grn} onChange={v=>setVicPrimaries(p=>({...p,grn:v}))} color="#059669" baseline={VIC_BASELINE_2022.grn} />
                 <PrimaryInput label="Independents"  value={vicPrimaries.ind} onChange={v=>setVicPrimaries(p=>({...p,ind:v}))} color="#0891B2" baseline={VIC_BASELINE_2022.ind} />
+                <PrimaryInput label="Undecided" value={vicPrimaries.undecided??0} onChange={v=>setVicPrimaries(p=>({...p,undecided:v}))} color="#9CA3AF" baseline={0} />
                 {(() => {
                   const entered = +(vicPrimaries.alp + vicPrimaries.lp + vicPrimaries.np + vicPrimaries.grn + vicPrimaries.ind).toFixed(1);
-                  const other   = +(100 - entered).toFixed(1);
-                  const overLimit = entered > 100;
+                  const undecided = +(vicPrimaries.undecided ?? 0);
+                  const other   = +(100 - entered - undecided).toFixed(1);
+                  const overLimit = entered + undecided > 100;
                   return (
                     <div style={{ borderTop:"1px solid #F3F4F6", paddingTop:10, marginTop:4, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                       <span style={{ fontSize:12, color:"#6B7280" }}>Other / minor parties</span>
@@ -3715,7 +3721,7 @@ export default function App() {
               </div>
 
               {vicHasChanges && (
-                <button onClick={() => { setVicPrimaries({ alp:38.1, lp:25.3, np:5.8, grn:12.2, ind:5.5 }); setVicPrefFlows({ grn_alp:0.85, ind_alp:0.60, other_alp:0.43 }); }}
+                <button onClick={() => { setVicPrimaries({ alp:38.1, lp:25.3, np:5.8, grn:12.2, ind:5.5, undecided:0 }); setVicPrefFlows({ grn_alp:0.85, ind_alp:0.60, other_alp:0.43 }); }}
                   style={{ width:"100%", padding:"8px", background:"#FEF2F2", color:"#DC2626", border:"1px solid #FECACA", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600, marginBottom:16 }}>
                   Reset VIC model
                 </button>
@@ -3847,8 +3853,9 @@ export default function App() {
             if (!el.modelEnabled || !cfg) return null;
             const { prim, setPrim, flows, setFlows, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats } = cfg;
             const entered = parties.reduce((s, p) => s + (prim[p.k] ?? 0), 0);
-            const other   = +(100 - entered).toFixed(1);
-            const overLimit = entered > 100;
+            const undecided = +(prim.undecided ?? 0);
+            const other   = +(100 - entered - undecided).toFixed(1);
+            const overLimit = entered + undecided > 100;
             const alpProj  = proj.alp || 0;
             const coalProj = proj.coalition || 0;
             const grnProj  = proj.greens || 0;
@@ -3865,6 +3872,9 @@ export default function App() {
                       onChange={v => setPrim(pr => ({ ...pr, [p.k]: v }))}
                       color={p.c} baseline={bl[p.k]??0} />
                   ))}
+                  <PrimaryInput label="Undecided" value={prim.undecided??0}
+                    onChange={v => setPrim(pr => ({ ...pr, undecided: v }))}
+                    color="#9CA3AF" baseline={0} />
                   <div style={{ borderTop:"1px solid #F3F4F6", paddingTop:10, marginTop:4, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                     <span style={{ fontSize:12, color:"#6B7280" }}>Other / minor parties</span>
                     <span style={{ fontSize:13, fontWeight:700, color: overLimit ? "#DC2626" : "#374151" }}>
@@ -3885,7 +3895,7 @@ export default function App() {
                   </div>
                 </div>
                 {hasChanges && (
-                  <button onClick={() => { setPrim({...bl}); setFlows({...resetFlows}); }}
+                  <button onClick={() => { setPrim({...bl, undecided:0}); setFlows({...resetFlows}); }}
                     style={{ width:"100%", padding:"8px", background:"#FEF2F2", color:"#DC2626", border:"1px solid #FECACA", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600, marginBottom:16 }}>
                     Reset model
                   </button>
@@ -4006,12 +4016,13 @@ export default function App() {
                   <PrimaryInput label="Liberal"       value={tasPrim.lp}  onChange={v=>setTasPrim(p=>({...p,lp:v}))}  color="#1D4ED8" baseline={TAS_BL.lp}  />
                   <PrimaryInput label="Greens"        value={tasPrim.grn} onChange={v=>setTasPrim(p=>({...p,grn:v}))} color="#059669" baseline={TAS_BL.grn} />
                   <PrimaryInput label="Independents"  value={tasPrim.ind} onChange={v=>setTasPrim(p=>({...p,ind:v}))} color="#0891B2" baseline={TAS_BL.ind} />
-                  {(() => { const e=+(tasPrim.alp+tasPrim.lp+tasPrim.grn+tasPrim.ind).toFixed(1); const o=+(100-e).toFixed(1); const ov=e>100;
+                  <PrimaryInput label="Undecided" value={tasPrim.undecided??0} onChange={v=>setTasPrim(p=>({...p,undecided:v}))} color="#9CA3AF" baseline={0} />
+                  {(() => { const e=+(tasPrim.alp+tasPrim.lp+tasPrim.grn+tasPrim.ind).toFixed(1); const ud=+(tasPrim.undecided??0); const o=+(100-e-ud).toFixed(1); const ov=e+ud>100;
                     return <div style={{ borderTop:"1px solid #F3F4F6", paddingTop:10, marginTop:4, display:"flex", justifyContent:"space-between" }}><span style={{ fontSize:12, color:"#6B7280" }}>Other / minor parties</span><span style={{ fontSize:13, fontWeight:700, color:ov?"#DC2626":"#374151" }}>{ov?`−${Math.abs(o).toFixed(1)}% ⚠`:`${o}%`}</span></div>;
                   })()}
                   <div style={{ fontSize:11, color:"#9CA3AF", marginTop:6 }}>Baseline: ALP {TAS_BL.alp}% · Lib {TAS_BL.lp}% · Grn {TAS_BL.grn}% · Ind {TAS_BL.ind}%</div>
                 </div>
-                {tasHasChanges && <button onClick={() => setTasPrim({...TAS_BL})} style={{ width:"100%", padding:"8px", background:"#FEF2F2", color:"#DC2626", border:"1px solid #FECACA", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600, marginBottom:16 }}>Reset TAS model</button>}
+                {tasHasChanges && <button onClick={() => setTasPrim({...TAS_BL, undecided:0})} style={{ width:"100%", padding:"8px", background:"#FEF2F2", color:"#DC2626", border:"1px solid #FECACA", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600, marginBottom:16 }}>Reset TAS model</button>}
               </div>
               <div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:14 }}>
@@ -4071,12 +4082,13 @@ export default function App() {
                   <PrimaryInput label="Liberal"       value={actPrim.lp}  onChange={v=>setActPrim(p=>({...p,lp:v}))}  color="#1D4ED8" baseline={ACT_BL.lp}  />
                   <PrimaryInput label="Greens"        value={actPrim.grn} onChange={v=>setActPrim(p=>({...p,grn:v}))} color="#059669" baseline={ACT_BL.grn} />
                   <PrimaryInput label="Independents"  value={actPrim.ind} onChange={v=>setActPrim(p=>({...p,ind:v}))} color="#0891B2" baseline={ACT_BL.ind} />
-                  {(() => { const e=+(actPrim.alp+actPrim.lp+actPrim.grn+actPrim.ind).toFixed(1); const o=+(100-e).toFixed(1); const ov=e>100;
+                  <PrimaryInput label="Undecided" value={actPrim.undecided??0} onChange={v=>setActPrim(p=>({...p,undecided:v}))} color="#9CA3AF" baseline={0} />
+                  {(() => { const e=+(actPrim.alp+actPrim.lp+actPrim.grn+actPrim.ind).toFixed(1); const ud=+(actPrim.undecided??0); const o=+(100-e-ud).toFixed(1); const ov=e+ud>100;
                     return <div style={{ borderTop:"1px solid #F3F4F6", paddingTop:10, marginTop:4, display:"flex", justifyContent:"space-between" }}><span style={{ fontSize:12, color:"#6B7280" }}>Other / minor parties</span><span style={{ fontSize:13, fontWeight:700, color:ov?"#DC2626":"#374151" }}>{ov?`−${Math.abs(o).toFixed(1)}% ⚠`:`${o}%`}</span></div>;
                   })()}
                   <div style={{ fontSize:11, color:"#9CA3AF", marginTop:6 }}>Baseline: ALP {ACT_BL.alp}% · Lib {ACT_BL.lp}% · Grn {ACT_BL.grn}% · Ind {ACT_BL.ind}%</div>
                 </div>
-                {actHasChanges && <button onClick={() => setActPrim({...ACT_BL})} style={{ width:"100%", padding:"8px", background:"#FEF2F2", color:"#DC2626", border:"1px solid #FECACA", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600, marginBottom:16 }}>Reset ACT model</button>}
+                {actHasChanges && <button onClick={() => setActPrim({...ACT_BL, undecided:0})} style={{ width:"100%", padding:"8px", background:"#FEF2F2", color:"#DC2626", border:"1px solid #FECACA", borderRadius:7, cursor:"pointer", fontSize:13, fontWeight:600, marginBottom:16 }}>Reset ACT model</button>}
               </div>
               <div>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:14 }}>
