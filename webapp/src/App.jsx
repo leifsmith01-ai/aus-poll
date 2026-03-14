@@ -2104,50 +2104,36 @@ export default function App() {
     return { alp: wavg("alp"), coal: wavg("coal"), grn: wavg("grn"), oth: wavg("oth"), tpp: tppAvg, n: recent.length };
   }, [sortedPolls]);
 
-  // Weekly weighted aggregate trend for the chart (30-day window, 7-day step)
-  const pollTrendData = useMemo(() => {
-    if (!polls.length) return [];
-    const sorted = [...polls].sort((a, b) => a.date.localeCompare(b.date));
-    const firstMs = new Date(sorted[0].date).getTime();
-    const lastMs  = new Date(sorted[sorted.length - 1].date).getTime();
+  // Unified chart dataset: raw poll values + weighted aggregate trend at each poll date
+  const pollChartData = useMemo(() => {
     const HALF_LIFE = 90, MEDIAN_N = 1500, WINDOW_MS = 30 * 86400000;
-    const result = [];
-    for (let ms = firstMs; ms <= lastMs; ms += 7 * 86400000) {
-      const ref = new Date(ms);
-      const inWindow = sorted.filter(p => {
-        const pMs = new Date(p.date).getTime();
-        return pMs <= ms && ms - pMs <= WINDOW_MS;
+    const sorted = [...polls].sort((a, b) => a.date.localeCompare(b.date));
+    return sorted.map(p => {
+      const pMs = new Date(p.date).getTime();
+      const label = new Date(p.date).toLocaleDateString("en-AU", { month:"short", day:"numeric" });
+      const inWindow = sorted.filter(q => {
+        const qMs = new Date(q.date).getTime();
+        return qMs <= pMs && pMs - qMs <= WINDOW_MS;
       });
-      if (inWindow.length < 2) continue;
-      const wt = p => {
-        const days = (ms - new Date(p.date).getTime()) / 86400000;
-        return Math.exp(-Math.log(2) / HALF_LIFE * days) * Math.sqrt((p.n ?? MEDIAN_N) / MEDIAN_N);
+      const wt = q => {
+        const days = (pMs - new Date(q.date).getTime()) / 86400000;
+        return Math.exp(-Math.log(2) / HALF_LIFE * days) * Math.sqrt((q.n ?? MEDIAN_N) / MEDIAN_N);
       };
       const wavg = vals => {
-        const tw = vals.reduce((s, p) => s + wt(p), 0);
-        return tw ? vals.reduce((s, p) => s + p.v * wt(p), 0) / tw : null;
+        const tw = vals.reduce((s, q) => s + wt(q), 0);
+        return tw ? +(vals.reduce((s, q) => s + q.v * wt(q), 0) / tw).toFixed(1) : null;
       };
-      const tppPts = inWindow.map(p => ({ ...p, v: imputedTpp(p) })).filter(p => p.v != null);
-      const label = ref.toLocaleDateString("en-AU", { month:"short", day:"numeric" });
-      result.push({
+      const tppPts = inWindow.map(q => ({ ...q, v: imputedTpp(q) })).filter(q => q.v != null);
+      const hasEnough = inWindow.length >= 2;
+      return {
         date: label,
-        "ALP (trend)":  +(wavg(inWindow.map(p => ({ ...p, v: p.alp }))) ?? 0).toFixed(1),
-        "Coal (trend)": +(wavg(inWindow.map(p => ({ ...p, v: p.coal }))) ?? 0).toFixed(1),
-        "Grn (trend)":  +(wavg(inWindow.map(p => ({ ...p, v: p.grn }))) ?? 0).toFixed(1),
-        "2PP (trend)":  tppPts.length ? +(wavg(tppPts) ?? 0).toFixed(1) : null,
-      });
-    }
-    return result;
-  }, [polls]);
-
-  const pollChartData = useMemo(() => {
-    return [...polls]
-      .sort((a,b) => a.date.localeCompare(b.date))
-      .map(p => {
-        const d = new Date(p.date);
-        const label = d.toLocaleDateString("en-AU", { month:"short", day:"numeric" });
-        return { date:label, ALP:p.alp, Coalition:p.coal, Greens:p.grn, "2PP (ALP)":p.tpp };
-      });
+        ALP: p.alp, Coalition: p.coal, Greens: p.grn, "2PP (ALP)": p.tpp,
+        "ALP (trend)":  hasEnough ? wavg(inWindow.map(q => ({ ...q, v: q.alp })))  : null,
+        "Coal (trend)": hasEnough ? wavg(inWindow.map(q => ({ ...q, v: q.coal }))) : null,
+        "Grn (trend)":  hasEnough ? wavg(inWindow.map(q => ({ ...q, v: q.grn })))  : null,
+        "2PP (trend)":  tppPts.length >= 2 ? wavg(tppPts) : null,
+      };
+    });
   }, [polls]);
 
   const loadFromPoll = () => {
@@ -2162,13 +2148,17 @@ export default function App() {
     setActiveTab("model");
   };
 
+  const PREF_FLOWS_2022 = {
+    grn_alp:0.81, teal_alp:0.62, on_alp:0.43, other_alp:0.50,
+    coal_alp_v_on:0.10, grn_alp_v_on:0.90, teal_alp_v_on:0.75, other_alp_v_on:0.60,
+    alp_on_v_coal:0.20, grn_on_v_coal:0.08, teal_on_v_coal:0.12, other_on_v_coal:0.25,
+  };
+
+  const resetPrefFlows = () => setPrefFlows(PREF_FLOWS_2022);
+
   const resetModel = () => {
     setPrimaries({ alp:BASELINE_2022.alp, coal:BASELINE_2022.coal, grn:BASELINE_2022.grn, teal:BASELINE_2022.teal, on:BASELINE_2022.on, undecided:0 });
-    setPrefFlows({
-      grn_alp:0.81, teal_alp:0.62, on_alp:0.43, other_alp:0.50,
-      coal_alp_v_on:0.10, grn_alp_v_on:0.90, teal_alp_v_on:0.75, other_alp_v_on:0.60,
-      alp_on_v_coal:0.20, grn_on_v_coal:0.08, teal_on_v_coal:0.12, other_on_v_coal:0.25,
-    });
+    setPrefFlows(PREF_FLOWS_2022);
     setOnThreshold(6.5);
     setSeatOverrides({});
   };
@@ -2590,20 +2580,26 @@ export default function App() {
                 {pollAvg && <div style={{ fontSize:12, color:"#6B7280" }}>30-day weighted avg ({pollAvg.n} polls) shown in brackets</div>}
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:10 }}>
-                {[
-                  { label:"ALP primary",       value:latestPoll.alp,  avg:pollAvg?.alp,  color:"#DC2626", delta: latestPoll.alp - BASELINE_2022.alp },
-                  { label:"Coalition primary",  value:latestPoll.coal, avg:pollAvg?.coal, color:"#1D4ED8", delta: latestPoll.coal - BASELINE_2022.coal },
-                  { label:"Greens primary",     value:latestPoll.grn,  avg:pollAvg?.grn,  color:"#059669", delta: latestPoll.grn - BASELINE_2022.grn },
-                  { label:"Other / minor",      value:latestPoll.oth,  avg:pollAvg?.oth,  color:"#7C3AED", delta: null },
-                  { label:"2PP (ALP)",          value:latestPoll.tpp,  avg:pollAvg?.tpp,  color:"#DC2626", delta: latestPoll.tpp - NATIONAL_2PP_2022 },
-                ].map(card => (
+                {(() => {
+                  const effTpp = latestPoll.tpp ?? imputedTpp(latestPoll);
+                  const tppIsEst = latestPoll.tpp == null;
+                  return [
+                    { label:"ALP primary",       value:latestPoll.alp,  avg:pollAvg?.alp,  color:"#DC2626", delta: latestPoll.alp - BASELINE_2022.alp, est:false },
+                    { label:"Coalition primary",  value:latestPoll.coal, avg:pollAvg?.coal, color:"#1D4ED8", delta: latestPoll.coal - BASELINE_2022.coal, est:false },
+                    { label:"Greens primary",     value:latestPoll.grn,  avg:pollAvg?.grn,  color:"#059669", delta: latestPoll.grn - BASELINE_2022.grn, est:false },
+                    { label:"Other / minor",      value:latestPoll.oth,  avg:pollAvg?.oth,  color:"#7C3AED", delta: null, est:false },
+                    { label: tppIsEst ? "2PP ALP (est.)" : "2PP (ALP)", value:effTpp, avg:pollAvg?.tpp, color:"#DC2626", delta: effTpp != null ? effTpp - NATIONAL_2PP_2022 : null, est:tppIsEst },
+                  ];
+                })().map(card => (
                   <div key={card.label} style={{ background:"#F9FAFB", borderRadius:8, border:"1px solid #E5E7EB", padding:"12px 14px" }}>
                     <div style={{ width:20, height:3, background:card.color, borderRadius:2, marginBottom:6 }} />
                     <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
-                      <span style={{ fontSize:24, fontWeight:800, color:"#111" }}>{card.value}%</span>
+                      <span style={{ fontSize:24, fontWeight:800, color:"#111", fontStyle:card.est?"italic":"normal" }}>
+                        {card.value != null ? `${card.est ? "~" : ""}${card.value}%` : "—"}
+                      </span>
                       {card.avg !== undefined && <span style={{ fontSize:12, color:"#9CA3AF" }}>({card.avg}%)</span>}
                     </div>
-                    {card.delta !== null && (
+                    {card.delta != null && (
                       <div style={{ fontSize:11, fontWeight:600, color: card.delta>0?"#059669":card.delta<0?"#DC2626":"#9CA3AF", marginTop:2 }}>
                         {card.delta>0?"+":""}{card.delta.toFixed(1)} vs 2022
                       </div>
@@ -2620,23 +2616,23 @@ export default function App() {
             <div style={{ fontWeight:700, color:"#374151", marginBottom:4 }}>Polling trends</div>
             <div style={{ fontSize:11, color:"#6B7280", marginBottom:12 }}>Thick lines = weighted aggregate (30-day window, decay + sample-size weighted) · Dots = individual polls</div>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart margin={{ top:4, right:10, left:-10, bottom:0 }}>
+              <LineChart data={pollChartData} margin={{ top:4, right:10, left:-10, bottom:0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                <XAxis dataKey="date" tick={{ fontSize:10 }} allowDuplicatedCategory={false} />
+                <XAxis dataKey="date" tick={{ fontSize:10 }} interval="preserveStartEnd" />
                 <YAxis domain={[0,65]} tick={{ fontSize:11 }} tickFormatter={v=>`${v}%`} />
                 <Tooltip formatter={(v,name) => [v != null ? `${v}%` : "—", name]} contentStyle={{ fontSize:12, borderRadius:8, border:"1px solid #E5E7EB" }} />
                 <Legend wrapperStyle={{ fontSize:11 }} />
                 <ReferenceLine y={50} stroke="#9CA3AF" strokeDasharray="5 5" label={{ value:"50%", fontSize:10, fill:"#9CA3AF", position:"insideRight" }} />
-                {/* Raw poll scatter */}
-                <Line data={pollChartData} type="linear" dataKey="ALP"       stroke="#DC2626" strokeWidth={0} dot={{ r:3, fill:"#DC2626" }} activeDot={{ r:4 }} legendType="circle" />
-                <Line data={pollChartData} type="linear" dataKey="Coalition" stroke="#1D4ED8" strokeWidth={0} dot={{ r:3, fill:"#1D4ED8" }} activeDot={{ r:4 }} legendType="circle" />
-                <Line data={pollChartData} type="linear" dataKey="Greens"    stroke="#059669" strokeWidth={0} dot={{ r:3, fill:"#059669" }} activeDot={{ r:4 }} legendType="circle" />
-                <Line data={pollChartData} type="linear" dataKey="2PP (ALP)" stroke="#DC2626" strokeWidth={0} dot={{ r:4, fill:"none", stroke:"#DC2626", strokeWidth:1.5 }} activeDot={{ r:5 }} legendType="circle" />
+                {/* Raw poll scatter (strokeWidth=0 = dots only, no connecting line) */}
+                <Line type="linear" dataKey="ALP"       stroke="#DC2626" strokeWidth={0} dot={{ r:3, fill:"#DC2626" }} activeDot={{ r:4 }} legendType="circle" />
+                <Line type="linear" dataKey="Coalition" stroke="#1D4ED8" strokeWidth={0} dot={{ r:3, fill:"#1D4ED8" }} activeDot={{ r:4 }} legendType="circle" />
+                <Line type="linear" dataKey="Greens"    stroke="#059669" strokeWidth={0} dot={{ r:3, fill:"#059669" }} activeDot={{ r:4 }} legendType="circle" />
+                <Line type="linear" dataKey="2PP (ALP)" stroke="#DC2626" strokeWidth={0} dot={{ r:4, fill:"none", stroke:"#DC2626", strokeWidth:1.5 }} activeDot={{ r:5 }} legendType="circle" />
                 {/* Weighted aggregate trend lines */}
-                <Line data={pollTrendData} type="monotone" dataKey="ALP (trend)"  stroke="#DC2626" strokeWidth={2.5} dot={false} />
-                <Line data={pollTrendData} type="monotone" dataKey="Coal (trend)" stroke="#1D4ED8" strokeWidth={2.5} dot={false} />
-                <Line data={pollTrendData} type="monotone" dataKey="Grn (trend)"  stroke="#059669" strokeWidth={2.5} dot={false} />
-                <Line data={pollTrendData} type="monotone" dataKey="2PP (trend)"  stroke="#991B1B" strokeWidth={3}   dot={false} strokeDasharray="6 3" />
+                <Line type="monotone" dataKey="ALP (trend)"  stroke="#DC2626" strokeWidth={2.5} dot={false} connectNulls />
+                <Line type="monotone" dataKey="Coal (trend)" stroke="#1D4ED8" strokeWidth={2.5} dot={false} connectNulls />
+                <Line type="monotone" dataKey="Grn (trend)"  stroke="#059669" strokeWidth={2.5} dot={false} connectNulls />
+                <Line type="monotone" dataKey="2PP (trend)"  stroke="#991B1B" strokeWidth={3}   dot={false} strokeDasharray="6 3" connectNulls />
               </LineChart>
             </ResponsiveContainer>
             <div style={{ fontSize:11, color:"#9CA3AF", marginTop:6, textAlign:"center" }}>Thick dashed dark-red = 2PP weighted trend · Open circles = individual 2PP polls · Filled dots = primary vote polls</div>
@@ -2870,14 +2866,20 @@ export default function App() {
 
               {/* Standard preference flows (ALP vs Coalition finals) */}
               <div style={panelStyle}>
-                <div style={sectionHead}>Preference flows to ALP</div>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
+                  <div style={sectionHead}>Preference flows to ALP</div>
+                  <button onClick={resetPrefFlows}
+                    style={{ fontSize:11, color:"#6B7280", background:"none", border:"none", cursor:"pointer", padding:0, textDecoration:"underline", whiteSpace:"nowrap" }}>
+                    ↺ Reset to 2022
+                  </button>
+                </div>
                 <div style={{ fontSize:11, color:"#9CA3AF", marginBottom:8 }}>Used in standard ALP vs Coalition finals. Remainder flows to Coalition.</div>
                 <PrefInput label="Greens → ALP"      value={prefFlows.grn_alp}   onChange={v=>setPrefFlows(f=>({...f,grn_alp:v}))}   color="#059669" />
                 <PrefInput label="Independents → ALP" value={prefFlows.teal_alp} onChange={v=>setPrefFlows(f=>({...f,teal_alp:v}))} color="#0891B2" />
                 <PrefInput label="One Nation → ALP"  value={prefFlows.on_alp}    onChange={v=>setPrefFlows(f=>({...f,on_alp:v}))}    color="#B45309" />
                 <PrefInput label="Other → ALP"       value={prefFlows.other_alp} onChange={v=>setPrefFlows(f=>({...f,other_alp:v}))} color="#7C3AED" />
                 <div style={{ fontSize:11, color:"#9CA3AF", borderTop:"1px solid #F3F4F6", paddingTop:8, marginTop:4 }}>
-                  Defaults based on 2022 distributions (Grn 81%, Ind 62%, ON 43%, Other 50%).
+                  Defaults based on 2022 AEC distributions (Grn 81%, Ind 62%, ON 43%, Other 50%).
                 </div>
               </div>
 
