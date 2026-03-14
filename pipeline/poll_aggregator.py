@@ -34,19 +34,21 @@ OUTPUT_FILE = POLLS_DIR / "aggregated.json"
 
 # ── Aggregation parameters ────────────────────────────────────────────────────
 HALF_LIFE_DAYS = 90          # Exponential decay half-life (≈3 months)
-HOUSE_EFFECT_ITERATIONS = 10 # Iterations for bias-correction convergence
+HOUSE_EFFECT_ITERATIONS = 50 # Max iterations for bias-correction (convergence usually faster)
+HOUSE_EFFECT_TOLERANCE = 1e-4 # Stop iterating when max house-effect change < this
 MIN_POLLS_FOR_HE = 3         # Minimum polls from a house to estimate its bias
 SMOOTHING_WINDOW_DAYS = 14   # Rolling window for trend output points (days either side)
 TREND_STEP_DAYS = 7          # Generate one trend point per week
+MEDIAN_SAMPLE_SIZE = 1500    # Normalisation base for sample-size weighting
 
 # ── Standard preference flows for TPP imputation ─────────────────────────────
 # Based on observed flows at the 2022 federal election (AEC DOP data).
 # These convert primary votes → estimated ALP 2PP when TPP is not reported.
 DEFAULT_PREF_FLOWS = {
-    "grn_alp":   0.845,  # Greens → ALP
+    "grn_alp":   0.857,  # Greens → ALP (2022 AEC DOP: 85.7%)
     "teal_alp":  0.735,  # Teal/IND → ALP
-    "on_alp":    0.165,  # One Nation → ALP
-    "other_alp": 0.545,  # Other minor parties → ALP (blended)
+    "on_alp":    0.149,  # One Nation → ALP (2022 AEC DOP: 14.9%)
+    "other_alp": 0.574,  # Other minor parties → ALP (2022 AEC DOP: 57.4%)
 }
 
 # Parties that sum to 100% in the poll data; "other" is the residual.
@@ -106,21 +108,32 @@ def _weighted_variance(values: list[float], weights: list[float], mean: float) -
     return sum(w * (v - mean) ** 2 for v, w in zip(values, weights)) / total_w
 
 
+def _sample_weight(poll: dict, median_n: float = MEDIAN_SAMPLE_SIZE) -> float:
+    """Return a sample-size scaling factor: sqrt(n / median_n), or 1.0 if n is unknown."""
+    n = poll.get("n")
+    if n and n > 0:
+        return math.sqrt(n / median_n)
+    return 1.0
+
+
 def compute_house_effects(
     polls: list[dict],
     metric: str,
     ref_date: date,
     iterations: int = HOUSE_EFFECT_ITERATIONS,
+    tolerance: float = HOUSE_EFFECT_TOLERANCE,
     min_polls: int = MIN_POLLS_FOR_HE,
 ) -> dict[str, float]:
     """
     Iterative house-effect (pollster bias) correction.
 
     Algorithm:
-      1. Compute an initial decay-weighted national mean for `metric`.
+      1. Compute an initial decay+sample-size-weighted national mean for `metric`.
       2. For each pollster, compute their weighted-mean deviation from the national mean.
       3. Subtract house effects from each poll and recompute national mean.
-      4. Repeat until convergence.
+      4. Repeat until convergence (max house-effect change < `tolerance`) or `iterations`.
+
+    Weights combine exponential time-decay with sqrt(n/median_n) sample-size scaling.
 
     Returns a dict of {pollster: bias} where a positive bias means the pollster
     shows higher values for `metric` than the consensus.
@@ -132,7 +145,7 @@ def compute_house_effects(
     house_effects: dict[str, float] = {}
 
     for _ in range(iterations):
-        # Compute decay-weighted mean after subtracting current house effects
+        # Compute decay+size-weighted mean after subtracting current house effects
         values, weights = [], []
         for p in valid:
             days_ago = (ref_date - date.fromisoformat(p["date"])).days
@@ -140,7 +153,7 @@ def compute_house_effects(
                 continue
             he = house_effects.get(p["pollster"], 0.0)
             values.append(p[metric] - he)
-            weights.append(_decay_weight(days_ago))
+            weights.append(_decay_weight(days_ago) * _sample_weight(p))
 
         nat_mean = _weighted_mean(values, weights)
         if math.isnan(nat_mean):
@@ -155,14 +168,20 @@ def compute_house_effects(
             he = house_effects.get(p["pollster"], 0.0)
             residual = (p[metric] - he) - nat_mean
             pollster_residuals[p["pollster"]].append(
-                (residual, _decay_weight(days_ago))
+                (residual, _decay_weight(days_ago) * _sample_weight(p))
             )
 
+        max_change = 0.0
         for pollster, res_weights in pollster_residuals.items():
             if len(res_weights) < min_polls:
                 continue
             vals, wts = zip(*res_weights)
-            house_effects[pollster] = house_effects.get(pollster, 0.0) + _weighted_mean(list(vals), list(wts))
+            delta = _weighted_mean(list(vals), list(wts))
+            house_effects[pollster] = house_effects.get(pollster, 0.0) + delta
+            max_change = max(max_change, abs(delta))
+
+        if max_change < tolerance:
+            break
 
     return {k: round(v, 3) for k, v in house_effects.items()}
 
@@ -197,7 +216,7 @@ def aggregate_at_date(
         he = house_effects.get(p["pollster"], 0.0)
         adjusted = p[metric] - he
         values.append(adjusted)
-        weights.append(_decay_weight(days_ago))
+        weights.append(_decay_weight(days_ago) * _sample_weight(p))
 
     mean = _weighted_mean(values, weights)
     variance = _weighted_variance(values, weights, mean)
@@ -342,12 +361,14 @@ def run(
         "generated": ref_date.isoformat(),
         "source": raw.get("source"),
         "methodology": {
-            "half_life_days":           HALF_LIFE_DAYS,
-            "house_effect_iterations":  HOUSE_EFFECT_ITERATIONS,
-            "min_polls_for_he":         MIN_POLLS_FOR_HE,
-            "smoothing_window_days":    SMOOTHING_WINDOW_DAYS,
-            "trend_step_days":          TREND_STEP_DAYS,
-            "tpp_pref_flows":           DEFAULT_PREF_FLOWS,
+            "half_life_days":            HALF_LIFE_DAYS,
+            "house_effect_max_iter":     HOUSE_EFFECT_ITERATIONS,
+            "house_effect_tolerance":    HOUSE_EFFECT_TOLERANCE,
+            "min_polls_for_he":          MIN_POLLS_FOR_HE,
+            "smoothing_window_days":     SMOOTHING_WINDOW_DAYS,
+            "trend_step_days":           TREND_STEP_DAYS,
+            "median_sample_size":        MEDIAN_SAMPLE_SIZE,
+            "tpp_pref_flows":            DEFAULT_PREF_FLOWS,
         },
         "house_effects": he_summary,
         "current": current,
