@@ -3557,6 +3557,10 @@ export default function App() {
                         const d = getDemog(seat.id);
 
                         const seatWinProb = uncertainty.seatWinProbs[seat.id];
+                        const ov = seatOverrides[seat.id] ?? {};
+                        const seatPrefFlows = ov.prefFlows ?? {};
+                        const hasSeatOverrides = Object.keys(ov).some(k => k !== "prefFlows" && ov[k] != null)
+                          || Object.values(seatPrefFlows).some(v => v != null);
                         return (
                           <div key={seat.id}>
                             <div onClick={() => setExpandedModelSeatId(prev => prev === seat.id ? null : seat.id)}
@@ -3593,6 +3597,7 @@ export default function App() {
                               </span>
                               <span style={{ fontSize:10, color: changed ? projColor : "#9CA3AF", fontWeight:600 }}>
                                 {changed ? "CHANGED" : ""}
+                                {hasSeatOverrides && <span style={{ marginLeft:4, fontSize:9, color:"#6B7280", fontWeight:700 }}>⚙</span>}
                               </span>
                             </div>
                             {isExpanded && (
@@ -3623,6 +3628,59 @@ export default function App() {
                                     </div>
                                   </div>
                                 </div>
+
+                                {/* ── Seat-level primary vote overrides ── */}
+                                <div style={{ marginTop:14, borderTop:"1px solid #E5E7EB", paddingTop:12 }}>
+                                  <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>
+                                    Primary Votes (seat override)
+                                  </div>
+                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6, marginBottom:6 }}>
+                                    {[["ALP","alp","#DC2626"],["Coal","coal","#1D4ED8"],["Grn","grn","#059669"],["Ind","teal","#0891B2"],["ON","on","#B45309"]].map(([label, key, color]) => (
+                                      <div key={key} style={{ textAlign:"center" }}>
+                                        <div style={{ fontSize:10, fontWeight:800, color, marginBottom:3, textTransform:"uppercase", letterSpacing:"0.05em" }}>{label}</div>
+                                        <input
+                                          type="number" min={0} max={100} step={0.5}
+                                          value={ov[key] != null ? ov[key] : ""}
+                                          placeholder={primaries[key]?.toFixed(1) ?? "—"}
+                                          onChange={e => updateSeatOverride(seat.id, key, e.target.value)}
+                                          style={{ width:"100%", border:"1px solid #D1D5DB", borderRadius:5, padding:"4px 3px", fontSize:12, textAlign:"center", boxSizing:"border-box" }}
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <div style={{ fontSize:10, color:"#9CA3AF" }}>
+                                    National (2025): ALP {primaries.alp}% · Coal {primaries.coal}% · Grn {primaries.grn}% · Ind {primaries.teal}% · ON {primaries.on}%
+                                  </div>
+                                </div>
+
+                                {/* ── Seat-level preference flow overrides ── */}
+                                <div style={{ marginTop:12, borderTop:"1px solid #E5E7EB", paddingTop:12 }}>
+                                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                                    <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF" }}>
+                                      Preference Flows (seat override)
+                                    </div>
+                                    {Object.values(seatPrefFlows).some(v => v != null) && (
+                                      <span style={{ fontSize:10, background:"#6B7280", color:"#fff", padding:"1px 6px", borderRadius:8, fontWeight:600 }}>seat-level</span>
+                                    )}
+                                  </div>
+                                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0 16px" }}>
+                                    {[["Greens → ALP","grn_alp","#059669"],["Independents → ALP","teal_alp","#0891B2"],["One Nation → ALP","on_alp","#B45309"],["Other → ALP","other_alp","#7C3AED"]].map(([label, key, color]) => (
+                                      <PrefInput key={key} label={label}
+                                        value={seatPrefFlows[key] ?? prefFlows[key]}
+                                        onChange={v => updateSeatPrefFlow(seat.id, key, Math.round(v * 200) / 2)}
+                                        color={color} />
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {hasSeatOverrides && (
+                                  <div style={{ marginTop:10, textAlign:"right" }}>
+                                    <button onClick={e => { e.stopPropagation(); clearOverride(seat.id); }}
+                                      style={{ fontSize:11, color:"#DC2626", background:"none", border:"none", cursor:"pointer", textDecoration:"underline", padding:0 }}>
+                                      Clear seat overrides
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
