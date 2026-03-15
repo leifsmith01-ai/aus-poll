@@ -1414,14 +1414,17 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity) {
   const quantile = p => (cdf.find(({ cum }) => cum >= p) ?? cdf[cdf.length - 1]).c;
   const pMajority = sorted.filter(c => c >= 76).reduce((s, c) => s + seatCountCdf[c], 0);
 
-  const alpVar = alpCoalSeats.reduce((s, seat) => {
-    const p = seatWinProbs[seat.id];
-    return s + p * (1 - p);
-  }, 0);
+  // Derive mean and std from the CDF grid distribution rather than the independence
+  // assumption. The grid integrates over correlated national swing outcomes, so it
+  // correctly reflects that all seats move together — producing a wider (more realistic)
+  // seat-count spread than the Bernoulli-independence formula sqrt(sum(p*(1-p))).
+  const cdfMean = sorted.reduce((s, c) => s + c * seatCountCdf[c], 0);
+  const cdfVar  = sorted.reduce((s, c) => s + c * c * seatCountCdf[c], 0) - cdfMean ** 2;
+  const cdfStd  = Math.sqrt(Math.max(0, cdfVar));
 
   return {
-    alpMean:     Math.round(alpMeanSeats * 10) / 10,
-    alpStd:      Math.round(Math.sqrt(alpVar) * 10) / 10,
+    alpMean:     Math.round(cdfMean * 10) / 10,
+    alpStd:      Math.round(cdfStd * 10) / 10,
     alpP05:      quantile(0.05),
     alpP25:      quantile(0.25),
     alpP50:      quantile(0.50),
@@ -1945,17 +1948,22 @@ function PrimaryInput({ label, value, onChange, color="#6B7280", baseline }) {
   );
 }
 
-function PrefInput({ label, value, onChange, color="#6B7280" }) {
-  const pct = Math.round(value * 100);
+function PrefInput({ label, value, onChange, color="#6B7280", historicalRange }) {
+  const pct = Math.round(value * 200) / 2;  // round to nearest 0.5
   return (
     <div style={{ marginBottom:12 }}>
       <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
         <label style={{ fontSize:12, fontWeight:600, color:"#374151" }}>{label}</label>
-        <span style={{ fontSize:13, fontWeight:700, color:"#111" }}>{pct}%</span>
+        <span style={{ fontSize:13, fontWeight:700, color:"#111" }}>{pct.toFixed(1)}%</span>
       </div>
-      <input type="range" min={0} max={100} step={1} value={pct}
-        onChange={e => onChange(parseInt(e.target.value)/100)}
+      <input type="range" min={0} max={100} step={0.5} value={pct}
+        onChange={e => onChange(parseFloat(e.target.value)/100)}
         style={{ width:"100%", accentColor:color, cursor:"pointer" }} />
+      {historicalRange && (
+        <div style={{ fontSize:10, color:"#9CA3AF", marginTop:2 }}>
+          Historical (2019–2025): {(historicalRange[0]*100).toFixed(0)}–{(historicalRange[1]*100).toFixed(0)}%
+        </div>
+      )}
     </div>
   );
 }
@@ -2509,6 +2517,23 @@ export default function App() {
     grn_alp:0.81, teal_alp:0.62, on_alp:0.43, other_alp:0.50,
     coal_alp_v_on:0.10, grn_alp_v_on:0.90, teal_alp_v_on:0.75, other_alp_v_on:0.60,
     alp_on_v_coal:0.20, grn_on_v_coal:0.08, teal_on_v_coal:0.12, other_on_v_coal:0.25,
+  };
+
+  // Observed min–max ranges across 2019, 2022, and 2025 federal elections (AEC DOP data).
+  // ON-race flows have limited historical data; ranges are estimated from available seats.
+  const PREF_FLOW_RANGES = {
+    grn_alp:         [0.80, 0.86],
+    teal_alp:        [0.62, 0.74],
+    on_alp:          [0.14, 0.43],
+    other_alp:       [0.50, 0.57],
+    coal_alp_v_on:   [0.08, 0.12],
+    grn_alp_v_on:    [0.88, 0.93],
+    teal_alp_v_on:   [0.73, 0.80],
+    other_alp_v_on:  [0.55, 0.65],
+    alp_on_v_coal:   [0.18, 0.25],
+    grn_on_v_coal:   [0.05, 0.10],
+    teal_on_v_coal:  [0.09, 0.15],
+    other_on_v_coal: [0.22, 0.30],
   };
 
   const resetPrefFlows = () => setPrefFlows(PREF_FLOWS_2025);
@@ -3221,6 +3246,26 @@ export default function App() {
                 </div>
               </div>
 
+              {/* Flow consistency warning */}
+              {(() => {
+                const warns = [];
+                if (prefFlows.grn_alp_v_on < prefFlows.grn_alp)
+                  warns.push(`Greens→ALP in ON race (${(prefFlows.grn_alp_v_on*100).toFixed(1)}%) is below the standard flow (${(prefFlows.grn_alp*100).toFixed(1)}%). When ON is the opponent, Greens voters should flow more strongly to ALP.`);
+                if (prefFlows.teal_alp_v_on < prefFlows.teal_alp)
+                  warns.push(`Independents→ALP in ON race (${(prefFlows.teal_alp_v_on*100).toFixed(1)}%) is below the standard flow (${(prefFlows.teal_alp*100).toFixed(1)}%). When ON is the opponent, teal voters should flow more strongly to ALP.`);
+                if (prefFlows.alp_on_v_coal >= 0.5)
+                  warns.push(`ALP→ON (${(prefFlows.alp_on_v_coal*100).toFixed(1)}%) is ≥ 50%. ALP voters strongly prefer Coalition over ON; this rate is implausibly high.`);
+                if (warns.length === 0) return null;
+                return (
+                  <div style={{ background:"#FFFBEB", border:"1px solid #FCD34D", borderRadius:8, padding:"10px 12px", marginBottom:10 }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:"#92400E", marginBottom:6 }}>⚠ Inconsistent preference flows</div>
+                    {warns.map((w,i) => (
+                      <div key={i} style={{ fontSize:11, color:"#B45309", marginBottom: i < warns.length-1 ? 4 : 0 }}>• {w}</div>
+                    ))}
+                  </div>
+                );
+              })()}
+
               {/* Standard preference flows (ALP vs Coalition finals) */}
               <div style={panelStyle}>
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
@@ -3231,10 +3276,10 @@ export default function App() {
                   </button>
                 </div>
                 <div style={{ fontSize:11, color:"#9CA3AF", marginBottom:8 }}>Used in standard ALP vs Coalition finals. Remainder flows to Coalition.</div>
-                <PrefInput label="Greens → ALP"      value={prefFlows.grn_alp}   onChange={v=>setPrefFlows(f=>({...f,grn_alp:v}))}   color="#059669" />
-                <PrefInput label="Independents → ALP" value={prefFlows.teal_alp} onChange={v=>setPrefFlows(f=>({...f,teal_alp:v}))} color="#0891B2" />
-                <PrefInput label="One Nation → ALP"  value={prefFlows.on_alp}    onChange={v=>setPrefFlows(f=>({...f,on_alp:v}))}    color="#B45309" />
-                <PrefInput label="Other → ALP"       value={prefFlows.other_alp} onChange={v=>setPrefFlows(f=>({...f,other_alp:v}))} color="#7C3AED" />
+                <PrefInput label="Greens → ALP"      value={prefFlows.grn_alp}   onChange={v=>setPrefFlows(f=>({...f,grn_alp:v}))}   color="#059669" historicalRange={PREF_FLOW_RANGES.grn_alp} />
+                <PrefInput label="Independents → ALP" value={prefFlows.teal_alp} onChange={v=>setPrefFlows(f=>({...f,teal_alp:v}))} color="#0891B2" historicalRange={PREF_FLOW_RANGES.teal_alp} />
+                <PrefInput label="One Nation → ALP"  value={prefFlows.on_alp}    onChange={v=>setPrefFlows(f=>({...f,on_alp:v}))}    color="#B45309" historicalRange={PREF_FLOW_RANGES.on_alp} />
+                <PrefInput label="Other → ALP"       value={prefFlows.other_alp} onChange={v=>setPrefFlows(f=>({...f,other_alp:v}))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_alp} />
                 <div style={{ fontSize:11, color:"#9CA3AF", borderTop:"1px solid #F3F4F6", paddingTop:8, marginTop:4 }}>
                   Defaults based on 2025 AEC distributions (Grn 81%, Ind 62%, ON 43%, Other 50%).
                 </div>
@@ -3265,10 +3310,10 @@ export default function App() {
                       <div style={{ fontSize:11, color:"#B45309", marginBottom:8 }}>
                         When ON beats Coalition to be in the final count against ALP. Greens/teal voters flow more strongly to ALP here because they oppose ON more than Coalition.
                       </div>
-                      <PrefInput label="Greens → ALP"      value={prefFlows.grn_alp_v_on}   onChange={v=>setPrefFlows(f=>({...f,grn_alp_v_on:v}))}   color="#059669" />
-                      <PrefInput label="Independents → ALP" value={prefFlows.teal_alp_v_on}  onChange={v=>setPrefFlows(f=>({...f,teal_alp_v_on:v}))}  color="#0891B2" />
-                      <PrefInput label="Other → ALP"        value={prefFlows.other_alp_v_on} onChange={v=>setPrefFlows(f=>({...f,other_alp_v_on:v}))} color="#7C3AED" />
-                      <PrefInput label="Coalition → ALP"    value={prefFlows.coal_alp_v_on}  onChange={v=>setPrefFlows(f=>({...f,coal_alp_v_on:v}))}  color="#1D4ED8" />
+                      <PrefInput label="Greens → ALP"      value={prefFlows.grn_alp_v_on}   onChange={v=>setPrefFlows(f=>({...f,grn_alp_v_on:v}))}   color="#059669" historicalRange={PREF_FLOW_RANGES.grn_alp_v_on} />
+                      <PrefInput label="Independents → ALP" value={prefFlows.teal_alp_v_on}  onChange={v=>setPrefFlows(f=>({...f,teal_alp_v_on:v}))}  color="#0891B2" historicalRange={PREF_FLOW_RANGES.teal_alp_v_on} />
+                      <PrefInput label="Other → ALP"        value={prefFlows.other_alp_v_on} onChange={v=>setPrefFlows(f=>({...f,other_alp_v_on:v}))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_alp_v_on} />
+                      <PrefInput label="Coalition → ALP"    value={prefFlows.coal_alp_v_on}  onChange={v=>setPrefFlows(f=>({...f,coal_alp_v_on:v}))}  color="#1D4ED8" historicalRange={PREF_FLOW_RANGES.coal_alp_v_on} />
                       <div style={{ fontSize:11, color:"#9CA3AF", borderTop:"1px solid #FDE68A", paddingTop:6, marginTop:2 }}>
                         Defaults: Grn 90% · Ind 75% · Other 60% · Coal 10%
                       </div>
@@ -3281,10 +3326,10 @@ export default function App() {
                       <div style={{ fontSize:11, color:"#B45309", marginBottom:8 }}>
                         When ON beats ALP to be in the final count against Coalition. Greens/teal voters flow minimally to ON because they strongly prefer Coalition over ON in this scenario.
                       </div>
-                      <PrefInput label="ALP → ON"           value={prefFlows.alp_on_v_coal}   onChange={v=>setPrefFlows(f=>({...f,alp_on_v_coal:v}))}   color="#DC2626" />
-                      <PrefInput label="Greens → ON"        value={prefFlows.grn_on_v_coal}   onChange={v=>setPrefFlows(f=>({...f,grn_on_v_coal:v}))}   color="#059669" />
-                      <PrefInput label="Independents → ON"  value={prefFlows.teal_on_v_coal}  onChange={v=>setPrefFlows(f=>({...f,teal_on_v_coal:v}))}  color="#0891B2" />
-                      <PrefInput label="Other → ON"         value={prefFlows.other_on_v_coal} onChange={v=>setPrefFlows(f=>({...f,other_on_v_coal:v}))} color="#7C3AED" />
+                      <PrefInput label="ALP → ON"           value={prefFlows.alp_on_v_coal}   onChange={v=>setPrefFlows(f=>({...f,alp_on_v_coal:v}))}   color="#DC2626" historicalRange={PREF_FLOW_RANGES.alp_on_v_coal} />
+                      <PrefInput label="Greens → ON"        value={prefFlows.grn_on_v_coal}   onChange={v=>setPrefFlows(f=>({...f,grn_on_v_coal:v}))}   color="#059669" historicalRange={PREF_FLOW_RANGES.grn_on_v_coal} />
+                      <PrefInput label="Independents → ON"  value={prefFlows.teal_on_v_coal}  onChange={v=>setPrefFlows(f=>({...f,teal_on_v_coal:v}))}  color="#0891B2" historicalRange={PREF_FLOW_RANGES.teal_on_v_coal} />
+                      <PrefInput label="Other → ON"         value={prefFlows.other_on_v_coal} onChange={v=>setPrefFlows(f=>({...f,other_on_v_coal:v}))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_on_v_coal} />
                       <div style={{ fontSize:11, color:"#9CA3AF", borderTop:"1px solid #FDE68A", paddingTop:6, marginTop:2 }}>
                         Defaults: ALP 20% · Grn 8% · Ind 12% · Other 25%. Remainder flows to Coalition.
                       </div>
