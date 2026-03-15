@@ -62,15 +62,29 @@ const PARTY = {
 };
 const getParty = (ab) => PARTY[ab] ?? { short:ab||"?", color:"#6B7280", bg:"#F3F4F6", group:"crossbench" };
 
+// Named "teal" independent seats (climate-focused progressive independents).
+// All other IND/CA seats are classified as "ind" (Other Independent).
+const TEAL_SEAT_IDS = new Set([151, 152, 108, 132, 221, 214]); // Warringah, Wentworth, Bradfield, Mackellar, Kooyong, Goldstein
+
+// Returns the display group for a seat, distinguishing named teal seats from other independents.
+// Pass overrideParty when the projected winner differs from the 2025 winner.
+function getSeatGroup(seat, overrideParty) {
+  const p = overrideParty ?? seat.winner.party;
+  const g = getParty(p).group;
+  if (g === "teal") return TEAL_SEAT_IDS.has(seat.id) ? "teal" : "ind";
+  return g;
+}
+
 const GROUP_CONFIG = {
   alp:        { label:"Labor",              color:"#DC2626" },
   coalition:  { label:"Coalition",          color:"#1D4ED8" },
   greens:     { label:"Greens",             color:"#059669" },
-  teal:       { label:"Teal Ind.",           color:"#0891B2" },
+  teal:       { label:"Teal Ind.",          color:"#0891B2" },
+  ind:        { label:"Other Ind.",         color:"#0D9488" },
   one_nation: { label:"One Nation",         color:"#B45309" },
   crossbench: { label:"Other Crossbench",   color:"#7C3AED" },
 };
-const GROUP_ORDER = ["alp","coalition","greens","teal","one_nation","crossbench"];
+const GROUP_ORDER = ["alp","coalition","greens","teal","ind","one_nation","crossbench"];
 
 const STATES = ["NSW","VIC","QLD","WA","SA","TAS","ACT","NT"];
 const MARGINS = ["very_marginal","marginal","fairly_safe","safe"];
@@ -1337,22 +1351,32 @@ function normCDF(x) {
 //
 // Per-seat ALP win probability = Φ((base + ε·μ − 50) / (ε·σ))
 // where ε is the elasticity multiplier and μ is nat2ppSwing.
-// Non-ALP/Coal seats are held at their 2025 winner.
+// Non-ALP/Coal seats and ON-auto-detected seats use their deterministic projected outcome.
+// Only pure ALP vs Coalition seats (not redirected to an ON TCP race) are modelled
+// probabilistically via the Φ-function swing distribution.
 function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity) {
   const COALITION = new Set(["LP","LNP","NP","CLP"]);
 
+  // Φ-function applies only to ALP/Coal seats that were NOT rerouted to an ON TCP race.
   const alpCoalSeats = seats.filter(s => {
     const parties = s.tcp.map(t => t.party);
-    return parties.includes("ALP") && parties.some(p => COALITION.has(p));
+    const isAlpCoal = parties.includes("ALP") && parties.some(p => COALITION.has(p));
+    return isAlpCoal && !(s.modelled?.isAutoMatchup === true);
   });
+  // All other seats (non-ALP/Coal and ON-detected) use their deterministic modelled outcome.
   const nonAlpCoalAlp = seats.filter(s => {
     const parties = s.tcp.map(t => t.party);
-    return !(parties.includes("ALP") && parties.some(p => COALITION.has(p))) && s.winner.party === "ALP";
+    const isAlpCoal = parties.includes("ALP") && parties.some(p => COALITION.has(p));
+    if (isAlpCoal && !(s.modelled?.isAutoMatchup === true)) return false;
+    return (s.modelled?.winnerGroup ?? getParty(s.winner.party).group) === "alp";
   }).length;
 
-  // Per-seat win probabilities (analytical)
+  // Per-seat win probabilities — non-Φ seats use deterministic modelled outcome (0 or 1)
   const seatWinProbs = {};
-  seats.forEach(s => { seatWinProbs[s.id] = s.winner.party === "ALP" ? 1.0 : 0.0; });
+  seats.forEach(s => {
+    const g = s.modelled?.winnerGroup ?? getParty(s.winner.party).group;
+    seatWinProbs[s.id] = g === "alp" ? 1.0 : 0.0;
+  });
   let alpMeanSeats = nonAlpCoalAlp;
   alpCoalSeats.forEach(seat => {
     const base = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
@@ -1635,7 +1659,8 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const adj   = hasTcpOverride
         ? override.tcpPct
         : Math.max(0, Math.min(100, base + effTealSwing - effCoalSwing));
-      projWinnerGroup = adj >= 50 ? "teal" : "coalition";
+      const indGroup = TEAL_SEAT_IDS.has(seat.id) ? "teal" : "ind";
+      projWinnerGroup = adj >= 50 ? indGroup : "coalition";
       projWinnerParty = adj >= 50 ? tealP?.party : seat.tcp.find(t => ["LP","LNP","NP","CLP"].includes(t.party))?.party;
       projWinnerPct   = adj >= 50 ? adj : 100 - adj;
 
@@ -1645,12 +1670,13 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const adj   = hasTcpOverride
         ? override.tcpPct
         : Math.max(0, Math.min(100, base + effTealSwing - effAlpSwing));
-      projWinnerGroup = adj >= 50 ? "teal" : "alp";
+      const indGroup = TEAL_SEAT_IDS.has(seat.id) ? "teal" : "ind";
+      projWinnerGroup = adj >= 50 ? indGroup : "alp";
       projWinnerParty = adj >= 50 ? tealP?.party : "ALP";
       projWinnerPct   = adj >= 50 ? adj : 100 - adj;
 
     } else {
-      projWinnerGroup = getParty(seat.winner.party).group;
+      projWinnerGroup = getSeatGroup(seat);
       projWinnerParty = seat.winner.party;
       projWinnerPct   = seat.tcp[0]?.pct ?? 50;
     }
@@ -1862,7 +1888,7 @@ function TcpBar({ tcp, winnerParty }) {
 function TallyBar({ seats, useModelled=false }) {
   const counts = {};
   seats.forEach(s => {
-    const g = useModelled ? (s.modelled?.winnerGroup ?? getParty(s.winner.party).group) : getParty(s.winner.party).group;
+    const g = useModelled ? (s.modelled?.winnerGroup ?? getSeatGroup(s)) : getSeatGroup(s);
     counts[g] = (counts[g]||0) + 1;
   });
   const total = seats.length;
@@ -2029,7 +2055,7 @@ export default function App() {
         if (!s.name.toLowerCase().includes(q) && !s.winner.name.toLowerCase().includes(q)) return false;
       }
       if (!stateFilter.has(s.state)) return false;
-      if (!groupFilter.has(getParty(s.winner.party).group)) return false;
+      if (!groupFilter.has(getSeatGroup(s))) return false;
       if (!marginFilter.has(getMarginCat(s.margin))) return false;
       return true;
     });
@@ -2045,7 +2071,7 @@ export default function App() {
   }, [search, stateFilter, groupFilter, marginFilter, sortKey, sortDir]);
 
   const stateCounts  = useMemo(() => Object.fromEntries(STATES.map(s => [s, SEATS.filter(d => d.state===s).length])), []);
-  const groupCounts  = useMemo(() => { const c={}; SEATS.forEach(s => { const g=getParty(s.winner.party).group; c[g]=(c[g]||0)+1; }); return c; }, []);
+  const groupCounts  = useMemo(() => { const c={}; SEATS.forEach(s => { const g=getSeatGroup(s); c[g]=(c[g]||0)+1; }); return c; }, []);
   const marginCounts = useMemo(() => { const c={}; SEATS.forEach(s => { const cat=getMarginCat(s.margin); c[cat]=(c[cat]||0)+1; }); return c; }, []);
 
   // ── Modelling ──
@@ -2058,8 +2084,8 @@ export default function App() {
     [swings, prefFlows, seatOverrides, nat2ppSwing, onThreshold, useElasticity]);
 
   const uncertainty = useMemo(() =>
-    computeUncertainty(SEATS, nat2ppSwing, swingStd, useElasticity),
-    [nat2ppSwing, swingStd, useElasticity]);
+    computeUncertainty(modelledSeats, nat2ppSwing, swingStd, useElasticity),
+    [modelledSeats, nat2ppSwing, swingStd, useElasticity]);
 
   const projCounts = useMemo(() => {
     const c = {};
@@ -2069,7 +2095,7 @@ export default function App() {
 
   const baseCounts = useMemo(() => {
     const c = {};
-    SEATS.forEach(s => { const g=getParty(s.winner.party).group; c[g]=(c[g]||0)+1; });
+    SEATS.forEach(s => { const g=getSeatGroup(s); c[g]=(c[g]||0)+1; });
     return c;
   }, []);
 
@@ -3470,7 +3496,7 @@ export default function App() {
 
                     {/* Column headers */}
                     <div style={{ display:"grid", gridTemplateColumns:"1fr 48px 80px 80px 80px 70px", gap:4, borderBottom:"2px solid #F3F4F6", paddingBottom:4, marginBottom:4 }}>
-                      {[["Seat","#374151"],["State","#6B7280"],["2022","#6B7280"],["Projected","#6B7280"],["Margin","#6B7280"],["ALP win%","#6B7280"],["",""]].map(([label, color], i) => (
+                      {[["Seat","#374151"],["State","#6B7280"],["2025","#6B7280"],["Projected","#6B7280"],["Margin","#6B7280"],["ALP win%","#6B7280"],["",""]].map(([label, color], i) => (
                         <div key={i} style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.05em", color, paddingLeft: i===0?2:0 }}>{label}</div>
                       ))}
                     </div>
