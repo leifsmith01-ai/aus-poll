@@ -150,6 +150,10 @@ const ON_FP_2022 = {
 
 // ── 2025 seat-level ON first preferences from AEC ──────────────────────────
 const ON_FP_2025 = {
+  // ACT
+  318: 2.5,  // Bean (ACT)
+  101: 1.5,  // Canberra (ACT)
+  102: 2.0,  // Fenner (ACT)
   103: 3.5,  // Banks (NSW)
   104: 5.4,  // Barton (NSW)
   105: 2.2,  // Bennelong (NSW)
@@ -1415,8 +1419,8 @@ function computeNat2pp(prim, flows) {
 
 // Methodology:
 //  - ALP/Coalition seats (no primary override): uniform national swing — nat2ppSwing is
-//    applied to each seat's actual 2022 ALP 2PP baseline. This correctly models each seat
-//    starting from its own 2022 result rather than treating all seats identically.
+//    applied to each seat's actual 2025 ALP 2PP baseline. This correctly models each seat
+//    starting from its own 2025 result rather than treating all seats identically.
 //  - ALP/Coalition seats (primary vote override): TCP is computed from the override
 //    first-preference percentages via the standard preference-flow formula.
 //  - Non-ALP/Coalition seats (GRN, TEAL): swing differential is applied to the seat's
@@ -1468,11 +1472,11 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const estAlp  = override?.alp  != null ? override.alp  : Math.max(0, BASELINE_2025.alp  + swings.alp);
       const estCoal = override?.coal != null ? override.coal : Math.max(0, BASELINE_2025.coal + swings.coal);
       if (estOnFp > estAlp && estCoal >= estAlp) {
-        // ON beats ALP on primaries → ON vs ALP final
-        activeTcpMatchup = "on_v_alp";
-      } else if (estOnFp > estCoal && estAlp >= estCoal) {
-        // ON beats Coalition on primaries → ON vs Coalition final
+        // ALP eliminated (fewest votes) → ON vs Coalition final
         activeTcpMatchup = "on_v_coal";
+      } else if (estOnFp > estCoal && estAlp >= estCoal) {
+        // Coalition eliminated (fewest votes) → ON vs ALP final
+        activeTcpMatchup = "on_v_alp";
       }
     }
     const isAutoMatchup = activeTcpMatchup !== null && !(override?.tcpMatchup);
@@ -1861,7 +1865,7 @@ function TallyBar({ seats, useModelled=false }) {
   return (
     <div style={{ background:"#fff", border:"1px solid #E5E7EB", borderRadius:12, padding:"14px 18px", marginBottom:14 }}>
       <div style={{ fontSize:13, fontWeight:600, color:"#6B7280", marginBottom:8 }}>
-        {useModelled ? "Projected" : "2022 result"} — {total} seats shown
+        {useModelled ? "Projected" : "2025 result"} — {total} seats shown
       </div>
       <div style={{ display:"flex", height:26, borderRadius:6, overflow:"hidden", gap:2 }}>
         {GROUP_ORDER.filter(g => counts[g]).map(g => (
