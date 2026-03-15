@@ -10,10 +10,30 @@ Each election has a consistent set of CSV/Excel files following standard naming 
 # These are the AEC internal event IDs used in all file/URL naming.
 ELECTIONS = {
     2025: {
-        "event_id": 29581,   # Verify at results.aec.gov.au — update if URL returns 404
+        "event_id": 31496,
         "name": "2025 Australian Federal Election",
         "date": "2025-05-03",
-        "results_base_url": "https://results.aec.gov.au/29581/Website/Downloads",
+        "results_base_url": "https://results.aec.gov.au/31496/Website/Downloads",
+        # 2025 AEC renamed several files relative to the standard FILE_TEMPLATES.
+        # Keys here override the FILE_TEMPLATES entry for this election year only.
+        "file_overrides": {
+            # Booth-level FP is now split per-state; list format triggers multi-download
+            # and the results are merged into a single "first_preferences" parse output.
+            "first_preferences": [
+                "HouseStateFirstPrefsByPollingPlaceDownload-31496-NSW.csv",
+                "HouseStateFirstPrefsByPollingPlaceDownload-31496-VIC.csv",
+                "HouseStateFirstPrefsByPollingPlaceDownload-31496-QLD.csv",
+                "HouseStateFirstPrefsByPollingPlaceDownload-31496-WA.csv",
+                "HouseStateFirstPrefsByPollingPlaceDownload-31496-SA.csv",
+                "HouseStateFirstPrefsByPollingPlaceDownload-31496-TAS.csv",
+                "HouseStateFirstPrefsByPollingPlaceDownload-31496-ACT.csv",
+                "HouseStateFirstPrefsByPollingPlaceDownload-31496-NT.csv",
+            ],
+            # Division-level files renamed in 2025
+            "division_first_prefs": "HouseFirstPrefsByCandidateByVoteTypeDownload-31496.csv",
+            "division_tcp":         "HouseTcpByCandidateByVoteTypeDownload-31496.csv",
+            "enrolment":            "GeneralEnrolmentByDivisionDownload-31496.csv",
+        },
     },
     2022: {
         "event_id": 27966,

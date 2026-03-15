@@ -109,17 +109,31 @@ def download_election(year: int, force: bool = False) -> dict:
         "User-Agent": "AEC-Election-Dashboard/1.0 (research; contact via GitHub)"
     })
 
+    file_overrides = election.get("file_overrides", {})
+
     for file_key, template in FILE_TEMPLATES.items():
-        filename = template.format(event_id=event_id)
-        url = f"{base_url}/{filename}"
-        dest_path = dest_dir / filename
+        override = file_overrides.get(file_key)
 
-        success = download_file(url, dest_path, force=force, session=session)
-        if success:
-            downloaded[file_key] = str(dest_path)
-
-        # Be polite to AEC servers
-        time.sleep(REQUEST_DELAY_SECONDS)
+        if isinstance(override, list):
+            # Multiple files (e.g. 2025 per-state first_preferences)
+            paths = []
+            for filename in override:
+                url = f"{base_url}/{filename}"
+                dest_path = dest_dir / filename
+                success = download_file(url, dest_path, force=force, session=session)
+                if success:
+                    paths.append(str(dest_path))
+                time.sleep(REQUEST_DELAY_SECONDS)
+            if paths:
+                downloaded[file_key] = paths
+        else:
+            filename = override if override else template.format(event_id=event_id)
+            url = f"{base_url}/{filename}"
+            dest_path = dest_dir / filename
+            success = download_file(url, dest_path, force=force, session=session)
+            if success:
+                downloaded[file_key] = str(dest_path)
+            time.sleep(REQUEST_DELAY_SECONDS)
 
     logger.info(
         "Downloaded %d/%d files for %d", len(downloaded), len(FILE_TEMPLATES), year
@@ -148,15 +162,23 @@ def list_local_files(year: int) -> dict:
     if year not in ELECTIONS:
         return {}
 
-    event_id = ELECTIONS[year]["event_id"]
+    election = ELECTIONS[year]
+    event_id = election["event_id"]
     dest_dir = get_raw_dir(year)
+    file_overrides = election.get("file_overrides", {})
     found = {}
 
     for file_key, template in FILE_TEMPLATES.items():
-        filename = template.format(event_id=event_id)
-        path = dest_dir / filename
-        if path.exists():
-            found[file_key] = str(path)
+        override = file_overrides.get(file_key)
+        if isinstance(override, list):
+            paths = [str(dest_dir / fn) for fn in override if (dest_dir / fn).exists()]
+            if paths:
+                found[file_key] = paths
+        else:
+            filename = override if override else template.format(event_id=event_id)
+            path = dest_dir / filename
+            if path.exists():
+                found[file_key] = str(path)
 
     return found
 
