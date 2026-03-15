@@ -1337,7 +1337,7 @@ function normCDF(x) {
 //
 // Per-seat ALP win probability = Φ((base + ε·μ − 50) / (ε·σ))
 // where ε is the elasticity multiplier and μ is nat2ppSwing.
-// Non-ALP/Coal seats are held at their 2022 winner.
+// Non-ALP/Coal seats are held at their 2025 winner.
 function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity) {
   const COALITION = new Set(["LP","LNP","NP","CLP"]);
 
@@ -1424,10 +1424,10 @@ function computeNat2pp(prim, flows) {
 //  - ALP/Coalition seats (primary vote override): TCP is computed from the override
 //    first-preference percentages via the standard preference-flow formula.
 //  - Non-ALP/Coalition seats (GRN, TEAL): swing differential is applied to the seat's
-//    2022 TCP baseline (same approach, already correct).
-//  - tcpPct override: bypasses all calculations; directly sets the 2022 winner's TCP%.
-//    tcpPct > 50 → 2022 winner holds; tcpPct < 50 → challenger wins.
-//  - ON auto-detection: when ON's estimated seat-level primary (using seat-level 2022
+//    2025 TCP baseline (same approach, already correct).
+//  - tcpPct override: bypasses all calculations; directly sets the 2025 winner's TCP%.
+//    tcpPct > 50 → 2025 winner holds; tcpPct < 50 → challenger wins.
+//  - ON auto-detection: when ON's estimated seat-level primary (using seat-level 2025
 //    baseline + national swing) exceeds onThreshold, the model automatically determines
 //    whether the seat enters an ON vs ALP or ON vs Coalition TCP. Manual tcpMatchup
 //    overrides always take precedence over auto-detection.
@@ -1459,16 +1459,26 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       effTealSwing = swings.teal;
     }
 
-    // Estimate ON's primary in this seat using seat-level 2022 baseline + national swing.
+    // Estimate ON's primary in this seat using seat-level 2025 baseline + national swing.
     // If the seat has a primary override for ON, use that value directly.
     const estOnFp = override?.on != null
       ? override.on
       : estimateSeatOnFp(seat.id, swings);
 
+    // Seat TCP type — computed before auto-detection so the ON check can be restricted
+    // to traditional ALP vs Coalition seats (ON can't realistically reach the final 2CP
+    // in Greens or Teal seats where those parties dominate locally).
+    const tcpP = seat.tcp.map(t => t.party);
+    const hasAlp  = tcpP.includes("ALP");
+    const hasCoal = tcpP.some(p => ["LP","LNP","NP","CLP"].includes(p));
+    const hasGrn  = tcpP.includes("GRN");
+    const hasTeal = tcpP.some(p => ["IND","CA"].includes(p));
+
     // Auto-detect ON TCP matchup when ON is above threshold, unless manually overridden.
-    // Compares estimated ON primary against estimated ALP and Coalition primaries.
+    // Only applies to ALP vs Coalition seats — Greens/Teal seats have such high local
+    // primary votes for those candidates that ON cannot realistically reach the final 2CP.
     let activeTcpMatchup = override?.tcpMatchup ?? null;
-    if (!activeTcpMatchup && estOnFp >= onThreshold) {
+    if (!activeTcpMatchup && estOnFp >= onThreshold && hasAlp && hasCoal) {
       const estAlp  = override?.alp  != null ? override.alp  : Math.max(0, BASELINE_2025.alp  + swings.alp);
       const estCoal = override?.coal != null ? override.coal : Math.max(0, BASELINE_2025.coal + swings.coal);
       if (estOnFp > estAlp && estCoal >= estAlp) {
@@ -1480,12 +1490,6 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       }
     }
     const isAutoMatchup = activeTcpMatchup !== null && !(override?.tcpMatchup);
-
-    const tcpP = seat.tcp.map(t => t.party);
-    const hasAlp  = tcpP.includes("ALP");
-    const hasCoal = tcpP.some(p => ["LP","LNP","NP","CLP"].includes(p));
-    const hasGrn  = tcpP.includes("GRN");
-    const hasTeal = tcpP.some(p => ["IND","CA"].includes(p));
 
     // tcpPct override: represents the 2022 winner's TCP% (seat.tcp[0].party).
     // >50 means the 2022 winner holds; <50 means the challenger wins.
@@ -1597,7 +1601,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         const c2 = newFp.coal + newFp.grn*(1-ef.grn_alp) + newFp.teal*(1-ef.teal_alp) + newFp.on*(1-ef.on_alp) + newFp.other*(1-ef.other_alp);
         projAlp2pp = a2 / (a2 + c2) * 100;
       } else {
-        // Uniform national swing applied to this seat's 2022 ALP 2PP baseline.
+        // Uniform national swing applied to this seat's 2025 ALP 2PP baseline.
         // With elasticity enabled, marginal seats swing proportionally more.
         const eps = useElasticity ? seatElasticityMult(baseAlp2pp) : 1.0;
         projAlp2pp = Math.max(0, Math.min(100, baseAlp2pp + nat2ppSwing * eps));
@@ -3274,7 +3278,7 @@ export default function App() {
                     <>
                       <div style={{ fontSize:30, fontWeight:800, color: implied2pp>=50?"#059669":"#DC2626" }}>{implied2pp.toFixed(1)}%</div>
                       <div style={{ fontSize:12, color:"#6B7280", marginTop:2 }}>
-                        {implied2pp>=50 ? `▲ +${(implied2pp-NATIONAL_2PP_2025).toFixed(1)} vs 2025` : `▼ ${(implied2pp-NATIONAL_2PP_2025).toFixed(1)} vs 2025`}
+                        {implied2pp>=NATIONAL_2PP_2025 ? `▲ +${(implied2pp-NATIONAL_2PP_2025).toFixed(1)} vs 2025` : `▼ ${(implied2pp-NATIONAL_2PP_2025).toFixed(1)} vs 2025`}
                       </div>
                     </>
                   ) : <div style={{ fontSize:20, color:"#9CA3AF" }}>—</div>}
