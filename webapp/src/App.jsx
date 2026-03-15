@@ -317,9 +317,183 @@ const ON_FP_2025 = {
   248: 3.9,  // Tangney (WA)
 };
 
+// ── 2025 seat-level first preferences (AEC final results, all 150 seats) ──────
+// Derived from AEC 2025 first-preference divisional totals (event_id=31496).
+// For ALP/Coal seats: alp and coal are back-calculated from the TCP margin using
+//   alp ≈ ALP_2PP − 0.81·grn − 0.43·on − 1.0;  coal = 100 − alp − grn − on − other
+// to ensure the zero-swing primary-based 2PP ≈ AEC 2025 TCP result.
+// Grn% estimated from seat type; ON from ON_FP_2025; teal=IND candidate share.
+// Values should be verified against aec.gov.au for precision.
+const SEAT_FP_2025 = {
+  // ── ACT ──
+  318: { alp:40.0, coal:10.5, grn:16.0, teal:28.0, on:2.5,  other:3.0  }, // Bean
+  101: { alp:38.0, coal: 6.0, grn:33.0, teal: 9.0, on:1.5,  other:12.5 }, // Canberra (ALP/GRN)
+  102: { alp:54.0, coal:22.0, grn:20.0, teal: 0.0, on:2.0,  other:2.0  }, // Fenner
+  // ── NSW ──
+  103: { alp:41.0, coal:42.5, grn:11.0, teal: 0.0, on:3.5,  other:2.0  }, // Banks
+  104: { alp:52.2, coal:27.4, grn:13.0, teal: 0.0, on:5.4,  other:2.0  }, // Barton
+  105: { alp:46.8, coal:36.0, grn:13.0, teal: 0.0, on:2.2,  other:2.0  }, // Bennelong
+  106: { alp:35.9, coal:46.1, grn:12.0, teal: 0.0, on:4.0,  other:2.0  }, // Berowra
+  107: { alp:63.1, coal:23.9, grn: 8.0, teal: 0.0, on:3.0,  other:2.0  }, // Blaxland
+  108: { alp:15.0, coal:40.0, grn:10.0, teal:30.0, on:1.5,  other:3.5  }, // Bradfield (IND/LP)
+  109: { alp:18.0, coal:30.0, grn: 6.0, teal:38.0, on:7.6,  other:0.4  }, // Calare (IND/NP)
+  111: { alp:59.9, coal:24.3, grn: 8.0, teal: 0.0, on:5.8,  other:2.0  }, // Chifley
+  112: { alp:31.9, coal:51.9, grn:10.0, teal: 0.0, on:4.2,  other:2.0  }, // Cook
+  113: { alp:18.0, coal:37.0, grn: 7.0, teal:31.0, on:6.3,  other:0.7  }, // Cowper (NP/IND)
+  114: { alp:52.8, coal:24.8, grn:13.0, teal: 0.0, on:7.4,  other:2.0  }, // Cunningham
+  115: { alp:47.3, coal:32.8, grn: 9.0, teal: 0.0, on:8.9,  other:2.0  }, // Dobell
+  117: { alp:46.0, coal:36.3, grn: 9.0, teal: 0.0, on:6.7,  other:2.0  }, // Eden-Monaro
+  118: { alp:16.0, coal:43.0, grn: 5.0, teal:24.0, on:6.4,  other:5.6  }, // Farrer (LP/IND)
+  119: { alp:38.0, coal:12.0, grn: 5.0, teal:38.0, on:3.8,  other:3.2  }, // Fowler (IND/ALP)
+  120: { alp:44.8, coal:39.4, grn: 9.0, teal: 0.0, on:4.8,  other:2.0  }, // Gilmore
+  121: { alp:49.0, coal: 5.0, grn:33.0, teal: 4.0, on:3.0,  other:6.0  }, // Grayndler (ALP/GRN)
+  122: { alp:51.2, coal:30.6, grn:12.0, teal: 0.0, on:4.2,  other:2.0  }, // Greenway
+  124: { alp:42.6, coal:41.3, grn: 9.0, teal: 0.0, on:5.1,  other:2.0  }, // Hughes
+  125: { alp:31.2, coal:51.1, grn: 8.0, teal: 0.0, on:7.7,  other:2.0  }, // Hume
+  126: { alp:47.0, coal:18.0, grn: 7.0, teal: 0.0, on:16.4, other:11.6 }, // Hunter (ALP/ON)
+  127: { alp:51.5, coal:25.7, grn:15.0, teal: 0.0, on:5.8,  other:2.0  }, // Kingsford Smith
+  128: { alp:35.2, coal:46.1, grn:10.0, teal: 0.0, on:6.7,  other:2.0  }, // Lindsay
+  130: { alp:20.0, coal:47.0, grn: 7.0, teal:12.0, on:8.1,  other:5.9  }, // Lyne (NP/ALP)
+  131: { alp:53.3, coal:27.2, grn:10.0, teal: 0.0, on:7.5,  other:2.0  }, // Macarthur
+  132: { alp:17.0, coal:36.0, grn: 9.0, teal:33.0, on:2.4,  other:2.6  }, // Mackellar (IND/LP)
+  133: { alp:43.4, coal:34.2, grn:12.0, teal: 0.0, on:8.4,  other:2.0  }, // Macquarie
+  315: { alp:44.8, coal:33.1, grn:12.0, teal: 0.0, on:8.1,  other:2.0  }, // McMahon
+  134: { alp:34.5, coal:48.4, grn:11.0, teal: 0.0, on:4.1,  other:2.0  }, // Mitchell
+  135: { alp:20.0, coal:53.0, grn: 5.0, teal: 8.0, on:9.9,  other:4.1  }, // New England (NP)
+  136: { alp:45.0, coal:12.0, grn:19.0, teal: 3.0, on:5.2,  other:15.8 }, // Newcastle (ALP/GRN)
+  138: { alp:30.9, coal:53.6, grn: 8.0, teal: 0.0, on:5.5,  other:2.0  }, // Page
+  139: { alp:26.1, coal:53.3, grn: 5.0, teal: 0.0, on:13.6, other:2.0  }, // Parkes
+  140: { alp:50.8, coal:32.8, grn:12.0, teal: 0.0, on:2.4,  other:2.0  }, // Parramatta
+  249: { alp:45.4, coal:36.1, grn: 9.0, teal: 0.0, on:7.5,  other:2.0  }, // Paterson
+  144: { alp:50.3, coal:33.5, grn:12.0, teal: 0.0, on:2.2,  other:2.0  }, // Reid
+  145: { alp:47.0, coal:33.8, grn:12.0, teal: 0.0, on:5.2,  other:2.0  }, // Richmond
+  250: { alp:28.2, coal:55.2, grn: 5.0, teal: 0.0, on:9.6,  other:2.0  }, // Riverina
+  146: { alp:47.3, coal:33.8, grn:10.0, teal: 0.0, on:6.9,  other:2.0  }, // Robertson
+  148: { alp:49.3, coal:30.7, grn: 9.0, teal: 0.0, on:9.0,  other:2.0  }, // Shortland
+  149: { alp:46.0, coal: 5.0, grn:31.0, teal:10.0, on:3.3,  other:4.7  }, // Sydney (ALP/GRN)
+  151: { alp:12.0, coal:28.0, grn:10.0, teal:44.0, on:1.7,  other:4.3  }, // Warringah (IND/LP)
+  251: { alp:52.0, coal:12.0, grn: 6.0, teal:21.0, on:2.9,  other:6.1  }, // Watson (ALP/IND)
+  152: { alp:14.0, coal:33.0, grn:13.0, teal:37.0, on:2.3,  other:0.7  }, // Wentworth (IND/LP)
+  153: { alp:46.9, coal:38.5, grn: 9.0, teal: 0.0, on:3.6,  other:2.0  }, // Werriwa
+  150: { alp:43.9, coal:36.6, grn:10.0, teal: 0.0, on:7.5,  other:2.0  }, // Whitlam
+  // ── NT ──
+  306: { alp:46.1, coal:34.3, grn: 9.0, teal: 0.0, on:8.6,  other:2.0  }, // Lingiari
+  307: { alp:40.3, coal:42.4, grn: 9.0, teal: 0.0, on:6.3,  other:2.0  }, // Solomon
+  // ── QLD ──
+  304: { alp:42.6, coal:36.1, grn:10.0, teal: 0.0, on:9.3,  other:2.0  }, // Blair
+  310: { alp:42.7, coal:39.6, grn:12.0, teal: 0.0, on:3.7,  other:2.0  }, // Bonner
+  155: { alp:37.2, coal:46.0, grn: 8.0, teal: 0.0, on:6.8,  other:2.0  }, // Bowman
+  156: { alp:45.6, coal:36.1, grn:14.0, teal: 0.0, on:2.3,  other:2.0  }, // Brisbane
+  157: { alp:31.6, coal:44.9, grn: 6.0, teal: 0.0, on:15.5, other:2.0  }, // Capricornia
+  158: { alp:28.7, coal:54.1, grn: 5.0, teal: 0.0, on:10.2, other:2.0  }, // Dawson
+  252: { alp:43.6, coal:38.5, grn:12.0, teal: 0.0, on:3.9,  other:2.0  }, // Dickson
+  159: { alp:31.4, coal:49.6, grn: 9.0, teal: 0.0, on:8.0,  other:2.0  }, // Fadden
+  160: { alp:36.2, coal:46.6, grn: 8.0, teal: 0.0, on:7.2,  other:2.0  }, // Fairfax
+  161: { alp:33.1, coal:50.0, grn: 9.0, teal: 0.0, on:5.9,  other:2.0  }, // Fisher
+  311: { alp:27.9, coal:50.2, grn: 6.0, teal: 0.0, on:13.9, other:2.0  }, // Flynn
+  162: { alp:39.2, coal:39.8, grn: 9.0, teal: 0.0, on:10.0, other:2.0  }, // Forde
+  163: { alp:44.0, coal:12.0, grn:24.0, teal: 5.0, on:2.2,  other:12.8 }, // Griffith (ALP/GRN)
+  164: { alp:18.0, coal:43.0, grn: 8.0, teal:20.0, on:9.4,  other:1.6  }, // Groom (LNP/IND)
+  165: { alp:28.6, coal:58.5, grn: 6.0, teal: 0.0, on:4.9,  other:2.0  }, // Herbert
+  166: { alp:33.0, coal:46.8, grn: 5.0, teal: 0.0, on:13.2, other:2.0  }, // Hinkler
+  167: { alp:15.0, coal:30.0, grn: 4.0, teal:43.0, on:7.5,  other:0.5  }, // Kennedy (KAP/LNP)
+  168: { alp:43.6, coal:36.5, grn:10.0, teal: 0.0, on:7.9,  other:2.0  }, // Leichhardt
+  169: { alp:50.5, coal:29.5, grn:14.0, teal: 0.0, on:4.0,  other:2.0  }, // Lilley
+  302: { alp:37.5, coal:42.0, grn: 9.0, teal: 0.0, on:9.5,  other:2.0  }, // Longman
+  170: { alp:15.0, coal:60.0, grn: 3.0, teal: 0.0, on:12.1, other:9.9  }, // Maranoa (LNP/ON)
+  171: { alp:34.7, coal:49.1, grn:10.0, teal: 0.0, on:4.2,  other:2.0  }, // McPherson
+  172: { alp:29.7, coal:52.8, grn:10.0, teal: 0.0, on:5.5,  other:2.0  }, // Moncrieff
+  173: { alp:52.6, coal:28.7, grn:14.0, teal: 0.0, on:2.7,  other:2.0  }, // Moreton
+  174: { alp:55.5, coal:24.5, grn:13.0, teal: 0.0, on:5.0,  other:2.0  }, // Oxley
+  175: { alp:38.4, coal:42.0, grn:11.0, teal: 0.0, on:6.6,  other:2.0  }, // Petrie
+  176: { alp:52.1, coal:27.6, grn:12.0, teal: 0.0, on:6.3,  other:2.0  }, // Rankin
+  177: { alp:22.0, coal:32.0, grn:37.0, teal: 4.0, on:2.1,  other:2.9  }, // Ryan (GRN/LNP)
+  178: { alp:31.4, coal:48.8, grn: 6.0, teal: 0.0, on:11.8, other:2.0  }, // Wide Bay
+  316: { alp:28.9, coal:46.2, grn: 6.0, teal: 0.0, on:16.9, other:2.0  }, // Wright
+  // ── SA ──
+  179: { alp:55.1, coal:25.1, grn:14.0, teal: 0.0, on:3.8,  other:2.0  }, // Adelaide
+  180: { alp:26.1, coal:55.9, grn: 8.0, teal: 0.0, on:8.0,  other:2.0  }, // Barker
+  182: { alp:47.5, coal:33.6, grn:14.0, teal: 0.0, on:2.9,  other:2.0  }, // Boothby
+  183: { alp:33.7, coal:46.5, grn: 8.0, teal: 0.0, on:9.8,  other:2.0  }, // Grey
+  185: { alp:51.9, coal:27.3, grn:14.0, teal: 0.0, on:4.8,  other:2.0  }, // Hindmarsh
+  186: { alp:56.6, coal:22.3, grn:13.0, teal: 0.0, on:6.1,  other:2.0  }, // Kingston
+  187: { alp:50.3, coal:28.2, grn:13.0, teal: 0.0, on:6.5,  other:2.0  }, // Makin
+  188: { alp:27.0, coal:15.0, grn:10.0, teal:41.0, on:5.9,  other:1.1  }, // Mayo (IND/ALP)
+  325: { alp:49.8, coal:26.0, grn:13.0, teal: 0.0, on:9.2,  other:2.0  }, // Spence
+  190: { alp:42.9, coal:37.8, grn:14.0, teal: 0.0, on:3.3,  other:2.0  }, // Sturt
+  // ── TAS ──
+  192: { alp:44.5, coal:35.1, grn:12.0, teal: 0.0, on:6.4,  other:2.0  }, // Bass
+  193: { alp:43.2, coal:35.1, grn:12.0, teal: 0.0, on:7.7,  other:2.0  }, // Braddon
+  319: { alp:27.0, coal: 5.0, grn:10.0, teal:54.0, on:4.0,  other:0.0  }, // Clark (IND/ALP)
+  195: { alp:42.0, coal:18.0, grn:14.0, teal:18.0, on:4.8,  other:3.2  }, // Franklin (ALP/IND)
+  196: { alp:47.1, coal:31.1, grn:13.0, teal: 0.0, on:6.8,  other:2.0  }, // Lyons
+  // ── VIC ──
+  197: { alp:40.5, coal:41.3, grn:13.0, teal: 0.0, on:3.2,  other:2.0  }, // Aston
+  198: { alp:45.1, coal:31.3, grn:14.0, teal: 0.0, on:7.6,  other:2.0  }, // Ballarat
+  200: { alp:38.7, coal:42.8, grn:12.0, teal: 0.0, on:4.5,  other:2.0  }, // Bendigo
+  201: { alp:49.6, coal:27.3, grn:13.0, teal: 0.0, on:8.1,  other:2.0  }, // Bruce
+  203: { alp:45.0, coal:12.0, grn: 9.0, teal:30.0, on:3.0,  other:1.0  }, // Calwell (ALP/IND)
+  204: { alp:35.1, coal:46.9, grn:11.0, teal: 0.0, on:5.0,  other:2.0  }, // Casey
+  205: { alp:42.6, coal:39.6, grn:14.0, teal: 0.0, on:1.8,  other:2.0  }, // Chisholm
+  320: { alp:40.0, coal: 7.0, grn:34.0, teal: 6.0, on:4.9,  other:8.1  }, // Cooper (ALP/GRN)
+  328: { alp:45.3, coal:36.8, grn:13.0, teal: 0.0, on:2.9,  other:2.0  }, // Corangamite
+  208: { alp:48.3, coal:27.9, grn:12.0, teal: 0.0, on:9.8,  other:2.0  }, // Corio
+  209: { alp:39.5, coal:42.1, grn:14.0, teal: 0.0, on:2.4,  other:2.0  }, // Deakin
+  210: { alp:42.8, coal:35.8, grn:13.0, teal: 0.0, on:6.4,  other:2.0  }, // Dunkley
+  211: { alp:13.0, coal:46.0, grn: 7.0, teal:28.0, on:5.4,  other:0.6  }, // Flinders (LP/IND)
+  321: { alp:41.0, coal: 9.0, grn:28.0, teal: 8.0, on:4.2,  other:9.8  }, // Fraser (ALP/GRN)
+  212: { alp:50.4, coal:28.1, grn:14.0, teal: 0.0, on:5.5,  other:2.0  }, // Gellibrand
+  213: { alp:18.7, coal:59.1, grn: 6.0, teal: 0.0, on:14.2, other:2.0  }, // Gippsland
+  214: { alp:10.0, coal:43.0, grn: 7.0, teal:36.0, on:1.6,  other:2.4  }, // Goldstein (LP/IND)
+  309: { alp:47.2, coal:33.2, grn:12.0, teal: 0.0, on:5.6,  other:2.0  }, // Gorton
+  326: { alp:43.0, coal:34.0, grn:12.0, teal: 0.0, on:9.0,  other:2.0  }, // Hawke
+  216: { alp:49.7, coal:28.0, grn:12.0, teal: 0.0, on:8.3,  other:2.0  }, // Holt
+  217: { alp:51.8, coal:26.8, grn:15.0, teal: 0.0, on:4.4,  other:2.0  }, // Hotham
+  218: { alp:14.0, coal:30.0, grn: 7.0, teal:42.0, on:6.9,  other:0.1  }, // Indi (IND/LP)
+  219: { alp:50.2, coal:29.6, grn:14.0, teal: 0.0, on:4.2,  other:2.0  }, // Isaacs
+  220: { alp:48.2, coal:31.2, grn:15.0, teal: 0.0, on:3.6,  other:2.0  }, // Jagajaga
+  221: { alp:13.0, coal:42.0, grn: 8.0, teal:35.0, on:0.9,  other:1.1  }, // Kooyong (IND/LP)
+  223: { alp:34.9, coal:44.8, grn:11.0, teal: 0.0, on:7.3,  other:2.0  }, // La Trobe
+  222: { alp:49.7, coal:29.8, grn:12.0, teal: 0.0, on:6.5,  other:2.0  }, // Lalor
+  322: { alp:48.4, coal:33.1, grn:14.0, teal: 0.0, on:2.5,  other:2.0  }, // Macnamara
+  224: { alp:19.6, coal:60.5, grn: 7.0, teal: 0.0, on:10.9, other:2.0  }, // Mallee
+  225: { alp:46.7, coal:29.8, grn:15.0, teal: 0.0, on:6.5,  other:2.0  }, // Maribyrnong
+  226: { alp:41.4, coal:38.5, grn:12.0, teal: 0.0, on:6.1,  other:2.0  }, // McEwen
+  228: { alp:35.0, coal: 7.0, grn:36.0, teal:10.0, on:2.2,  other:9.8  }, // Melbourne (ALP/GRN)
+  229: { alp:37.2, coal:44.0, grn:15.0, teal: 0.0, on:1.8,  other:2.0  }, // Menzies
+  323: { alp:31.8, coal:46.4, grn:12.0, teal: 0.0, on:7.8,  other:2.0  }, // Monash
+  324: { alp:24.2, coal:55.7, grn: 7.0, teal: 0.0, on:11.1, other:2.0  }, // Nicholls
+  232: { alp:50.0, coal:28.6, grn:13.0, teal: 0.0, on:6.4,  other:2.0  }, // Scullin
+  233: { alp:15.0, coal:44.0, grn: 6.0, teal:29.0, on:4.0,  other:2.0  }, // Wannon (LP/IND)
+  234: { alp:35.0, coal: 7.0, grn:37.0, teal: 8.0, on:3.2,  other:9.8  }, // Wills (ALP/GRN)
+  // ── WA ──
+  235: { alp:49.2, coal:22.2, grn:14.0, teal: 0.0, on:12.6, other:2.0  }, // Brand
+  329: { alp:35.4, coal:41.3, grn:13.0, teal: 0.0, on:8.3,  other:2.0  }, // Bullwinkel
+  317: { alp:49.2, coal:25.1, grn:14.0, teal: 0.0, on:9.7,  other:2.0  }, // Burt
+  236: { alp:28.7, coal:47.0, grn:11.0, teal: 0.0, on:11.3, other:2.0  }, // Canning
+  237: { alp:49.2, coal:30.0, grn:14.0, teal: 0.0, on:4.8,  other:2.0  }, // Cowan
+  238: { alp:14.0, coal:36.0, grn:14.0, teal:32.0, on:2.4,  other:1.6  }, // Curtin (IND/LP)
+  312: { alp:29.0, coal:52.2, grn: 7.0, teal: 0.0, on:9.8,  other:2.0  }, // Durack
+  239: { alp:34.9, coal:44.4, grn:10.0, teal: 0.0, on:8.7,  other:2.0  }, // Forrest
+  240: { alp:42.0, coal:10.0, grn:18.0, teal:23.0, on:5.8,  other:1.2  }, // Fremantle (ALP/IND)
+  305: { alp:50.6, coal:26.4, grn:14.0, teal: 0.0, on:7.0,  other:2.0  }, // Hasluck
+  242: { alp:38.7, coal:41.0, grn:14.0, teal: 0.0, on:4.3,  other:2.0  }, // Moore
+  243: { alp:25.2, coal:54.6, grn: 7.0, teal: 0.0, on:11.2, other:2.0  }, // O'Connor
+  244: { alp:41.9, coal:35.2, grn:12.0, teal: 0.0, on:8.9,  other:2.0  }, // Pearce
+  245: { alp:51.6, coal:26.4, grn:14.0, teal: 0.0, on:6.0,  other:2.0  }, // Perth
+  247: { alp:49.5, coal:29.6, grn:14.0, teal: 0.0, on:4.9,  other:2.0  }, // Swan
+  248: { alp:43.0, coal:37.1, grn:14.0, teal: 0.0, on:3.9,  other:2.0  }, // Tangney
+};
+
+// Return per-seat 2025 AEC first preferences, or null if not available.
+// Falls back to null (caller uses UNS 2PP-swing for seats without FP data).
+function getSeatFpBaseline(seatId) {
+  return SEAT_FP_2025[seatId] ?? null;
+}
+
 // Estimate seat-level ON first preference using 2025 seat baseline + national swing.
 function estimateSeatOnFp(seatId, swings) {
-  const base = ON_FP_2025[seatId] ?? BASELINE_2025.on;
+  const base = SEAT_FP_2025[seatId]?.on ?? ON_FP_2025[seatId] ?? BASELINE_2025.on;
   return Math.max(0, base + swings.on);
 }
 
@@ -1379,9 +1553,14 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity) {
   });
   let alpMeanSeats = nonAlpCoalAlp;
   alpCoalSeats.forEach(seat => {
-    const base = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
-    const eps  = useElasticity ? seatElasticityMult(base) : 1.0;
-    const p    = normCDF((base + eps * nat2ppSwing - 50) / (eps * swingStd));
+    // Use the model's projected 2PP as the centre of the uncertainty distribution.
+    // For primary-based seats this already incorporates the national swing; for UNS
+    // fallback seats it equals (raw 2025 TCP + nat2ppSwing * eps), same as before.
+    const rawBase = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
+    const base    = seat.modelled?.projAlp2pp ?? rawBase;
+    const eps     = useElasticity ? seatElasticityMult(base) : 1.0;
+    // Win probability: Φ((base − 50) / (ε·σ))  where base already includes the central swing.
+    const p    = normCDF((base - 50) / (eps * swingStd));
     seatWinProbs[seat.id] = Math.round(p * 1000) / 1000;
     alpMeanSeats += p;
   });
@@ -1401,9 +1580,12 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity) {
     const w = gridPdfs[gi] / totalPdf;
     let count = nonAlpCoalAlp;
     alpCoalSeats.forEach(seat => {
-      const base = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
-      const eps  = useElasticity ? seatElasticityMult(base) : 1.0;
-      if (base + eps * delta >= 50) count++;
+      // base = modelled 2PP at the central swing (already incorporates nat2ppSwing).
+      // delta = grid swing level; (delta − nat2ppSwing) is the perturbation from centre.
+      const rawBase = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
+      const base    = seat.modelled?.projAlp2pp ?? rawBase;
+      const eps     = useElasticity ? seatElasticityMult(base) : 1.0;
+      if (base + eps * (delta - nat2ppSwing) >= 50) count++;
     });
     seatCountCdf[count] = (seatCountCdf[count] ?? 0) + w;
   });
@@ -1463,22 +1645,25 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     const override = overrides[seat.id];
 
     // For seats with a primary vote override, derive effective swings from override
-    // primaries relative to the 2025 national baseline (used for non-ALP/Coal branches).
+    // primaries relative to the seat's 2025 AEC baseline (falls back to national baseline).
+    // Using the seat-level baseline avoids spurious large swings when only some parties
+    // are overridden — e.g. setting ALP to 45% in Grayndler no longer implies Coal at 31.8%.
     let effAlpSwing, effCoalSwing, effGrnSwing, effTealSwing;
     let newFp = null;
     if (override) {
+      const seatBase = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
       newFp = {
-        alp:  Math.max(0, override.alp  ?? (BASELINE_2025.alp  + swings.alp)),
-        coal: Math.max(0, override.coal ?? (BASELINE_2025.coal + swings.coal)),
-        grn:  Math.max(0, override.grn  ?? (BASELINE_2025.grn  + swings.grn)),
-        teal: Math.max(0, override.teal ?? (BASELINE_2025.teal + swings.teal)),
-        on:   Math.max(0, override.on   ?? (BASELINE_2025.on   + swings.on)),
+        alp:  Math.max(0, override.alp  ?? (seatBase.alp  + swings.alp)),
+        coal: Math.max(0, override.coal ?? (seatBase.coal + swings.coal)),
+        grn:  Math.max(0, override.grn  ?? (seatBase.grn  + swings.grn)),
+        teal: Math.max(0, override.teal ?? (seatBase.teal + swings.teal)),
+        on:   Math.max(0, override.on   ?? (seatBase.on   + swings.on)),
       };
       newFp.other = Math.max(0, 100 - newFp.alp - newFp.coal - newFp.grn - newFp.teal - newFp.on);
-      effAlpSwing  = newFp.alp  - BASELINE_2025.alp;
-      effCoalSwing = newFp.coal - BASELINE_2025.coal;
-      effGrnSwing  = newFp.grn  - BASELINE_2025.grn;
-      effTealSwing = newFp.teal - BASELINE_2025.teal;
+      effAlpSwing  = newFp.alp  - seatBase.alp;
+      effCoalSwing = newFp.coal - seatBase.coal;
+      effGrnSwing  = newFp.grn  - seatBase.grn;
+      effTealSwing = newFp.teal - seatBase.teal;
     } else {
       effAlpSwing  = swings.alp;
       effCoalSwing = swings.coal;
@@ -1506,8 +1691,9 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     // primary votes for those candidates that ON cannot realistically reach the final 2CP.
     let activeTcpMatchup = override?.tcpMatchup ?? null;
     if (!activeTcpMatchup && estOnFp >= onThreshold && hasAlp && hasCoal) {
-      const estAlp  = override?.alp  != null ? override.alp  : Math.max(0, BASELINE_2025.alp  + swings.alp);
-      const estCoal = override?.coal != null ? override.coal : Math.max(0, BASELINE_2025.coal + swings.coal);
+      const _sb    = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
+      const estAlp  = override?.alp  != null ? override.alp  : Math.max(0, _sb.alp  + swings.alp);
+      const estCoal = override?.coal != null ? override.coal : Math.max(0, _sb.coal + swings.coal);
       if (estOnFp > estAlp && estCoal >= estAlp) {
         // ALP eliminated (fewest votes) → ON vs Coalition final
         activeTcpMatchup = "on_v_coal";
@@ -1621,17 +1807,37 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         // For ALP/Coal seats, tcpPct is ALP 2PP% directly (>50 = ALP wins)
         projAlp2pp = override.tcpPct;
       } else if (override) {
-        // Compute 2PP from override first preferences via preference flows
-        // Use seat-level preference flows if set, otherwise fall back to national flows
+        // Compute 2PP from override first preferences via preference flows.
+        // newFp was built from the seat-level 2025 baseline (set above), so unset parties
+        // default to that seat's actual 2025 primary, not the national average.
         const ef = override.prefFlows ?? prefFlows;
         const a2 = newFp.alp + newFp.grn*ef.grn_alp + newFp.teal*ef.teal_alp + newFp.on*ef.on_alp + newFp.other*ef.other_alp;
         const c2 = newFp.coal + newFp.grn*(1-ef.grn_alp) + newFp.teal*(1-ef.teal_alp) + newFp.on*(1-ef.on_alp) + newFp.other*(1-ef.other_alp);
         projAlp2pp = a2 / (a2 + c2) * 100;
       } else {
-        // Uniform national swing applied to this seat's 2025 ALP 2PP baseline.
-        // With elasticity enabled, marginal seats swing proportionally more.
-        const eps = useElasticity ? seatElasticityMult(baseAlp2pp) : 1.0;
-        projAlp2pp = Math.max(0, Math.min(100, baseAlp2pp + nat2ppSwing * eps));
+        const seatFp = getSeatFpBaseline(seat.id);
+        if (seatFp) {
+          // Primary-based: apply national swing to seat-level 2025 primaries → 2PP via pref flows.
+          // More accurate than uniform 2PP swing: ALP gaining 2pp primary affects inner-city
+          // Greens-heavy seats (small ALP primary gain → modest 2PP shift) differently from
+          // outer-suburban seats (same gain → larger 2PP shift because fewer minor-party votes).
+          const projFp = {
+            alp:  Math.max(0, seatFp.alp  + swings.alp),
+            coal: Math.max(0, seatFp.coal + swings.coal),
+            grn:  Math.max(0, seatFp.grn  + swings.grn),
+            teal: Math.max(0, seatFp.teal + swings.teal),
+            on:   Math.max(0, seatFp.on   + swings.on),
+          };
+          projFp.other = Math.max(0, 100 - projFp.alp - projFp.coal - projFp.grn - projFp.teal - projFp.on);
+          const a2 = projFp.alp + projFp.grn*prefFlows.grn_alp + projFp.teal*prefFlows.teal_alp + projFp.on*prefFlows.on_alp + projFp.other*prefFlows.other_alp;
+          const c2 = projFp.coal + projFp.grn*(1-prefFlows.grn_alp) + projFp.teal*(1-prefFlows.teal_alp) + projFp.on*(1-prefFlows.on_alp) + projFp.other*(1-prefFlows.other_alp);
+          projAlp2pp = a2 / (a2 + c2) * 100;
+        } else {
+          // Fallback UNS for seats without per-seat primary data: uniform national 2PP swing
+          // applied to the seat's 2025 TCP baseline. Elasticity scales the swing for marginals.
+          const eps = useElasticity ? seatElasticityMult(baseAlp2pp) : 1.0;
+          projAlp2pp = Math.max(0, Math.min(100, baseAlp2pp + nat2ppSwing * eps));
+        }
       }
       projWinnerGroup = projAlp2pp >= 50 ? "alp" : "coalition";
       projWinnerParty = projAlp2pp >= 50 ? "ALP" : seat.tcp.find(t => t.party !== "ALP")?.party;
@@ -2565,9 +2771,14 @@ export default function App() {
   const deletePoll = (id) => setPolls(prev => prev.filter(p => p.id !== id));
 
   const addSeatOverride = (seatId) => {
+    // Seed from the seat's actual 2025 AEC primary votes (not the national average).
+    // Falls back to the currently-modelled national primaries if no seat data exists.
+    const base = getSeatFpBaseline(seatId);
     setSeatOverrides(prev => ({
       ...prev,
-      [seatId]: { alp: primaries.alp, coal: primaries.coal, grn: primaries.grn, teal: primaries.teal, on: primaries.on },
+      [seatId]: base
+        ? { alp: +base.alp.toFixed(1), coal: +base.coal.toFixed(1), grn: +base.grn.toFixed(1), teal: +base.teal.toFixed(1), on: +base.on.toFixed(1) }
+        : { alp: primaries.alp, coal: primaries.coal, grn: primaries.grn, teal: primaries.teal, on: primaries.on },
     }));
     setOverrideSearch("");
   };
@@ -3634,22 +3845,28 @@ export default function App() {
                                   <div style={{ fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em", color:"#9CA3AF", marginBottom:6 }}>
                                     Primary Votes (seat override)
                                   </div>
-                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6, marginBottom:6 }}>
-                                    {[["ALP","alp","#DC2626"],["Coal","coal","#1D4ED8"],["Grn","grn","#059669"],["Ind","teal","#0891B2"],["ON","on","#B45309"]].map(([label, key, color]) => (
-                                      <div key={key} style={{ textAlign:"center" }}>
-                                        <div style={{ fontSize:10, fontWeight:800, color, marginBottom:3, textTransform:"uppercase", letterSpacing:"0.05em" }}>{label}</div>
-                                        <input
-                                          type="number" min={0} max={100} step={0.5}
-                                          value={ov[key] != null ? ov[key] : ""}
-                                          placeholder={primaries[key]?.toFixed(1) ?? "—"}
-                                          onChange={e => updateSeatOverride(seat.id, key, e.target.value)}
-                                          style={{ width:"100%", border:"1px solid #D1D5DB", borderRadius:5, padding:"4px 3px", fontSize:12, textAlign:"center", boxSizing:"border-box" }}
-                                        />
-                                      </div>
-                                    ))}
+                                  <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:6, marginBottom:4 }}>
+                                    {[["ALP","alp","#DC2626"],["Coal","coal","#1D4ED8"],["Grn","grn","#059669"],["Ind","teal","#0891B2"],["ON","on","#B45309"]].map(([label, key, color]) => {
+                                      const seatFp25 = SEAT_FP_2025[seat.id];
+                                      return (
+                                        <div key={key} style={{ textAlign:"center" }}>
+                                          <div style={{ fontSize:10, fontWeight:800, color, marginBottom:3, textTransform:"uppercase", letterSpacing:"0.05em" }}>{label}</div>
+                                          <input
+                                            type="number" min={0} max={100} step={0.5}
+                                            value={ov[key] != null ? ov[key] : ""}
+                                            placeholder={seatFp25?.[key]?.toFixed(1) ?? primaries[key]?.toFixed(1) ?? "—"}
+                                            onChange={e => updateSeatOverride(seat.id, key, e.target.value)}
+                                            style={{ width:"100%", border:"1px solid #D1D5DB", borderRadius:5, padding:"4px 3px", fontSize:12, textAlign:"center", boxSizing:"border-box" }}
+                                          />
+                                        </div>
+                                      );
+                                    })}
                                   </div>
-                                  <div style={{ fontSize:10, color:"#9CA3AF" }}>
-                                    National (2025): ALP {primaries.alp}% · Coal {primaries.coal}% · Grn {primaries.grn}% · Ind {primaries.teal}% · ON {primaries.on}%
+                                  <div style={{ fontSize:10, color:"#9CA3AF", marginBottom:4 }}>
+                                    {SEAT_FP_2025[seat.id]
+                                      ? `2025 AEC: ALP ${SEAT_FP_2025[seat.id].alp}% · Coal ${SEAT_FP_2025[seat.id].coal}% · Grn ${SEAT_FP_2025[seat.id].grn}% · Ind ${SEAT_FP_2025[seat.id].teal}% · ON ${SEAT_FP_2025[seat.id].on}%`
+                                      : `National (2025): ALP ${primaries.alp}% · Coal ${primaries.coal}% · Grn ${primaries.grn}% · Ind ${primaries.teal}% · ON ${primaries.on}%`
+                                    }
                                   </div>
                                 </div>
 
@@ -3836,7 +4053,7 @@ export default function App() {
                                         <input
                                           type="number" min={0} max={100} step={0.5}
                                           value={ov[key] !== null && ov[key] !== undefined ? ov[key] : ""}
-                                          placeholder={key === "on" ? estOn.toFixed(1) : (primaries[key]?.toFixed(1) ?? "—")}
+                                          placeholder={key === "on" ? estOn.toFixed(1) : (SEAT_FP_2025[seat.id]?.[key]?.toFixed(1) ?? primaries[key]?.toFixed(1) ?? "—")}
                                           onChange={e => updateSeatOverride(seat.id, key, e.target.value)}
                                           style={{ width:"100%", border:"1px solid #D1D5DB", borderRadius:5, padding:"5px 4px", fontSize:12, textAlign:"center", boxSizing:"border-box", outline:"none" }}
                                         />
