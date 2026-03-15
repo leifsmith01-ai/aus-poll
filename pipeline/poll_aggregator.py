@@ -42,13 +42,19 @@ TREND_STEP_DAYS = 7          # Generate one trend point per week
 MEDIAN_SAMPLE_SIZE = 1500    # Normalisation base for sample-size weighting
 
 # ── Standard preference flows for TPP imputation ─────────────────────────────
-# Based on observed flows at the 2022 federal election (AEC DOP data).
+# Based on observed flows at the 2025 federal election (AEC DOP data).
 # These convert primary votes → estimated ALP 2PP when TPP is not reported.
+# Historical context (for reference):
+#   2022 AEC: grn_alp=0.857, teal_alp=0.735, on_alp=0.149, other_alp=0.574
+#   2025 AEC: grn_alp=0.810, teal_alp=0.620, on_alp=0.430, other_alp=0.500
+# Note: teal_alp is tracked separately here to match the frontend model. When
+# poll data does not break out teal/IND separately, teal votes are included in
+# the "other" residual and flow at the other_alp rate.
 DEFAULT_PREF_FLOWS = {
-    "grn_alp":   0.857,  # Greens → ALP (2022 AEC DOP: 85.7%)
-    "teal_alp":  0.735,  # Teal/IND → ALP
-    "on_alp":    0.149,  # One Nation → ALP (2022 AEC DOP: 14.9%)
-    "other_alp": 0.574,  # Other minor parties → ALP (2022 AEC DOP: 57.4%)
+    "grn_alp":   0.810,  # Greens → ALP (2025 AEC DOP: 81.0%)
+    "teal_alp":  0.620,  # Teal/IND → ALP (2025 AEC DOP: 62.0%)
+    "on_alp":    0.430,  # One Nation → ALP (2025 AEC DOP: 43.0%)
+    "other_alp": 0.500,  # Other minor parties → ALP (2025 AEC DOP: 50.0%)
 }
 
 # Parties that sum to 100% in the poll data; "other" is the residual.
