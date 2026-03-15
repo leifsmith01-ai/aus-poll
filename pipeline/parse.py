@@ -156,17 +156,27 @@ def parse_first_preferences(filepath: str | Path, election_id: int) -> list[dict
     """
     records = []
     for row in _iter_aec_csv(filepath):
+        cid = _safe_int(row.get("CandidateID"))
+        if cid == 999:
+            continue  # Skip AEC informal-votes virtual row
+        ordinary = _safe_int(row.get("OrdinaryVotes"))
+        absent = _safe_int(row.get("AbsentVotes"))
+        provisional = _safe_int(row.get("ProvisionalVotes"))
+        prepoll = _safe_int(row.get("PrePollVotes"))
+        postal = _safe_int(row.get("PostalVotes"))
+        # TotalVotes absent from 2025 per-state files; fall back to sum of components
+        total = _safe_int(row.get("TotalVotes")) or (ordinary + absent + provisional + prepoll + postal)
         records.append({
             "election_id":        election_id,
             "division_id":        _safe_int(row.get("DivisionID")),
             "polling_place_id":   _safe_int(row.get("PollingPlaceID")),
-            "candidate_id":       _safe_int(row.get("CandidateID")),
-            "ordinary_votes":     _safe_int(row.get("OrdinaryVotes")),
-            "absent_votes":       _safe_int(row.get("AbsentVotes")),
-            "provisional_votes":  _safe_int(row.get("ProvisionalVotes")),
-            "prepoll_votes":      _safe_int(row.get("PrePollVotes")),
-            "postal_votes":       _safe_int(row.get("PostalVotes")),
-            "total_votes":        _safe_int(row.get("TotalVotes")),
+            "candidate_id":       cid,
+            "ordinary_votes":     ordinary,
+            "absent_votes":       absent,
+            "provisional_votes":  provisional,
+            "prepoll_votes":      prepoll,
+            "postal_votes":       postal,
+            "total_votes":        total,
         })
 
     logger.info(
@@ -281,14 +291,23 @@ def parse_all(file_paths: dict, election_id: int) -> dict:
 
     results = {}
     for key, parser_fn in parsers.items():
-        if key in file_paths:
-            try:
-                results[key] = parser_fn(file_paths[key], election_id)
-            except FileNotFoundError:
-                logger.warning("File not found for key '%s', skipping.", key)
-            except Exception as e:
-                logger.error("Error parsing '%s': %s", key, e, exc_info=True)
-        else:
+        if key not in file_paths:
             logger.warning("No local file for '%s', skipping.", key)
+            continue
+        path_or_paths = file_paths[key]
+        try:
+            if isinstance(path_or_paths, list):
+                # Multiple files (e.g. 2025 per-state first_preferences) — merge
+                merged = []
+                for p in path_or_paths:
+                    merged.extend(parser_fn(p, election_id))
+                results[key] = merged
+                logger.info("Merged %d files for '%s': %d records", len(path_or_paths), key, len(merged))
+            else:
+                results[key] = parser_fn(path_or_paths, election_id)
+        except FileNotFoundError:
+            logger.warning("File not found for key '%s', skipping.", key)
+        except Exception as e:
+            logger.error("Error parsing '%s': %s", key, e, exc_info=True)
 
     return results

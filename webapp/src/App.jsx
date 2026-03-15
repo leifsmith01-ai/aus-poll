@@ -148,61 +148,155 @@ const ON_FP_2022 = {
   324:  5.3, // Nicholls
 };
 
-// Seat-level 2025 ON first-preference %, proportionally scaled from 2022 (6.4/4.7 ≈ 1.36).
-// Replace with actual AEC data once pipeline has downloaded 2025 results.
+// ── 2025 seat-level ON first preferences from AEC ──────────────────────────
 const ON_FP_2025 = {
-  // QLD — regional seats
-  166: 18.8, // Hinkler
-  178: 15.3, // Wide Bay
-  158: 14.3, // Dawson
-  157: 13.8, // Capricornia
-  126: 14.3, // Hunter (NSW)
-  167: 12.5, // Kennedy
-  165: 11.8, // Herbert
-  311: 11.7, // Flynn
-  312: 13.3, // Durack (WA)
-  306: 11.0, // Lingiari (NT)
-  243: 10.4, // O'Connor (WA)
-  168: 11.0, // Leichhardt
-  138: 12.9, // Page (NSW)
-  170: 10.9, // Maranoa
-  316: 10.6, // Wright
-  139: 11.0, // Parkes (NSW)
-  135: 10.8, // New England (NSW)
-  239:  9.5, // Forrest (WA)
-  213:  9.5, // Gippsland (VIC)
-  302:  8.9, // Longman
-  250:  8.9, // Riverina (NSW)
-  236:  8.9, // Canning (WA)
-  249: 10.2, // Paterson (NSW)
-  115:  9.9, // Dobell (NSW)
-  130: 10.1, // Lyne (NSW)
-  162:  9.4, // Forde
-  304:  9.3, // Blair
-  193:  9.8, // Braddon (TAS)
-  180:  9.8, // Barker (SA)
-  305:  7.9, // Hasluck (WA)
-  183:  9.3, // Grey (SA)
-  146:  9.3, // Robertson (NSW)
-  175:  8.6, // Petrie
-  145:  9.7, // Richmond (NSW)
-  161:  8.3, // Fisher
-  171:  8.2, // McPherson
-  310:  8.0, // Bonner
-  155:  7.9, // Bowman
-  148:  9.5, // Shortland (NSW)
-  117:  8.2, // Eden-Monaro (NSW)
-  192:  8.7, // Bass (TAS)
-  252:  7.8, // Dickson
-  242:  7.5, // Moore (WA)
-  160:  7.6, // Fairfax
-  172:  7.2, // Moncrieff
-  307:  7.2, // Solomon (NT)
-  196:  8.3, // Lyons (TAS)
-  224:  8.3, // Mallee (VIC)
-  324:  7.2, // Nicholls (VIC)
-  164:  6.3, // Groom
-  163:  6.1, // Griffith
+  103: 3.5,  // Banks (NSW)
+  104: 5.4,  // Barton (NSW)
+  105: 2.2,  // Bennelong (NSW)
+  106: 4.0,  // Berowra (NSW)
+  107: 3.0,  // Blaxland (NSW)
+  108: 1.5,  // Bradfield (NSW)
+  109: 7.6,  // Calare (NSW)
+  111: 5.8,  // Chifley (NSW)
+  112: 4.2,  // Cook (NSW)
+  113: 6.3,  // Cowper (NSW)
+  114: 7.4,  // Cunningham (NSW)
+  115: 8.9,  // Dobell (NSW)
+  117: 6.7,  // Eden-Monaro (NSW)
+  118: 6.4,  // Farrer (NSW)
+  119: 3.8,  // Fowler (NSW)
+  120: 4.8,  // Gilmore (NSW)
+  121: 3.0,  // Grayndler (NSW)
+  122: 4.2,  // Greenway (NSW)
+  124: 5.1,  // Hughes (NSW)
+  125: 7.7,  // Hume (NSW)
+  126: 16.4,  // Hunter (NSW)
+  127: 5.8,  // Kingsford Smith (NSW)
+  128: 6.7,  // Lindsay (NSW)
+  130: 8.1,  // Lyne (NSW)
+  131: 7.5,  // Macarthur (NSW)
+  132: 2.4,  // Mackellar (NSW)
+  133: 8.4,  // Macquarie (NSW)
+  315: 8.1,  // McMahon (NSW)
+  134: 4.1,  // Mitchell (NSW)
+  135: 9.9,  // New England (NSW)
+  136: 5.2,  // Newcastle (NSW)
+  138: 5.5,  // Page (NSW)
+  139: 13.6,  // Parkes (NSW)
+  140: 2.4,  // Parramatta (NSW)
+  249: 7.5,  // Paterson (NSW)
+  144: 2.2,  // Reid (NSW)
+  145: 5.2,  // Richmond (NSW)
+  250: 9.6,  // Riverina (NSW)
+  146: 6.9,  // Robertson (NSW)
+  148: 9.0,  // Shortland (NSW)
+  149: 3.3,  // Sydney (NSW)
+  151: 1.7,  // Warringah (NSW)
+  251: 2.9,  // Watson (NSW)
+  152: 2.3,  // Wentworth (NSW)
+  153: 3.6,  // Werriwa (NSW)
+  150: 7.5,  // Whitlam (NSW)
+  306: 8.6,  // Lingiari (NT)
+  307: 6.3,  // Solomon (NT)
+  304: 9.3,  // Blair (QLD)
+  310: 3.7,  // Bonner (QLD)
+  155: 6.8,  // Bowman (QLD)
+  156: 2.3,  // Brisbane (QLD)
+  157: 15.5,  // Capricornia (QLD)
+  158: 10.2,  // Dawson (QLD)
+  252: 3.9,  // Dickson (QLD)
+  159: 8.0,  // Fadden (QLD)
+  160: 7.2,  // Fairfax (QLD)
+  161: 5.9,  // Fisher (QLD)
+  311: 13.9,  // Flynn (QLD)
+  162: 10.0,  // Forde (QLD)
+  163: 2.2,  // Griffith (QLD)
+  164: 9.4,  // Groom (QLD)
+  165: 4.9,  // Herbert (QLD)
+  166: 13.2,  // Hinkler (QLD)
+  167: 7.5,  // Kennedy (QLD)
+  168: 7.9,  // Leichhardt (QLD)
+  169: 4.0,  // Lilley (QLD)
+  302: 9.5,  // Longman (QLD)
+  170: 12.1,  // Maranoa (QLD)
+  171: 4.2,  // McPherson (QLD)
+  172: 5.5,  // Moncrieff (QLD)
+  173: 2.7,  // Moreton (QLD)
+  174: 5.0,  // Oxley (QLD)
+  175: 6.6,  // Petrie (QLD)
+  176: 6.3,  // Rankin (QLD)
+  177: 2.1,  // Ryan (QLD)
+  178: 11.8,  // Wide Bay (QLD)
+  316: 16.9,  // Wright (QLD)
+  179: 3.8,  // Adelaide (SA)
+  180: 8.0,  // Barker (SA)
+  182: 2.9,  // Boothby (SA)
+  183: 9.8,  // Grey (SA)
+  185: 4.8,  // Hindmarsh (SA)
+  186: 6.1,  // Kingston (SA)
+  187: 6.5,  // Makin (SA)
+  188: 5.9,  // Mayo (SA)
+  325: 9.2,  // Spence (SA)
+  190: 3.3,  // Sturt (SA)
+  192: 6.4,  // Bass (TAS)
+  193: 7.7,  // Braddon (TAS)
+  319: 4.0,  // Clark (TAS)
+  195: 4.8,  // Franklin (TAS)
+  196: 6.8,  // Lyons (TAS)
+  197: 3.2,  // Aston (VIC)
+  198: 7.6,  // Ballarat (VIC)
+  200: 4.5,  // Bendigo (VIC)
+  201: 8.1,  // Bruce (VIC)
+  203: 3.0,  // Calwell (VIC)
+  204: 5.0,  // Casey (VIC)
+  205: 1.8,  // Chisholm (VIC)
+  320: 4.9,  // Cooper (VIC)
+  328: 2.9,  // Corangamite (VIC)
+  208: 9.8,  // Corio (VIC)
+  209: 2.4,  // Deakin (VIC)
+  210: 6.4,  // Dunkley (VIC)
+  211: 5.4,  // Flinders (VIC)
+  321: 4.2,  // Fraser (VIC)
+  212: 5.5,  // Gellibrand (VIC)
+  213: 14.2,  // Gippsland (VIC)
+  214: 1.6,  // Goldstein (VIC)
+  309: 5.6,  // Gorton (VIC)
+  326: 9.0,  // Hawke (VIC)
+  216: 8.3,  // Holt (VIC)
+  217: 4.4,  // Hotham (VIC)
+  218: 6.9,  // Indi (VIC)
+  219: 4.2,  // Isaacs (VIC)
+  220: 3.6,  // Jagajaga (VIC)
+  221: 0.9,  // Kooyong (VIC)
+  223: 7.3,  // La Trobe (VIC)
+  222: 6.5,  // Lalor (VIC)
+  322: 2.5,  // Macnamara (VIC)
+  224: 10.9,  // Mallee (VIC)
+  225: 6.5,  // Maribyrnong (VIC)
+  226: 6.1,  // McEwen (VIC)
+  228: 2.2,  // Melbourne (VIC)
+  229: 1.8,  // Menzies (VIC)
+  323: 7.8,  // Monash (VIC)
+  324: 11.1,  // Nicholls (VIC)
+  232: 6.4,  // Scullin (VIC)
+  233: 4.0,  // Wannon (VIC)
+  234: 3.2,  // Wills (VIC)
+  235: 12.6,  // Brand (WA)
+  329: 8.3,  // Bullwinkel (WA)
+  317: 9.7,  // Burt (WA)
+  236: 11.3,  // Canning (WA)
+  237: 4.8,  // Cowan (WA)
+  238: 2.4,  // Curtin (WA)
+  312: 9.8,  // Durack (WA)
+  239: 8.7,  // Forrest (WA)
+  240: 5.8,  // Fremantle (WA)
+  305: 7.0,  // Hasluck (WA)
+  242: 4.3,  // Moore (WA)
+  243: 11.2,  // O'Connor (WA)
+  244: 8.9,  // Pearce (WA)
+  245: 6.0,  // Perth (WA)
+  247: 4.9,  // Swan (WA)
+  248: 3.9,  // Tangney (WA)
 };
 
 // Estimate seat-level ON first preference using 2025 seat baseline + national swing.
@@ -372,164 +466,158 @@ const SEATS_2022=_S.map(([id,name,state,wp,wn,t1,t2,m])=>({
   tcp:[{party:t1,pct:+(50+m/2).toFixed(2)},{party:t2,pct:+(50-m/2).toFixed(2)}]
 }));
 
-// ── 2025 seat data: uniform +3.07pp swing applied from 2022 baseline ──────────
-// Known overrides: Dickson (LP→ALP, Peter Dutton lost to Ali France),
-//                  Aston (ALP held via 2023 by-election, Mary Doyle)
-// Seat count: ALP 86, Coalition 50, Greens+GVIC 1, Others 14 (actual: ALP 94)
-// Non-uniform real swing (esp. stronger in QLD) means uniform model underestimates.
-// Run `python main.py --year 2025` once AEC event_id 29581 is verified.
+// ── 2025 seat data from AEC final results (event_id=31496) ────────────────────
 const _S25=[
-  [318,"Bean","ACT","ALP","David Smith","ALP","LP",28.96],
-  [101,"Canberra","ACT","ALP","Alicia Payne","ALP","GRN",27.46],
-  [102,"Fenner","ACT","ALP","Andrew Leigh","ALP","LP",34.46],
-  [103,"Banks","NSW","LP","David Coleman","LP","ALP",3.33],
-  [104,"Barton","NSW","ALP","Linda Burney","ALP","LP",34.16],
-  [105,"Bennelong","NSW","ALP","Jerome Laxale","ALP","LP",5.03],
-  [106,"Berowra","NSW","LP","Julian Leeser","LP","ALP",16.47],
-  [107,"Blaxland","NSW","ALP","Jason Clare","ALP","LP",32.94],
-  [108,"Bradfield","NSW","LP","Paul Fletcher","LP","IND",5.4],
-  [109,"Calare","NSW","NP","Andrew Gee","NP","IND",16.29],
-  [111,"Chifley","NSW","ALP","Ed Husic","ALP","LP",30.0],
-  [112,"Cook","NSW","LP","Scott Morrison","LP","ALP",21.82],
-  [113,"Cowper","NSW","NP","Pat Conaghan","NP","IND",1.58],
-  [114,"Cunningham","NSW","ALP","Alison Byrnes","ALP","LP",32.47],
-  [115,"Dobell","NSW","ALP","Emma Mcbride","ALP","LP",16.11],
-  [117,"Eden-Monaro","NSW","ALP","Kristy Mcbain","ALP","LP",19.47],
-  [118,"Farrer","NSW","LP","Sussan Ley","LP","ALP",29.64],
-  [119,"Fowler","NSW","IND","Dai Le","IND","ALP",6.32],
-  [120,"Gilmore","NSW","ALP","Fiona Phillips","ALP","LP",3.4],
-  [121,"Grayndler","NSW","ALP","Anthony Albanese","ALP","GRN",37.17],
-  [122,"Greenway","NSW","ALP","Michelle Rowland","ALP","LP",26.13],
-  [124,"Hughes","NSW","LP","Jenny Ware","LP","ALP",10.94],
-  [125,"Hume","NSW","LP","Angus Taylor","LP","ALP",12.37],
-  [126,"Hunter","NSW","ALP","Dan Repacholi","ALP","NP",11.12],
-  [127,"Kingsford Smith","NSW","ALP","Matt Thistlethwaite","ALP","LP",32.07],
-  [128,"Lindsay","NSW","LP","Melissa Mcintosh","LP","ALP",9.61],
-  [130,"Lyne","NSW","NP","David Gillespie","NP","ALP",24.52],
-  [131,"Macarthur","NSW","ALP","Mike Freelander","ALP","LP",20.12],
-  [132,"Mackellar","NSW","IND","Sophie Scamps","IND","LP",8.08],
-  [133,"Macquarie","NSW","ALP","Susan Templeman","ALP","LP",18.61],
-  [315,"McMahon","NSW","ALP","Chris Bowen","ALP","LP",22.05],
-  [134,"Mitchell","NSW","LP","Alex Hawke","LP","ALP",18.31],
-  [135,"New England","NSW","NP","Barnaby Joyce","NP","ALP",29.8],
-  [136,"Newcastle","NSW","ALP","Sharon Claydon","ALP","LP",39.03],
-  [137,"North Sydney","NSW","IND","Kylea Jane Tink","IND","LP",8.9],
-  [138,"Page","NSW","NP","Kevin Hogan","NP","ALP",18.4],
-  [139,"Parkes","NSW","NP","Mark Coulton","NP","ALP",32.61],
-  [140,"Parramatta","NSW","ALP","Andrew Charlton","ALP","LP",12.2],
-  [249,"Paterson","NSW","ALP","Meryl Swanson","ALP","LP",9.69],
-  [144,"Reid","NSW","ALP","Sally Sitou","ALP","LP",13.46],
-  [145,"Richmond","NSW","ALP","Justine Elliot","ALP","NP",19.53],
-  [250,"Riverina","NSW","NP","Michael Mccormack","NP","ALP",26.62],
-  [146,"Robertson","NSW","ALP","Gordon Reid","ALP","LP",7.59],
-  [148,"Shortland","NSW","ALP","Pat Conroy","ALP","LP",14.71],
-  [149,"Sydney","NSW","ALP","Tanya Plibersek","ALP","GRN",36.44],
-  [151,"Warringah","NSW","IND","Zali Steggall","IND","LP",24.98],
-  [251,"Watson","NSW","ALP","Tony Burke","ALP","LP",33.27],
-  [152,"Wentworth","NSW","IND","Allegra Spender","IND","LP",11.45],
-  [153,"Werriwa","NSW","ALP","Anne Maree Stanley","ALP","LP",14.71],
-  [150,"Whitlam","NSW","ALP","Stephen Jones","ALP","LP",23.22],
-  [306,"Lingiari","NT","ALP","Marion Scrymgour","ALP","CLP",4.96],
-  [307,"Solomon","NT","ALP","Luke Gosling","ALP","CLP",21.8],
-  [304,"Blair","QLD","ALP","Shayne Neumann","ALP","LNP",13.53],
-  [310,"Bonner","QLD","LNP","Ross Vasta","LNP","ALP",3.75],
-  [155,"Bowman","QLD","LNP","Henry Pike","LNP","ALP",7.95],
-  [156,"Brisbane","QLD","GRN","Stephen Bates","GRN","LNP",10.54],
-  [157,"Capricornia","QLD","LNP","Michelle Landry","LNP","ALP",10.11],
-  [158,"Dawson","QLD","LNP","Andrew Willcox","LNP","ALP",17.76],
-  [252,"Dickson","QLD","ALP","Ali France","ALP","LP",1.69],
-  [159,"Fadden","QLD","LNP","Stuart Robert","LNP","ALP",18.18],
-  [160,"Fairfax","QLD","LNP","Ted O'brien","LNP","ALP",14.83],
-  [161,"Fisher","QLD","LNP","Andrew Wallace","LNP","ALP",14.27],
-  [311,"Flynn","QLD","LNP","Colin Boyce","LNP","ALP",4.57],
-  [162,"Forde","QLD","LNP","Bert Van Manen","LNP","ALP",5.4],
-  [163,"Griffith","QLD","GRN","Max Chandler-mather","GRN","LNP",23.98],
-  [164,"Groom","QLD","LNP","Garth Hamilton","LNP","IND",10.7],
-  [165,"Herbert","QLD","LNP","Phillip Thompson","LNP","ALP",20.48],
-  [166,"Hinkler","QLD","LNP","Keith Pitt","LNP","ALP",17.08],
-  [167,"Kennedy","QLD","KAP","Bob Katter","KAP","LNP",29.26],
-  [168,"Leichhardt","QLD","LNP","Warren Entsch","LNP","ALP",3.81],
-  [169,"Lilley","QLD","ALP","Anika Wells","ALP","LNP",24.15],
-  [302,"Longman","QLD","LNP","Terry Young","LNP","ALP",3.09],
-  [170,"Maranoa","QLD","LNP","David Littleproud","LNP","ALP",41.17],
-  [171,"McPherson","QLD","LNP","Karen Andrews","LNP","ALP",15.6],
-  [172,"Moncrieff","QLD","LNP","Angie Bell","LNP","ALP",19.32],
-  [173,"Moreton","QLD","ALP","Graham Perrett","ALP","LNP",21.25],
-  [174,"Oxley","QLD","ALP","Milton Dick","ALP","LNP",26.26],
-  [175,"Petrie","QLD","LNP","Luke Howarth","LNP","ALP",5.8],
-  [176,"Rankin","QLD","ALP","Jim Chalmers","ALP","LNP",21.25],
-  [177,"Ryan","QLD","GRN","Elizabeth Watson-brown","GRN","LNP",8.36],
-  [178,"Wide Bay","QLD","LNP","Llew O'brien","LNP","ALP",19.62],
-  [316,"Wright","QLD","LNP","Scott Buchholz","LNP","ALP",18.72],
-  [179,"Adelaide","SA","ALP","Steve Georganas","ALP","LP",26.9],
-  [180,"Barker","SA","LP","Tony Pasin","LP","ALP",30.17],
-  [182,"Boothby","SA","ALP","Louise Miller-frost","ALP","LP",9.62],
-  [183,"Grey","SA","LP","Rowan Ramsey","LP","ALP",17.06],
-  [185,"Hindmarsh","SA","ALP","Mark Butler","ALP","LP",20.96],
-  [186,"Kingston","SA","ALP","Amanda Rishworth","ALP","LP",35.77],
-  [187,"Makin","SA","ALP","Tony Zappia","ALP","LP",24.67],
-  [188,"Mayo","SA","XEN","Rebekha Sharkie","XEN","LP",27.59],
-  [325,"Spence","SA","ALP","Matt Burnell","ALP","LP",28.87],
-  [190,"Sturt","SA","ALP","ALP Member","LP","ALP",2.17],
-  [192,"Bass","TAS","ALP","ALP Member","LP","ALP",0.2],
-  [193,"Braddon","TAS","LP","Gavin Pearce","LP","ALP",12.99],
-  [319,"Clark","TAS","IND","Andrew Wilkie","IND","ALP",44.72],
-  [195,"Franklin","TAS","ALP","Julie Collins","ALP","LP",30.47],
-  [196,"Lyons","TAS","ALP","Brian Mitchell","ALP","LP",4.9],
-  [197,"Aston","VIC","ALP","Mary Doyle","ALP","LP",6.81],
-  [198,"Ballarat","VIC","ALP","Catherine King","ALP","LP",29.02],
-  [200,"Bendigo","VIC","ALP","Lisa Chesters","ALP","LP",27.28],
-  [201,"Bruce","VIC","ALP","Julian Hill","ALP","LP",16.24],
-  [203,"Calwell","VIC","ALP","Maria Vamvakinou","ALP","LP",27.86],
-  [204,"Casey","VIC","ALP","ALP Member","LP","ALP",0.11],
-  [205,"Chisholm","VIC","ALP","Carina Garland","ALP","LP",15.89],
-  [320,"Cooper","VIC","ALP","Ged Kearney","ALP","GVIC",20.42],
-  [328,"Corangamite","VIC","ALP","Libby Coker","ALP","LP",18.28],
-  [208,"Corio","VIC","ALP","Richard Marles","ALP","LP",28.75],
-  [209,"Deakin","VIC","ALP","ALP Member","LP","ALP",2.7],
-  [210,"Dunkley","VIC","ALP","Peta Murphy","ALP","LP",15.61],
-  [211,"Flinders","VIC","LP","Zoe Mckenzie","LP","ALP",10.33],
-  [321,"Fraser","VIC","ALP","Daniel Mulino","ALP","LP",36.08],
-  [212,"Gellibrand","VIC","ALP","Tim Watts","ALP","LP",26.15],
-  [213,"Gippsland","VIC","NP","Darren Chester","NP","ALP",38.06],
-  [214,"Goldstein","VIC","IND","Zoe Daniel","IND","LP",8.81],
-  [309,"Gorton","VIC","ALP","Brendan O'connor","ALP","LP",23.01],
-  [326,"Hawke","VIC","ALP","Sam Rae","ALP","LP",18.32],
-  [215,"Higgins","VIC","ALP","Michelle Ananda-rajah","ALP","LP",7.2],
-  [216,"Holt","VIC","ALP","Cassandra Fernando","ALP","LP",17.31],
-  [217,"Hotham","VIC","ALP","Clare O'neil","ALP","LP",31.57],
-  [218,"Indi","VIC","IND","Helen Haines","IND","LP",20.95],
-  [219,"Isaacs","VIC","ALP","Mark Dreyfus","ALP","LP",16.77],
-  [220,"Jagajaga","VIC","ALP","Kate Thwaites","ALP","LP",27.76],
-  [221,"Kooyong","VIC","IND","Monique Ryan","IND","LP",8.96],
-  [223,"La Trobe","VIC","LP","Jason Wood","LP","ALP",14.31],
-  [222,"Lalor","VIC","ALP","Joanne Ryan","ALP","LP",28.72],
-  [322,"Macnamara","VIC","ALP","Josh Burns","ALP","LP",27.57],
-  [224,"Mallee","VIC","NP","Anne Webster","NP","ALP",34.9],
-  [225,"Maribyrnong","VIC","ALP","Bill Shorten","ALP","LP",27.96],
-  [226,"McEwen","VIC","ALP","Rob Mitchell","ALP","LP",9.63],
-  [228,"Melbourne","VIC","GVIC","Adam Bandt","GVIC","ALP",23.37],
-  [229,"Menzies","VIC","ALP","ALP Member","LP","ALP",1.71],
-  [323,"Monash","VIC","LP","Russell Broadbent","LP","ALP",2.72],
-  [324,"Nicholls","VIC","NP","Sam Birrell","NP","IND",4.55],
-  [232,"Scullin","VIC","ALP","Andrew Giles","ALP","LP",34.24],
-  [233,"Wannon","VIC","LP","Dan Tehan","LP","IND",4.78],
-  [234,"Wills","VIC","ALP","Peter Khalil","ALP","GVIC",20.21],
-  [235,"Brand","WA","ALP","Madeleine King","ALP","LP",36.49],
-  [317,"Burt","WA","ALP","Matt Keogh","ALP","LP",33.5],
-  [236,"Canning","WA","LP","Andrew Hastie","LP","ALP",4.1],
-  [237,"Cowan","WA","ALP","Anne Aly","ALP","LP",24.7],
-  [238,"Curtin","WA","IND","Kate Chaney","IND","LP",5.6],
-  [312,"Durack","WA","LP","Melissa Price","LP","ALP",5.47],
-  [239,"Forrest","WA","LP","Nola Marino","LP","ALP",5.51],
-  [240,"Fremantle","WA","ALP","Josh Wilson","ALP","LP",36.84],
-  [305,"Hasluck","WA","ALP","Tania Lawrence","ALP","LP",15.07],
-  [242,"Moore","WA","ALP","ALP Member","LP","ALP",1.75],
-  [243,"O'Connor","WA","LP","Rick Wilson","LP","ALP",10.88],
-  [244,"Pearce","WA","ALP","Tracey Roberts","ALP","LP",21.15],
-  [245,"Perth","WA","ALP","Patrick Gorman","ALP","LP",32.67],
-  [247,"Swan","WA","ALP","Zaneta Mascarenhas","ALP","LP",20.62],
-  [248,"Tangney","WA","ALP","Sam Lim","ALP","LP",7.83],
+  [318,"Bean","ACT","ALP","David Smith","ALP","IND",0.68],
+  [101,"Canberra","ACT","ALP","Alicia Payne","ALP","GRN",39.04],
+  [102,"Fenner","ACT","ALP","Andrew Leigh","ALP","LP",44.16],
+  [103,"Banks","NSW","ALP","Zhi Soon","ALP","LP",4.78],
+  [104,"Barton","NSW","ALP","Ash Ambihaipahar","ALP","LP",32.01],
+  [105,"Bennelong","NSW","ALP","Jerome Laxale","ALP","LP",18.52],
+  [106,"Berowra","NSW","LP","Julian Leeser","LP","ALP",3.27],
+  [107,"Blaxland","NSW","ALP","Jason Clare","ALP","LP",43.81],
+  [108,"Bradfield","NSW","IND","Nicolette Boele","IND","LP",0.02],
+  [109,"Calare","NSW","IND","Andrew Gee","IND","NP",13.56],
+  [111,"Chifley","NSW","ALP","Ed Husic","ALP","LP",39.66],
+  [112,"Cook","NSW","LP","Simon Kennedy","LP","ALP",14.39],
+  [113,"Cowper","NSW","NP","Pat Conaghan","NP","IND",5.09],
+  [114,"Cunningham","NSW","ALP","Alison Byrnes","ALP","LP",35.04],
+  [115,"Dobell","NSW","ALP","Emma Mcbride","ALP","LP",18.86],
+  [117,"Eden-Monaro","NSW","ALP","Kristy Mcbain","ALP","LP",14.43],
+  [118,"Farrer","NSW","LP","Sussan Ley","LP","IND",12.39],
+  [119,"Fowler","NSW","IND","Dai Le","IND","ALP",5.35],
+  [120,"Gilmore","NSW","ALP","Fiona Phillips","ALP","LP",10.26],
+  [121,"Grayndler","NSW","ALP","Anthony Albanese","ALP","GRN",33.73],
+  [122,"Greenway","NSW","ALP","Michelle Rowland","ALP","LP",27.52],
+  [124,"Hughes","NSW","ALP","David Moncrieff","ALP","LP",6.11],
+  [125,"Hume","NSW","LP","Angus Taylor","LP","ALP",16.11],
+  [126,"Hunter","NSW","ALP","Dan Repacholi","ALP","ON",18.07],
+  [127,"Kingsford Smith","NSW","ALP","Matt Thistlethwaite","ALP","LP",34.37],
+  [128,"Lindsay","NSW","LP","Melissa Mcintosh","LP","ALP",5.57],
+  [130,"Lyne","NSW","NP","Alison Penfold","NP","ALP",19.56],
+  [131,"Macarthur","NSW","ALP","Mike Freelander","ALP","LP",31.21],
+  [132,"Mackellar","NSW","IND","Sophie Scamps","IND","LP",11.32],
+  [133,"Macquarie","NSW","ALP","Susan Templeman","ALP","LP",15.41],
+  [315,"McMahon","NSW","ALP","Chris Bowen","ALP","LP",18.04],
+  [134,"Mitchell","NSW","LP","Alex Hawke","LP","ALP",7.62],
+  [135,"New England","NSW","NP","Barnaby Joyce","NP","ALP",34.12],
+  [136,"Newcastle","NSW","ALP","Sharon Claydon","ALP","GRN",31.61],
+  [138,"Page","NSW","NP","Kevin Hogan","NP","ALP",18.57],
+  [139,"Parkes","NSW","NP","Jamie Chaffey","NP","ALP",25.94],
+  [140,"Parramatta","NSW","ALP","Andrew Charlton","ALP","LP",25.1],
+  [249,"Paterson","NSW","ALP","Meryl Swanson","ALP","LP",13.78],
+  [144,"Reid","NSW","ALP","Sally Sitou","ALP","LP",24.01],
+  [145,"Richmond","NSW","ALP","Justine Elliot","ALP","NP",20.01],
+  [250,"Riverina","NSW","NP","Michael Mccormack","NP","ALP",25.24],
+  [146,"Robertson","NSW","ALP","Gordon Reid","ALP","LP",18.73],
+  [148,"Shortland","NSW","ALP","Pat Conroy","ALP","LP",23.01],
+  [149,"Sydney","NSW","ALP","Tanya Plibersek","ALP","GRN",41.89],
+  [151,"Warringah","NSW","IND","Zali Steggall","IND","LP",22.4],
+  [251,"Watson","NSW","ALP","Tony Burke","ALP","IND",33.03],
+  [152,"Wentworth","NSW","IND","Allegra Spender","IND","LP",16.69],
+  [153,"Werriwa","NSW","ALP","Anne Maree Stanley","ALP","LP",13.55],
+  [150,"Whitlam","NSW","ALP","Carol Berry","ALP","LP",12.49],
+  [306,"Lingiari","NT","ALP","Marion Scrymgour","ALP","CLP",16.25],
+  [307,"Solomon","NT","ALP","Luke John Gosling","ALP","CLP",2.62],
+  [304,"Blair","QLD","ALP","Shayne Neumann","ALP","LNP",11.42],
+  [310,"Bonner","QLD","ALP","Kara Cook","ALP","LNP",10.0],
+  [155,"Bowman","QLD","LNP","Henry Pike","LNP","ALP",4.86],
+  [156,"Brisbane","QLD","ALP","Madonna Jarrett","ALP","LNP",17.92],
+  [157,"Capricornia","QLD","LNP","Michelle Landry","LNP","ALP",11.67],
+  [158,"Dawson","QLD","LNP","Andrew Willcox","LNP","ALP",23.66],
+  [252,"Dickson","QLD","ALP","Ali France","ALP","LNP",11.98],
+  [159,"Fadden","QLD","LNP","Cameron Caldwell","LNP","ALP",13.76],
+  [160,"Fairfax","QLD","LNP","Ted O'brien","LNP","ALP",6.46],
+  [161,"Fisher","QLD","LNP","Andrew Wallace","LNP","ALP",12.07],
+  [311,"Flynn","QLD","LNP","Colin Boyce","LNP","ALP",20.48],
+  [162,"Forde","QLD","ALP","Rowan Holzberger","ALP","LNP",3.53],
+  [163,"Griffith","QLD","ALP","Renee Coffey","ALP","GRN",21.15],
+  [164,"Groom","QLD","LNP","Garth Hamilton","LNP","IND",11.35],
+  [165,"Herbert","QLD","LNP","Phillip Thompson","LNP","ALP",26.83],
+  [166,"Hinkler","QLD","LNP","David Batt","LNP","ALP",12.52],
+  [167,"Kennedy","QLD","KAP","Bob Katter","KAP","LNP",31.51],
+  [168,"Leichhardt","QLD","ALP","Matt Smith","ALP","LNP",12.12],
+  [169,"Lilley","QLD","ALP","Anika Wells","ALP","LNP",29.04],
+  [302,"Longman","QLD","LNP","Terry Young","LNP","ALP",0.22],
+  [170,"Maranoa","QLD","LNP","David Littleproud","LNP","ON",40.19],
+  [171,"McPherson","QLD","LNP","Leon Rebello","LNP","ALP",8.87],
+  [172,"Moncrieff","QLD","LNP","Angie Bell","LNP","ALP",17.6],
+  [173,"Moreton","QLD","ALP","Julie-ann Campbell","ALP","LNP",32.18],
+  [174,"Oxley","QLD","ALP","Milton Dick","ALP","LNP",38.38],
+  [175,"Petrie","QLD","ALP","Emma Comer","ALP","LNP",2.34],
+  [176,"Rankin","QLD","ALP","Jim Chalmers","ALP","LNP",31.11],
+  [177,"Ryan","QLD","GRN","Elizabeth Watson-brown","GRN","LNP",6.54],
+  [178,"Wide Bay","QLD","LNP","Llew O'brien","LNP","ALP",15.26],
+  [316,"Wright","QLD","LNP","Scott Buchholz","LNP","ALP",15.95],
+  [179,"Adelaide","SA","ALP","Steve Georganas","ALP","LP",38.13],
+  [180,"Barker","SA","LP","Tony Pasin","LP","ALP",25.95],
+  [182,"Boothby","SA","ALP","Louise Miller-frost","ALP","LP",22.21],
+  [183,"Grey","SA","LP","Tom Venning","LP","ALP",9.28],
+  [185,"Hindmarsh","SA","ALP","Mark Butler","ALP","LP",32.7],
+  [186,"Kingston","SA","ALP","Amanda Rishworth","ALP","LP",41.48],
+  [187,"Makin","SA","ALP","Tony Zappia","ALP","LP",29.32],
+  [188,"Mayo","SA","IND","Rebekha Sharkie","IND","ALP",29.78],
+  [325,"Spence","SA","ALP","Matt Burnell","ALP","LP",30.67],
+  [190,"Sturt","SA","ALP","Claire Clutterham","ALP","LP",13.25],
+  [192,"Bass","TAS","ALP","Jess Teesdale","ALP","LP",16.02],
+  [193,"Braddon","TAS","ALP","Anne Urquhart","ALP","LP",14.4],
+  [319,"Clark","TAS","IND","Andrew Wilkie","IND","ALP",40.77],
+  [195,"Franklin","TAS","ALP","Julie Collins","ALP","IND",15.56],
+  [196,"Lyons","TAS","ALP","Rebecca White","ALP","LP",23.17],
+  [197,"Aston","VIC","ALP","Mary Doyle","ALP","LP",6.86],
+  [198,"Ballarat","VIC","ALP","Catherine King","ALP","LP",21.33],
+  [200,"Bendigo","VIC","ALP","Lisa Chesters","ALP","NP",2.8],
+  [201,"Bruce","VIC","ALP","Julian Hill","ALP","LP",29.23],
+  [203,"Calwell","VIC","ALP","Basem Abdo","ALP","IND",10.16],
+  [204,"Casey","VIC","LP","Aaron Violi","LP","ALP",5.78],
+  [205,"Chisholm","VIC","ALP","Carina Garland","ALP","LP",11.4],
+  [320,"Cooper","VIC","ALP","Ged Kearney","ALP","GRN",19.43],
+  [328,"Corangamite","VIC","ALP","Libby Coker","ALP","LP",16.09],
+  [208,"Corio","VIC","ALP","Richard Marles","ALP","LP",26.46],
+  [209,"Deakin","VIC","ALP","Matt Gregg","ALP","LP",5.65],
+  [210,"Dunkley","VIC","ALP","Jodie Belyea","ALP","LP",14.16],
+  [211,"Flinders","VIC","LP","Zoe Mckenzie","LP","IND",4.57],
+  [321,"Fraser","VIC","ALP","Daniel Mulino","ALP","GRN",18.45],
+  [212,"Gellibrand","VIC","ALP","Tim Watts","ALP","LP",30.2],
+  [213,"Gippsland","VIC","NP","Darren Chester","NP","ALP",38.71],
+  [214,"Goldstein","VIC","LP","Tim Wilson","LP","IND",0.15],
+  [309,"Gorton","VIC","ALP","Alice Jordan-baird","ALP","LP",20.57],
+  [326,"Hawke","VIC","ALP","Sam Rae","ALP","LP",15.26],
+  [216,"Holt","VIC","ALP","Cassandra Fernando","ALP","LP",28.06],
+  [217,"Hotham","VIC","ALP","Clare O'neil","ALP","LP",33.72],
+  [218,"Indi","VIC","IND","Helen Haines","IND","LP",17.27],
+  [219,"Isaacs","VIC","ALP","Mark Dreyfus","ALP","LP",28.68],
+  [220,"Jagajaga","VIC","ALP","Kate Thwaites","ALP","LP",25.76],
+  [221,"Kooyong","VIC","IND","Monique Ryan","IND","LP",1.33],
+  [223,"La Trobe","VIC","LP","Jason Wood","LP","ALP",4.12],
+  [222,"Lalor","VIC","ALP","Joanne Ryan","ALP","LP",26.43],
+  [322,"Macnamara","VIC","ALP","Josh Burns","ALP","LP",23.59],
+  [224,"Mallee","VIC","NP","Anne Webster","NP","ALP",38.08],
+  [225,"Maribyrnong","VIC","ALP","Jo Briskey","ALP","LP",25.29],
+  [226,"McEwen","VIC","ALP","Rob Mitchell","ALP","LP",9.52],
+  [228,"Melbourne","VIC","ALP","Sarah Witty","ALP","GRN",6.03],
+  [229,"Menzies","VIC","ALP","Gabriel Ng","ALP","LP",2.15],
+  [323,"Monash","VIC","LP","Mary Aldred","LP","ALP",8.18],
+  [324,"Nicholls","VIC","NP","Sam Birrell","NP","ALP",28.76],
+  [232,"Scullin","VIC","ALP","Andrew Giles","ALP","LP",28.59],
+  [233,"Wannon","VIC","LP","Dan Tehan","LP","IND",6.55],
+  [234,"Wills","VIC","ALP","Peter Khalil","ALP","GRN",2.86],
+  [235,"Brand","WA","ALP","Madeleine King","ALP","LP",33.84],
+  [329,"Bullwinkel","WA","ALP","Trish Cook","ALP","LP",1.02],
+  [317,"Burt","WA","ALP","Matt Keogh","ALP","LP",31.41],
+  [236,"Canning","WA","LP","Andrew Hastie","LP","ALP",13.1],
+  [237,"Cowan","WA","ALP","Anne Aly","ALP","LP",27.27],
+  [238,"Curtin","WA","IND","Kate Chaney","IND","LP",6.54],
+  [312,"Durack","WA","LP","Melissa Price","LP","ALP",20.31],
+  [239,"Forrest","WA","LP","Ben Small","LP","ALP",4.47],
+  [240,"Fremantle","WA","ALP","Josh Wilson","ALP","IND",1.37],
+  [305,"Hasluck","WA","ALP","Tania Lawrence","ALP","LP",31.95],
+  [242,"Moore","WA","ALP","Tom French","ALP","LP",5.77],
+  [243,"O'Connor","WA","LP","Rick Wilson","LP","ALP",26.57],
+  [244,"Pearce","WA","ALP","Tracey Roberts","ALP","LP",12.87],
+  [245,"Perth","WA","ALP","Patrick Gorman","ALP","LP",33.02],
+  [247,"Swan","WA","ALP","Zaneta Mascarenhas","ALP","LP",27.98],
+  [248,"Tangney","WA","ALP","Sam Lim","ALP","LP",13.98],
 ];
 const SEATS=_S25.map(([id,name,state,wp,wn,t1,t2,m])=>({
   id,name,state,margin:m,swing:0,fp:[],
@@ -2383,17 +2471,17 @@ export default function App() {
     setActiveTab("model");
   };
 
-  const PREF_FLOWS_2022 = {
+  const PREF_FLOWS_2025 = {
     grn_alp:0.81, teal_alp:0.62, on_alp:0.43, other_alp:0.50,
     coal_alp_v_on:0.10, grn_alp_v_on:0.90, teal_alp_v_on:0.75, other_alp_v_on:0.60,
     alp_on_v_coal:0.20, grn_on_v_coal:0.08, teal_on_v_coal:0.12, other_on_v_coal:0.25,
   };
 
-  const resetPrefFlows = () => setPrefFlows(PREF_FLOWS_2022);
+  const resetPrefFlows = () => setPrefFlows(PREF_FLOWS_2025);
 
   const resetModel = () => {
     setPrimaries({ alp:BASELINE_2025.alp, coal:BASELINE_2025.coal, grn:BASELINE_2025.grn, teal:BASELINE_2025.teal, on:BASELINE_2025.on, undecided:0 });
-    setPrefFlows(PREF_FLOWS_2022);
+    setPrefFlows(PREF_FLOWS_2025);
     setOnThreshold(6.5);
     setSeatOverrides({});
   };
@@ -3095,7 +3183,7 @@ export default function App() {
                   </div>
                 )}
                 <div style={{ fontSize:11, color:"#9CA3AF", marginTop:6 }}>
-                  Uses seat-level 2022 ON primary as baseline. When ON's estimated primary exceeds this threshold and beats ALP or Coalition in a seat, that seat is automatically modelled as an ON vs ALP or ON vs Coalition final.
+                  Uses seat-level 2025 ON primary as baseline. When ON's estimated primary exceeds this threshold and beats ALP or Coalition in a seat, that seat is automatically modelled as an ON vs ALP or ON vs Coalition final.
                 </div>
               </div>
 
@@ -3105,7 +3193,7 @@ export default function App() {
                   <div style={sectionHead}>Preference flows to ALP</div>
                   <button onClick={resetPrefFlows}
                     style={{ fontSize:11, color:"#6B7280", background:"none", border:"none", cursor:"pointer", padding:0, textDecoration:"underline", whiteSpace:"nowrap" }}>
-                    ↺ Reset to 2022
+                    ↺ Reset to 2025
                   </button>
                 </div>
                 <div style={{ fontSize:11, color:"#9CA3AF", marginBottom:8 }}>Used in standard ALP vs Coalition finals. Remainder flows to Coalition.</div>
@@ -3114,7 +3202,7 @@ export default function App() {
                 <PrefInput label="One Nation → ALP"  value={prefFlows.on_alp}    onChange={v=>setPrefFlows(f=>({...f,on_alp:v}))}    color="#B45309" />
                 <PrefInput label="Other → ALP"       value={prefFlows.other_alp} onChange={v=>setPrefFlows(f=>({...f,other_alp:v}))} color="#7C3AED" />
                 <div style={{ fontSize:11, color:"#9CA3AF", borderTop:"1px solid #F3F4F6", paddingTop:8, marginTop:4 }}>
-                  Defaults based on 2022 AEC distributions (Grn 81%, Ind 62%, ON 43%, Other 50%).
+                  Defaults based on 2025 AEC distributions (Grn 81%, Ind 62%, ON 43%, Other 50%).
                 </div>
               </div>
 
@@ -3213,7 +3301,7 @@ export default function App() {
               <div style={panelStyle}>
                 <div style={{ fontWeight:700, color:"#374151", marginBottom:12 }}>Seat composition</div>
                 <div style={{ marginBottom:8 }}>
-                  <div style={{ fontSize:12, color:"#6B7280", marginBottom:4 }}>2022 result</div>
+                  <div style={{ fontSize:12, color:"#6B7280", marginBottom:4 }}>2025 result</div>
                   <TallyBar seats={SEATS} />
                 </div>
                 <div>
