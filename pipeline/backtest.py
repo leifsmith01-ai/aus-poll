@@ -38,6 +38,14 @@ BACKTEST_DIR     = Path(__file__).parent.parent / "data" / "backtest"
 
 COALITION_PARTIES = {"LP", "LNP", "NP", "CLP"}
 
+# ── Standard preference flows (for primary-based backtest) ─────────────────────
+DEFAULT_PREF_FLOWS = {
+    "grn_alp":   0.810,
+    "teal_alp":  0.620,
+    "on_alp":    0.430,
+    "other_alp": 0.500,
+}
+
 
 # ── Data structures ────────────────────────────────────────────────────────────
 
@@ -199,16 +207,9 @@ def apply_swing_with_elasticity(
         return apply_uniform_swing(baseline, nat_2pp_swing)
 
     marginality = abs(baseline.alp_2pp - 50)   # 0 = knife-edge, 50 = very safe
-    # Seats within 10pp are "marginal", those beyond 20pp are "safe"
-    # Multiplier: marginal = 1.3x, competitive = 1.1x, safe = 0.8x
-    if marginality <= 5:
-        multiplier = 1.30
-    elif marginality <= 10:
-        multiplier = 1.15
-    elif marginality <= 20:
-        multiplier = 1.00
-    else:
-        multiplier = 0.80
+    # Logistic curve: ranges from 0.80 (safe) to 1.30 (knife-edge)
+    # Midpoint at ~8pp margin, steepness 0.20
+    multiplier = 0.80 + 0.50 / (1 + math.exp(0.20 * (marginality - 8)))
 
     adjusted_swing = nat_2pp_swing * multiplier
     pred = max(0.0, min(100.0, baseline.alp_2pp + adjusted_swing))
@@ -218,6 +219,47 @@ def apply_swing_with_elasticity(
         "pred_winner_party": winner,
         "changed":           (pred >= 50) != (baseline.alp_2pp >= 50),
         "elasticity_mult":   multiplier,
+    }
+
+
+def apply_primary_swing(
+    baseline: SeatResult,
+    primary_swings: dict[str, float],
+    flows: dict[str, float] = DEFAULT_PREF_FLOWS,
+) -> dict:
+    """
+    Apply uniform primary swings to a seat, then convert to 2PP using preference flows.
+    """
+    if baseline.alp_2pp is None or baseline.alp_fp is None or baseline.coal_fp is None or baseline.grn_fp is None:
+        return apply_uniform_swing(baseline, primary_swings.get("alp_2pp", 0.0))
+
+    proj_fp = {
+        "alp": max(0.0, baseline.alp_fp + primary_swings.get("alp", 0.0)),
+        "coal": max(0.0, baseline.coal_fp + primary_swings.get("coal", 0.0)),
+        "grn": max(0.0, baseline.grn_fp + primary_swings.get("grn", 0.0)),
+    }
+    # Assume teal and ON are negligible or rolled into 'other' if not in baseline
+    proj_fp["other"] = max(0.0, 100.0 - proj_fp["alp"] - proj_fp["coal"] - proj_fp["grn"])
+
+    alp_tcp = (
+        proj_fp["alp"]
+        + proj_fp["grn"] * flows["grn_alp"]
+        + proj_fp["other"] * flows["other_alp"]
+    )
+    coal_tcp = (
+        proj_fp["coal"]
+        + proj_fp["grn"] * (1 - flows["grn_alp"])
+        + proj_fp["other"] * (1 - flows["other_alp"])
+    )
+    total = alp_tcp + coal_tcp
+    pred = round(alp_tcp / total * 100.0, 2) if total > 0 else 50.0
+    
+    winner = "ALP" if pred >= 50.0 else "LP"
+    return {
+        "pred_alp_2pp":      pred,
+        "pred_winner_party": winner,
+        "changed":           (pred >= 50) != (baseline.alp_2pp >= 50),
+        "elasticity_mult":   1.0,
     }
 
 
@@ -307,6 +349,7 @@ def run_backtest(
     baseline_year: int,
     election_year: int,
     elasticity_curve: bool = True,
+    primary_based: bool = False,
     verbose: bool = False,
 ) -> BacktestResult:
     """
@@ -330,6 +373,12 @@ def run_backtest(
     baseline_nat = _national_primary(baseline_seats)
     election_nat = _national_primary(election_seats)
     nat_2pp_swing = election_nat["alp_2pp"] - baseline_nat["alp_2pp"]
+    primary_swings = {
+        "alp": election_nat["alp"] - baseline_nat["alp"],
+        "coal": election_nat["coal"] - baseline_nat["coal"],
+        "grn": election_nat["grn"] - baseline_nat["grn"],
+        "alp_2pp": nat_2pp_swing,
+    }
     logger.info("National ALP 2PP: %s=%.2f%% → %s=%.2f%% (swing=%.2fpp)",
                 baseline_year, baseline_nat["alp_2pp"],
                 election_year, election_nat["alp_2pp"],
@@ -352,7 +401,10 @@ def run_backtest(
     seat_swings = []
 
     for base, actual in paired:
-        pred = apply_swing_with_elasticity(base, nat_2pp_swing, elasticity_curve)
+        if primary_based:
+            pred = apply_primary_swing(base, primary_swings)
+        else:
+            pred = apply_swing_with_elasticity(base, nat_2pp_swing, elasticity_curve)
 
         err = pred["pred_alp_2pp"] - actual.alp_2pp
         errors.append(err)
@@ -479,6 +531,10 @@ if __name__ == "__main__":
         help="Disable seat elasticity correction (use pure uniform swing)",
     )
     parser.add_argument(
+        "--primary-based", action="store_true",
+        help="Use primary-based swing model instead of uniform 2PP swing",
+    )
+    parser.add_argument(
         "--report", action="store_true",
         help="Write JSON report to data/backtest/",
     )
@@ -496,6 +552,7 @@ if __name__ == "__main__":
     for baseline_yr, election_yr in backtests:
         try:
             bt = run_backtest(baseline_yr, election_yr, elasticity_curve=elasticity,
+                              primary_based=args.primary_based,
                               verbose=args.verbose)
             print_report(bt)
 
