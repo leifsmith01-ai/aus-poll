@@ -1939,9 +1939,9 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const base = seat.tcp.find(t => t.party === "GRN")?.pct ?? 50;
       const ef = override?.prefFlows ?? prefFlows;
       // Net swing to Greens: pure GRN swing + (portion of ALP swing flowing to GRN) + (portion of Teal swing flowing to GRN)
-      const netGrnGain = effGrnSwing + effAlpSwing * ef.alp_grn + effTealSwing * ef.teal_grn;
+      const netGrnGain = effGrnSwing + effAlpSwing * (ef.alp_grn ?? 0.85) + effTealSwing * (ef.teal_grn ?? 0.40);
       // Net swing to Coal: pure Coal swing + (portion of ON swing flowing to Coal) + (portion of Other swing flowing to Coal)
-      const netCoalGain = effCoalSwing + effOnSwing * (1 - ef.on_alp) + effOtherSwing * (1 - ef.other_alp);
+      const netCoalGain = effCoalSwing + effOnSwing * (1 - (ef.on_alp ?? 0.43)) + effOtherSwing * (1 - (ef.other_alp ?? 0.50));
       const adj = hasTcpOverride
         ? override.tcpPct
         : Math.max(0, Math.min(100, base + netGrnGain - netCoalGain));
@@ -1952,10 +1952,10 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     } else if (hasGrn && hasAlp) {
       const base = seat.tcp.find(t => t.party === "ALP")?.pct ?? 50;
       const ef = override?.prefFlows ?? prefFlows;
-      // Net swing to ALP: pure ALP swing + (portion of Coal swing flowing to ALP) + (portion of Other swing flowing to ALP)
-      const netAlpGain = effAlpSwing + effCoalSwing * prefFlows.coal_alp + effOtherSwing * ef.other_alp;
+      // Net swing to ALP: pure ALP swing + (portion of Coal swing flowing to ALP) + (portion of Other swing flowing to ALP) + (portion of ON flowing to ALP)
+      const netAlpGain = effAlpSwing + effCoalSwing * (ef.coal_alp ?? 0.05) + effOtherSwing * (ef.other_alp ?? 0.50) + effOnSwing * (ef.on_alp ?? 0.43);
       // Net swing to Greens: pure GRN swing + (portion of Teal flowing to GRN)
-      const netGrnGain = effGrnSwing + effTealSwing * ef.teal_grn;
+      const netGrnGain = effGrnSwing + effTealSwing * (ef.teal_grn ?? 0.40);
       const adj = hasTcpOverride
         ? override.tcpPct
         : Math.max(0, Math.min(100, base + netAlpGain - netGrnGain));
@@ -1969,9 +1969,9 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const base = tealP?.pct ?? 50;
       const ef = override?.prefFlows ?? prefFlows;
       // Net swing to Teal: pure Teal swing + (portion of ALP flowing to Teal) + (portion of GRN flowing to Teal)
-      const netTealGain = effTealSwing + effAlpSwing * ef.alp_teal + effGrnSwing * ef.grn_teal;
+      const netTealGain = effTealSwing + effAlpSwing * (ef.alp_teal ?? 0.70) + effGrnSwing * (ef.grn_teal ?? 0.50);
       // Net swing to Coal: pure Coal swing + (portion of ON flowing to Coal) + (portion of Other flowing to Coal)
-      const netCoalGain = effCoalSwing + effOnSwing * (1 - ef.on_alp) + effOtherSwing * (1 - ef.other_alp);
+      const netCoalGain = effCoalSwing + effOnSwing * (1 - (ef.on_alp ?? 0.43)) + effOtherSwing * (1 - (ef.other_alp ?? 0.50));
       const adj = hasTcpOverride
         ? override.tcpPct
         : Math.max(0, Math.min(100, base + netTealGain - netCoalGain));
@@ -2318,16 +2318,25 @@ export default function App() {
     teal_alp: 0.62,
     on_alp: 0.43,
     other_alp: 0.50,
+    coal_alp: 0.05, // Coal → ALP in 3rd party contests (usually very low)
+    alp_grn: 0.85,
+    alp_teal: 0.70,
+    grn_teal: 0.50,
+    teal_grn: 0.40,
+    coal_grn: 0.02,
+    coal_teal: 0.15,
+    on_grn: 0.15,
+    on_teal: 0.25,
     // ON vs ALP final — sources distribute between ALP and ON
-    coal_alp_v_on: 0.10,  // Coalition → ALP (low; conservatives reluctant to boost ALP over ON)
-    grn_alp_v_on: 0.90,  // Greens → ALP (high; Greens voters strongly oppose ON)
-    teal_alp_v_on: 0.75,  // Independents → ALP
-    other_alp_v_on: 0.60,  // Other → ALP
+    coal_alp_v_on: 0.10,
+    grn_alp_v_on: 0.90,
+    teal_alp_v_on: 0.75,
+    other_alp_v_on: 0.60,
     // ON vs Coalition final — sources distribute between ON and Coalition
-    alp_on_v_coal: 0.20,  // ALP → ON (low; ALP voters prefer Coalition over ON in this race)
-    grn_on_v_coal: 0.08,  // Greens → ON (very low; Greens strongly prefer Coalition over ON)
-    teal_on_v_coal: 0.12,  // Independents → ON
-    other_on_v_coal: 0.25,  // Other → ON
+    alp_on_v_coal: 0.20,
+    grn_on_v_coal: 0.08,
+    teal_on_v_coal: 0.12,
+    other_on_v_coal: 0.25,
   });
   // Derive swings from primaries vs 2025 baseline — used by computeModelledSeats
   const swings = {
