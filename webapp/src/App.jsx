@@ -1718,7 +1718,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     // primaries relative to the seat's 2025 AEC baseline (falls back to national baseline).
     // Using the seat-level baseline avoids spurious large swings when only some parties
     // are overridden — e.g. setting ALP to 45% in Grayndler no longer implies Coal at 31.8%.
-    let effAlpSwing, effCoalSwing, effGrnSwing, effTealSwing;
+    let effAlpSwing, effCoalSwing, effGrnSwing, effTealSwing, effOnSwing, effOtherSwing;
     let newFp = null;
     if (override) {
       const seatBase = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
@@ -1736,12 +1736,16 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       effCoalSwing = newFp.coal - seatBase.coal;
       effGrnSwing = newFp.grn - seatBase.grn;
       effTealSwing = newFp.teal - seatBase.teal;
+      effOnSwing = newFp.on - seatBase.on;
+      effOtherSwing = newFp.other - seatBase.other;
     } else {
       const sSwings = blendSwings(swings, stateSwings, seat.state);
       effAlpSwing = sSwings.alp;
       effCoalSwing = sSwings.coal;
       effGrnSwing = sSwings.grn;
       effTealSwing = sSwings.teal;
+      effOnSwing = sSwings.on;
+      effOtherSwing = -(effAlpSwing + effCoalSwing + effGrnSwing + effTealSwing + effOnSwing);
     }
 
     // Estimate ON's primary in this seat using seat-level 2025 baseline + state consensus swing.
@@ -1919,18 +1923,28 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
 
     } else if (hasGrn && hasCoal) {
       const base = seat.tcp.find(t => t.party === "GRN")?.pct ?? 50;
+      const ef = override?.prefFlows ?? prefFlows;
+      // Net swing to Greens: pure GRN swing + (portion of ALP swing flowing to GRN) + (portion of Teal swing flowing to GRN)
+      const netGrnGain = effGrnSwing + effAlpSwing * ef.alp_grn + effTealSwing * ef.teal_grn;
+      // Net swing to Coal: pure Coal swing + (portion of ON swing flowing to Coal) + (portion of Other swing flowing to Coal)
+      const netCoalGain = effCoalSwing + effOnSwing * (1 - ef.on_alp) + effOtherSwing * (1 - ef.other_alp);
       const adj = hasTcpOverride
         ? override.tcpPct
-        : Math.max(0, Math.min(100, base + effGrnSwing - effCoalSwing));
+        : Math.max(0, Math.min(100, base + netGrnGain - netCoalGain));
       projWinnerGroup = adj >= 50 ? "greens" : "coalition";
       projWinnerParty = adj >= 50 ? "GRN" : seat.tcp.find(t => t.party !== "GRN")?.party;
       projWinnerPct = adj >= 50 ? adj : 100 - adj;
 
     } else if (hasGrn && hasAlp) {
       const base = seat.tcp.find(t => t.party === "ALP")?.pct ?? 50;
+      const ef = override?.prefFlows ?? prefFlows;
+      // Net swing to ALP: pure ALP swing + (portion of Coal swing flowing to ALP) + (portion of Other swing flowing to ALP)
+      const netAlpGain = effAlpSwing + effCoalSwing * prefFlows.coal_alp + effOtherSwing * ef.other_alp;
+      // Net swing to Greens: pure GRN swing + (portion of Teal flowing to GRN)
+      const netGrnGain = effGrnSwing + effTealSwing * ef.teal_grn;
       const adj = hasTcpOverride
         ? override.tcpPct
-        : Math.max(0, Math.min(100, base + effAlpSwing - effGrnSwing));
+        : Math.max(0, Math.min(100, base + netAlpGain - netGrnGain));
       projWinnerGroup = adj >= 50 ? "alp" : "greens";
       projWinnerParty = adj >= 50 ? "ALP" : "GRN";
       projWinnerPct = adj >= 50 ? adj : 100 - adj;
@@ -1939,9 +1953,14 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     } else if (hasTeal && hasCoal) {
       const tealP = seat.tcp.find(t => ["IND", "CA"].includes(t.party));
       const base = tealP?.pct ?? 50;
+      const ef = override?.prefFlows ?? prefFlows;
+      // Net swing to Teal: pure Teal swing + (portion of ALP flowing to Teal) + (portion of GRN flowing to Teal)
+      const netTealGain = effTealSwing + effAlpSwing * ef.alp_teal + effGrnSwing * ef.grn_teal;
+      // Net swing to Coal: pure Coal swing + (portion of ON flowing to Coal) + (portion of Other flowing to Coal)
+      const netCoalGain = effCoalSwing + effOnSwing * (1 - ef.on_alp) + effOtherSwing * (1 - ef.other_alp);
       const adj = hasTcpOverride
         ? override.tcpPct
-        : Math.max(0, Math.min(100, base + effTealSwing - effCoalSwing));
+        : Math.max(0, Math.min(100, base + netTealGain - netCoalGain));
       const indGroup = TEAL_SEAT_IDS.has(seat.id) ? "teal" : "ind";
       projWinnerGroup = adj >= 50 ? indGroup : "coalition";
       projWinnerParty = adj >= 50 ? tealP?.party : seat.tcp.find(t => ["LP", "LNP", "NP", "CLP"].includes(t.party))?.party;
@@ -1950,9 +1969,14 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     } else if (hasTeal && hasAlp) {
       const tealP = seat.tcp.find(t => ["IND", "CA"].includes(t.party));
       const base = tealP?.pct ?? 50;
+      const ef = override?.prefFlows ?? prefFlows;
+      // Net swing to Teal: pure Teal swing + (portion of GRN flowing to Teal) + (portion of Coal flowing to Teal)
+      const netTealGain = effTealSwing + effGrnSwing * ef.grn_teal + effCoalSwing * (1 - prefFlows.coal_alp);
+      // Net swing to ALP: pure ALP swing + (portion of ON flowing to ALP) + (portion of Other flowing to ALP)
+      const netAlpGain = effAlpSwing + effOnSwing * ef.on_alp + effOtherSwing * ef.other_alp;
       const adj = hasTcpOverride
         ? override.tcpPct
-        : Math.max(0, Math.min(100, base + effTealSwing - effAlpSwing));
+        : Math.max(0, Math.min(100, base + netTealGain - netAlpGain));
       const indGroup = TEAL_SEAT_IDS.has(seat.id) ? "teal" : "ind";
       projWinnerGroup = adj >= 50 ? indGroup : "alp";
       projWinnerParty = adj >= 50 ? tealP?.party : "ALP";
