@@ -1828,11 +1828,18 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const wGroup = onPct >= 50 ? "one_nation" : "alp";
       const wParty = onPct >= 50 ? "ON" : "ALP";
       const wPct = onPct >= 50 ? onPct : 100 - onPct;
+
+      // Calculate the standard 2PP (ALP vs Coal) to keep the national tracker accurate
+      const a2 = fp.alp + fp.grn * prefFlows.grn_alp + fp.teal * prefFlows.teal_alp + fp.on * prefFlows.on_alp + fp.other * prefFlows.other_alp;
+      const c2 = fp.coal + fp.grn * (1 - prefFlows.grn_alp) + fp.teal * (1 - prefFlows.teal_alp) + fp.on * (1 - prefFlows.on_alp) + fp.other * (1 - prefFlows.other_alp);
+      const synthAlp2pp = a2 / (a2 + c2) * 100;
+
       return {
         ...seat,
         modelled: {
           winnerParty: wParty, winnerGroup: wGroup, winnerPct: wPct,
-          projAlp2pp: 100 - onPct,
+          projAlp2pp: synthAlp2pp,
+          isSynthetic2pp: true,
           changed: wGroup !== getParty(seat.winner.party).group,
           isOverride: !isAutoMatchup,
           isAutoMatchup,
@@ -1866,11 +1873,18 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const wGroup = onPct >= 50 ? "one_nation" : "coalition";
       const wParty = onPct >= 50 ? "ON" : coalP;
       const wPct = onPct >= 50 ? onPct : 100 - onPct;
+
+      // Calculate the standard 2PP (ALP vs Coal) to keep the national tracker accurate
+      const a2 = fp.alp + fp.grn * prefFlows.grn_alp + fp.teal * prefFlows.teal_alp + fp.on * prefFlows.on_alp + fp.other * prefFlows.other_alp;
+      const c2 = fp.coal + fp.grn * (1 - prefFlows.grn_alp) + fp.teal * (1 - prefFlows.teal_alp) + fp.on * (1 - prefFlows.on_alp) + fp.other * (1 - prefFlows.other_alp);
+      const synthAlp2pp = a2 / (a2 + c2) * 100;
+
       return {
         ...seat,
         modelled: {
           winnerParty: wParty, winnerGroup: wGroup, winnerPct: wPct,
-          projAlp2pp: null,
+          projAlp2pp: synthAlp2pp,
+          isSynthetic2pp: true,
           changed: wGroup !== getParty(seat.winner.party).group,
           isOverride: !isAutoMatchup,
           isAutoMatchup,
@@ -4290,7 +4304,9 @@ export default function App() {
                                         : <PartyBadge party={ms.winnerParty} />
                                       }
                                       {ms.projAlp2pp !== null && (
-                                        <span style={{ fontSize: 12, color: "#6B7280" }}>ALP 2PP {ms.projAlp2pp.toFixed(1)}%</span>
+                                        <span style={{ fontSize: 12, color: "#6B7280" }}>
+                                          ALP 2PP {ms.projAlp2pp.toFixed(1)}% {ms.isSynthetic2pp && <span style={{ fontStyle: "italic", fontSize: 10 }}>(synthetic)</span>}
+                                        </span>
                                       )}
                                       {ms.winnerPct !== null && (
                                         <span style={{ fontSize: 12, color: "#6B7280" }}>
