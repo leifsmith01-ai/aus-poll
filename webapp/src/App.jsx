@@ -2340,14 +2340,10 @@ export default function App() {
   const [seatOverrides, setSeatOverrides] = useState({});  // {seatId: {alp,coal,grn,teal,on,prefFlows?}}
   const [overrideSearch, setOverrideSearch] = useState("");
 
-  // ── One Nation seats panel state ──
-  const [expandedOnSeat, setExpandedOnSeat] = useState(null);  // seat id or null
-  const [onSeatSort, setOnSeatSort] = useState({ field: "name", dir: "asc" });
-  const [onSeatFilter, setOnSeatFilter] = useState("");
+  // ── Modifiable ON/Elasticity/Uncertainty settings ──
   const [onThreshold, setOnThreshold] = useState(6.5);   // % ON primary to auto-detect TCP
   const [useElasticity, setUseElasticity] = useState(false); // apply seat-level swing elasticity
   const [swingStd, setSwingStd] = useState(1.5);   // polling uncertainty (pp std dev)
-  const [onCompetitiveOnly, setOnCompetitiveOnly] = useState(false); // filter panel to competitive seats only
   const [showAdvancedFlows, setShowAdvancedFlows] = useState(false); // show/hide advanced ON race flows
 
   // ── Seat-at-risk table state ──
@@ -2456,42 +2452,6 @@ export default function App() {
   const changedSeats = useMemo(() =>
     modelledSeats.filter(s => s.modelled.changed),
     [modelledSeats]);
-
-  const projectedOnSeats = useMemo(() =>
-    modelledSeats.filter(s => s.modelled.winnerGroup === "one_nation"),
-    [modelledSeats]);
-
-  // Count seats auto-detected as ON TCP contests (not manually overridden)
-  const autoOnCount = useMemo(() =>
-    modelledSeats.filter(s => s.modelled.isAutoMatchup).length,
-    [modelledSeats]);
-
-  const sortedOnSeatList = useMemo(() => {
-    let list = [...modelledSeats];
-    // If competitive-only filter is active, show only ON-relevant seats
-    if (onCompetitiveOnly) {
-      list = list.filter(s =>
-        s.modelled.winnerGroup === "one_nation" ||
-        s.modelled.isAutoMatchup ||
-        seatOverrides[s.id]?.tcpMatchup?.startsWith("on_")
-      );
-    }
-    if (onSeatFilter) {
-      const q = onSeatFilter.toLowerCase();
-      list = list.filter(s => s.name.toLowerCase().includes(q) || s.state.toLowerCase().includes(q));
-    }
-    list.sort((a, b) => {
-      let cmp = 0;
-      if (onSeatSort.field === "name") cmp = a.name.localeCompare(b.name);
-      if (onSeatSort.field === "state") cmp = a.state.localeCompare(b.state) || a.name.localeCompare(b.name);
-      if (onSeatSort.field === "holder") cmp = getParty(a.winner.party).group.localeCompare(getParty(b.winner.party).group);
-      if (onSeatSort.field === "margin") cmp = (a.margin ?? 99) - (b.margin ?? 99);
-      if (onSeatSort.field === "proj") cmp = a.modelled.winnerGroup.localeCompare(b.modelled.winnerGroup);
-      if (onSeatSort.field === "onFp") cmp = estimateSeatOnFp(b.id, swings) - estimateSeatOnFp(a.id, swings);
-      return onSeatSort.dir === "asc" ? cmp : -cmp;
-    });
-    return list;
-  }, [modelledSeats, onSeatSort, onSeatFilter, onCompetitiveOnly, seatOverrides, swings]);
 
   const implied2pp = useMemo(() => {
     const relevant = modelledSeats.filter(s => s.modelled.projAlp2pp !== null);
@@ -2970,27 +2930,6 @@ export default function App() {
           other_on_v_coal: prefFlows.other_on_v_coal,
         },
       },
-    }));
-  };
-
-  const toggleExpandedOnSeat = (seatId) => {
-    setExpandedOnSeat(prev => {
-      const next = prev === seatId ? null : seatId;
-      // Ensure a minimal override exists so pref flows have somewhere to live
-      if (next !== null && !seatOverrides[seatId]) {
-        setSeatOverrides(ov => ({
-          ...ov,
-          [seatId]: { alp: null, coal: null, grn: null, teal: null, on: null },
-        }));
-      }
-      return next;
-    });
-  };
-
-  const handleOnSeatSort = (field) => {
-    setOnSeatSort(prev => ({
-      field,
-      dir: prev.field === field ? (prev.dir === "asc" ? "desc" : "asc") : "asc",
     }));
   };
 
@@ -3564,44 +3503,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* ON scenario presets + auto-detect threshold */}
-                <div style={panelStyle}>
-                  <div style={sectionHead}>One Nation scenarios</div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 12 }}>
-                    {[[6.4, "2025 baseline"], [8, "Moderate rise"], [10, "Strong rise"], [13, "Peak (~2016)"]].map(([pct, label]) => {
-                      const active = Math.abs(primaries.on - pct) < 0.05;
-                      return (
-                        <button key={pct} onClick={() => setPrimaries(p => ({ ...p, on: pct }))}
-                          style={{
-                            padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap",
-                            background: active ? "#B45309" : "#FEF3C7", color: active ? "#fff" : "#92400E",
-                            border: `1px solid ${active ? "#B45309" : "#FDE68A"}`
-                          }}>
-                          {label} ({pct}%)
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "8px 10px", background: "#FFFBEB", borderRadius: 7, border: "1px solid #FDE68A" }}>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: "#92400E", whiteSpace: "nowrap" }}>
-                      Auto-detect TCP above:
-                    </label>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <input type="number" min={0} max={30} step={0.5} value={onThreshold}
-                        onChange={e => setOnThreshold(+e.target.value)}
-                        style={{ width: 56, border: "1px solid #FDE68A", borderRadius: 5, padding: "3px 6px", fontSize: 13, fontWeight: 700, textAlign: "center", background: "#fff", outline: "none" }} />
-                      <span style={{ fontSize: 12, color: "#B45309", fontWeight: 600 }}>%</span>
-                    </div>
-                  </div>
-                  {autoOnCount > 0 && (
-                    <div style={{ fontSize: 11, color: "#B45309", marginTop: 6, fontWeight: 600 }}>
-                      {autoOnCount} seat{autoOnCount !== 1 ? "s" : ""} auto-detected as ON TCP contest{autoOnCount !== 1 ? "s" : ""}
-                    </div>
-                  )}
-                  <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6 }}>
-                    Uses seat-level 2025 ON primary as baseline. When ON's estimated primary exceeds this threshold and beats ALP or Coalition in a seat, that seat is automatically modelled as an ON vs ALP or ON vs Coalition final.
-                  </div>
-                </div>
+
 
                 {/* Flow consistency warning */}
                 {(() => {
@@ -3649,11 +3551,6 @@ export default function App() {
                     style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: showAdvancedFlows ? 12 : 0 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#374151" }}>
                       Advanced: ON race flows
-                      {autoOnCount > 0 && (
-                        <span style={{ marginLeft: 7, fontSize: 10, background: "#B45309", color: "#fff", padding: "1px 7px", borderRadius: 8, fontWeight: 600 }}>
-                          {autoOnCount} seat{autoOnCount !== 1 ? "s" : ""} affected
-                        </span>
-                      )}
                     </span>
                     <span style={{ fontSize: 13, color: "#9CA3AF" }}>{showAdvancedFlows ? "▲" : "▼"}</span>
                   </button>
@@ -3854,6 +3751,13 @@ export default function App() {
                         {useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}
                       </span>
                     </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151", marginBottom: 8 }}>
+                      <label style={{ minWidth: 130 }}>ON auto-detect threshold:</label>
+                      <input type="number" min={0} max={30} step={0.5} value={onThreshold}
+                        onChange={e => setOnThreshold(+e.target.value)}
+                        style={{ width: 56, border: "1px solid #D1D5DB", borderRadius: 5, padding: "3px 6px", fontSize: 12, textAlign: "center", outline: "none" }} />
+                      <span style={{ fontSize: 11, color: "#6B7280" }}>% primary vote</span>
+                    </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
                       <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
                       <input
@@ -4058,273 +3962,6 @@ export default function App() {
                       </div>
                       <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, borderTop: "1px solid #F3F4F6", paddingTop: 8 }}>
                         {filtered.length} seats shown · Red = &lt;2pp · Amber = &lt;5pp · Faded = safe (&gt;10pp) · Bold left border = projected change · Click row to expand demographics
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* ── One Nation Seats panel ── */}
-                {(() => {
-                  const ON_COLOR = "#B45309";
-                  const ON_BG = "#FEF3C7";
-                  const ON_LIGHT = "#FFFBEB";
-
-                  const SortColBtn = ({ field, label }) => {
-                    const active = onSeatSort.field === field;
-                    return (
-                      <button
-                        onClick={() => handleOnSeatSort(field)}
-                        style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 6px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: active ? ON_COLOR : "#9CA3AF", display: "flex", alignItems: "center", gap: 3, userSelect: "none", whiteSpace: "nowrap" }}>
-                        {label}
-                        <span style={{ fontSize: 10 }}>{active ? (onSeatSort.dir === "asc" ? "↑" : "↓") : "↕"}</span>
-                      </button>
-                    );
-                  };
-
-                  return (
-                    <div style={{ border: `2px solid ${ON_COLOR}`, borderRadius: 12, marginBottom: 16, overflow: "hidden" }}>
-                      {/* Orange header */}
-                      <div style={{ background: ON_COLOR, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                        <span style={{ fontWeight: 800, fontSize: 14, color: "#fff" }}>One Nation Seats</span>
-                        <span style={{ background: "rgba(255,255,255,0.25)", color: "#fff", fontSize: 12, fontWeight: 700, padding: "2px 10px", borderRadius: 10 }}>
-                          {projectedOnSeats.length} projected
-                        </span>
-                        {autoOnCount > 0 && (
-                          <span style={{ background: "rgba(0,0,0,0.25)", color: "#fff", fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 10 }}>
-                            {autoOnCount} auto-detected
-                          </span>
-                        )}
-                        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-                          <button
-                            onClick={() => setOnCompetitiveOnly(v => !v)}
-                            style={{
-                              fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 6, cursor: "pointer",
-                              background: onCompetitiveOnly ? "#fff" : "rgba(255,255,255,0.2)",
-                              color: onCompetitiveOnly ? ON_COLOR : "#fff",
-                              border: "1px solid rgba(255,255,255,0.5)"
-                            }}>
-                            {onCompetitiveOnly ? "Show all seats" : "Competitive only"}
-                          </button>
-                          <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 12 }}>
-                            {sortedOnSeatList.length} listed
-                          </span>
-                        </div>
-                      </div>
-
-                      <div style={{ background: "#fff", padding: "12px 14px" }}>
-                        {/* Search filter */}
-                        <input
-                          value={onSeatFilter}
-                          onChange={e => setOnSeatFilter(e.target.value)}
-                          placeholder="Filter seats by name or state…"
-                          style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 7, padding: "7px 10px", fontSize: 13, boxSizing: "border-box", outline: "none", marginBottom: 8 }}
-                        />
-
-                        {/* Column headers — now includes ON% column */}
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 55px 80px 55px 70px 90px 24px", gap: 4, alignItems: "center", borderBottom: `2px solid ${ON_BG}`, paddingBottom: 4, marginBottom: 4 }}>
-                          <SortColBtn field="name" label="Seat" />
-                          <SortColBtn field="state" label="State" />
-                          <SortColBtn field="holder" label="2022 Holder" />
-                          <SortColBtn field="margin" label="Margin" />
-                          <SortColBtn field="onFp" label="Est. ON%" />
-                          <SortColBtn field="proj" label="Projected" />
-                          <div />
-                        </div>
-
-                        {/* Seat rows */}
-                        <div style={{ maxHeight: 480, overflowY: "auto" }}>
-                          {sortedOnSeatList.map(seat => {
-                            const isOnProj = seat.modelled.winnerGroup === "one_nation";
-                            const isExpanded = expandedOnSeat === seat.id;
-                            const ov = seatOverrides[seat.id] ?? {};
-                            const ms = seat.modelled;
-                            const seatPrefFlows = ov.prefFlows;
-                            const hasSeatPrefFlows = seatPrefFlows && Object.values(seatPrefFlows).some(v => v !== null);
-                            const estOn = estimateSeatOnFp(seat.id, swings);
-                            const isAboveThreshold = estOn >= onThreshold;
-                            // Row highlight: orange if ON projected to win, amber bg if auto-detected contest
-                            const isOnContest = isOnProj || ms.isAutoMatchup || ov.tcpMatchup?.startsWith("on_");
-                            const rowBg = isOnProj ? ON_LIGHT : ms.isAutoMatchup ? "#FFFBEB" : "transparent";
-                            const rowBorder = isOnProj ? `4px solid ${ON_COLOR}` : ms.isAutoMatchup ? "4px solid #F59E0B" : "4px solid transparent";
-
-                            return (
-                              <div key={seat.id}>
-                                {/* Collapsed row */}
-                                <div
-                                  onClick={() => toggleExpandedOnSeat(seat.id)}
-                                  style={{ display: "grid", gridTemplateColumns: "1fr 55px 80px 55px 70px 90px 24px", gap: 4, alignItems: "center", padding: "6px 2px", cursor: "pointer", background: rowBg, borderLeft: rowBorder, borderRadius: 4, marginBottom: 1 }}>
-                                  <span style={{ fontWeight: isOnContest ? 700 : 500, fontSize: 13, color: "#111", paddingLeft: isOnContest ? 4 : 8 }}>{seat.name}</span>
-                                  <span style={{ fontSize: 12, color: "#6B7280" }}>{seat.state}</span>
-                                  <div><PartyBadge party={seat.winner.party} /></div>
-                                  <span style={{ fontSize: 12, color: "#374151" }}>{seat.margin?.toFixed(1)}%</span>
-                                  <span style={{ fontSize: 12, fontWeight: isAboveThreshold ? 700 : 400, color: isAboveThreshold ? ON_COLOR : "#9CA3AF" }}>
-                                    {estOn.toFixed(1)}%
-                                  </span>
-                                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                    {isOnProj
-                                      ? <span style={{ background: ON_COLOR, color: "#fff", fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>One Nation</span>
-                                      : ms.isAutoMatchup
-                                        ? <span style={{ background: "#F59E0B", color: "#fff", fontSize: 10, fontWeight: 700, padding: "1px 5px", borderRadius: 4 }}>
-                                          {ms.activeTcpMatchup === "on_v_alp" ? "ON v ALP" : "ON v Coal"}
-                                        </span>
-                                        : <PartyBadge party={ms.winnerParty} />
-                                    }
-                                    {ms.isAutoMatchup && !isOnProj && (
-                                      <span style={{ fontSize: 9, color: "#9CA3AF", fontWeight: 600 }}>auto</span>
-                                    )}
-                                    {ov.tcpMatchup && (
-                                      <span style={{ fontSize: 9, color: "#9CA3AF", fontWeight: 600 }}>⚙</span>
-                                    )}
-                                  </div>
-                                  <span style={{ fontSize: 12, color: "#9CA3AF", textAlign: "center" }}>{isExpanded ? "▲" : "▼"}</span>
-                                </div>
-
-                                {/* Expanded panel */}
-                                {isExpanded && (
-                                  <div style={{ background: ON_LIGHT, border: `1px solid ${ON_BG}`, borderRadius: 8, padding: "12px 14px", marginBottom: 6, marginLeft: 4 }}>
-
-                                    {/* Auto-detection context */}
-                                    {(ms.isAutoMatchup || ov.tcpMatchup) && (
-                                      <div style={{ fontSize: 11, color: "#92400E", background: "#FEF3C7", border: "1px solid #FDE68A", borderRadius: 6, padding: "6px 10px", marginBottom: 10 }}>
-                                        {ms.isAutoMatchup
-                                          ? `Auto-detected: ON estimated at ${estOn.toFixed(1)}% (threshold ${onThreshold}%) → modelled as ${ms.activeTcpMatchup === "on_v_alp" ? "ON vs ALP" : "ON vs Coalition"} final`
-                                          : `Manual override: ${ov.tcpMatchup === "on_v_alp" ? "ON vs ALP" : "ON vs Coalition"} final`
-                                        }
-                                      </div>
-                                    )}
-
-                                    {/* Primary vote inputs */}
-                                    <div style={{ fontSize: 11, fontWeight: 800, color: ON_COLOR, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Primary votes</div>
-                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6, marginBottom: 12 }}>
-                                      {[["ALP", "alp", "#DC2626"], ["Coal", "coal", "#1D4ED8"], ["Grn", "grn", "#059669"], ["Ind", "teal", "#0891B2"], ["ON", "on", ON_COLOR]].map(([label, key, color]) => (
-                                        <div key={key} style={{ textAlign: "center" }}>
-                                          <div style={{ fontSize: 10, fontWeight: 800, color, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
-                                          <input
-                                            type="number" min={0} max={100} step={0.5}
-                                            value={ov[key] !== null && ov[key] !== undefined ? ov[key] : ""}
-                                            placeholder={key === "on" ? estOn.toFixed(1) : (SEAT_FP_2025[seat.id]?.[key]?.toFixed(1) ?? primaries[key]?.toFixed(1) ?? "—")}
-                                            onChange={e => updateSeatOverride(seat.id, key, e.target.value)}
-                                            style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 5, padding: "5px 4px", fontSize: 12, textAlign: "center", boxSizing: "border-box", outline: "none" }}
-                                          />
-                                        </div>
-                                      ))}
-                                    </div>
-                                    <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 12 }}>
-                                      National: ALP {primaries.alp}% · Coal {primaries.coal}% · Grn {primaries.grn}% · Ind {primaries.teal}% · ON {primaries.on}%
-                                      {ON_FP_2022[seat.id] && ` · 2022 seat ON: ${ON_FP_2022[seat.id]}%`}
-                                    </div>
-
-                                    {/* Per-seat preference flows */}
-                                    <div style={{ borderTop: `1px solid ${ON_BG}`, paddingTop: 10 }}>
-                                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                                        <span style={{ fontSize: 11, fontWeight: 800, color: ON_COLOR, textTransform: "uppercase", letterSpacing: "0.06em" }}>Preference flows</span>
-                                        {hasSeatPrefFlows
-                                          ? <span style={{ fontSize: 10, background: ON_COLOR, color: "#fff", padding: "1px 7px", borderRadius: 8, fontWeight: 600 }}>seat-level</span>
-                                          : (
-                                            <button
-                                              onClick={() => initSeatPrefFlows(seat.id)}
-                                              style={{ fontSize: 11, color: ON_COLOR, background: "#fff", border: `1px solid ${ON_COLOR}`, borderRadius: 5, padding: "2px 8px", cursor: "pointer", fontWeight: 600 }}>
-                                              Customise for this seat
-                                            </button>
-                                          )
-                                        }
-                                        {hasSeatPrefFlows && (
-                                          <button
-                                            onClick={() => setSeatOverrides(prev => { const n = { ...prev }; delete n[seat.id].prefFlows; return { ...n, [seat.id]: { ...n[seat.id] } }; })}
-                                            style={{ fontSize: 11, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>
-                                            Reset to national
-                                          </button>
-                                        )}
-                                      </div>
-                                      {hasSeatPrefFlows ? (
-                                        <div>
-                                          {/* Standard ALP vs Coal flows */}
-                                          <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Standard (ALP vs Coal)</div>
-                                          {[["Greens → ALP", "grn_alp", "#059669"], ["Independents → ALP", "teal_alp", "#0891B2"], ["One Nation → ALP", "on_alp", ON_COLOR], ["Other → ALP", "other_alp", "#7C3AED"]].map(([label, key, color]) => (
-                                            <PrefInput key={key} label={label} value={seatPrefFlows[key] ?? prefFlows[key]} onChange={v => updateSeatPrefFlow(seat.id, key, Math.round(v * 100))} color={color} />
-                                          ))}
-                                          {/* ON vs ALP flows */}
-                                          {(ms.activeTcpMatchup === "on_v_alp" || ov.tcpMatchup === "on_v_alp") && (
-                                            <>
-                                              <div style={{ fontSize: 10, fontWeight: 700, color: "#92400E", textTransform: "uppercase", marginBottom: 4, marginTop: 10 }}>ON vs ALP final — flows to ALP</div>
-                                              {[["Greens → ALP", "grn_alp_v_on", "#059669"], ["Independents → ALP", "teal_alp_v_on", "#0891B2"], ["Other → ALP", "other_alp_v_on", "#7C3AED"], ["Coalition → ALP", "coal_alp_v_on", "#1D4ED8"]].map(([label, key, color]) => (
-                                                <PrefInput key={key} label={label} value={seatPrefFlows[key] ?? prefFlows[key]} onChange={v => updateSeatPrefFlow(seat.id, key, Math.round(v * 100))} color={color} />
-                                              ))}
-                                            </>
-                                          )}
-                                          {/* ON vs Coal flows */}
-                                          {(ms.activeTcpMatchup === "on_v_coal" || ov.tcpMatchup === "on_v_coal") && (
-                                            <>
-                                              <div style={{ fontSize: 10, fontWeight: 700, color: "#92400E", textTransform: "uppercase", marginBottom: 4, marginTop: 10 }}>ON vs Coalition final — flows to ON</div>
-                                              {[["ALP → ON", "alp_on_v_coal", "#DC2626"], ["Greens → ON", "grn_on_v_coal", "#059669"], ["Independents → ON", "teal_on_v_coal", "#0891B2"], ["Other → ON", "other_on_v_coal", "#7C3AED"]].map(([label, key, color]) => (
-                                                <PrefInput key={key} label={label} value={seatPrefFlows[key] ?? prefFlows[key]} onChange={v => updateSeatPrefFlow(seat.id, key, Math.round(v * 100))} color={color} />
-                                              ))}
-                                            </>
-                                          )}
-                                        </div>
-                                      ) : (
-                                        <div style={{ fontSize: 12, color: "#9CA3AF" }}>
-                                          {ms.activeTcpMatchup === "on_v_alp" || ov.tcpMatchup === "on_v_alp"
-                                            ? `Using ON vs ALP flows: Grn ${Math.round(prefFlows.grn_alp_v_on * 100)}% · Ind ${Math.round(prefFlows.teal_alp_v_on * 100)}% · Other ${Math.round(prefFlows.other_alp_v_on * 100)}% · Coal ${Math.round(prefFlows.coal_alp_v_on * 100)}% → ALP`
-                                            : ms.activeTcpMatchup === "on_v_coal" || ov.tcpMatchup === "on_v_coal"
-                                              ? `Using ON vs Coal flows: ALP ${Math.round(prefFlows.alp_on_v_coal * 100)}% · Grn ${Math.round(prefFlows.grn_on_v_coal * 100)}% · Ind ${Math.round(prefFlows.teal_on_v_coal * 100)}% · Other ${Math.round(prefFlows.other_on_v_coal * 100)}% → ON`
-                                              : `Using national flows: Grn ${Math.round(prefFlows.grn_alp * 100)}% · Ind ${Math.round(prefFlows.teal_alp * 100)}% · ON ${Math.round(prefFlows.on_alp * 100)}% · Other ${Math.round(prefFlows.other_alp * 100)}% → ALP`
-                                          }
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    {/* TCP Matchup */}
-                                    <div style={{ borderTop: `1px solid ${ON_BG}`, paddingTop: 10, marginTop: 10 }}>
-                                      <div style={{ fontSize: 11, fontWeight: 700, color: ON_COLOR, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>TCP Matchup</div>
-                                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                                        {[["auto", "Auto (threshold-based)"], ["on_v_alp", "Force ON vs ALP"], ["on_v_coal", "Force ON vs Coal"]].map(([val, label]) => {
-                                          const active = (ov.tcpMatchup ?? "auto") === val;
-                                          return (
-                                            <button key={val}
-                                              onClick={() => updateSeatOverride(seat.id, "tcpMatchup", val === "auto" ? null : val)}
-                                              style={{ padding: "3px 9px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer", background: active ? ON_COLOR : "#fff", color: active ? "#fff" : ON_COLOR, border: `1px solid ${ON_COLOR}` }}>
-                                              {label}
-                                            </button>
-                                          );
-                                        })}
-                                      </div>
-                                      {ms.isAutoMatchup && !ov.tcpMatchup && (
-                                        <div style={{ fontSize: 11, color: "#B45309", marginTop: 5 }}>
-                                          Currently auto-detected as {ms.activeTcpMatchup === "on_v_alp" ? "ON vs ALP" : "ON vs Coalition"}. Select "Force" to lock in manually.
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    {/* Modelled outcome */}
-                                    <div style={{ borderTop: `1px solid ${ON_BG}`, paddingTop: 10, marginTop: 10, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                                      <span style={{ fontSize: 11, fontWeight: 700, color: "#374151" }}>Modelled:</span>
-                                      {isOnProj
-                                        ? <span style={{ background: ON_COLOR, color: "#fff", fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 5 }}>One Nation wins</span>
-                                        : <PartyBadge party={ms.winnerParty} />
-                                      }
-                                      {ms.projAlp2pp !== null && (
-                                        <span style={{ fontSize: 12, color: "#6B7280" }}>
-                                          ALP 2PP {ms.projAlp2pp.toFixed(1)}% {ms.isSynthetic2pp && <span style={{ fontStyle: "italic", fontSize: 10 }}>(synthetic)</span>}
-                                        </span>
-                                      )}
-                                      {ms.winnerPct !== null && (
-                                        <span style={{ fontSize: 12, color: "#6B7280" }}>
-                                          {isOnProj ? `ON TCP ${ms.winnerPct?.toFixed(1)}%` : `margin ${Math.abs(ms.winnerPct - 50).toFixed(1)}pp`}
-                                        </span>
-                                      )}
-                                      <button
-                                        onClick={() => clearOverride(seat.id)}
-                                        style={{ marginLeft: "auto", fontSize: 11, color: "#EF4444", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 5, padding: "3px 8px", cursor: "pointer", fontWeight: 600 }}>
-                                        Clear overrides
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
                       </div>
                     </div>
                   );
