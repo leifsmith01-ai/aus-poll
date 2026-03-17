@@ -2316,7 +2316,11 @@ export default function App() {
     // Standard flows (used in ALP vs Coalition finals)
     grn_alp: 0.81,
     teal_alp: 0.62,
-    on_alp: 0.43,
+    // ON→ALP: historical range 0.15 (2022) to 0.43 (2025, peak anti-ON sentiment).
+    // Default 0.27 = approximate historical average, giving a realistic baseline
+    // where an ON surge meaningfully hurts Coalition at TCP rather than being
+    // offset by 2025's unusually high ON→ALP preference flow.
+    on_alp: 0.27,
     other_alp: 0.50,
     coal_alp: 0.05, // Coal → ALP in 3rd party contests (usually very low)
     alp_grn: 0.85,
@@ -2328,7 +2332,8 @@ export default function App() {
     on_grn: 0.15,
     on_teal: 0.25,
     // ON vs ALP final — sources distribute between ALP and ON
-    coal_alp_v_on: 0.10,
+    // Coal→ALP in ON vs ALP: 2025 was ~15%, reflecting voters preferring ALP over ON.
+    coal_alp_v_on: 0.15,
     grn_alp_v_on: 0.90,
     teal_alp_v_on: 0.75,
     other_alp_v_on: 0.60,
@@ -2841,9 +2846,11 @@ export default function App() {
   const PREF_FLOW_RANGES = {
     grn_alp: [0.80, 0.86],
     teal_alp: [0.62, 0.74],
+    // ON→ALP: 14.9% in 2022 (low-hostility), 43.0% in 2025 (peak anti-ON). Default = 27% (avg).
     on_alp: [0.14, 0.43],
     other_alp: [0.50, 0.57],
-    coal_alp_v_on: [0.08, 0.12],
+    // Coal→ALP in ON vs ALP: 2025 was ~15%. Range reflects limited historical data.
+    coal_alp_v_on: [0.10, 0.20],
     grn_alp_v_on: [0.88, 0.93],
     teal_alp_v_on: [0.73, 0.80],
     other_alp_v_on: [0.55, 0.65],
@@ -3549,7 +3556,7 @@ export default function App() {
                   <PrefInput label="One Nation → ALP" value={prefFlows.on_alp} onChange={v => setPrefFlows(f => ({ ...f, on_alp: v }))} color="#B45309" historicalRange={PREF_FLOW_RANGES.on_alp} />
                   <PrefInput label="Other → ALP" value={prefFlows.other_alp} onChange={v => setPrefFlows(f => ({ ...f, other_alp: v }))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_alp} />
                   <div style={{ fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
-                    Defaults based on 2025 AEC distributions (Grn 81%, Ind 62%, ON 43%, Other 50%).
+                    Defaults: Grn 81% (2025) · Ind 62% (2025) · ON 27% (avg 2022…15%, 2025…43%) · Other 50%. Use "↺ Reset to 2025" to restore 2025 actuals.
                   </div>
                 </div>
 
@@ -3578,7 +3585,7 @@ export default function App() {
                         <PrefInput label="Other → ALP" value={prefFlows.other_alp_v_on} onChange={v => setPrefFlows(f => ({ ...f, other_alp_v_on: v }))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_alp_v_on} />
                         <PrefInput label="Coalition → ALP" value={prefFlows.coal_alp_v_on} onChange={v => setPrefFlows(f => ({ ...f, coal_alp_v_on: v }))} color="#1D4ED8" historicalRange={PREF_FLOW_RANGES.coal_alp_v_on} />
                         <div style={{ fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #FDE68A", paddingTop: 6, marginTop: 2 }}>
-                          Defaults: Grn 90% · Ind 75% · Other 60% · Coal 10%
+                          Defaults: Grn 90% · Ind 75% · Other 60% · Coal 15% (2025 AEC)
                         </div>
                       </div>
                       {/* ON vs Coal final flows */}
