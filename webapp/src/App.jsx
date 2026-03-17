@@ -1973,7 +1973,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const base = tealP?.pct ?? 50;
       const ef = override?.prefFlows ?? prefFlows;
       // Net swing to Teal: pure Teal swing + (portion of GRN flowing to Teal) + (portion of Coal flowing to Teal)
-      const netTealGain = effTealSwing + effGrnSwing * ef.grn_teal + effCoalSwing * (1 - prefFlows.coal_alp);
+      const netTealGain = effTealSwing + effGrnSwing * (ef.grn_teal ?? 0.50) + effCoalSwing * (1 - (ef.coal_alp ?? 0.25));
       // Net swing to ALP: pure ALP swing + (portion of ON flowing to ALP) + (portion of Other flowing to ALP)
       const netAlpGain = effAlpSwing + effOnSwing * ef.on_alp + effOtherSwing * ef.other_alp;
       const adj = hasTcpOverride
