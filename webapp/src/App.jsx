@@ -2234,6 +2234,22 @@ function TcpBar({ tcp, winnerParty }) {
   );
 }
 
+const STYLES = {
+  panel:        { background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "16px 20px", marginBottom: 16 },
+  sectionHead:  { fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 10 },
+  panelTitle:   { fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 },
+  sectionTitle: { fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 },
+  statCard:     { background: "#fff",    border: "1px solid #E5E7EB", borderRadius: 8, padding: "12px 16px" },
+  metricCard:   { background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "12px 16px" },
+  tableHead:    { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280", background: "#F9FAFB", padding: "10px 12px", textAlign: "left" },
+  tableCell:    { padding: "9px 12px" },
+  input:        { border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 9px", fontSize: 13, outline: "none" },
+  btnPrimary:   { padding: "7px 14px", background: "#1D4ED8", color: "#fff",    borderRadius: 6, fontSize: 13, fontWeight: 600, border: "none",                  cursor: "pointer" },
+  btnSecondary: { padding: "7px 14px", background: "#F3F4F6", color: "#374151", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #D1D5DB",    cursor: "pointer" },
+  btnDanger:    { padding: "7px 14px", background: "#FEF2F2", color: "#DC2626", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #FECACA",    cursor: "pointer" },
+  btnInfo:      { padding: "7px 14px", background: "#F0F9FF", color: "#0369A1", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #BAE6FD",    cursor: "pointer" },
+};
+
 function TallyBar({ seats, useModelled = false }) {
   const counts = {};
   seats.forEach(s => {
@@ -3090,21 +3106,6 @@ export default function App() {
     { id: "model", label: `Model${hasChanges ? " ●" : ""}` },
   ];
 
-  const STYLES = {
-    panel:        { background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "16px 20px", marginBottom: 16 },
-    sectionHead:  { fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 10 },
-    panelTitle:   { fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 },
-    sectionTitle: { fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 },
-    statCard:     { background: "#fff",    border: "1px solid #E5E7EB", borderRadius: 8, padding: "12px 16px" },
-    metricCard:   { background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "12px 16px" },
-    tableHead:    { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280", background: "#F9FAFB", padding: "10px 12px", textAlign: "left" },
-    tableCell:    { padding: "9px 12px" },
-    input:        { border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 9px", fontSize: 13, outline: "none" },
-    btnPrimary:   { padding: "7px 14px", background: "#1D4ED8", color: "#fff",    borderRadius: 6, fontSize: 13, fontWeight: 600, border: "none",                  cursor: "pointer" },
-    btnSecondary: { padding: "7px 14px", background: "#F3F4F6", color: "#374151", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #D1D5DB",    cursor: "pointer" },
-    btnDanger:    { padding: "7px 14px", background: "#FEF2F2", color: "#DC2626", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #FECACA",    cursor: "pointer" },
-    btnInfo:      { padding: "7px 14px", background: "#F0F9FF", color: "#0369A1", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #BAE6FD",    cursor: "pointer" },
-  };
   const panelStyle = STYLES.panel;
   const sectionHead = STYLES.sectionHead;
 
