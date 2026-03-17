@@ -507,6 +507,148 @@ const SEAT_FP_2022 = {};
 //   // return synthesized seat baselines for the new electoral map.
 // }
 
+// ── 2025 primary-model calibration offsets ────────────────────────────────────
+// Offset = (actual 2025 ALP 2PP TCP) − (primary-model-predicted 2PP at zero swing)
+// Applied with a linear blend that fades to zero at ±5pp national swing, so the
+// offset only matters near the 2025 baseline and does not distort larger-swing
+// scenarios. Covers ALP vs Coalition seats that have SEAT_FP_2025 data.
+// Recompute via: python scripts/compute_calibration.py
+const SEAT_CALIB_2025 = {
+  // ── ACT ──
+  102: +0.02,  // Fenner
+  // ── NSW ──
+  103: -0.02,  // Banks
+  104: -0.05,  // Barton
+  105: -0.02,  // Bennelong
+  106: +0.03,  // Berowra
+  107: +0.04,  // Blaxland
+  111: -0.04,  // Chifley
+  112: -0.01,  // Cook
+  114: +0.01,  // Cunningham
+  115: +0.01,  // Dobell
+  117: +0.05,  // Eden-Monaro
+  120: -0.02,  // Gilmore
+  122: +0.03,  // Greenway
+  124: -0.03,  // Hughes
+  125: -0.04,  // Hume
+  127: +0.05,  // Kingsford Smith
+  128: +0.04,  // Lindsay
+  130: +0.68,  // Lyne
+  131: -0.02,  // Macarthur
+  133: -0.03,  // Macquarie
+  134: +0.02,  // Mitchell
+  135: -2.38,  // New England
+  138: -0.02,  // Page
+  139: +0.03,  // Parkes
+  140: -0.00,  // Parramatta
+  144: +0.04,  // Reid
+  145: +0.05,  // Richmond
+  146: +0.00,  // Robertson
+  148: +0.05,  // Shortland
+  150: +0.02,  // Whitlam
+  153: +0.03,  // Werriwa
+  249: -0.03,  // Paterson
+  250: +0.00,  // Riverina
+  315: +0.02,  // McMahon
+  // ── NT ──
+  306: +0.03,  // Lingiari
+  307: +0.01,  // Solomon
+  // ── QLD ──
+  155: -0.03,  // Bowman
+  156: +0.03,  // Brisbane
+  157: +0.03,  // Capricornia
+  158: +0.03,  // Dawson
+  159: -0.01,  // Fadden
+  160: +0.01,  // Fairfax
+  161: +0.02,  // Fisher
+  162: -0.01,  // Forde
+  164: -0.03,  // Groom
+  165: +0.02,  // Herbert
+  166: +0.03,  // Hinkler
+  168: +0.05,  // Leichhardt
+  169: +0.01,  // Lilley
+  170: -0.03,  // Maranoa
+  171: +0.03,  // McPherson
+  172: +0.04,  // Moncrieff
+  173: +0.00,  // Moreton
+  174: -0.01,  // Oxley
+  175: +0.02,  // Petrie
+  176: +0.02,  // Rankin
+  178: +0.02,  // Wide Bay
+  252: +0.04,  // Dickson
+  302: +0.04,  // Longman
+  304: +0.03,  // Blair
+  311: +0.02,  // Flynn
+  316: +0.04,  // Wright
+  310: +0.03,  // Bonner
+  // ── SA ──
+  179: -0.03,  // Adelaide
+  180: +0.00,  // Barker
+  182: +0.02,  // Boothby
+  183: -0.03,  // Grey
+  185: +0.05,  // Hindmarsh
+  186: -0.01,  // Kingston
+  187: +0.03,  // Makin
+  190: -0.04,  // Sturt
+  325: +0.05,  // Spence
+  // ── TAS ──
+  192: +0.04,  // Bass
+  193: -0.03,  // Braddon
+  196: +0.04,  // Lyons
+  // ── VIC ──
+  197: +0.02,  // Aston
+  198: -0.05,  // Ballarat
+  200: +0.04,  // Bendigo
+  201: -0.00,  // Bruce
+  204: -0.05,  // Casey
+  205: -0.01,  // Chisholm
+  208: -0.00,  // Corio
+  209: -0.04,  // Deakin
+  210: -0.00,  // Dunkley
+  212: -0.00,  // Gellibrand
+  213: -0.03,  // Gippsland
+  216: +0.04,  // Holt
+  217: +0.02,  // Hotham
+  219: -0.01,  // Isaacs
+  220: -0.02,  // Jagajaga
+  222: +0.01,  // Lalor
+  223: -0.01,  // La Trobe
+  224: +0.00,  // Mallee
+  225: -0.01,  // Maribyrnong
+  226: +0.02,  // McEwen
+  229: -0.04,  // Menzies
+  232: +0.02,  // Scullin
+  309: -0.05,  // Gorton
+  322: -0.02,  // Macnamara
+  323: +0.04,  // Monash
+  324: -0.02,  // Nicholls
+  326: +0.04,  // Hawke
+  328: -0.03,  // Corangamite
+  // ── WA ──
+  235: -0.04,  // Brand
+  236: -0.02,  // Canning
+  237: +0.03,  // Cowan
+  239: +0.03,  // Forrest
+  242: -0.01,  // Moore
+  243: +0.03,  // O'Connor
+  244: -0.01,  // Pearce
+  245: -0.01,  // Perth
+  247: +0.04,  // Swan
+  248: -0.03,  // Tangney
+  305: +0.02,  // Hasluck
+  312: -0.04,  // Durack
+  317: -0.01,  // Burt
+  329: +0.01,  // Bullwinkel
+};
+
+// ── 2025 per-seat preference flows from AEC Distribution of Preferences ────────
+// Sourced from data/exports/2025/preference_flows.json (populated after running the
+// pipeline). When populated, these replace national-average flows for each seat in
+// the primary-based 2PP computation, further reducing zero-swing calibration error.
+// Populate via: python scripts/update_s25_from_exports.py (after running the pipeline)
+// Format: { seatId: { grn_alp, teal_alp, on_alp, other_alp } }
+const SEAT_PREF_FLOWS_2025 = {};
+
 // Return per-seat 2025 AEC first preferences, or null if not available.
 // Falls back to null (caller uses UNS 2PP-swing for seats without FP data).
 function getSeatFpBaseline(seatId) {
@@ -1735,14 +1877,22 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         // Compute 2PP from override first preferences via preference flows.
         // newFp was built from the seat-level 2025 baseline (set above), so unset parties
         // default to that seat's actual 2025 primary, not the national average.
-        const ef = override.prefFlows ?? prefFlows;
+        // Use per-seat preference flows if available (Phase 3), otherwise national average.
+        const ef = override.prefFlows ?? SEAT_PREF_FLOWS_2025[seat.id] ?? prefFlows;
         const a2 = newFp.alp + newFp.grn * ef.grn_alp + newFp.teal * ef.teal_alp + newFp.on * ef.on_alp + newFp.other * ef.other_alp;
         const c2 = newFp.coal + newFp.grn * (1 - ef.grn_alp) + newFp.teal * (1 - ef.teal_alp) + newFp.on * (1 - ef.on_alp) + newFp.other * (1 - ef.other_alp);
         projAlp2pp = a2 / (a2 + c2) * 100;
+        // Apply calibration offset (Phase 1): blends to zero at ±5pp national swing.
+        // Only applied when using national-average pref flows (not per-seat or user overrides).
+        if (!override.prefFlows && !SEAT_PREF_FLOWS_2025[seat.id]) {
+          const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / 5);
+          projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + (SEAT_CALIB_2025[seat.id] ?? 0) * calibBlend));
+        }
       } else {
         const seatFp = getSeatFpBaseline(seat.id);
         if (seatFp) {
           // Primary-based: apply state-blended swing to seat-level 2025 primaries → 2PP.
+          // Use per-seat preference flows if available (Phase 3), otherwise national average.
           const sSwings = blendSwings(swings, stateSwings, seat.state);
           const projFp = {
             alp: Math.max(0, seatFp.alp + sSwings.alp),
@@ -1752,9 +1902,16 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
             on: Math.max(0, seatFp.on + sSwings.on),
           };
           projFp.other = Math.max(0, 100 - projFp.alp - projFp.coal - projFp.grn - projFp.teal - projFp.on);
-          const a2 = projFp.alp + projFp.grn * prefFlows.grn_alp + projFp.teal * prefFlows.teal_alp + projFp.on * prefFlows.on_alp + projFp.other * prefFlows.other_alp;
-          const c2 = projFp.coal + projFp.grn * (1 - prefFlows.grn_alp) + projFp.teal * (1 - prefFlows.teal_alp) + projFp.on * (1 - prefFlows.on_alp) + projFp.other * (1 - prefFlows.other_alp);
+          const ef = SEAT_PREF_FLOWS_2025[seat.id] ?? prefFlows;
+          const a2 = projFp.alp + projFp.grn * ef.grn_alp + projFp.teal * ef.teal_alp + projFp.on * ef.on_alp + projFp.other * ef.other_alp;
+          const c2 = projFp.coal + projFp.grn * (1 - ef.grn_alp) + projFp.teal * (1 - ef.teal_alp) + projFp.on * (1 - ef.on_alp) + projFp.other * (1 - ef.other_alp);
           projAlp2pp = a2 / (a2 + c2) * 100;
+          // Apply calibration offset (Phase 1): blends to zero at ±5pp national swing.
+          // Only applied when per-seat flows are unavailable (national average used).
+          if (!SEAT_PREF_FLOWS_2025[seat.id]) {
+            const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / 5);
+            projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + (SEAT_CALIB_2025[seat.id] ?? 0) * calibBlend));
+          }
         } else {
           // Fallback UNS for seats without per-seat primary data: uniform national 2PP swing
           // applied to the seat's 2025 TCP baseline. Elasticity scales the swing for marginals.
