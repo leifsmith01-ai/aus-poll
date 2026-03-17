@@ -57,12 +57,16 @@ CREATE TABLE IF NOT EXISTS vic_candidates (
 -- because the VEC does not publish booth-level data publicly
 -- (use Tally Room if booth-level data is needed).
 CREATE TABLE IF NOT EXISTS vic_district_fp (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    election_id  INTEGER NOT NULL,
-    district_id  INTEGER NOT NULL,
-    candidate_id INTEGER NOT NULL,
-    total_votes  INTEGER NOT NULL DEFAULT 0,
-    vote_pct     REAL,
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id    INTEGER NOT NULL,
+    district_id    INTEGER NOT NULL,
+    candidate_id   INTEGER NOT NULL,
+    total_votes    INTEGER NOT NULL DEFAULT 0,
+    vote_pct       REAL,
+    -- Turnout and informal vote tracking (populated when VEC enrolment data available)
+    informal_votes INTEGER DEFAULT 0,
+    total_enrolled INTEGER,          -- enrolled voters in this district (from enrolment file)
+    turnout_pct    REAL,             -- (total_formal + informal) / total_enrolled * 100
     UNIQUE (election_id, district_id, candidate_id),
     FOREIGN KEY (election_id) REFERENCES vic_elections(election_id)
 );
@@ -82,6 +86,23 @@ CREATE TABLE IF NOT EXISTS vic_district_2cp (
     FOREIGN KEY (election_id) REFERENCES vic_elections(election_id)
 );
 
+-- ── VIC Distribution of Preferences (district-level) ─────
+-- Stores each count round from VEC DOP publications, enabling
+-- preference flow analysis between elections.
+-- VEC publishes DOP in its district-level Excel files.
+CREATE TABLE IF NOT EXISTS vic_district_dop (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id  INTEGER NOT NULL,
+    district_id  INTEGER NOT NULL,
+    count_number INTEGER NOT NULL,   -- preference distribution round (1 = first exclusion)
+    candidate_id INTEGER NOT NULL,
+    votes_gained INTEGER DEFAULT 0,  -- preferences received in this round
+    votes_total  INTEGER DEFAULT 0,  -- running total after this round
+    exhausted    INTEGER DEFAULT 0,  -- votes that exhausted at this round
+    UNIQUE (election_id, district_id, count_number, candidate_id),
+    FOREIGN KEY (election_id) REFERENCES vic_elections(election_id)
+);
+
 -- ── Indexes ───────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_vic_fp_election_district
     ON vic_district_fp(election_id, district_id);
@@ -89,3 +110,28 @@ CREATE INDEX IF NOT EXISTS idx_vic_2cp_election_district
     ON vic_district_2cp(election_id, district_id);
 CREATE INDEX IF NOT EXISTS idx_vic_candidates_election_district
     ON vic_candidates(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_vic_dop_election_district
+    ON vic_district_dop(election_id, district_id);
+
+-- ── vic_district_margins view ─────────────────────────────
+-- Convenience view: one row per elected district per election,
+-- with the 2CP margin (winner_pct - 50) and the winning party.
+-- Used by the export layer and frontend for seat projections.
+CREATE VIEW IF NOT EXISTS vic_district_margins AS
+SELECT
+    d.election_id,
+    d.district_id,
+    dn.district_name,
+    dn.enrolment,
+    MAX(d.vote_pct) - 50.0        AS margin_pct,
+    c.party_ab                    AS winner_party,
+    c.surname || ', ' || c.given_name AS winner_name
+FROM vic_district_2cp d
+JOIN vic_candidates c
+    ON  c.candidate_id = d.candidate_id
+    AND c.election_id  = d.election_id
+JOIN vic_districts dn
+    ON  dn.district_id  = d.district_id
+    AND dn.election_id  = d.election_id
+WHERE d.elected = 1
+GROUP BY d.election_id, d.district_id;

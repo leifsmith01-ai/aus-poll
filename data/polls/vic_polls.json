@@ -1,0 +1,28 @@
+{
+  "source": "Victorian state-level polls (manual collection)",
+  "jurisdiction": "vic_state",
+  "election_date": "2026-11-28",
+  "note": "VIC state polls are infrequent. Includes Newspoll VIC state breakdowns, Roy Morgan VIC state figures, and dedicated VIC state polls where available. tpp = ALP 2-party-preferred vs Coalition. n = sample size.",
+  "party_keys": {
+    "alp":  "Australian Labor Party",
+    "lp":   "Liberal Party of Australia (Victorian Division)",
+    "grn":  "The Greens (VIC)",
+    "ind":  "Independents and other minor parties",
+    "on":   "Pauline Hanson's One Nation"
+  },
+  "polls": [
+    {
+      "scope": "VIC",
+      "pollster": "2022 Election Result",
+      "date": "2022-11-26",
+      "alp": 38.1,
+      "lp": 31.1,
+      "grn": 12.2,
+      "ind": 5.5,
+      "on": 1.3,
+      "tpp": 57.3,
+      "n": null,
+      "note": "VEC official 2022 result — used as baseline"
+    }
+  ]
+}

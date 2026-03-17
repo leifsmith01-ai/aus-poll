@@ -125,6 +125,13 @@ DB_PATH            = os.path.join(BASE_DIR, "data", "aec_elections.db")
 # clashing with federal election_ids which are plain years (2022, 2019, etc.).
 # event_id uses synthetic values in the 990XXX range (VEC has no equivalent).
 VIC_ELECTIONS = {
+    202611: {
+        "name": "2026 Victorian State Election",
+        "date": "2026-11-28",  # exact date TBC — placeholder based on 4-year cycle
+        "jurisdiction": "vic_state",
+        "event_id": 990126,
+        "results_page_url": "https://www.vec.vic.gov.au/results/state-election-results/2026-state-election-results",
+    },
     202211: {
         "name": "2022 Victorian State Election",
         "date": "2022-11-26",
@@ -152,17 +159,39 @@ VIC_ELECTIONS = {
 VIC_RAW_DIR     = os.path.join(BASE_DIR, "data", "raw", "vic")
 VIC_EXPORTS_DIR = os.path.join(DATA_EXPORTS_DIR, "vic")
 
+# VEC district name aliases for cross-election swing computation.
+# Maps old/alternate name → canonical current name. Used when matching
+# districts between elections where the VEC renamed a seat during a
+# redistribution. The canonical name is the most recent known name.
+VIC_DISTRICT_ALIASES: dict[str, str] = {
+    # 2013 redistribution renames
+    "Ballarat West":   "Wendouree",
+    "Ballarat North":  "Macedon",
+    "Seymour":         "Eildon",
+    # Older alternate spellings / abbreviations sometimes seen in VEC files
+    "Albert Park":     "Albert Park",  # no change — placeholder for documentation
+}
+
 # VEC party abbreviations (state-level parties differ slightly from federal)
 VIC_PARTIES = {
-    "ALP":   "Australian Labor Party",
-    "LP":    "Liberal Party of Australia",
-    "NP":    "The Nationals",
-    "GRN":   "The Greens",
-    "IND":   "Independent",
-    "ON":    "Pauline Hanson's One Nation",
-    "DLP":   "Democratic Labour Party",
-    "DHJP":  "Derryn Hinch's Justice Party",
-    "SAP":   "Sustainable Australia Party",
+    "ALP":    "Australian Labor Party",
+    "LP":     "Liberal Party of Australia",
+    "NP":     "The Nationals",
+    "GRN":    "The Greens",
+    "IND":    "Independent",
+    "ON":     "Pauline Hanson's One Nation",
+    "DLP":    "Democratic Labour Party",
+    "DHJP":   "Derryn Hinch's Justice Party",
+    "SAP":    "Sustainable Australia Party",
+    # Minor parties active in Victorian state elections
+    "VS":     "Victorian Socialists",
+    "AJP":    "Animal Justice Party",
+    "LDP":    "Liberal Democrats",
+    "FF":     "Family First",
+    "REASON": "Reason Australia",
+    "TMP":    "Transport Matters Party",
+    "UAP":    "United Australia Party",
+    "SFF":    "Shooters, Fishers and Farmers",
 }
 
 # Coalition partners in VIC (Liberal + Nationals, no LNP/CLP in VIC)
@@ -474,8 +503,21 @@ NT_COALITION_PARTIES = {"CLP"}
 
 # ─── Unified state elections registry ────────────────────────────────────────
 # Maps state abbreviation (lower-case) to its elections dict and config.
-# Useful for generic pipeline dispatching (e.g. main.py --state nsw).
+# Useful for generic pipeline dispatching (e.g. main.py --state vic).
 STATE_REGISTRY = {
+    "vic": {
+        "elections":         VIC_ELECTIONS,
+        "parties":           VIC_PARTIES,
+        "coalition_parties": VIC_COALITION_PARTIES,
+        "raw_dir":           VIC_RAW_DIR,
+        "exports_dir":       VIC_EXPORTS_DIR,
+        "schema_file":       "vec_schema.sql",
+        "seats":             88,
+        "system":            "preferential",
+        # VEC does not publish booth-level results publicly.
+        # Booth-level data is available via The Tally Room (tallyroom.com.au).
+        "booth_level":       False,
+    },
     "nsw": {
         "elections":         NSW_ELECTIONS,
         "parties":           NSW_PARTIES,

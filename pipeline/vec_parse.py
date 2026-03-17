@@ -218,7 +218,9 @@ def parse_vec_fp_excel(path: Path, election_id: int) -> list[dict]:
             sheet_name, district_col, surname_col, party_col, votes_col
         )
 
-        candidate_counter = 1
+        # Per-district counter so IDs are stable regardless of sheet order.
+        # Key: district_id → number of candidates seen so far in that district.
+        district_candidate_counter: dict[int, int] = {}
 
         for _, row in df.iterrows():
             district_name = _normalise_district(row.get(district_col, ""))
@@ -242,11 +244,15 @@ def parse_vec_fp_excel(path: Path, election_id: int) -> list[dict]:
             if total_votes == 0 and not surname:
                 continue  # skip empty / sub-total rows
 
+            # Increment per-district counter (1-based) for stable, collision-free IDs
+            district_candidate_counter[district_id] = district_candidate_counter.get(district_id, 0) + 1
+            dc = district_candidate_counter[district_id]
+
             records.append({
                 "election_id":   election_id,
                 "district_id":   district_id,
                 "district_name": district_name,
-                "candidate_id":  election_id * 10000 + district_id * 100 + candidate_counter,
+                "candidate_id":  election_id * 10000 + district_id * 100 + dc,
                 "surname":       surname,
                 "given_name":    given_name,
                 "party_ab":      party_ab,
@@ -255,7 +261,6 @@ def parse_vec_fp_excel(path: Path, election_id: int) -> list[dict]:
                 "total_votes":   total_votes,
                 "vote_pct":      vote_pct,
             })
-            candidate_counter += 1
 
     logger.info("  Parsed %d FP records from %s", len(records), path.name)
     return records
@@ -510,7 +515,8 @@ def parse_all_vec(file_paths: dict[str, Path], election_id: int) -> dict[str, li
     file_paths: dict returned by vec_download.list_local_vec_files() or
                 vec_download.download_vec_election().
 
-    Returns dict with keys "fp", "tcp", "candidates" containing parsed records.
+    Returns dict with keys "fp", "tcp", "candidates", "enrolment" containing
+    parsed records. "enrolment" is a dict of {district_name: enrolled_count}.
     """
     result: dict[str, list[dict]] = {"fp": [], "tcp": [], "candidates": []}
 
@@ -556,8 +562,26 @@ def parse_all_vec(file_paths: dict[str, Path], election_id: int) -> dict[str, li
             if r["candidate_id"] in elected_candidates:
                 r["elected"] = 1
 
+    # Parse enrolment from any available file (try each in priority order)
+    enrolment: dict[str, int] = {}
+    for key in ("fp_xlsx", "results_xlsx", "other_xlsx", "tally_room_candidates"):
+        path = file_paths.get(key)
+        if path and path.exists():
+            enrolment = parse_vec_enrolment(path, election_id)
+            if enrolment:
+                logger.info("parse_all_vec: enrolment     %d districts (from %s)", len(enrolment), path.name)
+                break
+    result["enrolment"] = enrolment  # type: ignore[assignment]
+
+    # Propagate enrolment into FP records so the DB loader can write it to vic_districts
+    if enrolment:
+        for r in result["fp"]:
+            if r["district_name"] in enrolment:
+                r["enrolment"] = enrolment[r["district_name"]]
+
     for key, records in result.items():
-        logger.info("parse_all_vec: %-12s %d records", key, len(records))
+        if isinstance(records, list):
+            logger.info("parse_all_vec: %-12s %d records", key, len(records))
 
     return result
 
