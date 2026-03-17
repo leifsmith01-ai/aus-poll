@@ -122,6 +122,165 @@ DEFAULT_PREF_FLOWS = {
 # accurate 2PP imputation for teal-seat-heavy scenarios.
 PRIMARY_PARTIES = ["alp", "coal", "grn", "on", "teal"]
 
+# ── VIC state election preference flows ───────────────────────────────────────
+# Victorian state elections use full preferential voting. Preference flows are
+# more predictable than federally due to the absence of optional preferential.
+# Sources: VEC DOP data (2018, 2022); Antony Green election commentary.
+VIC_PREF_FLOWS = {
+    "grn_alp":   0.850,  # Greens → ALP (VEC 2022: ~85% in GRN→ALP seats)
+    "ind_alp":   0.600,  # Independents → ALP (varies strongly by seat)
+    "on_alp":    0.250,  # One Nation → ALP (VEC 2022: ~25%)
+    "other_alp": 0.430,  # Other minor parties → ALP (VEC 2022: ~43%)
+}
+
+# VIC primary parties tracked (no "teal" in VIC — independents tracked as "ind")
+VIC_PRIMARY_PARTIES = ["alp", "lp", "grn", "ind", "on"]
+
+# VIC state poll input file
+VIC_POLLS_FILE = POLLS_DIR / "vic_polls.json"
+VIC_OUTPUT_FILE = POLLS_DIR / "vic_aggregated.json"
+
+
+def _impute_vic_tpp(poll: dict, flows: dict = VIC_PREF_FLOWS) -> Optional[float]:
+    """
+    Estimate ALP 2PP from VIC state primary votes when TPP not reported.
+
+    VIC state polls use 'lp' (not 'coal') for the Liberal party.
+    'ind' covers all independents and micro-parties not tracked separately.
+    """
+    alp = poll.get("alp")
+    lp  = poll.get("lp")
+    grn = poll.get("grn")
+    if any(v is None for v in [alp, lp, grn]):
+        return None
+
+    ind   = poll.get("ind", 0.0) or 0.0
+    on    = poll.get("on",  0.0) or 0.0
+    other = max(0.0, 100.0 - alp - lp - grn - ind - on)
+
+    alp_tcp = (
+        alp
+        + grn   * flows["grn_alp"]
+        + ind   * flows["ind_alp"]
+        + on    * flows["on_alp"]
+        + other * flows["other_alp"]
+    )
+    coal_tcp = (
+        lp
+        + grn   * (1 - flows["grn_alp"])
+        + ind   * (1 - flows["ind_alp"])
+        + on    * (1 - flows["on_alp"])
+        + other * (1 - flows["other_alp"])
+    )
+    total = alp_tcp + coal_tcp
+    if total <= 0:
+        return None
+    return round(alp_tcp / total * 100, 2)
+
+
+def run_vic(
+    input_path: Path = VIC_POLLS_FILE,
+    output_path: Path = VIC_OUTPUT_FILE,
+    verbose: bool = False,
+) -> dict:
+    """
+    VIC state poll aggregation pipeline.
+
+    Mirrors the federal run() but uses VIC-specific:
+      - Party keys: alp, lp (not coal), grn, ind, on
+      - Preference flows from VIC_PREF_FLOWS
+      - Input file: data/polls/vic_polls.json
+      - Output file: data/polls/vic_aggregated.json
+
+    Steps: load → impute TPP → compute house effects → build trend → write.
+    """
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+    if not input_path.exists():
+        logger.error("VIC polls file not found: %s", input_path)
+        return {}
+
+    with open(input_path, encoding="utf-8") as f:
+        raw = json.load(f)
+
+    polls = raw.get("polls", [])
+    logger.info("Loaded %d VIC polls from %s", len(polls), input_path)
+
+    if not polls:
+        logger.warning("No VIC polls to aggregate.")
+        return {}
+
+    # Impute TPP where missing
+    n_imputed = 0
+    for p in polls:
+        if p.get("tpp") is None:
+            imputed = _impute_vic_tpp(p)
+            if imputed is not None:
+                p["tpp_imputed"] = imputed
+                n_imputed += 1
+        else:
+            p["tpp_imputed"] = None
+    for p in polls:
+        p["tpp_eff"] = p.get("tpp") if p.get("tpp") is not None else p.get("tpp_imputed")
+
+    logger.info("Imputed VIC TPP for %d polls", n_imputed)
+
+    poll_dates = [date.fromisoformat(p["date"]) for p in polls]
+    ref_date   = max(poll_dates)
+    metrics    = ["alp", "lp", "grn", "ind", "on", "tpp_eff"]
+
+    logger.info("Computing VIC house effects (ref date: %s) ...", ref_date)
+    house_effects: dict[str, dict[str, float]] = {}
+    for metric in metrics:
+        he = compute_house_effects(polls, metric, ref_date)
+        house_effects[metric] = he
+
+    first_date = min(poll_dates)
+    logger.info("Building VIC trend %s → %s ...", first_date, ref_date)
+    trend = build_trend(polls, house_effects, metrics, first_date, ref_date)
+
+    current_window = 60
+    current: dict = {}
+    for metric in metrics:
+        he = house_effects.get(metric, {})
+        result = aggregate_at_date(polls, ref_date, he, metric, window_days=current_window)
+        current[metric] = result
+
+    he_summary = {
+        metric: {k: v for k, v in sorted(he.items(), key=lambda x: -abs(x[1]))}
+        for metric, he in house_effects.items()
+    }
+
+    output = {
+        "generated":   ref_date.isoformat(),
+        "jurisdiction": raw.get("jurisdiction", "vic_state"),
+        "election_date": raw.get("election_date"),
+        "source":      raw.get("source"),
+        "methodology": {
+            "half_life_days":        HALF_LIFE_DAYS,
+            "smoothing_window_days": SMOOTHING_WINDOW_DAYS,
+            "trend_step_days":       TREND_STEP_DAYS,
+            "tpp_pref_flows":        VIC_PREF_FLOWS,
+            "note": "VIC state elections use full preferential voting. "
+                    "Party key 'lp' = Liberal (not 'coal'). "
+                    "'ind' = all independents tracked as a group.",
+        },
+        "house_effects": he_summary,
+        "current":       current,
+        "trend":         trend,
+        "polls":         polls,
+    }
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
+    logger.info("Wrote VIC aggregated polls → %s", output_path)
+
+    return output
+
 
 def _decay_weight(
     days_ago: float,
@@ -495,25 +654,42 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Aggregate Australian election polls")
     parser.add_argument("--input",  default=str(INPUT_FILE),  help="Input polls JSON")
     parser.add_argument("--output", default=str(OUTPUT_FILE), help="Output aggregated JSON")
+    parser.add_argument("--state",  default="",               help="State jurisdiction (e.g. 'vic'). Runs state-specific aggregation.")
     parser.add_argument("--plot",   action="store_true",      help="Print ASCII trend summary")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
-    result = run(Path(args.input), Path(args.output), verbose=args.verbose)
+    if args.state.lower() == "vic":
+        # VIC state poll aggregation
+        vic_input  = Path(args.input)  if args.input  != str(INPUT_FILE)  else VIC_POLLS_FILE
+        vic_output = Path(args.output) if args.output != str(OUTPUT_FILE) else VIC_OUTPUT_FILE
+        result = run_vic(vic_input, vic_output, verbose=args.verbose)
+        if args.plot and result:
+            print("\n=== VIC Current Aggregate (house-effect corrected, last 60 days) ===")
+            current = result.get("current", {})
+            for m in ["alp", "lp", "grn", "ind", "tpp_eff"]:
+                c = current.get(m)
+                if c:
+                    label = m.upper().replace("_EFF", " TPP")
+                    print(f"  {label:12s}: {c['mean']:5.1f}%  "
+                          f"[{c['lo95']:.1f}–{c['hi95']:.1f}]  "
+                          f"n={c['n']} (n_eff={c['n_eff']:.1f})")
+    else:
+        result = run(Path(args.input), Path(args.output), verbose=args.verbose)
 
-    if args.plot:
-        print("\n=== Current Aggregate (house-effect corrected, last 60 days) ===")
-        current = result["current"]
-        for m in ["alp", "coal", "grn", "on", "tpp_eff"]:
-            c = current.get(m)
-            if c:
-                label = m.upper().replace("_EFF", " TPP")
-                print(f"  {label:12s}: {c['mean']:5.1f}%  "
-                      f"[{c['lo95']:.1f}–{c['hi95']:.1f}]  "
-                      f"n={c['n']} (n_eff={c['n_eff']:.1f})")
+        if args.plot:
+            print("\n=== Current Aggregate (house-effect corrected, last 60 days) ===")
+            current = result["current"]
+            for m in ["alp", "coal", "grn", "on", "tpp_eff"]:
+                c = current.get(m)
+                if c:
+                    label = m.upper().replace("_EFF", " TPP")
+                    print(f"  {label:12s}: {c['mean']:5.1f}%  "
+                          f"[{c['lo95']:.1f}–{c['hi95']:.1f}]  "
+                          f"n={c['n']} (n_eff={c['n_eff']:.1f})")
 
-        print("\n=== Significant House Effects (TPP) ===")
-        he_tpp = result["house_effects"].get("tpp_eff", {})
-        for pollster, bias in list(he_tpp.items())[:8]:
-            direction = "HIGH" if bias > 0 else "LOW"
-            print(f"  {pollster:30s}: {bias:+.2f}pp ({direction})")
+            print("\n=== Significant House Effects (TPP) ===")
+            he_tpp = result["house_effects"].get("tpp_eff", {})
+            for pollster, bias in list(he_tpp.items())[:8]:
+                direction = "HIGH" if bias > 0 else "LOW"
+                print(f"  {pollster:30s}: {bias:+.2f}pp ({direction})")

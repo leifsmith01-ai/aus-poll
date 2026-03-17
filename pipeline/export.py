@@ -615,6 +615,129 @@ def export_all_vic_district_details(election_id: int, db_path: str = None,
         export_vic_district_detail(dist_id, election_id, db_path, exports_dir)
 
 
+def compute_vic_swings(
+    election_id: int,
+    prev_election_id: int,
+    db_path: str = None,
+    exports_dir: str = None,
+) -> None:
+    """
+    Compute and export district-level swings between two VIC elections.
+
+    For each district present in both elections, calculates:
+      • swing_2cp  — change in ALP (or leading left-of-centre) 2CP % between elections
+      • swing_alp_fp — change in ALP first-preference % between elections
+
+    District names are normalised via VIC_DISTRICT_ALIASES to handle seats renamed
+    during redistributions (e.g. "Ballarat West" → "Wendouree").
+
+    Output: vic/{election_id}/swings_vs_{prev_election_id}.json
+    """
+    from .config import VIC_DISTRICT_ALIASES
+
+    conn = get_connection(db_path)
+    try:
+        def _alp_2cp_pct(eid: int) -> dict[str, float | None]:
+            """Return {district_name: alp_2cp_pct} for an election."""
+            rows = conn.execute(
+                """
+                SELECT dn.district_name, t.vote_pct, c.party_ab
+                FROM vic_district_2cp t
+                JOIN vic_candidates c ON c.candidate_id = t.candidate_id
+                                     AND c.election_id = t.election_id
+                JOIN vic_districts dn ON dn.district_id = t.district_id
+                                      AND dn.election_id = t.election_id
+                WHERE t.election_id = ?
+                """,
+                (eid,),
+            ).fetchall()
+            result: dict[str, float | None] = {}
+            for row in rows:
+                name = row["district_name"]
+                # ALP or left-dominant party is assumed to be the 'alp' side;
+                # we record the ALP vote% if it's an ALP candidate, else store None
+                if row["party_ab"] == "ALP":
+                    result[name] = row["vote_pct"]
+            return result
+
+        def _alp_fp_pct(eid: int) -> dict[str, float | None]:
+            """Return {district_name: alp_fp_pct} for an election."""
+            rows = conn.execute(
+                """
+                SELECT dn.district_name, SUM(f.total_votes) AS alp_votes,
+                       SUM(ft.total_votes_district) AS total_votes
+                FROM vic_district_fp f
+                JOIN vic_candidates c ON c.candidate_id = f.candidate_id
+                                     AND c.election_id = f.election_id
+                JOIN vic_districts dn ON dn.district_id = f.district_id
+                                     AND dn.election_id = f.election_id
+                JOIN (
+                    SELECT election_id, district_id, SUM(total_votes) AS total_votes_district
+                    FROM vic_district_fp
+                    WHERE election_id = ?
+                    GROUP BY election_id, district_id
+                ) ft ON ft.election_id = f.election_id AND ft.district_id = f.district_id
+                WHERE f.election_id = ? AND c.party_ab = 'ALP'
+                GROUP BY dn.district_name
+                """,
+                (eid, eid),
+            ).fetchall()
+            return {
+                row["district_name"]: (
+                    _round2(row["alp_votes"] / row["total_votes"] * 100)
+                    if row["total_votes"] else None
+                )
+                for row in rows
+            }
+
+        curr_2cp = _alp_2cp_pct(election_id)
+        prev_2cp = _alp_2cp_pct(prev_election_id)
+        curr_fp  = _alp_fp_pct(election_id)
+        prev_fp  = _alp_fp_pct(prev_election_id)
+
+    finally:
+        conn.close()
+
+    # Normalise district names using aliases (e.g. renamed seats between redistributions)
+    def _canonical(name: str) -> str:
+        return VIC_DISTRICT_ALIASES.get(name, name)
+
+    # Build alias-keyed lookups for previous election
+    prev_2cp_aliased = {_canonical(k): v for k, v in prev_2cp.items()}
+    prev_fp_aliased  = {_canonical(k): v for k, v in prev_fp.items()}
+
+    output = []
+    all_districts = set(curr_2cp) | set(curr_fp)
+    for name in sorted(all_districts):
+        canonical = _canonical(name)
+        c2cp = curr_2cp.get(name)
+        p2cp = prev_2cp_aliased.get(canonical)
+        cfp  = curr_fp.get(name)
+        pfp  = prev_fp_aliased.get(canonical)
+
+        output.append({
+            "district_name":    name,
+            "alp_2cp_curr":     _round2(c2cp),
+            "alp_2cp_prev":     _round2(p2cp),
+            "swing_2cp":        _round2(c2cp - p2cp) if c2cp is not None and p2cp is not None else None,
+            "alp_fp_curr":      _round2(cfp),
+            "alp_fp_prev":      _round2(pfp),
+            "swing_alp_fp":     _round2(cfp - pfp) if cfp is not None and pfp is not None else None,
+            "prev_election_id": prev_election_id,
+        })
+
+    out = (
+        Path(exports_dir or VIC_EXPORTS_DIR)
+        / str(election_id)
+        / f"swings_vs_{prev_election_id}.json"
+    )
+    _write_json(output, out)
+    logger.info(
+        "Exported VIC district swings (%d→%d) for %d districts → %s",
+        prev_election_id, election_id, len(output), out,
+    )
+
+
 def export_vic_election(election_id: int, db_path: str = None,
                         exports_dir: str = None) -> None:
     """Run the full VIC export pipeline for one election."""
@@ -626,6 +749,21 @@ def export_vic_election(election_id: int, db_path: str = None,
     export_vic_state_summary(election_id, db_path, exports_dir)
     export_vic_districts_list(election_id, db_path, exports_dir)
     export_all_vic_district_details(election_id, db_path, exports_dir)
+
+    # Compute district-level swings vs the preceding election if both are loaded.
+    # Ordering: 202211 → 201811 → 201411
+    from .config import VIC_ELECTIONS
+    all_ids = sorted(VIC_ELECTIONS.keys(), reverse=True)  # descending: 202211, 201811, 201411
+    idx = all_ids.index(election_id) if election_id in all_ids else -1
+    if idx >= 0 and idx + 1 < len(all_ids):
+        prev_id = all_ids[idx + 1]
+        try:
+            compute_vic_swings(election_id, prev_id, db_path, exports_dir)
+        except Exception as exc:
+            logger.warning(
+                "Could not compute VIC swings (%d→%d): %s (run both elections first)",
+                prev_id, election_id, exc,
+            )
 
     logger.info("VIC export complete for election %d", election_id)
 
