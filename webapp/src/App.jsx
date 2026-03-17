@@ -2209,7 +2209,7 @@ function MarginDot({ margin }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
       <span style={{ width: 8, height: 8, borderRadius: "50%", background: c, display: "inline-block" }} />
-      <span style={{ fontWeight: 600, color: "#111" }}>{margin?.toFixed(1)}%</span>
+      <span style={{ fontWeight: 600, color: "#111827" }}>{margin?.toFixed(1)}%</span>
     </span>
   );
 }
@@ -2304,7 +2304,7 @@ function PrefInput({ label, value, onChange, color = "#6B7280", historicalRange 
     <div style={{ marginBottom: 12 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
         <label style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{label}</label>
-        <span style={{ fontSize: 13, fontWeight: 700, color: "#111" }}>{pct.toFixed(1)}%</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>{pct.toFixed(1)}%</span>
       </div>
       <input type="range" min={0} max={100} step={0.5} value={pct}
         onChange={e => onChange(parseFloat(e.target.value) / 100)}
@@ -3285,7 +3285,7 @@ export default function App() {
                               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                                 <div style={{ width: 3, height: 30, background: p.color, borderRadius: 2, flexShrink: 0 }} />
                                 <div>
-                                  <div style={{ fontWeight: 700, color: "#111" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</div>
+                                  <div style={{ fontWeight: 700, color: "#111827" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</div>
                                   <div style={{ fontSize: 11, color: "#9CA3AF" }}>ID {s.id}</div>
                                 </div>
                               </div>
@@ -3375,7 +3375,7 @@ export default function App() {
           {showAddPoll && (
             <div style={{ ...panelStyle, background: "#F0F9FF", borderColor: "#BAE6FD", marginBottom: 16 }}>
               <div style={{ ...STYLES.panelTitle, color: "#0369A1" }}>Add new poll</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 10, marginBottom: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 12, marginBottom: 12 }}>
                 {[
                   { key: "pollster", label: "Pollster", type: "text", placeholder: "e.g. Newspoll" },
                   { key: "date", label: "Date", type: "date", placeholder: "" },
@@ -3426,7 +3426,7 @@ export default function App() {
                   <div key={card.label} style={STYLES.metricCard}>
                     <div style={{ width: 20, height: 3, background: card.color, borderRadius: 2, marginBottom: 6 }} />
                     <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                      <span style={{ fontSize: 24, fontWeight: 800, color: "#111", fontStyle: card.est ? "italic" : "normal" }}>
+                      <span style={{ fontSize: 24, fontWeight: 800, color: "#111827", fontStyle: card.est ? "italic" : "normal" }}>
                         {card.value != null ? `${card.est ? "~" : ""}${card.value}%` : "—"}
                       </span>
                       {card.avg !== undefined && <span style={{ fontSize: 12, color: "#9CA3AF" }}>({card.avg}%)</span>}
@@ -3584,7 +3584,7 @@ export default function App() {
                               <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
                               <span style={{ fontSize: 11, fontWeight: 700, color: "#374151" }}>{GROUP_CONFIG[g].label}</span>
                             </div>
-                            <div style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{n}</div>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{n}</div>
                             <div style={{ fontSize: 11, color: "#9CA3AF" }}>of {el.totalSeats} seats</div>
                           </div>
                         );
@@ -3812,7 +3812,7 @@ export default function App() {
                             <span style={{ fontSize: 11, fontWeight: 700, color: "#374151" }}>{GROUP_CONFIG[g].label}</span>
                           </div>
                           <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                            <span style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{proj}</span>
+                            <span style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{proj}</span>
                             <span style={{ fontSize: 12, color: "#6B7280" }}>/ {base} base</span>
                           </div>
                           {delta !== 0 && (
@@ -3987,7 +3987,7 @@ export default function App() {
                                   background: isExpanded ? "#F0F9FF" : projGroup === "one_nation" && changed ? "#FFFBEB" : "transparent",
                                   cursor: "pointer",
                                 }}>
-                                <span style={{ fontWeight: changed ? 700 : 400, fontSize: 13, color: "#111", paddingLeft: changed ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                <span style={{ fontWeight: changed ? 700 : 400, fontSize: 13, color: "#111827", paddingLeft: changed ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                   {isExpanded ? "▾ " : "▸ "}{seat.name}
                                 </span>
                                 <span style={{ fontSize: 11, color: "#6B7280" }}>{seat.state}</span>
@@ -4450,7 +4450,7 @@ export default function App() {
               {/* ── VIC Results panel ── */}
               <div>
                 {/* Summary stat cards */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 14 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                     {vicImplied2pp !== null ? (
@@ -4511,7 +4511,7 @@ export default function App() {
                             <span style={{ fontSize: 11, fontWeight: 700, color: "#374151" }}>{GROUP_CONFIG[g].label}</span>
                           </div>
                           <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                            <span style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{proj}</span>
+                            <span style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{proj}</span>
                             <span style={{ fontSize: 12, color: "#6B7280" }}>/ {base} base</span>
                           </div>
                           {delta !== 0 && (
@@ -4680,7 +4680,7 @@ export default function App() {
 
                 {/* Results */}
                 <div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                       {implied2pp !== null ? (
@@ -4730,7 +4730,7 @@ export default function App() {
                               <span style={{ fontSize: 11, fontWeight: 700, color: "#374151" }}>{GROUP_CONFIG[g].label}</span>
                             </div>
                             <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                              <span style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{pv}</span>
+                              <span style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{pv}</span>
                               <span style={{ fontSize: 12, color: "#6B7280" }}>/ {bv} base</span>
                             </div>
                             {delta !== 0 && <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? "#059669" : "#DC2626", marginTop: 2 }}>{delta > 0 ? "+" : ""}{delta} seats</div>}
@@ -4858,7 +4858,7 @@ export default function App() {
                   {tasHasChanges && <button onClick={() => setTasPrim({ ...TAS_BL, undecided: 0 })} style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>Reset TAS model</button>}
                 </div>
                 <div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: majColor, marginTop: 4 }}>{projMaj}</div>
@@ -4909,7 +4909,7 @@ export default function App() {
                         return (
                           <div key={k} style={STYLES.metricCard}>
                             <div style={{ fontSize: 11, fontWeight: 700, color: c, marginBottom: 4 }}>{l}</div>
-                            <div style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{s.mean}</div>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{s.mean}</div>
                             <div style={{ fontSize: 11, color: "#6B7280" }}>P25–P75: {s.p25}–{s.p75}</div>
                             <div style={{ fontSize: 11, color: "#9CA3AF" }}>P05–P95: {s.p05}–{s.p95}</div>
                             {k === "coal" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#1D4ED8" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
@@ -4958,7 +4958,7 @@ export default function App() {
                   {actHasChanges && <button onClick={() => setActPrim({ ...ACT_BL, undecided: 0 })} style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>Reset ACT model</button>}
                 </div>
                 <div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: majColor, marginTop: 4 }}>{projMaj}</div>
@@ -5009,7 +5009,7 @@ export default function App() {
                         return (
                           <div key={k} style={STYLES.metricCard}>
                             <div style={{ fontSize: 11, fontWeight: 700, color: c, marginBottom: 4 }}>{l}</div>
-                            <div style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{s.mean}</div>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{s.mean}</div>
                             <div style={{ fontSize: 11, color: "#6B7280" }}>P25–P75: {s.p25}–{s.p75}</div>
                             <div style={{ fontSize: 11, color: "#9CA3AF" }}>P05–P95: {s.p05}–{s.p95}</div>
                             {k === "alp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#DC2626" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
@@ -5056,9 +5056,9 @@ export default function App() {
                           const s = demogStats[key];
                           if (!s) return null;
                           return (
-                            <div key={key} style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px" }}>
+                            <div key={key} style={STYLES.metricCard}>
                               <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>{label}</div>
-                              <div style={{ fontSize: 22, fontWeight: 800, color: "#111", marginBottom: 4 }}>{fmt(s.avg)}</div>
+                              <div style={{ fontSize: 24, fontWeight: 800, color: "#111827", marginBottom: 4 }}>{fmt(s.avg)}</div>
                               <div style={{ fontSize: 11, color: "#9CA3AF" }}>Range: {fmt(s.min)} – {fmt(s.max)}</div>
                             </div>
                           );
@@ -5150,20 +5150,20 @@ export default function App() {
                                       }}
                                       onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = "#F9FAFB"; }}
                                       onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = ""; }}>
-                                      <td style={{ padding: "8px 10px", fontWeight: 600, color: "#111" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</td>
-                                      <td style={{ padding: "8px 10px", color: "#6B7280" }}>{s.state}</td>
-                                      <td style={{ padding: "8px 10px" }}>
+                                      <td style={{ padding: "9px 12px", fontWeight: 600, color: "#111827" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</td>
+                                      <td style={{ padding: "9px 12px", color: "#6B7280" }}>{s.state}</td>
+                                      <td style={{ padding: "9px 12px" }}>
                                         <span style={{ background: pg.bg, color: pg.color, fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>{pg.short}</span>
                                       </td>
-                                      <td style={{ padding: "8px 10px", color: "#6B7280", fontSize: 11 }}>{d.urbanClass ?? "—"}</td>
-                                      <td style={{ padding: "8px 10px", fontWeight: 600 }}>{d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome / 1000).toFixed(0)}k` : "—"}</td>
-                                      <td style={{ padding: "8px 10px" }}>{d.medianPersonalIncome ? `$${(d.medianPersonalIncome / 1000).toFixed(0)}k` : "—"}</td>
-                                      <td style={{ padding: "8px 10px" }}>{d.medianWeeklyRent ? `$${d.medianWeeklyRent}` : "—"}</td>
-                                      <td style={{ padding: "8px 10px" }}>{d.renterPct != null ? `${d.renterPct}%` : "—"}</td>
-                                      <td style={{ padding: "8px 10px" }}>{d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</td>
-                                      <td style={{ padding: "8px 10px" }}>{d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</td>
-                                      <td style={{ padding: "8px 10px" }}>{d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</td>
-                                      <td style={{ padding: "8px 10px" }}>{d.medianAge ?? "—"}</td>
+                                      <td style={{ padding: "9px 12px", color: "#6B7280", fontSize: 11 }}>{d.urbanClass ?? "—"}</td>
+                                      <td style={{ padding: "9px 12px", fontWeight: 600 }}>{d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome / 1000).toFixed(0)}k` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.medianPersonalIncome ? `$${(d.medianPersonalIncome / 1000).toFixed(0)}k` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.medianWeeklyRent ? `$${d.medianWeeklyRent}` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.renterPct != null ? `${d.renterPct}%` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.medianAge ?? "—"}</td>
                                     </tr>
                                     {isExpanded && (
                                       <tr key={`${s.id}-exp`}>
@@ -5326,7 +5326,7 @@ export default function App() {
           </div>
 
           {/* Stat cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 18 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 12, marginBottom: 18 }}>
             {[
               { label: "Labor majority", value: `+${VIC_2022_SUMMARY.alp - 45}`, color: "#DC2626", note: "over majority" },
               { label: "Coalition seats", value: VIC_2022_SUMMARY.lp, color: "#1D4ED8", note: "vs 27 in 2018" },
@@ -5334,9 +5334,10 @@ export default function App() {
               { label: "Independent seats", value: VIC_2022_SUMMARY.ind, color: "#0891B2", note: "2 crossbench" },
               { label: "Next election", value: "Nov 2026", color: "#7C3AED", note: "due ~29 Nov" },
             ].map(card => (
-              <div key={card.label} style={{ background: "#fff", borderRadius: 10, border: "1px solid #E5E7EB", padding: "14px 16px" }}>
+              <div key={card.label} style={{ ...STYLES.statCard }}>
+
                 <div style={{ width: 24, height: 3, background: card.color, borderRadius: 2, marginBottom: 8 }} />
-                <div style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{card.value}</div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{card.value}</div>
                 <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{card.label}</div>
                 <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 1 }}>{card.note}</div>
               </div>
@@ -5373,7 +5374,7 @@ export default function App() {
               <thead>
                 <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
                   {["District", "Winner", "Party", "2CP Matchup", "Margin"].map(h => (
-                    <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280" }}>{h}</th>
+                    <th key={h} style={{ padding: "9px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -5383,18 +5384,18 @@ export default function App() {
                   const marginCat = margin < 2 ? "very_marginal" : margin < 5 ? "marginal" : margin < 10 ? "fairly_safe" : "safe";
                   return (
                     <tr key={id} style={{ borderBottom: "1px solid #F3F4F6" }}>
-                      <td style={{ padding: "8px 10px", fontWeight: 600, fontSize: 13 }}>{name}</td>
-                      <td style={{ padding: "8px 10px", fontSize: 12, color: "#374151" }}>{winner}</td>
-                      <td style={{ padding: "8px 10px" }}>
+                      <td style={{ padding: "9px 12px", fontWeight: 600, fontSize: 13 }}>{name}</td>
+                      <td style={{ padding: "9px 12px", fontSize: 12, color: "#374151" }}>{winner}</td>
+                      <td style={{ padding: "9px 12px" }}>
                         <span style={{ background: p.color, color: "#fff", fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>{p.short}</span>
                       </td>
-                      <td style={{ padding: "8px 10px", fontSize: 12, color: "#6B7280" }}>
+                      <td style={{ padding: "9px 12px", fontSize: 12, color: "#6B7280" }}>
                         {getParty(tcp1).short} v {getParty(tcp2).short}
                       </td>
-                      <td style={{ padding: "8px 10px" }}>
+                      <td style={{ padding: "9px 12px" }}>
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: MARGIN_COLOR[marginCat], display: "inline-block" }} />
-                          <span style={{ fontWeight: 600, color: "#111", fontSize: 13 }}>{margin.toFixed(1)}%</span>
+                          <span style={{ fontWeight: 600, color: "#111827", fontSize: 13 }}>{margin.toFixed(1)}%</span>
                         </span>
                       </td>
                     </tr>
