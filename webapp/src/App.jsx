@@ -8,6 +8,7 @@ import {
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
   ScatterChart, Scatter, ZAxis,
 } from "recharts";
+import { Analytics } from "@vercel/analytics/react";
 import DEMOGRAPHICS from "./data/demographics.js";
 
 // VIC_SEATS_KNOWN removed — full 88-seat data is in _VS / VIC_SEATS below.
@@ -5499,6 +5500,7 @@ export default function App() {
 
         </div>
       )}
+      <Analytics />
     </div>
   );
 }
