@@ -1395,7 +1395,7 @@ const SEAT_RESIDUAL_STD = 1.0;
 // effective 2PP uncertainty per seat, modelled as independent noise.
 const PREF_FLOW_STD = 0.8;
 
-function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity) {
+function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majority = 76) {
   const COALITION = new Set(["LP", "LNP", "NP", "CLP"]);
 
   // Φ-function applies only to ALP/Coal seats that were NOT rerouted to an ON TCP race.
@@ -1472,7 +1472,7 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity) {
   let cum = 0;
   const cdf = sorted.map(c => { cum += seatCountCdf[c]; return { c, cum }; });
   const quantile = p => (cdf.find(({ cum }) => cum >= p) ?? cdf[cdf.length - 1]).c;
-  const pMajority = sorted.filter(c => c >= 76).reduce((s, c) => s + seatCountCdf[c], 0);
+  const pMajority = sorted.filter(c => c >= majority).reduce((s, c) => s + seatCountCdf[c], 0);
 
   // Derive mean and std from the CDF grid distribution rather than the independence
   // assumption. The grid integrates over correlated national swing outcomes, so it
@@ -2004,6 +2004,44 @@ function allocateHareClark(electorates, newPcts) {
   return totals;  // { lp, alp, grn, ind, on }
 }
 
+// Box-Muller transform: standard normal sample
+function gaussRandom() {
+  const u = 1 - Math.random(), v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+// Monte Carlo uncertainty for Hare-Clark proportional systems.
+// Perturbs the statewide primary votes N times with Gaussian noise (swingStd),
+// runs allocateHareClark each time, and returns per-party seat-count statistics.
+function computeHareClarkUncertainty(electorates, basePcts, swingStd, majority, N = 500) {
+  const parties = ["lp", "alp", "grn", "ind", "on"];
+  const tallies = Object.fromEntries(parties.map(p => [p, []]));
+
+  for (let i = 0; i < N; i++) {
+    const perturbed = Object.fromEntries(parties.map(p => [
+      p, Math.max(0, (basePcts[p] ?? 0) + gaussRandom() * swingStd)
+    ]));
+    const result = allocateHareClark(electorates, perturbed);
+    parties.forEach(p => tallies[p].push(result[p] ?? 0));
+  }
+
+  const stats = {};
+  parties.forEach(p => {
+    const s = [...tallies[p]].sort((a, b) => a - b);
+    const mean = s.reduce((x, v) => x + v, 0) / N;
+    stats[p] = {
+      mean: Math.round(mean * 10) / 10,
+      p05: s[Math.floor(N * 0.05)],
+      p25: s[Math.floor(N * 0.25)],
+      p50: s[Math.floor(N * 0.50)],
+      p75: s[Math.floor(N * 0.75)],
+      p95: s[Math.floor(N * 0.95)],
+      pMajority: Math.round(s.filter(v => v >= majority).length / N * 100),
+    };
+  });
+  return stats;
+}
+
 // ─── Small reusable components ────────────────────────────────────────────────
 function PartyBadge({ party }) {
   const p = getParty(party);
@@ -2347,6 +2385,15 @@ export default function App() {
     (vicPrimaries.undecided || 0) > 0 ||
     vicPrefFlows.grn_alp !== 0.85 || vicPrefFlows.ind_alp !== 0.60 || vicPrefFlows.on_alp !== 0.25 || vicPrefFlows.other_alp !== 0.43;
 
+  const vicNat2ppSwing = useMemo(
+    () => computeVic2pp(vicPrimaries, vicPrefFlows) - VIC_2PP_2022,
+    [vicPrimaries, vicPrefFlows]
+  );
+  const vicUncertainty = useMemo(
+    () => computeUncertainty(vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity, 45),
+    [vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity]
+  );
+
   // ── NSW 2023 model state ──────────────────────────────────────────────────
   // Baselines: ALP 37.6  LP 28.6  NP 8.4  GRN 10.4  IND 8.5  ON 2.0  other 4.5  2PP 53.2
   const NSW_BL = { alp: 37.6, lp: 28.6, np: 8.4, grn: 10.4, ind: 8.5, on: 2.0 };
@@ -2370,6 +2417,18 @@ export default function App() {
   const nswChanged = useMemo(() => nswModelledSeats.filter(s => s.modelled.changed), [nswModelledSeats]);
   const nswImplied2pp = useMemo(() => { const r = nswModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [nswModelledSeats]);
   const nswHasChanges = Object.entries(NSW_BL).some(([k, v]) => Math.abs((nswPrim[k] ?? v) - v) > 0.05) || (nswPrim.undecided || 0) > 0 || nswFlows.grn_alp !== 0.88 || nswFlows.ind_alp !== 0.55 || nswFlows.on_alp !== 0.20 || nswFlows.other_alp !== 0.45;
+
+  const nswNat2ppSwing = useMemo(() => {
+    const onV = nswPrim.on ?? 0;
+    const other = Math.max(0, 100 - nswPrim.alp - nswPrim.lp - nswPrim.np - nswPrim.grn - nswPrim.ind - onV);
+    const a = nswPrim.alp + nswPrim.ind * nswFlows.ind_alp + nswPrim.grn * nswFlows.grn_alp + onV * nswFlows.on_alp + other * nswFlows.other_alp;
+    const c = nswPrim.lp + nswPrim.np + nswPrim.ind * (1 - nswFlows.ind_alp) + nswPrim.grn * (1 - nswFlows.grn_alp) + onV * (1 - nswFlows.on_alp) + other * (1 - nswFlows.other_alp);
+    return a / (a + c) * 100 - NSW_2PP;
+  }, [nswPrim, nswFlows]);
+  const nswUncertainty = useMemo(
+    () => computeUncertainty(nswModelledSeats, nswNat2ppSwing, swingStd, useElasticity, 47),
+    [nswModelledSeats, nswNat2ppSwing, swingStd, useElasticity]
+  );
 
   // ── QLD 2024 model state ──────────────────────────────────────────────────
   // Baselines: ALP 33.4  LNP 40.3  GRN 11.5  IND 5.5  ON 5.7  other 3.6  ALP 2PP 46.3
@@ -2395,6 +2454,18 @@ export default function App() {
   const qldImplied2pp = useMemo(() => { const r = qldModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [qldModelledSeats]);
   const qldHasChanges = Object.entries(QLD_BL).some(([k, v]) => Math.abs((qldPrim[k] ?? v) - v) > 0.05) || (qldPrim.undecided || 0) > 0 || qldFlows.grn_alp !== 0.82 || qldFlows.ind_alp !== 0.50 || qldFlows.on_alp !== 0.18 || qldFlows.other_alp !== 0.40;
 
+  const qldNat2ppSwing = useMemo(() => {
+    const onV = qldPrim.on ?? 0;
+    const other = Math.max(0, 100 - qldPrim.alp - qldPrim.lnp - qldPrim.grn - qldPrim.ind - onV);
+    const a = qldPrim.alp + qldPrim.ind * qldFlows.ind_alp + qldPrim.grn * qldFlows.grn_alp + onV * qldFlows.on_alp + other * qldFlows.other_alp;
+    const c = qldPrim.lnp + qldPrim.ind * (1 - qldFlows.ind_alp) + qldPrim.grn * (1 - qldFlows.grn_alp) + onV * (1 - qldFlows.on_alp) + other * (1 - qldFlows.other_alp);
+    return a / (a + c) * 100 - QLD_2PP;
+  }, [qldPrim, qldFlows]);
+  const qldUncertainty = useMemo(
+    () => computeUncertainty(qldModelledSeats, qldNat2ppSwing, swingStd, useElasticity, 47),
+    [qldModelledSeats, qldNat2ppSwing, swingStd, useElasticity]
+  );
+
   // ── WA 2025 model state ───────────────────────────────────────────────────
   // Baselines: ALP 55.0  LP 18.5  NP 4.5  GRN 11.0  IND 5.0  ON 2.5  other 3.5  2PP 63.1
   const WA_BL = { alp: 55.0, lp: 18.5, np: 4.5, grn: 11.0, ind: 5.0, on: 2.5 };
@@ -2418,6 +2489,18 @@ export default function App() {
   const waChanged = useMemo(() => waModelledSeats.filter(s => s.modelled.changed), [waModelledSeats]);
   const waImplied2pp = useMemo(() => { const r = waModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [waModelledSeats]);
   const waHasChanges = Object.entries(WA_BL).some(([k, v]) => Math.abs((waPrim[k] ?? v) - v) > 0.05) || (waPrim.undecided || 0) > 0 || waFlows.grn_alp !== 0.86 || waFlows.ind_alp !== 0.58 || waFlows.on_alp !== 0.22 || waFlows.other_alp !== 0.44;
+
+  const waNat2ppSwing = useMemo(() => {
+    const onV = waPrim.on ?? 0;
+    const other = Math.max(0, 100 - waPrim.alp - waPrim.lp - waPrim.np - waPrim.grn - waPrim.ind - onV);
+    const a = waPrim.alp + waPrim.ind * waFlows.ind_alp + waPrim.grn * waFlows.grn_alp + onV * waFlows.on_alp + other * waFlows.other_alp;
+    const c = waPrim.lp + waPrim.np + waPrim.ind * (1 - waFlows.ind_alp) + waPrim.grn * (1 - waFlows.grn_alp) + onV * (1 - waFlows.on_alp) + other * (1 - waFlows.other_alp);
+    return a / (a + c) * 100 - WA_2PP;
+  }, [waPrim, waFlows]);
+  const waUncertainty = useMemo(
+    () => computeUncertainty(waModelledSeats, waNat2ppSwing, swingStd, useElasticity, 30),
+    [waModelledSeats, waNat2ppSwing, swingStd, useElasticity]
+  );
 
   // ── SA 2022 model state ───────────────────────────────────────────────────
   // Baselines: ALP 38.3  LP 34.8  GRN 7.3  IND 12.1  ON 1.5  other 6.0  2PP 54.9
@@ -2443,6 +2526,18 @@ export default function App() {
   const saImplied2pp = useMemo(() => { const r = saModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [saModelledSeats]);
   const saHasChanges = Object.entries(SA_BL).some(([k, v]) => Math.abs((saPrim[k] ?? v) - v) > 0.05) || (saPrim.undecided || 0) > 0 || saFlows.grn_alp !== 0.84 || saFlows.ind_alp !== 0.52 || saFlows.on_alp !== 0.22 || saFlows.other_alp !== 0.45;
 
+  const saNat2ppSwing = useMemo(() => {
+    const onV = saPrim.on ?? 0;
+    const other = Math.max(0, 100 - saPrim.alp - saPrim.lp - saPrim.grn - saPrim.ind - onV);
+    const a = saPrim.alp + saPrim.ind * saFlows.ind_alp + saPrim.grn * saFlows.grn_alp + onV * saFlows.on_alp + other * saFlows.other_alp;
+    const c = saPrim.lp + saPrim.ind * (1 - saFlows.ind_alp) + saPrim.grn * (1 - saFlows.grn_alp) + onV * (1 - saFlows.on_alp) + other * (1 - saFlows.other_alp);
+    return a / (a + c) * 100 - SA_2PP;
+  }, [saPrim, saFlows]);
+  const saUncertainty = useMemo(
+    () => computeUncertainty(saModelledSeats, saNat2ppSwing, swingStd, useElasticity, 24),
+    [saModelledSeats, saNat2ppSwing, swingStd, useElasticity]
+  );
+
   // ── NT 2024 model state ───────────────────────────────────────────────────
   // Baselines: ALP 30.5  CLP 40.5  GRN 5.5  IND 12.5  ON 1.5  other 9.5
   const NT_BL = { alp: 30.5, clp: 40.5, grn: 5.5, ind: 12.5, on: 1.5 };
@@ -2466,6 +2561,18 @@ export default function App() {
   const ntChanged = useMemo(() => ntModelledSeats.filter(s => s.modelled.changed), [ntModelledSeats]);
   const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40;
 
+  const ntNat2ppSwing = useMemo(() => {
+    const onV = ntPrim.on ?? 0;
+    const other = Math.max(0, 100 - ntPrim.alp - ntPrim.clp - ntPrim.grn - ntPrim.ind - onV);
+    const a = ntPrim.alp + ntPrim.ind * ntFlows.ind_alp + ntPrim.grn * ntFlows.grn_alp + onV * ntFlows.on_alp + other * ntFlows.other_alp;
+    const c = ntPrim.clp + ntPrim.ind * (1 - ntFlows.ind_alp) + ntPrim.grn * (1 - ntFlows.grn_alp) + onV * (1 - ntFlows.on_alp) + other * (1 - ntFlows.other_alp);
+    return a / (a + c) * 100 - NT_2PP;
+  }, [ntPrim, ntFlows]);
+  const ntUncertainty = useMemo(
+    () => computeUncertainty(ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity, 13),
+    [ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity]
+  );
+
   // ── TAS 2024 model state (Hare-Clark) ─────────────────────────────────────
   // Baselines per electorate in TAS_ELECTORATES; statewide: LP 36  ALP 28  GRN 12  IND 10  ON 1  other 13
   const TAS_BL = { lp: 36, alp: 28, grn: 12, ind: 10, on: 1.0 };
@@ -2483,6 +2590,18 @@ export default function App() {
   }, [tasPrim]);
   const tasHasChanges = Object.entries(TAS_BL).some(([k, v]) => Math.abs((tasPrim[k] ?? v) - v) > 0.05) || (tasPrim.undecided || 0) > 0;
 
+  const tasUncertainty = useMemo(() => {
+    const electorates = TAS_ELECTORATES.map(el => ({
+      ...el,
+      lp: Math.max(0, el.lp + (tasPrim.lp - TAS_BL.lp)),
+      alp: Math.max(0, el.alp + (tasPrim.alp - TAS_BL.alp)),
+      grn: Math.max(0, el.grn + (tasPrim.grn - TAS_BL.grn)),
+      ind: Math.max(0, el.ind + (tasPrim.ind - TAS_BL.ind)),
+      on: Math.max(0, (el.on ?? 0) + ((tasPrim.on ?? 0) - TAS_BL.on)),
+    }));
+    return computeHareClarkUncertainty(electorates, tasPrim, swingStd, 18);
+  }, [tasPrim, swingStd]);
+
   // ── ACT 2024 model state (Hare-Clark) ─────────────────────────────────────
   // Baselines per electorate in ACT_ELECTORATES; statewide: ALP 34  LP 31  GRN 21  IND 9  ON 0.5  other 4.5
   const ACT_BL = { alp: 34, lp: 31, grn: 21, ind: 9, on: 0.5 };
@@ -2499,6 +2618,18 @@ export default function App() {
     return allocateHareClark(electorates, actPrim);
   }, [actPrim]);
   const actHasChanges = Object.entries(ACT_BL).some(([k, v]) => Math.abs((actPrim[k] ?? v) - v) > 0.05) || (actPrim.undecided || 0) > 0;
+
+  const actUncertainty = useMemo(() => {
+    const electorates = ACT_ELECTORATES.map(el => ({
+      ...el,
+      alp: Math.max(0, el.alp + (actPrim.alp - ACT_BL.alp)),
+      lp: Math.max(0, el.lp + (actPrim.lp - ACT_BL.lp)),
+      grn: Math.max(0, el.grn + (actPrim.grn - ACT_BL.grn)),
+      ind: Math.max(0, el.ind + (actPrim.ind - ACT_BL.ind)),
+      on: Math.max(0, (el.on ?? 0) + ((actPrim.on ?? 0) - ACT_BL.on)),
+    }));
+    return computeHareClarkUncertainty(electorates, actPrim, swingStd, 13);
+  }, [actPrim, swingStd]);
 
   const hasChanges =
     primaries.alp !== BASELINE_2025.alp || primaries.coal !== BASELINE_2025.coal ||
@@ -4230,6 +4361,58 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* VIC Uncertainty panel */}
+                <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "14px 18px", marginBottom: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                    <span style={{ fontWeight: 700, color: "#374151" }}>Seat-count uncertainty</span>
+                    <span style={{ fontSize: 11, color: "#6B7280", background: "#F3F4F6", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ</span>
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
+                      <span style={{ fontSize: 28, fontWeight: 800, color: "#DC2626" }}>{vicUncertainty.alpMean}</span>
+                      <span style={{ fontSize: 13, color: "#6B7280" }}>seats (mean)</span>
+                      <span style={{ fontSize: 13, color: "#9CA3AF" }}>±{vicUncertainty.alpStd}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: "#374151", marginBottom: 2 }}>
+                      <span style={{ color: "#6B7280" }}>80% CI: </span>
+                      <strong>{vicUncertainty.alpP25}–{vicUncertainty.alpP75}</strong> seats
+                      <span style={{ marginLeft: 10, color: "#6B7280" }}>95% CI: </span>
+                      <strong>{vicUncertainty.alpP05}–{vicUncertainty.alpP95}</strong> seats
+                    </div>
+                    <div style={{ fontSize: 12, color: "#374151", marginTop: 4 }}>
+                      <span style={{ color: "#6B7280" }}>P(ALP majority ≥45): </span>
+                      <strong style={{ color: vicUncertainty.pMajority >= 50 ? "#DC2626" : "#1D4ED8" }}>{vicUncertainty.pMajority}%</strong>
+                    </div>
+                  </div>
+                  <div style={{ position: "relative", height: 20, background: "#F3F4F6", borderRadius: 6, overflow: "hidden", marginBottom: 10 }}>
+                    <div style={{ position: "absolute", left: `${Math.max(0, vicUncertainty.alpP05 / 89 * 100)}%`, width: `${Math.min(100, (vicUncertainty.alpP95 - vicUncertainty.alpP05) / 89 * 100)}%`, height: "100%", background: "#FECACA", borderRadius: 4 }} />
+                    <div style={{ position: "absolute", left: `${Math.max(0, vicUncertainty.alpP25 / 89 * 100)}%`, width: `${Math.min(100, (vicUncertainty.alpP75 - vicUncertainty.alpP25) / 89 * 100)}%`, height: "100%", background: "#FCA5A5" }} />
+                    <div style={{ position: "absolute", left: `${Math.max(0, vicUncertainty.alpP50 / 89 * 100)}%`, width: 2, height: "100%", background: "#DC2626" }} />
+                    <div style={{ position: "absolute", left: `${45 / 89 * 100}%`, width: 1, height: "100%", background: "#6B7280" }} title="45 seats = majority" />
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#9CA3AF" }}>
+                    <span>{vicUncertainty.alpP05}</span>
+                    <span style={{ color: "#DC2626", fontWeight: 700 }}>{vicUncertainty.alpP50} median</span>
+                    <span>45 maj.</span>
+                    <span>{vicUncertainty.alpP95}</span>
+                  </div>
+                  <div style={{ borderTop: "1px solid #F3F4F6", marginTop: 12, paddingTop: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Model options</div>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151", cursor: "pointer", marginBottom: 8 }}>
+                      <input type="checkbox" checked={useElasticity} onChange={e => setUseElasticity(e.target.checked)} />
+                      Seat elasticity (marginal seats swing more)
+                      <span style={{ fontSize: 11, color: "#9CA3AF" }}>{useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}</span>
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
+                      <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
+                      <input type="range" min={0.5} max={4} step={0.25} value={swingStd} onChange={e => setSwingStd(+e.target.value)} style={{ flex: 1 }} />
+                      <span style={{ minWidth: 36, fontWeight: 600 }}>{swingStd}pp</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>Shared across all elections. Typical Australian state polling MAE ≈ 1–2pp.</div>
+                  </div>
+                </div>
+
                 {/* Seat-at-risk table */}
                 <div style={panelStyle}>
                   <div style={{ fontWeight: 700, color: "#374151", marginBottom: 12 }}>Seats at risk (tightest 25)</div>
@@ -4238,6 +4421,7 @@ export default function App() {
                       const base = getParty(seat.winner.party);
                       const proj = getParty(seat.modelled.winnerParty);
                       const changed = seat.modelled.changed;
+                      const winProb = vicUncertainty.seatWinProbs[seat.id];
                       return (
                         <div key={seat.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: "1px solid #F3F4F6", background: changed ? "#FFF7ED" : "transparent" }}>
                           <div style={{ width: 3, height: 28, background: changed ? proj.color : base.color, borderRadius: 2, flexShrink: 0 }} />
@@ -4253,12 +4437,15 @@ export default function App() {
                           <span style={{ fontWeight: 700, fontSize: 13, color: MARGIN_COLOR[getMarginCat(seat.margin)], minWidth: 40, textAlign: "right" }}>
                             {seat.margin.toFixed(1)}%
                           </span>
+                          <span style={{ fontSize: 11, fontWeight: 700, minWidth: 36, textAlign: "right", color: winProb == null ? "#9CA3AF" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "#6B7280" : "#1D4ED8" }}>
+                            {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
+                          </span>
                         </div>
                       );
                     })}
                   </div>
                   <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
-                    Uniform swing model · VEC 2022 official results · 88 Legislative Assembly districts
+                    Probabilistic swing model · VEC 2022 official results · 88 Legislative Assembly districts · ALP win% shown for ALP/Coalition contests
                   </div>
                 </div>
               </div>
@@ -4267,15 +4454,15 @@ export default function App() {
             {/* ── Reusable state builder (NSW, QLD, WA, SA, NT) ── */}
             {(() => {
               const cfgs = {
-                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition (LP+NP)", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "lp", l: "Liberal", c: "#1D4ED8" }, { k: "np", l: "Nationals", c: "#065F46" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45 }, allSeats: NSW_SEATS },
-                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "LNP", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "lnp", l: "LNP", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40 }, allSeats: QLD_SEATS },
-                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition (LP+NP)", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "lp", l: "Liberal", c: "#1D4ED8" }, { k: "np", l: "Nationals", c: "#065F46" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44 }, allSeats: WA_SEATS },
-                sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Liberal", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "lp", l: "Liberal", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45 }, allSeats: SA_SEATS },
-                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "CLP", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "clp", l: "CLP", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40 }, allSeats: NT_SEATS },
+                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition (LP+NP)", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "lp", l: "Liberal", c: "#1D4ED8" }, { k: "np", l: "Nationals", c: "#065F46" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty },
+                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "LNP", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "lnp", l: "LNP", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty },
+                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition (LP+NP)", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "lp", l: "Liberal", c: "#1D4ED8" }, { k: "np", l: "Nationals", c: "#065F46" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44 }, allSeats: WA_SEATS, uncertainty: waUncertainty },
+                sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Liberal", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "lp", l: "Liberal", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45 }, allSeats: SA_SEATS, uncertainty: saUncertainty },
+                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "CLP", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "clp", l: "CLP", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40 }, allSeats: NT_SEATS, uncertainty: ntUncertainty },
               };
               const cfg = cfgs[selectedModelId];
               if (!el.modelEnabled || !cfg) return null;
-              const { prim, setPrim, flows, setFlows, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats } = cfg;
+              const { prim, setPrim, flows, setFlows, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty } = cfg;
               const entered = parties.reduce((s, p) => s + (prim[p.k] ?? 0), 0);
               const undecided = +(prim.undecided ?? 0);
               const other = +(100 - entered - undecided).toFixed(1);
@@ -4389,6 +4576,58 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* Uncertainty panel */}
+                  <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "14px 18px", marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <span style={{ fontWeight: 700, color: "#374151" }}>Seat-count uncertainty</span>
+                      <span style={{ fontSize: 11, color: "#6B7280", background: "#F3F4F6", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ</span>
+                    </div>
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontSize: 28, fontWeight: 800, color: "#DC2626" }}>{uncertainty.alpMean}</span>
+                        <span style={{ fontSize: 13, color: "#6B7280" }}>seats (mean)</span>
+                        <span style={{ fontSize: 13, color: "#9CA3AF" }}>±{uncertainty.alpStd}</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: "#374151", marginBottom: 2 }}>
+                        <span style={{ color: "#6B7280" }}>80% CI: </span>
+                        <strong>{uncertainty.alpP25}–{uncertainty.alpP75}</strong> seats
+                        <span style={{ marginLeft: 10, color: "#6B7280" }}>95% CI: </span>
+                        <strong>{uncertainty.alpP05}–{uncertainty.alpP95}</strong> seats
+                      </div>
+                      <div style={{ fontSize: 12, color: "#374151", marginTop: 4 }}>
+                        <span style={{ color: "#6B7280" }}>P(ALP majority ≥{majority}): </span>
+                        <strong style={{ color: uncertainty.pMajority >= 50 ? "#DC2626" : "#1D4ED8" }}>{uncertainty.pMajority}%</strong>
+                      </div>
+                    </div>
+                    <div style={{ position: "relative", height: 20, background: "#F3F4F6", borderRadius: 6, overflow: "hidden", marginBottom: 10 }}>
+                      <div style={{ position: "absolute", left: `${Math.max(0, uncertainty.alpP05 / (totalSeats + 1) * 100)}%`, width: `${Math.min(100, (uncertainty.alpP95 - uncertainty.alpP05) / (totalSeats + 1) * 100)}%`, height: "100%", background: "#FECACA", borderRadius: 4 }} />
+                      <div style={{ position: "absolute", left: `${Math.max(0, uncertainty.alpP25 / (totalSeats + 1) * 100)}%`, width: `${Math.min(100, (uncertainty.alpP75 - uncertainty.alpP25) / (totalSeats + 1) * 100)}%`, height: "100%", background: "#FCA5A5" }} />
+                      <div style={{ position: "absolute", left: `${Math.max(0, uncertainty.alpP50 / (totalSeats + 1) * 100)}%`, width: 2, height: "100%", background: "#DC2626" }} />
+                      <div style={{ position: "absolute", left: `${majority / (totalSeats + 1) * 100}%`, width: 1, height: "100%", background: "#6B7280" }} title={`${majority} seats = majority`} />
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#9CA3AF" }}>
+                      <span>{uncertainty.alpP05}</span>
+                      <span style={{ color: "#DC2626", fontWeight: 700 }}>{uncertainty.alpP50} median</span>
+                      <span>{majority} maj.</span>
+                      <span>{uncertainty.alpP95}</span>
+                    </div>
+                    <div style={{ borderTop: "1px solid #F3F4F6", marginTop: 12, paddingTop: 10 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Model options</div>
+                      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151", cursor: "pointer", marginBottom: 8 }}>
+                        <input type="checkbox" checked={useElasticity} onChange={e => setUseElasticity(e.target.checked)} />
+                        Seat elasticity (marginal seats swing more)
+                        <span style={{ fontSize: 11, color: "#9CA3AF" }}>{useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}</span>
+                      </label>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
+                        <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
+                        <input type="range" min={0.5} max={4} step={0.25} value={swingStd} onChange={e => setSwingStd(+e.target.value)} style={{ flex: 1 }} />
+                        <span style={{ minWidth: 36, fontWeight: 600 }}>{swingStd}pp</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>Shared across all elections. Typical Australian state polling MAE ≈ 1–2pp.</div>
+                    </div>
+                  </div>
+
                   <div style={panelStyle}>
                     <div style={{ fontWeight: 700, color: "#374151", marginBottom: 12 }}>Seats at risk (tightest 25)</div>
                     <div style={{ maxHeight: 440, overflowY: "auto" }}>
@@ -4396,6 +4635,7 @@ export default function App() {
                         const baseP = getParty(seat.winner.party);
                         const projP = getParty(seat.modelled.winnerParty);
                         const chg = seat.modelled.changed;
+                        const winProb = uncertainty.seatWinProbs[seat.id];
                         return (
                           <div key={seat.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: "1px solid #F3F4F6", background: chg ? "#FFF7ED" : "transparent" }}>
                             <div style={{ width: 3, height: 28, background: chg ? projP.color : baseP.color, borderRadius: 2, flexShrink: 0 }} />
@@ -4411,13 +4651,15 @@ export default function App() {
                             <span style={{ fontWeight: 700, fontSize: 13, color: MARGIN_COLOR[getMarginCat(seat.margin)], minWidth: 40, textAlign: "right" }}>
                               {seat.margin.toFixed(1)}%
                             </span>
+                            <span style={{ fontSize: 11, fontWeight: 700, minWidth: 36, textAlign: "right", color: winProb == null ? "#9CA3AF" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "#6B7280" : "#1D4ED8" }}>
+                              {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
+                            </span>
                           </div>
                         );
                       })}
                     </div>
                     <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
-                      Uniform swing model · {source} · {totalSeats} seats
-                      (marginal seats use verified results; remaining seats are notional safe/fairly-safe)
+                      Probabilistic swing model · {source} · {totalSeats} seats · ALP win% shown for ALP/Coalition contests
                     </div>
                   </div>
                 </div>
@@ -4489,6 +4731,38 @@ export default function App() {
                       Hare-Clark proportional model (Droop quota) · TEC 2024 official results · 7 electorates × 5 seats
                     </div>
                   </div>
+
+                  {/* TAS Uncertainty panel */}
+                  <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "14px 18px", marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <span style={{ fontWeight: 700, color: "#374151" }}>Seat-count uncertainty (Monte Carlo)</span>
+                      <span style={{ fontSize: 11, color: "#6B7280", background: "#F3F4F6", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ · N=500</span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 8, marginBottom: 12 }}>
+                      {[{ k: "lp", l: "Liberal", c: "#1D4ED8" }, { k: "alp", l: "ALP", c: "#DC2626" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Ind", c: "#0891B2" }].map(({ k, l, c }) => {
+                        const s = tasUncertainty[k];
+                        if (!s) return null;
+                        return (
+                          <div key={k} style={{ background: "#F9FAFB", borderRadius: 8, border: "1px solid #E5E7EB", padding: "10px 12px" }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: c, marginBottom: 4 }}>{l}</div>
+                            <div style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{s.mean}</div>
+                            <div style={{ fontSize: 11, color: "#6B7280" }}>P25–P75: {s.p25}–{s.p75}</div>
+                            <div style={{ fontSize: 11, color: "#9CA3AF" }}>P05–P95: {s.p05}–{s.p95}</div>
+                            {k === "lp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#1D4ED8" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
+                            {k === "alp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#DC2626" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
+                        <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
+                        <input type="range" min={0.5} max={4} step={0.25} value={swingStd} onChange={e => setSwingStd(+e.target.value)} style={{ flex: 1 }} />
+                        <span style={{ minWidth: 36, fontWeight: 600 }}>{swingStd}pp</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>Shared across all elections.</div>
+                    </div>
+                  </div>
                 </div>
               </div>;
             })()}
@@ -4555,6 +4829,38 @@ export default function App() {
                     </div>
                     <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
                       Hare-Clark proportional model (Droop quota) · ACT EC 2024 official results · 5 electorates × 5 seats
+                    </div>
+                  </div>
+
+                  {/* ACT Uncertainty panel */}
+                  <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "14px 18px", marginBottom: 14 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <span style={{ fontWeight: 700, color: "#374151" }}>Seat-count uncertainty (Monte Carlo)</span>
+                      <span style={{ fontSize: 11, color: "#6B7280", background: "#F3F4F6", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ · N=500</span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 8, marginBottom: 12 }}>
+                      {[{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "lp", l: "Liberal", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Ind", c: "#0891B2" }].map(({ k, l, c }) => {
+                        const s = actUncertainty[k];
+                        if (!s) return null;
+                        return (
+                          <div key={k} style={{ background: "#F9FAFB", borderRadius: 8, border: "1px solid #E5E7EB", padding: "10px 12px" }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: c, marginBottom: 4 }}>{l}</div>
+                            <div style={{ fontSize: 22, fontWeight: 800, color: "#111" }}>{s.mean}</div>
+                            <div style={{ fontSize: 11, color: "#6B7280" }}>P25–P75: {s.p25}–{s.p75}</div>
+                            <div style={{ fontSize: 11, color: "#9CA3AF" }}>P05–P95: {s.p05}–{s.p95}</div>
+                            {k === "alp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#DC2626" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
+                            {k === "lp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#1D4ED8" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
+                        <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
+                        <input type="range" min={0.5} max={4} step={0.25} value={swingStd} onChange={e => setSwingStd(+e.target.value)} style={{ flex: 1 }} />
+                        <span style={{ minWidth: 36, fontWeight: 600 }}>{swingStd}pp</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>Shared across all elections.</div>
                     </div>
                   </div>
                 </div>
