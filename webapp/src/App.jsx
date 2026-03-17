@@ -8,6 +8,7 @@ import {
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
   ScatterChart, Scatter, ZAxis,
 } from "recharts";
+import { Analytics } from "@vercel/analytics/react";
 import DEMOGRAPHICS from "./data/demographics.js";
 
 // ─── Victoria 2022 state election — confirmed seat results ────────────────────
@@ -5426,6 +5427,7 @@ export default function App() {
 
         </div>
       )}
+      <Analytics />
     </div>
   );
 }
