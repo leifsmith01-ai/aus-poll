@@ -293,20 +293,92 @@ def fetch_betfair(app_key: str, session_token: str, seat_market_ids: dict[str, s
 # ── The Odds API ───────────────────────────────────────────────────────────────
 
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
-# Sport key for AU politics is discovered dynamically from /sports — no hardcoded key needed.
+# Sport keys are discovered dynamically from /sports — no hardcoded keys needed.
+
+# Search terms used to match Australian state election sports/events on The Odds API.
+# Each entry maps a state code → list of lowercase substrings to look for in the
+# sport title or event name.
+STATE_SEARCH_TERMS: dict[str, list[str]] = {
+    "vic": ["victoria", "victorian"],
+    "nsw": ["new south wales", "nsw state"],
+    "qld": ["queensland", "qld state"],
+    "wa":  ["western australia", "wa state"],
+    "sa":  ["south australia", "sa state"],
+    "tas": ["tasmania", "tasmanian"],
+    "act": ["australian capital territory", "act election", "act assembly"],
+    "nt":  ["northern territory", "nt election"],
+}
+
+# State metadata for display — kept here so the frontend JSON is self-describing.
+STATE_META: dict[str, dict] = {
+    "vic": {"election_name": "2026 Victorian State Election",  "date": "2026-11-28", "chamber": "Legislative Assembly", "total_seats": 88, "majority": 45},
+    "nsw": {"election_name": "2027 NSW State Election",        "date": "2027-03-27", "chamber": "Legislative Assembly", "total_seats": 93, "majority": 47},
+    "qld": {"election_name": "2028 Queensland State Election", "date": "2028-10-26", "chamber": "Legislative Assembly", "total_seats": 93, "majority": 47},
+    "wa":  {"election_name": "2029 WA State Election",         "date": "2029-03-08", "chamber": "Legislative Assembly", "total_seats": 59, "majority": 30},
+    "sa":  {"election_name": "2026 SA State Election",         "date": "2026-03-21", "chamber": "House of Assembly",    "total_seats": 47, "majority": 24},
+    "tas": {"election_name": "2028 Tasmanian State Election",  "date": "2028-03-01", "chamber": "House of Assembly",    "total_seats": 25, "majority": 13},
+    "act": {"election_name": "2028 ACT Assembly Election",     "date": "2028-10-17", "chamber": "Legislative Assembly", "total_seats": 25, "majority": 13},
+    "nt":  {"election_name": "2028 NT Election",               "date": "2028-08-24", "chamber": "Legislative Assembly", "total_seats": 25, "majority": 13},
+}
+
+
+def _parse_odds_event(event: dict) -> dict[str, dict]:
+    """
+    Extract averaged decimal odds and normalised probabilities from a single
+    Odds API event (aggregated across all bookmakers).
+    Returns: {"Outcome Name": {"decimal_odds": float, "implied_prob": float}, ...}
+    """
+    outcome_prices: dict[str, list[float]] = {}
+    for bm in event.get("bookmakers", []):
+        for market in bm.get("markets", []):
+            if market.get("key") == "h2h":
+                for outcome in market.get("outcomes", []):
+                    outcome_prices.setdefault(outcome["name"], []).append(outcome["price"])
+
+    if not outcome_prices:
+        return {}
+
+    avg_odds = {k: sum(v) / len(v) for k, v in outcome_prices.items()}
+    probs = remove_overround(avg_odds)
+    return {
+        name: {"decimal_odds": round(avg_odds[name], 2), "implied_prob": round(prob, 4)}
+        for name, prob in probs.items()
+    }
+
+
+def _get_odds_for_sport(api_key: str, sport_key: str) -> list[dict]:
+    """Fetch h2h odds for a sport key from The Odds API."""
+    resp = requests.get(
+        f"{ODDS_API_BASE}/sports/{sport_key}/odds",
+        params={"apiKey": api_key, "regions": "au", "markets": "h2h", "oddsFormat": "decimal"},
+        timeout=10,
+    )
+    resp.raise_for_status()
+    logger.info("Odds API [%s]: %s requests remaining this month",
+                sport_key, resp.headers.get("x-requests-remaining", "?"))
+    return resp.json()
 
 
 def fetch_odds_api(api_key: str) -> dict:
     """
-    Fetch government-winner market from the-odds-api.com.
+    Fetch federal government-winner AND available state election markets from
+    the-odds-api.com.
 
-    Returns a dict with the same shape as fetch_betfair() (national only;
-    seat-by-seat markets are rarely available via The Odds API).
+    Returns:
+        {
+            "source": "the-odds-api",
+            "national": { "alp_majority": {...}, "coalition_majority": {...} },
+            "seats": {},
+            "state_elections": {
+                "vic": { "election_name": ..., "alp_win": {...}, "coalition_win": {...} },
+                ...  (only states with active markets)
+            }
+        }
     """
-    result = {"source": "the-odds-api", "national": {}, "seats": {}}
+    result: dict = {"source": "the-odds-api", "national": {}, "seats": {}, "state_elections": {}}
 
     try:
-        # List available sports first to find the AU politics key
+        # ── Fetch sports list (1 request) ──────────────────────────────────────
         sports_resp = requests.get(
             f"{ODDS_API_BASE}/sports",
             params={"apiKey": api_key},
@@ -314,73 +386,100 @@ def fetch_odds_api(api_key: str) -> dict:
         )
         sports_resp.raise_for_status()
         sports = sports_resp.json()
-        sport_keys = [s["key"] for s in sports if "australia" in s.get("title", "").lower()
-                      or "politic" in s.get("group", "").lower()]
 
-        if not sport_keys:
-            logger.warning("Odds API: no Australian politics sport found. Available: %s",
-                           [s["key"] for s in sports[:10]])
-            return result
+        # Build lookup: sport title (lower) → sport key
+        sport_by_title = {s.get("title", "").lower(): s["key"] for s in sports}
+        all_titles_lower = list(sport_by_title.keys())
 
-        sport_key = sport_keys[0]
-        logger.info("Odds API: using sport key '%s'", sport_key)
+        # ── Federal election ───────────────────────────────────────────────────
+        federal_keys = [
+            s["key"] for s in sports
+            if "australia" in s.get("title", "").lower()
+            and ("election" in s.get("title", "").lower() or "politic" in s.get("group", "").lower())
+        ]
+        if not federal_keys:
+            # Broader fallback: any AU politics
+            federal_keys = [
+                s["key"] for s in sports
+                if "australia" in s.get("title", "").lower()
+                or "politic" in s.get("group", "").lower()
+            ]
 
-        # Fetch odds for the selected sport
-        odds_resp = requests.get(
-            f"{ODDS_API_BASE}/sports/{sport_key}/odds",
-            params={
-                "apiKey": api_key,
-                "regions": "au",
-                "markets": "h2h",
-                "oddsFormat": "decimal",
-            },
-            timeout=10,
-        )
-        odds_resp.raise_for_status()
-        events = odds_resp.json()
+        if federal_keys:
+            sport_key = federal_keys[0]
+            logger.info("Odds API: federal market sport key '%s'", sport_key)
+            events = _get_odds_for_sport(api_key, sport_key)
+            for event in events:
+                name_lower = event.get("sport_title", event.get("home_team", "")).lower()
+                # Skip obvious state matches at the federal level
+                if any(term in name_lower for state_terms in STATE_SEARCH_TERMS.values() for term in state_terms):
+                    continue
+                parsed = _parse_odds_event(event)
+                for outcome_name, odds in parsed.items():
+                    n = outcome_name.lower()
+                    if "labor" in n or "alp" in n:
+                        result["national"]["alp_majority"] = {
+                            **odds,
+                            "implied_2pp": prob_to_implied_2pp(odds["implied_prob"], SIGMA_NATIONAL),
+                        }
+                    elif "coalition" in n or "liberal" in n:
+                        result["national"]["coalition_majority"] = odds
+                if result["national"]:
+                    break  # found the federal market
+        else:
+            logger.warning("Odds API: no Australian federal election market found. "
+                           "Available sports: %s", [s["key"] for s in sports[:15]])
 
-        if not events:
-            logger.warning("Odds API: no events found for sport '%s'", sport_key)
-            return result
+        # ── State elections ────────────────────────────────────────────────────
+        for state_code, search_terms in STATE_SEARCH_TERMS.items():
+            # Find a matching sport by title
+            matched_key = None
+            for title_lower, key in sport_by_title.items():
+                if any(term in title_lower for term in search_terms):
+                    matched_key = key
+                    break
 
-        # Use the first event (most likely the federal government market)
-        event = events[0]
-        bookmakers = event.get("bookmakers", [])
-        if not bookmakers:
-            return result
+            if not matched_key:
+                continue  # no market for this state right now
 
-        # Aggregate odds across bookmakers (simple mean)
-        outcome_prices: dict[str, list[float]] = {}
-        for bm in bookmakers:
-            for market in bm.get("markets", []):
-                if market.get("key") == "h2h":
-                    for outcome in market.get("outcomes", []):
-                        name = outcome["name"]
-                        price = outcome["price"]
-                        outcome_prices.setdefault(name, []).append(price)
+            try:
+                events = _get_odds_for_sport(api_key, matched_key)
+            except Exception as e:
+                logger.warning("Odds API: error fetching %s state market: %s", state_code.upper(), e)
+                continue
 
-        if not outcome_prices:
-            return result
+            if not events:
+                continue
 
-        avg_odds = {k: sum(v) / len(v) for k, v in outcome_prices.items()}
-        probs = remove_overround(avg_odds)
+            # Use the first event for this state
+            parsed = _parse_odds_event(events[0])
+            if not parsed:
+                continue
 
-        for name, prob in probs.items():
-            n = name.lower()
-            if "labor" in n or "alp" in n:
-                result["national"]["alp_majority"] = {
-                    "decimal_odds": round(avg_odds[name], 2),
-                    "implied_prob": round(prob, 4),
-                    "implied_2pp": prob_to_implied_2pp(prob, SIGMA_NATIONAL),
-                }
-            elif "coalition" in n or "liberal" in n:
-                result["national"]["coalition_majority"] = {
-                    "decimal_odds": round(avg_odds[name], 2),
-                    "implied_prob": round(prob, 4),
-                }
+            meta = STATE_META.get(state_code, {})
+            state_entry: dict = {
+                "source": "the-odds-api",
+                **meta,
+            }
 
-        logger.info("Odds API: %s requests remaining this month",
-                    odds_resp.headers.get("x-requests-remaining", "?"))
+            for outcome_name, odds in parsed.items():
+                n = outcome_name.lower()
+                if "labor" in n or "alp" in n:
+                    state_entry["alp_win"] = odds
+                elif "liberal" in n or "coalition" in n or "lnp" in n:
+                    state_entry["coalition_win"] = odds
+                else:
+                    # Preserve any other runner (e.g. Greens, minor parties)
+                    safe_key = outcome_name.lower().replace(" ", "_").replace("'", "")
+                    state_entry[f"other_{safe_key}"] = odds
+
+            result["state_elections"][state_code] = state_entry
+            logger.info("Odds API: found %s state election market (%d outcomes)",
+                        state_code.upper(), len(parsed))
+
+        if result["state_elections"]:
+            logger.info("Odds API: state election markets found: %s",
+                        list(result["state_elections"].keys()))
 
     except Exception as e:
         logger.warning("Odds API: error: %s", e)
@@ -447,6 +546,16 @@ def run(force_source: str | None = None) -> dict:
     if output is None:
         logger.info("Using manual placeholder data from %s", MANUAL_JSON)
         output = load_manual()
+
+    # If a live source was used but has no state_elections, fill from manual
+    # so the frontend always has at least the placeholder state data.
+    if output.get("source") != "manual" and not output.get("state_elections"):
+        manual = load_manual()
+        if manual.get("state_elections"):
+            output["state_elections"] = manual["state_elections"]
+            logger.info("State elections: no live markets found — using manual placeholder")
+
+    output.setdefault("state_elections", {})
 
     # Attach metadata
     output["generated"] = date.today().isoformat()
