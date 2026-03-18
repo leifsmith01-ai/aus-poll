@@ -3028,6 +3028,8 @@ export default function App() {
         "Grn (trend)": hasEnough ? wavg(inWindow.map(q => ({ ...q, v: q.grn }))) : null,
         "ON (trend)": onPts.length >= 2 ? wavg(onPts) : null,
         "2PP (trend)": tppPts.length >= 2 ? wavg(tppPts) : null,
+        "2PP (Coal)": p.tpp != null ? +(100 - p.tpp).toFixed(1) : null,
+        "Coal 2PP (trend)": tppPts.length >= 2 ? +(100 - wavg(tppPts)).toFixed(1) : null,
       };
     });
   }, [polls]);
@@ -3586,13 +3588,13 @@ export default function App() {
 
           {/* Estimated aggregate 2PP chart */}
           <div style={panelStyle}>
-            <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Estimated aggregate 2PP (ALP)</div>
-            <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>Thick line = weighted aggregate trend (30-day window, decay + sample-size weighted) · Open circles = polls reporting 2PP directly · Polls reporting only primaries are imputed using 2022 AEC preference flows</div>
+            <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Estimated aggregate 2PP</div>
+            <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>Thick lines = weighted aggregate trend (30-day window, decay + sample-size weighted) · Open circles = polls reporting 2PP directly · Polls reporting only primaries are imputed using 2022 AEC preference flows</div>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-                <YAxis domain={[46, 62]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <YAxis domain={[38, 62]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
                 <Tooltip formatter={(v, name) => [v != null ? `${v}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <ReferenceLine y={50} stroke="#9CA3AF" strokeDasharray="5 5" label={{ value: "50%", fontSize: 10, fill: "#9CA3AF", position: "insideRight" }} />
@@ -3601,14 +3603,18 @@ export default function App() {
                     y={BETTING_ODDS.national.alp_majority.implied_2pp}
                     stroke="#7C3AED"
                     strokeDasharray="4 3"
-                    label={{ value: `Mkt: ${BETTING_ODDS.national.alp_majority.implied_2pp}%`, fontSize: 10, fill: "#7C3AED", position: "insideRight" }}
+                    label={{ value: `Mkt ALP: ${BETTING_ODDS.national.alp_majority.implied_2pp}%`, fontSize: 10, fill: "#7C3AED", position: "insideRight" }}
                   />
                 )}
-                <Line type="linear" dataKey="2PP (ALP)" stroke="#DC2626" strokeWidth={0} dot={{ r: 4, fill: "none", stroke: "#DC2626", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name="2PP (ALP) — reported" />
-                <Line type="monotone" dataKey="2PP (trend)" stroke="#991B1B" strokeWidth={3} dot={false} connectNulls name="2PP trend" />
+                {/* Individual poll dots — open circles */}
+                <Line type="linear" dataKey="2PP (ALP)" stroke="#DC2626" strokeWidth={0} dot={{ r: 4, fill: "none", stroke: "#DC2626", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name="ALP 2PP (reported)" />
+                <Line type="linear" dataKey="2PP (Coal)" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 4, fill: "none", stroke: "#1D4ED8", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name="Coal 2PP (reported)" />
+                {/* Weighted aggregate trend lines */}
+                <Line type="monotone" dataKey="2PP (trend)" stroke="#991B1B" strokeWidth={3} dot={false} connectNulls name="ALP 2PP trend" />
+                <Line type="monotone" dataKey="Coal 2PP (trend)" stroke="#1E40AF" strokeWidth={3} dot={false} connectNulls name="Coal 2PP trend" />
               </LineChart>
             </ResponsiveContainer>
-            <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>Open circles = polls reporting 2PP directly · Thick line = weighted aggregate (includes imputed 2PP from primaries)</div>
+            <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>Open circles = polls reporting 2PP directly · Thick lines = weighted aggregate (includes imputed 2PP from primaries)</div>
           </div>
 
           {/* Polls table */}
