@@ -2,7 +2,7 @@
 // Tabs: Overview · Seats · Polls · Model
 // All data, config and logic inlined — no external local imports.
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
@@ -2277,10 +2277,10 @@ function TcpBar({ tcp, winnerParty }) {
 }
 
 function useIsMobile(breakpoint = 768) {
-  const [w, setW] = React.useState(
+  const [w, setW] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1024
   );
-  React.useEffect(() => {
+  useEffect(() => {
     const handle = () => setW(window.innerWidth);
     window.addEventListener("resize", handle);
     return () => window.removeEventListener("resize", handle);
