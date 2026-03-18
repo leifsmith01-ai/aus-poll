@@ -293,10 +293,7 @@ def fetch_betfair(app_key: str, session_token: str, seat_market_ids: dict[str, s
 # ── The Odds API ───────────────────────────────────────────────────────────────
 
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
-
-# Odds API sport key for Australian politics.
-# Run: GET /sports to discover available keys near an election.
-ODDS_API_AU_POLITICS_SPORT = "politics_aus"
+# Sport key for AU politics is discovered dynamically from /sports — no hardcoded key needed.
 
 
 def fetch_odds_api(api_key: str) -> dict:
@@ -382,7 +379,6 @@ def fetch_odds_api(api_key: str) -> dict:
                     "implied_prob": round(prob, 4),
                 }
 
-        remaining = requests.get("", headers={"X-RateLimit-Requests-Remaining": "?"})
         logger.info("Odds API: %s requests remaining this month",
                     odds_resp.headers.get("x-requests-remaining", "?"))
 
