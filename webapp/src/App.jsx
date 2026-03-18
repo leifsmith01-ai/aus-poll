@@ -2277,19 +2277,19 @@ function TcpBar({ tcp, winnerParty }) {
 }
 
 const STYLES = {
-  panel:        { background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "16px 20px", marginBottom: 16 },
-  sectionHead:  { fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 10 },
+  panel:        { background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: "18px 22px", marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)" },
+  sectionHead:  { fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: "#9CA3AF", marginBottom: 10 },
   panelTitle:   { fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 },
-  sectionTitle: { fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 },
-  statCard:     { background: "#fff",    border: "1px solid #E5E7EB", borderRadius: 8, padding: "12px 16px" },
-  metricCard:   { background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 8, padding: "12px 16px" },
-  tableHead:    { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280", background: "#F9FAFB", padding: "10px 12px", textAlign: "left" },
+  sectionTitle: { fontSize: 21, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" },
+  statCard:     { background: "#fff",    border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" },
+  metricCard:   { background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" },
+  tableHead:    { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#6B7280", background: "#F9FAFB", padding: "10px 12px", textAlign: "left" },
   tableCell:    { padding: "9px 12px" },
-  input:        { border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 9px", fontSize: 13, outline: "none" },
-  btnPrimary:   { padding: "7px 14px", background: "#1D4ED8", color: "#fff",    borderRadius: 6, fontSize: 13, fontWeight: 600, border: "none",                  cursor: "pointer" },
-  btnSecondary: { padding: "7px 14px", background: "#F3F4F6", color: "#374151", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #D1D5DB",    cursor: "pointer" },
-  btnDanger:    { padding: "7px 14px", background: "#FEF2F2", color: "#DC2626", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #FECACA",    cursor: "pointer" },
-  btnInfo:      { padding: "7px 14px", background: "#F0F9FF", color: "#0369A1", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #BAE6FD",    cursor: "pointer" },
+  input:        { border: "1px solid #D1D5DB", borderRadius: 7, padding: "6px 10px", fontSize: 13, outline: "none", background: "#fff" },
+  btnPrimary:   { padding: "7px 16px", background: "#1D4ED8", color: "#fff",    borderRadius: 7, fontSize: 13, fontWeight: 600, border: "none",                  cursor: "pointer", letterSpacing: "0.01em" },
+  btnSecondary: { padding: "7px 16px", background: "#F8FAFC", color: "#374151", borderRadius: 7, fontSize: 13, fontWeight: 600, border: "1px solid #D1D5DB",    cursor: "pointer", letterSpacing: "0.01em" },
+  btnDanger:    { padding: "7px 16px", background: "#FEF2F2", color: "#DC2626", borderRadius: 7, fontSize: 13, fontWeight: 600, border: "1px solid #FECACA",    cursor: "pointer", letterSpacing: "0.01em" },
+  btnInfo:      { padding: "7px 16px", background: "#F0F9FF", color: "#0369A1", borderRadius: 7, fontSize: 13, fontWeight: 600, border: "1px solid #BAE6FD",    cursor: "pointer", letterSpacing: "0.01em" },
 };
 
 function TallyBar({ seats, useModelled = false }) {
@@ -2385,7 +2385,7 @@ export default function App() {
   const [marginFilter, setMarginFilter] = useState(new Set(MARGINS));
   const [sortKey, setSortKey] = useState("margin");
   const [sortDir, setSortDir] = useState("asc");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("model");
   // Overview uses all elections; Model uses only elections with a full model built
   const [selectedOverviewId, setSelectedOverviewId] = useState("federal_2025");
   const [selectedModelId, setSelectedModelId] = useState("federal_2025");
@@ -3146,10 +3146,10 @@ export default function App() {
   );
 
   const tabs = [
+    { id: "model",    label: `Model${hasChanges ? " ●" : ""}` },
     { id: "overview", label: "Overview" },
-    { id: "seats", label: "Seats" },
-    { id: "polls", label: "Polls" },
-    { id: "model", label: `Model${hasChanges ? " ●" : ""}` },
+    { id: "seats",    label: "Seats" },
+    { id: "polls",    label: "Polls" },
   ];
 
   const panelStyle = STYLES.panel;
@@ -3157,16 +3157,26 @@ export default function App() {
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: "#F3F4F6", minHeight: "100vh" }}>
+    <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: "#F1F5F9", minHeight: "100vh" }}>
 
       {/* ── Header ── */}
-      <div style={{ background: "#111827", color: "#fff", padding: "0 20px", display: "flex", alignItems: "center", gap: 16, height: 50, position: "sticky", top: 0, zIndex: 100 }}>
-        <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-0.02em", marginRight: 8 }}>🦘 AU Election Dashboard</span>
+      <div style={{ background: "#0F172A", color: "#fff", padding: "0 24px", display: "flex", alignItems: "center", gap: 4, height: 56, position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-0.02em", marginRight: 16, whiteSpace: "nowrap", color: "#F8FAFC" }}>🇦🇺 Australian Election Dashboard</span>
         {tabs.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
             style={{
-              background: activeTab === t.id ? "#374151" : "transparent", color: activeTab === t.id ? "#fff" : "#9CA3AF",
-              border: "none", padding: "5px 13px", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 500
+              background: "transparent",
+              color: activeTab === t.id ? "#fff" : "#94A3B8",
+              border: "none",
+              borderBottom: activeTab === t.id ? "2px solid #3B82F6" : "2px solid transparent",
+              padding: "0 14px",
+              height: 56,
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: activeTab === t.id ? 600 : 500,
+              transition: "color 0.15s, border-color 0.15s",
+              borderRadius: 0,
+              letterSpacing: "0.01em",
             }}>
             {t.label}
           </button>
@@ -3592,7 +3602,7 @@ export default function App() {
                 </div>
                 <p style={{ color: "#6B7280", fontSize: 13, margin: 0 }}>
                   {el.modelEnabled
-                    ? `${el.date} · ${el.chamber} · Adjust primary vote swings and preference flows.`
+                    ? `${el.date} · ${el.chamber} · Adjust primary vote shares and preference flows to model seat outcomes across all ${el.totalSeats} electorates.`
                     : `${el.date} · ${el.chamber} · ${el.totalSeats} seats · Majority: ${el.majority}`}
                 </p>
               </div>
