@@ -3737,7 +3737,7 @@ export default function App() {
             })()}
 
             {/* ── Federal scenario builder ── */}
-            {el.modelEnabled && selectedModelId === "federal_2025" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
+            {el.modelEnabled && selectedModelId === "federal_2025" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "320px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
 
               {/* ── Controls panel ── */}
               <div>
@@ -4508,7 +4508,7 @@ export default function App() {
             </div>}
 
             {/* ── VIC scenario builder ── */}
-            {el.modelEnabled && selectedModelId === "vic_2022" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
+            {el.modelEnabled && selectedModelId === "vic_2022" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "320px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
 
               {/* ── VIC Controls panel ── */}
               <div>
@@ -4769,7 +4769,7 @@ export default function App() {
               const projMaj = alpProj >= majority ? "ALP majority" : (coalProj >= majority ? `${coalLabel} majority` : "Hung parliament");
               const majColor = alpProj >= majority ? "#DC2626" : (coalProj >= majority ? "#1D4ED8" : "#F59E0B");
 
-              return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
+              return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "320px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
                 {/* Controls */}
                 <div>
                   <div style={panelStyle}>
@@ -4971,7 +4971,7 @@ export default function App() {
               const indProj = tasProjected.ind || 0;
               const projMaj = coalProj >= majority ? "Coalition majority" : alpProj >= majority ? "ALP majority" : "Hung parliament";
               const majColor = coalProj >= majority ? "#1D4ED8" : alpProj >= majority ? "#DC2626" : "#F59E0B";
-              return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
+              return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "320px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
                 <div>
                   <div style={panelStyle}>
                     <div style={sectionHead}>Statewide primary vote %</div>
@@ -5071,7 +5071,7 @@ export default function App() {
               const grnProj = actProjected.grn || 0;
               const projMaj = alpProj >= majority ? "ALP majority" : coalProj >= majority ? "Coalition majority" : "Hung parliament";
               const majColor = alpProj >= majority ? "#DC2626" : coalProj >= majority ? "#1D4ED8" : "#F59E0B";
-              return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
+              return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "320px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
                 <div>
                   <div style={panelStyle}>
                     <div style={sectionHead}>Statewide primary vote %</div>
