@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { Analytics } from "@vercel/analytics/react";
 import DEMOGRAPHICS from "./data/demographics.js";
+import BETTING_ODDS from "./data/betting_odds.json";
 
 // VIC_SEATS_KNOWN removed — full 88-seat data is in _VS / VIC_SEATS below.
 
@@ -3166,6 +3167,7 @@ export default function App() {
     { id: "overview", label: "Overview" },
     { id: "seats",    label: "Seats" },
     { id: "polls",    label: "Polls" },
+    { id: "markets",  label: "Markets" },
   ];
 
   const panelStyle = isMobile ? { ...STYLES.panel, padding: "14px 14px" } : STYLES.panel;
@@ -3566,6 +3568,14 @@ export default function App() {
                 <Tooltip formatter={(v, name) => [v != null ? `${v}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <ReferenceLine y={50} stroke="#9CA3AF" strokeDasharray="5 5" label={{ value: "50%", fontSize: 10, fill: "#9CA3AF", position: "insideRight" }} />
+                {BETTING_ODDS?.national?.alp_majority?.implied_2pp != null && (
+                  <ReferenceLine
+                    y={BETTING_ODDS.national.alp_majority.implied_2pp}
+                    stroke="#7C3AED"
+                    strokeDasharray="4 3"
+                    label={{ value: `Mkt: ${BETTING_ODDS.national.alp_majority.implied_2pp}%`, fontSize: 10, fill: "#7C3AED", position: "insideRight" }}
+                  />
+                )}
                 {/* Raw poll scatter (strokeWidth=0 = dots only, no connecting line) */}
                 <Line type="linear" dataKey="ALP" stroke="#DC2626" strokeWidth={0} dot={{ r: 3, fill: "#DC2626" }} activeDot={{ r: 4 }} legendType="circle" />
                 <Line type="linear" dataKey="Coalition" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 3, fill: "#1D4ED8" }} activeDot={{ r: 4 }} legendType="circle" />
@@ -4066,8 +4076,8 @@ export default function App() {
                       </div>
 
                       {/* Column headers */}
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 70px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4 }}>
-                        {[["Seat", "#374151"], ["State", "#6B7280"], ["2025", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP win%", "#6B7280"], ["", ""]].map(([label, color], i) => (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 70px 70px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4 }}>
+                        {[["Seat", "#374151"], ["State", "#6B7280"], ["2025", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP win%", "#6B7280"], ["Market", "#7C3AED"], ["", ""]].map(([label, color], i) => (
                           <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                         ))}
                       </div>
@@ -4087,11 +4097,33 @@ export default function App() {
                           const seatPrefFlows = ov.prefFlows ?? {};
                           const hasSeatOverrides = Object.keys(ov).some(k => k !== "prefFlows" && ov[k] != null)
                             || Object.values(seatPrefFlows).some(v => v != null);
+                          // ── Betting market cell for this seat ──────────────────────────────
+                          const mkt = BETTING_ODDS?.seats?.[seat.name];
+                          let mktDisplay = "—";
+                          let mktColor = "#9CA3AF";
+                          let mktTitle = "";
+                          if (mkt) {
+                            if (mkt.implied_2pp_alp != null) {
+                              const modelledAlp2pp = seat.modelled?.projAlp2pp;
+                              const diff = modelledAlp2pp != null ? Math.abs(mkt.implied_2pp_alp - modelledAlp2pp) : 0;
+                              mktDisplay = `${mkt.implied_2pp_alp.toFixed(1)}%`;
+                              mktColor = diff > 5 ? "#DC2626" : diff > 3 ? "#D97706" : "#059669";
+                              mktTitle = modelledAlp2pp != null
+                                ? `Market implied 2PP: ${mkt.implied_2pp_alp}% · Model: ${modelledAlp2pp?.toFixed(1)}% · Δ${diff.toFixed(1)}pp`
+                                : `Market implied 2PP: ${mkt.implied_2pp_alp}%`;
+                            } else if (mkt.finalist_a_prob != null) {
+                              const pct = Math.round(mkt.finalist_a_prob * 100);
+                              mktDisplay = `${pct}% ${mkt.finalist_a}`;
+                              mktColor = "#7C3AED";
+                              mktTitle = `${mkt.finalist_a} vs ${mkt.finalist_b} final · ${mkt.finalist_a}: ${pct}%`;
+                            }
+                          }
+
                           return (
                             <div key={seat.id}>
                               <div onClick={() => setExpandedModelSeatId(prev => prev === seat.id ? null : seat.id)}
                                 style={{
-                                  display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px", gap: 4, alignItems: "center",
+                                  display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px 70px", gap: 4, alignItems: "center",
                                   padding: "5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
                                   borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
                                   opacity: isSafe ? 0.55 : 1,
@@ -4125,6 +4157,9 @@ export default function App() {
                                 <span style={{ fontSize: 10, color: changed ? projColor : "#9CA3AF", fontWeight: 600 }}>
                                   {changed ? "CHANGED" : ""}
                                   {hasSeatOverrides && <span style={{ marginLeft: 4, fontSize: 9, color: "#6B7280", fontWeight: 700 }}>⚙</span>}
+                                </span>
+                                <span title={mktTitle} style={{ fontSize: 11, fontWeight: mkt ? 700 : 400, color: mktColor, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                  {mktDisplay}
                                 </span>
                               </div>
                               {isExpanded && (
@@ -5411,6 +5446,212 @@ export default function App() {
                   )}
                 </div>
               </>)}
+
+          </div>
+        );
+      })()}
+
+      {/* ══════════════════════ MARKETS TAB ═══════════════════════════════════ */}
+      {activeTab === "markets" && (() => {
+        const mktNational = BETTING_ODDS?.national ?? {};
+        const mktSeats = BETTING_ODDS?.seats ?? {};
+        const mktSource = BETTING_ODDS?.source ?? "unknown";
+        const mktGenerated = BETTING_ODDS?.generated ?? "";
+        const isManual = mktSource === "manual";
+
+        const sourceBadge = {
+          betfair:      { label: "Betfair Exchange", color: "#059669", bg: "#D1FAE5" },
+          "the-odds-api": { label: "The Odds API", color: "#1D4ED8", bg: "#DBEAFE" },
+          manual:       { label: "Manual placeholder", color: "#D97706", bg: "#FEF3C7" },
+        }[mktSource] ?? { label: mktSource, color: "#6B7280", bg: "#F3F4F6" };
+
+        const alpMajority = mktNational.alp_majority;
+        const coalMajority = mktNational.coalition_majority;
+
+        // Seat rows sorted by finalist_a_prob descending (most contested first)
+        const seatRows = Object.entries(mktSeats).sort(([, a], [, b]) =>
+          Math.min(a.finalist_a_prob, a.finalist_b_prob) - Math.min(b.finalist_a_prob, b.finalist_b_prob)
+        );
+
+        const groupColor = {
+          alp: "#DC2626", coalition: "#1D4ED8", greens: "#059669",
+          teal: "#0891B2", on: "#B45309", other: "#6B7280",
+        };
+
+        return (
+          <div style={{ padding: isMobile ? "14px 16px" : "20px 24px", maxWidth: 960, margin: "0 auto" }}>
+
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+              <div>
+                <h2 style={STYLES.sectionTitle}>Betting Markets</h2>
+                <p style={{ color: "#6B7280", fontSize: 13, margin: 0 }}>
+                  Market-implied probabilities and estimated 2PP values. Read-only overlay — does not affect the model.
+                </p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: sourceBadge.color, background: sourceBadge.bg, padding: "3px 8px", borderRadius: 8 }}>
+                  {sourceBadge.label}
+                </span>
+                {mktGenerated && (
+                  <span style={{ fontSize: 11, color: "#9CA3AF" }}>Updated {mktGenerated}</span>
+                )}
+              </div>
+            </div>
+
+            {isManual && (
+              <div style={{ background: "#FEF3C7", border: "1px solid #FCD34D", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#92400E" }}>
+                <strong>Placeholder data</strong> — these are illustrative values, not live market prices.
+                To fetch real odds, set <code>BETFAIR_APP_KEY</code> + <code>BETFAIR_SESSION_TOKEN</code> or <code>ODDS_API_KEY</code>
+                environment variables and run: <code>python pipeline/betting_odds.py</code>
+              </div>
+            )}
+
+            {/* National government odds */}
+            <div style={{ ...panelStyle, marginBottom: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 }}>National government odds</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+                {alpMajority && (
+                  <div style={STYLES.metricCard}>
+                    <div style={{ width: 20, height: 3, background: "#DC2626", borderRadius: 2, marginBottom: 6 }} />
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>ALP Majority</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                      <span style={{ fontSize: 28, fontWeight: 800, color: "#DC2626" }}>
+                        {(alpMajority.implied_prob * 100).toFixed(0)}%
+                      </span>
+                      <span style={{ fontSize: 13, color: "#6B7280" }}>implied</span>
+                    </div>
+                    {alpMajority.decimal_odds && (
+                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                        Odds: ${alpMajority.decimal_odds.toFixed(2)}
+                      </div>
+                    )}
+                    {alpMajority.implied_2pp != null && (
+                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                        Implied 2PP: <strong style={{ color: "#DC2626" }}>{alpMajority.implied_2pp}%</strong>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {coalMajority && (
+                  <div style={STYLES.metricCard}>
+                    <div style={{ width: 20, height: 3, background: "#1D4ED8", borderRadius: 2, marginBottom: 6 }} />
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Coalition Majority</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                      <span style={{ fontSize: 28, fontWeight: 800, color: "#1D4ED8" }}>
+                        {(coalMajority.implied_prob * 100).toFixed(0)}%
+                      </span>
+                      <span style={{ fontSize: 13, color: "#6B7280" }}>implied</span>
+                    </div>
+                    {coalMajority.decimal_odds && (
+                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                        Odds: ${coalMajority.decimal_odds.toFixed(2)}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {mktNational.hung_parliament && (
+                  <div style={STYLES.metricCard}>
+                    <div style={{ width: 20, height: 3, background: "#7C3AED", borderRadius: 2, marginBottom: 6 }} />
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Hung Parliament</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                      <span style={{ fontSize: 28, fontWeight: 800, color: "#7C3AED" }}>
+                        {(mktNational.hung_parliament.implied_prob * 100).toFixed(0)}%
+                      </span>
+                      <span style={{ fontSize: 13, color: "#6B7280" }}>implied</span>
+                    </div>
+                    {mktNational.hung_parliament.decimal_odds && (
+                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                        Odds: ${mktNational.hung_parliament.decimal_odds.toFixed(2)}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!alpMajority && !coalMajority && (
+                  <div style={{ fontSize: 13, color: "#9CA3AF", padding: "12px 0" }}>
+                    No national market data available.
+                  </div>
+                )}
+              </div>
+              <div style={{ marginTop: 12, fontSize: 11, color: "#9CA3AF" }}>
+                Implied 2PP uses: 2PP = 50 + {BETTING_ODDS?.sigma_national ?? 1.5}pp × Φ⁻¹(P_win) · Per-seat σ = {BETTING_ODDS?.sigma_per_seat ?? 2.5}pp
+              </div>
+            </div>
+
+            {/* Seat markets table */}
+            <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, overflow: "hidden", marginBottom: 14 }}>
+              <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #F3F4F6" }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>
+                  Seat markets{seatRows.length > 0 ? ` (${seatRows.length} seats)` : ""}
+                </div>
+                <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                  Only ~20–40 contested seats have liquid betting markets before an election. Sorted by contest tightness.
+                </div>
+              </div>
+              {seatRows.length === 0 ? (
+                <div style={{ padding: "20px 16px", fontSize: 13, color: "#9CA3AF", textAlign: "center" }}>
+                  No seat market data available. Run <code>python pipeline/betting_odds.py</code> with API keys to fetch seat-level markets.
+                </div>
+              ) : (
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid #E5E7EB", background: "#F9FAFB" }}>
+                      {["Seat", "Finalist A", "Prob", "Finalist B", "Prob", "Implied 2PP (ALP)", "Source"].map((h, i) => (
+                        <th key={i} style={{ padding: "9px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#6B7280" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {seatRows.map(([seatName, mkt], i) => {
+                      const faColor = groupColor[mkt.finalist_a] ?? "#6B7280";
+                      const fbColor = groupColor[mkt.finalist_b] ?? "#6B7280";
+                      const tightnessColor = Math.min(mkt.finalist_a_prob, mkt.finalist_b_prob) > 0.4
+                        ? "#DC2626" : Math.min(mkt.finalist_a_prob, mkt.finalist_b_prob) > 0.3
+                          ? "#D97706" : "#374151";
+                      return (
+                        <tr key={seatName} style={{ background: i % 2 === 0 ? "#fff" : "#FAFAFA", borderBottom: "1px solid #F3F4F6" }}>
+                          <td style={{ padding: "8px 12px", fontWeight: 600 }}>{seatName}</td>
+                          <td style={{ padding: "8px 12px" }}>
+                            <span style={{ fontWeight: 700, color: faColor, textTransform: "capitalize" }}>{mkt.finalist_a}</span>
+                          </td>
+                          <td style={{ padding: "8px 12px", fontWeight: 700, color: tightnessColor }}>
+                            {(mkt.finalist_a_prob * 100).toFixed(0)}%
+                          </td>
+                          <td style={{ padding: "8px 12px" }}>
+                            <span style={{ fontWeight: 700, color: fbColor, textTransform: "capitalize" }}>{mkt.finalist_b}</span>
+                          </td>
+                          <td style={{ padding: "8px 12px", fontWeight: 700, color: tightnessColor }}>
+                            {(mkt.finalist_b_prob * 100).toFixed(0)}%
+                          </td>
+                          <td style={{ padding: "8px 12px" }}>
+                            {mkt.implied_2pp_alp != null
+                              ? <strong style={{ color: mkt.implied_2pp_alp >= 50 ? "#DC2626" : "#1D4ED8" }}>{mkt.implied_2pp_alp}%</strong>
+                              : <span style={{ color: "#9CA3AF" }}>—</span>
+                            }
+                          </td>
+                          <td style={{ padding: "8px 12px", fontSize: 11, color: "#9CA3AF" }}>
+                            {mkt.source ?? mktSource}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Methodology note */}
+            <div style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", fontSize: 12, color: "#6B7280" }}>
+              <strong style={{ color: "#374151" }}>How odds translate to 2PP:</strong>{" "}
+              Decimal odds are converted to implied probabilities by removing the bookmaker overround
+              (normalising raw implied probs to sum to 100%). For ALP vs Coalition seats, the win
+              probability is inverted through the normal distribution:
+              {" "}<em>2PP = 50 + σ × Φ⁻¹(P_win)</em>, where σ = {BETTING_ODDS?.sigma_per_seat ?? 2.5}pp
+              (seat-level prediction uncertainty from historical calibration). For teal/Greens seats
+              with no ALP 2PP equivalent, the raw win probability is shown directly.
+              {" "}To update with live data:{" "}
+              <code style={{ background: "#E5E7EB", padding: "1px 4px", borderRadius: 4 }}>python pipeline/betting_odds.py</code>
+            </div>
 
           </div>
         );
