@@ -3019,12 +3019,14 @@ export default function App() {
       };
       const tppPts = inWindow.map(q => ({ ...q, v: imputedTpp(q) })).filter(q => q.v != null);
       const hasEnough = inWindow.length >= 2;
+      const onPts = inWindow.map(q => ({ ...q, v: q.on })).filter(q => q.v != null);
       return {
         date: label,
-        ALP: p.alp, Coalition: p.coal, Greens: p.grn, "2PP (ALP)": p.tpp,
+        ALP: p.alp, Coalition: p.coal, Greens: p.grn, ON: p.on, "2PP (ALP)": p.tpp,
         "ALP (trend)": hasEnough ? wavg(inWindow.map(q => ({ ...q, v: q.alp }))) : null,
         "Coal (trend)": hasEnough ? wavg(inWindow.map(q => ({ ...q, v: q.coal }))) : null,
         "Grn (trend)": hasEnough ? wavg(inWindow.map(q => ({ ...q, v: q.grn }))) : null,
+        "ON (trend)": onPts.length >= 2 ? wavg(onPts) : null,
         "2PP (trend)": tppPts.length >= 2 ? wavg(tppPts) : null,
       };
     });
@@ -3556,15 +3558,41 @@ export default function App() {
             </div>
           )}
 
-          {/* Trend chart */}
+          {/* Primary vote trend chart */}
           <div style={panelStyle}>
-            <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Polling trends</div>
+            <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Primary vote trends</div>
             <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>Thick lines = weighted aggregate (30-day window, decay + sample-size weighted) · Dots = individual polls</div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
-                <YAxis domain={[0, 65]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <YAxis domain={[0, 50]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                <Tooltip formatter={(v, name) => [v != null ? `${v}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB" }} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                {/* Raw poll scatter (strokeWidth=0 = dots only, no connecting line) */}
+                <Line type="linear" dataKey="ALP" stroke="#DC2626" strokeWidth={0} dot={{ r: 3, fill: "#DC2626" }} activeDot={{ r: 4 }} legendType="circle" />
+                <Line type="linear" dataKey="Coalition" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 3, fill: "#1D4ED8" }} activeDot={{ r: 4 }} legendType="circle" />
+                <Line type="linear" dataKey="Greens" stroke="#059669" strokeWidth={0} dot={{ r: 3, fill: "#059669" }} activeDot={{ r: 4 }} legendType="circle" />
+                <Line type="linear" dataKey="ON" stroke="#F97316" strokeWidth={0} dot={{ r: 3, fill: "#F97316" }} activeDot={{ r: 4 }} legendType="circle" name="One Nation" />
+                {/* Weighted aggregate trend lines */}
+                <Line type="monotone" dataKey="ALP (trend)" stroke="#DC2626" strokeWidth={2.5} dot={false} connectNulls />
+                <Line type="monotone" dataKey="Coal (trend)" stroke="#1D4ED8" strokeWidth={2.5} dot={false} connectNulls />
+                <Line type="monotone" dataKey="Grn (trend)" stroke="#059669" strokeWidth={2.5} dot={false} connectNulls />
+                <Line type="monotone" dataKey="ON (trend)" stroke="#EA580C" strokeWidth={2.5} dot={false} connectNulls name="One Nation (trend)" />
+              </LineChart>
+            </ResponsiveContainer>
+            <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>Filled dots = individual primary vote polls · Thick lines = weighted aggregate trends</div>
+          </div>
+
+          {/* Estimated aggregate 2PP chart */}
+          <div style={panelStyle}>
+            <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Estimated aggregate 2PP (ALP)</div>
+            <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>Thick line = weighted aggregate trend (30-day window, decay + sample-size weighted) · Open circles = polls reporting 2PP directly · Polls reporting only primaries are imputed using 2022 AEC preference flows</div>
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+                <YAxis domain={[46, 62]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
                 <Tooltip formatter={(v, name) => [v != null ? `${v}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <ReferenceLine y={50} stroke="#9CA3AF" strokeDasharray="5 5" label={{ value: "50%", fontSize: 10, fill: "#9CA3AF", position: "insideRight" }} />
@@ -3576,19 +3604,11 @@ export default function App() {
                     label={{ value: `Mkt: ${BETTING_ODDS.national.alp_majority.implied_2pp}%`, fontSize: 10, fill: "#7C3AED", position: "insideRight" }}
                   />
                 )}
-                {/* Raw poll scatter (strokeWidth=0 = dots only, no connecting line) */}
-                <Line type="linear" dataKey="ALP" stroke="#DC2626" strokeWidth={0} dot={{ r: 3, fill: "#DC2626" }} activeDot={{ r: 4 }} legendType="circle" />
-                <Line type="linear" dataKey="Coalition" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 3, fill: "#1D4ED8" }} activeDot={{ r: 4 }} legendType="circle" />
-                <Line type="linear" dataKey="Greens" stroke="#059669" strokeWidth={0} dot={{ r: 3, fill: "#059669" }} activeDot={{ r: 4 }} legendType="circle" />
-                <Line type="linear" dataKey="2PP (ALP)" stroke="#DC2626" strokeWidth={0} dot={{ r: 4, fill: "none", stroke: "#DC2626", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" />
-                {/* Weighted aggregate trend lines */}
-                <Line type="monotone" dataKey="ALP (trend)" stroke="#DC2626" strokeWidth={2.5} dot={false} connectNulls />
-                <Line type="monotone" dataKey="Coal (trend)" stroke="#1D4ED8" strokeWidth={2.5} dot={false} connectNulls />
-                <Line type="monotone" dataKey="Grn (trend)" stroke="#059669" strokeWidth={2.5} dot={false} connectNulls />
-                <Line type="monotone" dataKey="2PP (trend)" stroke="#991B1B" strokeWidth={3} dot={false} strokeDasharray="6 3" connectNulls />
+                <Line type="linear" dataKey="2PP (ALP)" stroke="#DC2626" strokeWidth={0} dot={{ r: 4, fill: "none", stroke: "#DC2626", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name="2PP (ALP) — reported" />
+                <Line type="monotone" dataKey="2PP (trend)" stroke="#991B1B" strokeWidth={3} dot={false} connectNulls name="2PP trend" />
               </LineChart>
             </ResponsiveContainer>
-            <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>Thick dashed dark-red = 2PP weighted trend · Open circles = individual 2PP polls · Filled dots = primary vote polls</div>
+            <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>Open circles = polls reporting 2PP directly · Thick line = weighted aggregate (includes imputed 2PP from primaries)</div>
           </div>
 
           {/* Polls table */}
