@@ -2276,6 +2276,18 @@ function TcpBar({ tcp, winnerParty }) {
   );
 }
 
+function useIsMobile(breakpoint = 768) {
+  const [w, setW] = React.useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024
+  );
+  React.useEffect(() => {
+    const handle = () => setW(window.innerWidth);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+  return w < breakpoint;
+}
+
 const STYLES = {
   panel:        { background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: "18px 22px", marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)" },
   sectionHead:  { fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: "#9CA3AF", marginBottom: 10 },
@@ -2378,6 +2390,7 @@ function PrefInput({ label, value, onChange, color = "#6B7280", historicalRange 
 
 // ─── Main dashboard ────────────────────────────────────────────────────────────
 export default function App() {
+  const isMobile = useIsMobile();
   // ── Seats tab state ──
   const [search, setSearch] = useState("");
   const [stateFilter, setStateFilter] = useState(new Set(STATES));
@@ -2389,6 +2402,9 @@ export default function App() {
   // Overview uses all elections; Model uses only elections with a full model built
   const [selectedOverviewId, setSelectedOverviewId] = useState("federal_2025");
   const [selectedModelId, setSelectedModelId] = useState("federal_2025");
+
+  // ── Seats tab mobile state ──
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // ── Polls tab state ──
   const [polls, setPolls] = useState(INITIAL_POLLS);
@@ -3160,27 +3176,57 @@ export default function App() {
     <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: "#F1F5F9", minHeight: "100vh" }}>
 
       {/* ── Header ── */}
-      <div style={{ background: "#0F172A", color: "#fff", padding: "0 24px", display: "flex", alignItems: "center", gap: 4, height: 56, position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-0.02em", marginRight: 16, whiteSpace: "nowrap", color: "#F8FAFC" }}>🇦🇺 Australian Election Dashboard</span>
-        {tabs.map(t => (
-          <button key={t.id} onClick={() => setActiveTab(t.id)}
-            style={{
-              background: "transparent",
-              color: activeTab === t.id ? "#fff" : "#94A3B8",
-              border: "none",
-              borderBottom: activeTab === t.id ? "2px solid #3B82F6" : "2px solid transparent",
-              padding: "0 14px",
-              height: 56,
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: activeTab === t.id ? 600 : 500,
-              transition: "color 0.15s, border-color 0.15s",
-              borderRadius: 0,
-              letterSpacing: "0.01em",
-            }}>
-            {t.label}
-          </button>
-        ))}
+      <div style={{ background: "#0F172A", color: "#fff", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        {/* Title row */}
+        <div style={{ padding: isMobile ? "0 16px" : "0 24px", display: "flex", alignItems: "center", gap: 4, height: isMobile ? 44 : 56 }}>
+          <span style={{ fontSize: isMobile ? 13 : 15, fontWeight: 800, letterSpacing: "-0.02em", marginRight: isMobile ? 0 : 16, whiteSpace: "nowrap", color: "#F8FAFC", flex: isMobile ? 1 : "none" }}>
+            🇦🇺 {isMobile ? "AU Election Dashboard" : "Australian Election Dashboard"}
+          </span>
+          {/* Desktop: tabs in title row */}
+          {!isMobile && tabs.map(t => (
+            <button key={t.id} onClick={() => setActiveTab(t.id)}
+              style={{
+                background: "transparent",
+                color: activeTab === t.id ? "#fff" : "#94A3B8",
+                border: "none",
+                borderBottom: activeTab === t.id ? "2px solid #3B82F6" : "2px solid transparent",
+                padding: "0 14px",
+                height: 56,
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: activeTab === t.id ? 600 : 500,
+                transition: "color 0.15s, border-color 0.15s",
+                borderRadius: 0,
+                letterSpacing: "0.01em",
+              }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        {/* Mobile: tabs row below title */}
+        {isMobile && (
+          <div style={{ display: "flex", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setActiveTab(t.id)}
+                style={{
+                  flex: 1,
+                  background: "transparent",
+                  color: activeTab === t.id ? "#fff" : "#94A3B8",
+                  border: "none",
+                  borderBottom: activeTab === t.id ? "2px solid #3B82F6" : "2px solid transparent",
+                  padding: "0 4px",
+                  height: 42,
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: activeTab === t.id ? 600 : 500,
+                  transition: "color 0.15s, border-color 0.15s",
+                  borderRadius: 0,
+                }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ══════════════════════ OVERVIEW TAB ══════════════════════════════════ */}
@@ -3197,7 +3243,7 @@ export default function App() {
         const veryMargCount = el.seats.filter(s => s.margin < 2).length;
         const incumbentColor = GROUP_CONFIG[PARTY[el.incumbentParty]?.group]?.color ?? "#374151";
         return (
-          <div style={{ padding: "20px 24px", maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ padding: isMobile ? "14px 16px" : "20px 24px", maxWidth: 900, margin: "0 auto" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 4 }}>
               <h2 style={STYLES.sectionTitle}>{el.jurisdiction} Election Results</h2>
               <select value={selectedOverviewId} onChange={e => setSelectedOverviewId(e.target.value)}
@@ -3256,9 +3302,17 @@ export default function App() {
 
       {/* ══════════════════════ SEATS TAB ═════════════════════════════════════ */}
       {activeTab === "seats" && (
-        <div style={{ display: "flex", maxWidth: 1400, margin: "0 auto" }}>
-          <aside style={{ width: 215, flexShrink: 0, padding: "16px 0 16px 16px" }}>
-            <div style={{ ...STYLES.panel, padding: "14px 16px", position: "sticky", top: 60, fontSize: 13, marginBottom: 0 }}>
+        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", maxWidth: 1400, margin: "0 auto" }}>
+          {isMobile && (
+            <div style={{ padding: "12px 16px 0" }}>
+              <button onClick={() => setShowMobileFilters(v => !v)}
+                style={{ ...STYLES.btnSecondary, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                <span>⚙</span> {showMobileFilters ? "Hide filters" : "Show filters"}
+              </button>
+            </div>
+          )}
+          <aside style={{ width: isMobile ? "100%" : 215, flexShrink: 0, padding: isMobile ? "8px 16px" : "16px 0 16px 16px", display: isMobile && !showMobileFilters ? "none" : "block" }}>
+            <div style={{ ...STYLES.panel, padding: "14px 16px", position: isMobile ? "static" : "sticky", top: isMobile ? "auto" : 90, fontSize: 13, marginBottom: 0 }}>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Search seats…"
                 style={{ ...STYLES.input, width: "100%", boxSizing: "border-box", marginBottom: 14 }} />
               <div style={sectionHead}>State / Territory</div>
@@ -3412,7 +3466,7 @@ export default function App() {
 
       {/* ══════════════════════ POLLS TAB ═════════════════════════════════════ */}
       {activeTab === "polls" && (
-        <div style={{ padding: "20px 24px", maxWidth: 1000, margin: "0 auto" }}>
+        <div style={{ padding: isMobile ? "14px 16px" : "20px 24px", maxWidth: 1000, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <div>
               <h2 style={STYLES.sectionTitle}>Polling Tracker</h2>
@@ -3591,7 +3645,7 @@ export default function App() {
           </select>
         );
         return (
-          <div style={{ padding: "20px 24px", maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ padding: isMobile ? "14px 16px" : "20px 24px", maxWidth: 1200, margin: "0 auto" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
@@ -3683,7 +3737,7 @@ export default function App() {
             })()}
 
             {/* ── Federal scenario builder ── */}
-            {el.modelEnabled && selectedModelId === "federal_2025" && <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 16, alignItems: "start" }}>
+            {el.modelEnabled && selectedModelId === "federal_2025" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
 
               {/* ── Controls panel ── */}
               <div>
@@ -4454,7 +4508,7 @@ export default function App() {
             </div>}
 
             {/* ── VIC scenario builder ── */}
-            {el.modelEnabled && selectedModelId === "vic_2022" && <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 16, alignItems: "start" }}>
+            {el.modelEnabled && selectedModelId === "vic_2022" && <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
 
               {/* ── VIC Controls panel ── */}
               <div>
@@ -4715,7 +4769,7 @@ export default function App() {
               const projMaj = alpProj >= majority ? "ALP majority" : (coalProj >= majority ? `${coalLabel} majority` : "Hung parliament");
               const majColor = alpProj >= majority ? "#DC2626" : (coalProj >= majority ? "#1D4ED8" : "#F59E0B");
 
-              return <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 16, alignItems: "start" }}>
+              return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
                 {/* Controls */}
                 <div>
                   <div style={panelStyle}>
@@ -4917,7 +4971,7 @@ export default function App() {
               const indProj = tasProjected.ind || 0;
               const projMaj = coalProj >= majority ? "Coalition majority" : alpProj >= majority ? "ALP majority" : "Hung parliament";
               const majColor = coalProj >= majority ? "#1D4ED8" : alpProj >= majority ? "#DC2626" : "#F59E0B";
-              return <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 16, alignItems: "start" }}>
+              return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
                 <div>
                   <div style={panelStyle}>
                     <div style={sectionHead}>Statewide primary vote %</div>
@@ -5017,7 +5071,7 @@ export default function App() {
               const grnProj = actProjected.grn || 0;
               const projMaj = alpProj >= majority ? "ALP majority" : coalProj >= majority ? "Coalition majority" : "Hung parliament";
               const majColor = alpProj >= majority ? "#DC2626" : coalProj >= majority ? "#1D4ED8" : "#F59E0B";
-              return <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 16, alignItems: "start" }}>
+              return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "320px 1fr", gap: 16, alignItems: "start" }}>
                 <div>
                   <div style={panelStyle}>
                     <div style={sectionHead}>Statewide primary vote %</div>
@@ -5364,7 +5418,7 @@ export default function App() {
 
       {/* victoria tab removed — see Model tab → Victoria 2022 dropdown option */}
       {false && (
-        <div style={{ padding: "20px 24px", maxWidth: 960, margin: "0 auto" }}>
+        <div style={{ padding: isMobile ? "14px 16px" : "20px 24px", maxWidth: 960, margin: "0 auto" }}>
           <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 2 }}>2022 Victorian State Election</h1>
           <p style={{ color: "#6B7280", marginBottom: 18 }}>
             {VIC_2022_SUMMARY.date} · Legislative Assembly · {VIC_2022_SUMMARY.total} seats
