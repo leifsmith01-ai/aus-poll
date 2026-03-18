@@ -4078,8 +4078,8 @@ export default function App() {
                       {/* Column headers + rows — wrapped for horizontal scroll on mobile */}
                       <div style={{ overflowX: "auto" }}>
                       {/* Column headers */}
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px 70px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 520 }}>
-                        {[["Seat", "#374151"], ["State", "#6B7280"], ["2025", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP win%", "#6B7280"], ["", "#6B7280"], ["Market", "#7C3AED"]].map(([label, color], i) => (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 450 }}>
+                        {[["Seat", "#374151"], ["State", "#6B7280"], ["2025", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP win%", "#6B7280"], ["", "#6B7280"]].map(([label, color], i) => (
                           <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                         ))}
                       </div>
@@ -4099,33 +4099,11 @@ export default function App() {
                           const seatPrefFlows = ov.prefFlows ?? {};
                           const hasSeatOverrides = Object.keys(ov).some(k => k !== "prefFlows" && ov[k] != null)
                             || Object.values(seatPrefFlows).some(v => v != null);
-                          // ── Betting market cell for this seat ──────────────────────────────
-                          const mkt = BETTING_ODDS?.seats?.[seat.name];
-                          let mktDisplay = "—";
-                          let mktColor = "#9CA3AF";
-                          let mktTitle = "";
-                          if (mkt) {
-                            if (mkt.implied_2pp_alp != null) {
-                              const modelledAlp2pp = seat.modelled?.projAlp2pp;
-                              const diff = modelledAlp2pp != null ? Math.abs(mkt.implied_2pp_alp - modelledAlp2pp) : 0;
-                              mktDisplay = `${mkt.implied_2pp_alp.toFixed(1)}%`;
-                              mktColor = diff > 5 ? "#DC2626" : diff > 3 ? "#D97706" : "#059669";
-                              mktTitle = modelledAlp2pp != null
-                                ? `Market implied 2PP: ${mkt.implied_2pp_alp}% · Model: ${modelledAlp2pp?.toFixed(1)}% · Δ${diff.toFixed(1)}pp`
-                                : `Market implied 2PP: ${mkt.implied_2pp_alp}%`;
-                            } else if (mkt.finalist_a_prob != null) {
-                              const pct = Math.round(mkt.finalist_a_prob * 100);
-                              mktDisplay = `${pct}% ${mkt.finalist_a}`;
-                              mktColor = "#7C3AED";
-                              mktTitle = `${mkt.finalist_a} vs ${mkt.finalist_b} final · ${mkt.finalist_a}: ${pct}%`;
-                            }
-                          }
-
                           return (
                             <div key={seat.id}>
                               <div onClick={() => setExpandedModelSeatId(prev => prev === seat.id ? null : seat.id)}
                                 style={{
-                                  display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px 70px", gap: 4, alignItems: "center", minWidth: 520,
+                                  display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px", gap: 4, alignItems: "center", minWidth: 450,
                                   padding: "5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
                                   borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
                                   opacity: isSafe ? 0.55 : 1,
@@ -4159,9 +4137,6 @@ export default function App() {
                                 <span style={{ fontSize: 10, color: changed ? projColor : "#9CA3AF", fontWeight: 600 }}>
                                   {changed ? "CHANGED" : ""}
                                   {hasSeatOverrides && <span style={{ marginLeft: 4, fontSize: 9, color: "#6B7280", fontWeight: 700 }}>⚙</span>}
-                                </span>
-                                <span title={mktTitle} style={{ fontSize: 11, fontWeight: mkt ? 700 : 400, color: mktColor, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                  {mktDisplay}
                                 </span>
                               </div>
                               {isExpanded && (
