@@ -156,5 +156,23 @@
       "finalist_b_prob": 0.442,
       "implied_2pp_alp": 51.2
     }
+  },
+  "state_elections": {
+    "vic": {
+      "source": "manual",
+      "election_name": "2026 Victorian State Election",
+      "date": "2026-11-28",
+      "chamber": "Legislative Assembly",
+      "total_seats": 88,
+      "majority": 45,
+      "alp_win": {
+        "decimal_odds": 1.45,
+        "implied_prob": 0.69
+      },
+      "coalition_win": {
+        "decimal_odds": 3.2,
+        "implied_prob": 0.31
+      }
+    }
   }
 }

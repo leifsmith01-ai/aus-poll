@@ -5638,6 +5638,74 @@ export default function App() {
               )}
             </div>
 
+            {/* State election markets */}
+            {(() => {
+              const stateMarkets = BETTING_ODDS?.state_elections ?? {};
+              const stateEntries = Object.entries(stateMarkets);
+              if (stateEntries.length === 0) return null;
+
+              const statePartyColor = { alp: "#DC2626", coalition: "#1D4ED8" };
+
+              return (
+                <div style={{ ...panelStyle, marginBottom: 14 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 }}>State & territory elections</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
+                    {stateEntries.map(([stateCode, mkt]) => {
+                      const alpProb  = mkt.alp_win?.implied_prob;
+                      const coalProb = mkt.coalition_win?.implied_prob;
+                      const isManualState = mkt.source === "manual";
+                      const leader = alpProb != null && coalProb != null
+                        ? (alpProb >= coalProb ? "alp" : "coalition")
+                        : null;
+                      return (
+                        <div key={stateCode} style={{ ...STYLES.metricCard, position: "relative" }}>
+                          {isManualState && (
+                            <div style={{ position: "absolute", top: 8, right: 10, fontSize: 9, fontWeight: 700, color: "#D97706", background: "#FEF3C7", padding: "2px 5px", borderRadius: 4 }}>
+                              placeholder
+                            </div>
+                          )}
+                          <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 2 }}>
+                            {stateCode.toUpperCase()}
+                          </div>
+                          <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 8 }}>
+                            {mkt.election_name ?? `${stateCode.toUpperCase()} Election`}
+                            {mkt.date && <span style={{ marginLeft: 6, color: "#9CA3AF" }}>{mkt.date}</span>}
+                          </div>
+                          <div style={{ display: "flex", gap: 10 }}>
+                            {alpProb != null && (
+                              <div style={{ flex: 1, textAlign: "center" }}>
+                                <div style={{ fontSize: 10, fontWeight: 700, color: statePartyColor.alp, marginBottom: 2 }}>ALP/Labor</div>
+                                <div style={{ fontSize: 22, fontWeight: 800, color: leader === "alp" ? statePartyColor.alp : "#374151" }}>
+                                  {(alpProb * 100).toFixed(0)}%
+                                </div>
+                                {mkt.alp_win?.decimal_odds && (
+                                  <div style={{ fontSize: 11, color: "#9CA3AF" }}>${mkt.alp_win.decimal_odds.toFixed(2)}</div>
+                                )}
+                              </div>
+                            )}
+                            {coalProb != null && (
+                              <div style={{ flex: 1, textAlign: "center" }}>
+                                <div style={{ fontSize: 10, fontWeight: 700, color: statePartyColor.coalition, marginBottom: 2 }}>Coalition/Lib</div>
+                                <div style={{ fontSize: 22, fontWeight: 800, color: leader === "coalition" ? statePartyColor.coalition : "#374151" }}>
+                                  {(coalProb * 100).toFixed(0)}%
+                                </div>
+                                {mkt.coalition_win?.decimal_odds && (
+                                  <div style={{ fontSize: 11, color: "#9CA3AF" }}>${mkt.coalition_win.decimal_odds.toFixed(2)}</div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8 }}>
+                    State markets appear on The Odds API as elections approach. Only states with active markets are shown.
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Methodology note */}
             <div style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", fontSize: 12, color: "#6B7280" }}>
               <strong style={{ color: "#374151" }}>How odds translate to 2PP:</strong>{" "}
