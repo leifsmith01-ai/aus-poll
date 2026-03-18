@@ -1,0 +1,160 @@
+{
+  "generated": "2026-03-18",
+  "source": "manual",
+  "note": "Placeholder data based on typical pre-election market prices. Replace with live data by running: python pipeline/betting_odds.py",
+  "sigma_per_seat": 2.5,
+  "sigma_national": 1.5,
+  "national": {
+    "alp_majority": {
+      "decimal_odds": 1.55,
+      "implied_prob": 0.645,
+      "implied_2pp": 52.8
+    },
+    "coalition_majority": {
+      "decimal_odds": 2.9,
+      "implied_prob": 0.344
+    },
+    "hung_parliament": {
+      "decimal_odds": 5.5,
+      "implied_prob": 0.11
+    }
+  },
+  "seats": {
+    "Warringah": {
+      "source": "manual",
+      "finalist_a": "teal",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.761,
+      "finalist_b_prob": 0.239,
+      "implied_2pp_alp": null,
+      "note": "Teal vs Coalition final"
+    },
+    "Kooyong": {
+      "source": "manual",
+      "finalist_a": "teal",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.724,
+      "finalist_b_prob": 0.276,
+      "implied_2pp_alp": null,
+      "note": "Teal vs Coalition final"
+    },
+    "Mackellar": {
+      "source": "manual",
+      "finalist_a": "teal",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.699,
+      "finalist_b_prob": 0.301,
+      "implied_2pp_alp": null,
+      "note": "Teal vs Coalition final"
+    },
+    "Wentworth": {
+      "source": "manual",
+      "finalist_a": "teal",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.681,
+      "finalist_b_prob": 0.319,
+      "implied_2pp_alp": null,
+      "note": "Teal vs Coalition final"
+    },
+    "Bradfield": {
+      "source": "manual",
+      "finalist_a": "teal",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.653,
+      "finalist_b_prob": 0.347,
+      "implied_2pp_alp": null,
+      "note": "Teal vs Coalition final"
+    },
+    "Goldstein": {
+      "source": "manual",
+      "finalist_a": "teal",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.637,
+      "finalist_b_prob": 0.363,
+      "implied_2pp_alp": null,
+      "note": "Teal vs Coalition final"
+    },
+    "Melbourne": {
+      "source": "manual",
+      "finalist_a": "greens",
+      "finalist_b": "alp",
+      "finalist_a_prob": 0.582,
+      "finalist_b_prob": 0.418,
+      "implied_2pp_alp": null,
+      "note": "Greens vs ALP final"
+    },
+    "Ryan": {
+      "source": "manual",
+      "finalist_a": "greens",
+      "finalist_b": "alp",
+      "finalist_a_prob": 0.544,
+      "finalist_b_prob": 0.456,
+      "implied_2pp_alp": null,
+      "note": "Greens vs ALP final"
+    },
+    "Chifley": {
+      "source": "manual",
+      "finalist_a": "alp",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.932,
+      "finalist_b_prob": 0.068,
+      "implied_2pp_alp": 57.9
+    },
+    "Longman": {
+      "source": "manual",
+      "finalist_a": "alp",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.571,
+      "finalist_b_prob": 0.429,
+      "implied_2pp_alp": 51.8
+    },
+    "Flynn": {
+      "source": "manual",
+      "finalist_a": "coalition",
+      "finalist_b": "alp",
+      "finalist_a_prob": 0.621,
+      "finalist_b_prob": 0.379,
+      "implied_2pp_alp": 48.5
+    },
+    "Hunter": {
+      "source": "manual",
+      "finalist_a": "alp",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.844,
+      "finalist_b_prob": 0.156,
+      "implied_2pp_alp": 55.4
+    },
+    "Bonner": {
+      "source": "manual",
+      "finalist_a": "coalition",
+      "finalist_b": "alp",
+      "finalist_a_prob": 0.688,
+      "finalist_b_prob": 0.312,
+      "implied_2pp_alp": 47.1
+    },
+    "Dickson": {
+      "source": "manual",
+      "finalist_a": "coalition",
+      "finalist_b": "alp",
+      "finalist_a_prob": 0.643,
+      "finalist_b_prob": 0.357,
+      "implied_2pp_alp": 48.2
+    },
+    "Dunkley": {
+      "source": "manual",
+      "finalist_a": "alp",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.597,
+      "finalist_b_prob": 0.403,
+      "implied_2pp_alp": 51.5
+    },
+    "Deakin": {
+      "source": "manual",
+      "finalist_a": "alp",
+      "finalist_b": "coalition",
+      "finalist_a_prob": 0.558,
+      "finalist_b_prob": 0.442,
+      "implied_2pp_alp": 51.2
+    }
+  }
+}

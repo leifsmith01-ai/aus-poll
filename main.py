@@ -512,6 +512,17 @@ def _parse_args():
         help="List locally available raw files and exit",
     )
     parser.add_argument(
+        "--betting",
+        action="store_true",
+        help=(
+            "Fetch/refresh betting odds after the main pipeline. "
+            "Uses BETFAIR_APP_KEY/BETFAIR_SESSION_TOKEN if set, else ODDS_API_KEY, "
+            "else loads the manual placeholder. "
+            "Writes data/polls/betting_odds.json. "
+            "Can also be run standalone: python pipeline/betting_odds.py"
+        ),
+    )
+    parser.add_argument(
         "--verbose", "-v",
         action="store_true",
         help="Enable verbose (DEBUG) logging",
@@ -557,6 +568,13 @@ if __name__ == "__main__":
                     size_kb = Path(path).stat().st_size / 1024
                     print(f"  {key:<28} {Path(path).name}  ({size_kb:.0f} KB)")
         sys.exit(0)
+
+    if args.betting:
+        logger = logging.getLogger(__name__)
+        logger.info("Running betting odds fetch...")
+        from pipeline.betting_odds import run as run_betting
+        run_betting()
+        logger.info("Betting odds fetch complete.")
 
     if is_vic:
         election_ids = args.year or [202211, 201811]

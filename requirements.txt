@@ -21,6 +21,9 @@ uvicorn[standard]>=0.27.0
 # Progress bars (nice for long downloads/loads)
 tqdm>=4.66.0
 
+# Scientific computing (used by betting_odds.py for inverse normal CDF)
+scipy>=1.11.0
+
 # Testing
 pytest>=7.4.0
 pytest-cov>=4.1.0

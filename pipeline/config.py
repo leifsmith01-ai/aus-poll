@@ -501,6 +501,43 @@ NT_PARTIES = {
 NT_COALITION_PARTIES = {"CLP"}
 
 
+# ─── Betting odds configuration ───────────────────────────────────────────────
+# Used by pipeline/betting_odds.py to fetch and translate market prices.
+#
+# To populate national_market_id and seat_market_ids, run:
+#   python pipeline/discover_betfair_markets.py
+#
+# Betfair credentials are read from environment variables:
+#   BETFAIR_APP_KEY         — your Betfair application key (free account)
+#   BETFAIR_SESSION_TOKEN   — login session token
+#
+# The Odds API key:
+#   ODDS_API_KEY            — from the-odds-api.com (500 free req/month)
+BETTING_CONFIG = {
+    # Betfair competition ID for Australian Federal Politics.
+    # Run discover_betfair_markets.py --list-competitions to find the current value.
+    "betfair_competition_id": "6423930",
+
+    # Betfair market ID for the national government-winner market.
+    # Leave empty until discovered; the pipeline falls back to manual placeholder.
+    "national_market_id": "",
+
+    # Betfair market IDs for individual seat markets.
+    # Populated by running: python pipeline/discover_betfair_markets.py
+    # Only ~20–40 seats will have liquid markets before an election.
+    "seat_market_ids": {},
+
+    # Standard deviation of the seat-level 2PP prediction error (pp).
+    # Derived from data/calibration_report.txt.
+    # Used to convert P(win) → implied 2PP via the inverse normal CDF.
+    "sigma_per_seat": 2.5,
+
+    # National 2PP uncertainty (pp). Tighter than per-seat because
+    # errors partially cancel across 151 seats.
+    "sigma_national": 1.5,
+}
+
+
 # ─── Unified state elections registry ────────────────────────────────────────
 # Maps state abbreviation (lower-case) to its elections dict and config.
 # Useful for generic pipeline dispatching (e.g. main.py --state vic).
