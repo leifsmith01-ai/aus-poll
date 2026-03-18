@@ -3168,12 +3168,12 @@ export default function App() {
     { id: "polls",    label: "Polls" },
   ];
 
-  const panelStyle = STYLES.panel;
+  const panelStyle = isMobile ? { ...STYLES.panel, padding: "14px 14px" } : STYLES.panel;
   const sectionHead = STYLES.sectionHead;
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: "#F1F5F9", minHeight: "100vh" }}>
+    <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: "#F1F5F9", minHeight: "100vh", overflowX: "hidden" }}>
 
       {/* ── Header ── */}
       <div style={{ background: "#0F172A", color: "#fff", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
