@@ -4075,9 +4075,11 @@ export default function App() {
                         </div>
                       </div>
 
+                      {/* Column headers + rows — wrapped for horizontal scroll on mobile */}
+                      <div style={{ overflowX: "auto" }}>
                       {/* Column headers */}
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 70px 70px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4 }}>
-                        {[["Seat", "#374151"], ["State", "#6B7280"], ["2025", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP win%", "#6B7280"], ["Market", "#7C3AED"], ["", ""]].map(([label, color], i) => (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px 70px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 520 }}>
+                        {[["Seat", "#374151"], ["State", "#6B7280"], ["2025", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP win%", "#6B7280"], ["", "#6B7280"], ["Market", "#7C3AED"]].map(([label, color], i) => (
                           <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                         ))}
                       </div>
@@ -4123,7 +4125,7 @@ export default function App() {
                             <div key={seat.id}>
                               <div onClick={() => setExpandedModelSeatId(prev => prev === seat.id ? null : seat.id)}
                                 style={{
-                                  display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px 70px", gap: 4, alignItems: "center",
+                                  display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px 70px", gap: 4, alignItems: "center", minWidth: 520,
                                   padding: "5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
                                   borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
                                   opacity: isSafe ? 0.55 : 1,
@@ -4260,6 +4262,7 @@ export default function App() {
                           </div>
                         )}
                       </div>
+                      </div>{/* end overflowX scroll wrapper */}
                       <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, borderTop: "1px solid #F3F4F6", paddingTop: 8 }}>
                         {filtered.length} seats shown · Red = &lt;2pp · Amber = &lt;5pp · Faded = safe (&gt;10pp) · Bold left border = projected change · Click row to expand demographics
                       </div>
