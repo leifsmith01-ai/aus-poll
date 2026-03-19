@@ -1346,7 +1346,7 @@ const VIC_SEATS = _VS.map(([id, name, state, wp, wn, t1, t2, m]) => ({
 
 const ELECTION_DATA = {
   federal_2025: {
-    label: "Federal 2025", jurisdiction: "Federal",
+    label: "Federal", jurisdiction: "Federal",
     chamber: "House of Representatives", date: "3 May 2025",
     totalSeats: 151, majority: 76, twopp: 55.2,
     seats: SEATS,
@@ -1355,7 +1355,7 @@ const ELECTION_DATA = {
     modelEnabled: true,
   },
   nsw_2023: {
-    label: "NSW 2023", jurisdiction: "New South Wales",
+    label: "NSW", jurisdiction: "New South Wales",
     chamber: "Legislative Assembly", date: "25 March 2023",
     totalSeats: 93, majority: 47, twopp: 53.2,
     seats: NSW_SEATS,
@@ -1364,7 +1364,7 @@ const ELECTION_DATA = {
     modelEnabled: true,
   },
   vic_2022: {
-    label: "Victoria 2022", jurisdiction: "Victoria",
+    label: "Victoria", jurisdiction: "Victoria",
     chamber: "Legislative Assembly", date: "26 November 2022",
     totalSeats: 88, majority: 45, twopp: 57.3,
     seats: VIC_SEATS,
@@ -1373,7 +1373,7 @@ const ELECTION_DATA = {
     modelEnabled: true,
   },
   qld_2024: {
-    label: "Queensland 2024", jurisdiction: "Queensland",
+    label: "Queensland", jurisdiction: "Queensland",
     chamber: "Legislative Assembly", date: "26 October 2024",
     totalSeats: 93, majority: 47, twopp: 46.3,
     seats: QLD_SEATS,
@@ -1382,7 +1382,7 @@ const ELECTION_DATA = {
     modelEnabled: true,
   },
   wa_2025: {
-    label: "W. Australia 2025", jurisdiction: "Western Australia",
+    label: "W. Australia", jurisdiction: "Western Australia",
     chamber: "Legislative Assembly", date: "8 March 2025",
     totalSeats: 59, majority: 30, twopp: 63.1,
     seats: WA_SEATS,
@@ -1391,7 +1391,7 @@ const ELECTION_DATA = {
     modelEnabled: true,
   },
   sa_2022: {
-    label: "South Aus. 2022", jurisdiction: "South Australia",
+    label: "South Aus.", jurisdiction: "South Australia",
     chamber: "House of Assembly", date: "19 March 2022",
     totalSeats: 47, majority: 24, twopp: 54.9,
     seats: SA_SEATS,
@@ -1400,7 +1400,7 @@ const ELECTION_DATA = {
     modelEnabled: true,
   },
   tas_2024: {
-    label: "Tasmania 2024", jurisdiction: "Tasmania",
+    label: "Tasmania", jurisdiction: "Tasmania",
     chamber: "House of Assembly (Hare-Clark)", date: "23 March 2024",
     totalSeats: 35, majority: 18, twopp: null,
     seats: TAS_2024_SEATS,
@@ -1409,7 +1409,7 @@ const ELECTION_DATA = {
     modelEnabled: true,
   },
   act_2024: {
-    label: "ACT 2024", jurisdiction: "Australian Capital Territory",
+    label: "ACT", jurisdiction: "Australian Capital Territory",
     chamber: "Legislative Assembly (Hare-Clark)", date: "19 October 2024",
     totalSeats: 25, majority: 13, twopp: null,
     seats: ACT_2024_SEATS,
@@ -1418,7 +1418,7 @@ const ELECTION_DATA = {
     modelEnabled: true,
   },
   nt_2024: {
-    label: "N. Territory 2024", jurisdiction: "Northern Territory",
+    label: "N. Territory", jurisdiction: "Northern Territory",
     chamber: "Legislative Assembly", date: "24 August 2024",
     totalSeats: 25, majority: 13, twopp: null,
     seats: NT_SEATS,
@@ -2038,10 +2038,20 @@ function _getVicRegion(seatName) {
   return VIC_DISTRICT_REGION[seatName] ?? "outer_metro"; // default to outer_metro
 }
 
-function computeVic2pp(primaries, prefFlows) {
+function computeVic2pp(primaries, prefFlows, onTcpMatchup = null) {
   const { alp, coal, grn, ind, on } = primaries;
   const onV = on ?? 0;
   const others = Math.max(0, 100 - alp - coal - grn - ind - onV);
+  if (onTcpMatchup === "on_v_alp") {
+    const a = alp + coal * prefFlows.coal_alp_v_on + grn * prefFlows.grn_alp_v_on + ind * prefFlows.ind_alp_v_on + others * prefFlows.other_alp_v_on;
+    const onTcp = onV + coal * (1 - prefFlows.coal_alp_v_on) + grn * (1 - prefFlows.grn_alp_v_on) + ind * (1 - prefFlows.ind_alp_v_on) + others * (1 - prefFlows.other_alp_v_on);
+    return a / (a + onTcp) * 100;
+  }
+  if (onTcpMatchup === "on_v_coal") {
+    const onTcp = onV + alp * prefFlows.alp_on_v_coal + grn * prefFlows.grn_on_v_coal + ind * prefFlows.ind_on_v_coal + others * prefFlows.other_on_v_coal;
+    const c = coal + alp * (1 - prefFlows.alp_on_v_coal) + grn * (1 - prefFlows.grn_on_v_coal) + ind * (1 - prefFlows.ind_on_v_coal) + others * (1 - prefFlows.other_on_v_coal);
+    return onTcp / (onTcp + c) * 100;
+  }
   return alp + grn * prefFlows.grn_alp + ind * prefFlows.ind_alp + onV * prefFlows.on_alp + others * prefFlows.other_alp;
 }
 
@@ -2049,7 +2059,7 @@ function computeVic2pp(primaries, prefFlows) {
 // Regional multipliers reflect the historically observed pattern that inner-metro seats
 // swing more than suburban seats, which in turn swing more than regional/rural seats.
 // The useRegionalSwing parameter enables/disables regional differentiation.
-function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing = true) {
+function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing = true, onTcpMatchup = null, baseline2pp = VIC_2PP_2022) {
   const newPrim = {
     alp: Math.max(0, VIC_BASELINE_2022.alp + swings.alp),
     coal: Math.max(0, VIC_BASELINE_2022.coal + (swings.coal ?? 0)),
@@ -2057,8 +2067,8 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
     ind: Math.max(0, VIC_BASELINE_2022.ind + swings.ind),
     on: Math.max(0, VIC_BASELINE_2022.on + (swings.on ?? 0)),
   };
-  const new2pp = computeVic2pp(newPrim, prefFlows);
-  const vic2ppSwing = new2pp - VIC_2PP_2022;
+  const new2pp = computeVic2pp(newPrim, prefFlows, onTcpMatchup);
+  const vic2ppSwing = new2pp - baseline2pp;
 
   return vicSeats.map(seat => {
     const t1 = seat.tcp[0].party, t2 = seat.tcp[1].party;
@@ -2455,7 +2465,14 @@ export default function App() {
 
   // ── VIC model state ──
   const [vicPrimaries, setVicPrimaries] = useState({ alp: 38.1, coal: 31.1, grn: 12.2, ind: 5.5, on: 1.3, undecided: 0 });
-  const [vicPrefFlows, setVicPrefFlows] = useState({ grn_alp: 0.85, ind_alp: 0.60, on_alp: 0.25, other_alp: 0.43 });
+  const [vicPrefFlows, setVicPrefFlows] = useState({
+    grn_alp: 0.85, ind_alp: 0.60, on_alp: 0.25, other_alp: 0.43,
+    // ON vs ALP final flows
+    coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58,
+    // ON vs Coalition final flows
+    alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
+  });
+  const [vicOnTcp, setVicOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   // Regional swing differentiation: inner-metro seats amplify the state swing;
   // regional/rural seats respond less (calibrated from 2014-2022 VEC data).
   const [useVicRegionalSwing, setUseVicRegionalSwing] = useState(true);
@@ -2571,8 +2588,9 @@ export default function App() {
       ind: +(vicPrimaries.ind - VIC_BASELINE_2022.ind).toFixed(2),
       on: +(vicPrimaries.on - VIC_BASELINE_2022.on).toFixed(2),
     };
-    return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing);
-  }, [vicPrimaries, vicPrefFlows, useVicRegionalSwing]);
+    const baseline2pp = vicOnTcp ? computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp) : VIC_2PP_2022;
+    return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing, vicOnTcp, baseline2pp);
+  }, [vicPrimaries, vicPrefFlows, useVicRegionalSwing, vicOnTcp]);
 
   const vicProjCounts = useMemo(() => {
     const c = {};
@@ -2600,12 +2618,12 @@ export default function App() {
     vicPrimaries.grn !== 12.2 || vicPrimaries.ind !== 5.5 || vicPrimaries.on !== 1.3 ||
     (vicPrimaries.undecided || 0) > 0 ||
     vicPrefFlows.grn_alp !== 0.85 || vicPrefFlows.ind_alp !== 0.60 || vicPrefFlows.on_alp !== 0.25 || vicPrefFlows.other_alp !== 0.43 ||
-    !useVicRegionalSwing;
+    !useVicRegionalSwing || vicOnTcp !== null;
 
-  const vicNat2ppSwing = useMemo(
-    () => computeVic2pp(vicPrimaries, vicPrefFlows) - VIC_2PP_2022,
-    [vicPrimaries, vicPrefFlows]
-  );
+  const vicNat2ppSwing = useMemo(() => {
+    const baseline = vicOnTcp ? computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp) : VIC_2PP_2022;
+    return computeVic2pp(vicPrimaries, vicPrefFlows, vicOnTcp) - baseline;
+  }, [vicPrimaries, vicPrefFlows, vicOnTcp]);
   const vicUncertainty = useMemo(
     () => computeUncertainty(vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity, 45),
     [vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity]
@@ -2617,31 +2635,63 @@ export default function App() {
   const NSW_2PP = 53.2;
   const NSW_COAL = new Set(["LP", "NP"]);
   const [nswPrim, setNswPrim] = useState({ ...NSW_BL, undecided: 0 });
-  const [nswFlows, setNswFlows] = useState({ grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45 });
+  const [nswFlows, setNswFlows] = useState({
+    grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45,
+    coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58,
+    alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
+  });
+  const [nswOnTcp, setNswOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const nswModelledSeats = useMemo(() => {
     const s = { alp: nswPrim.alp - NSW_BL.alp, coal: nswPrim.coal - NSW_BL.coal, grn: nswPrim.grn - NSW_BL.grn, on: nswPrim.on - NSW_BL.on };
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - (nswPrim.ind) - onV);
-      const a = p.alp + (nswPrim.ind) * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + (nswPrim.ind) * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - nswPrim.ind - onV);
+      if (nswOnTcp === "on_v_alp") {
+        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + nswPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
+        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + nswPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
+        return a / (a + on) * 100;
+      }
+      if (nswOnTcp === "on_v_coal") {
+        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + nswPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
+        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + nswPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
+        return on / (on + c) * 100;
+      }
+      const a = p.alp + nswPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
+      const c = p.coal + nswPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    return computeModelledSeatsState(NSW_SEATS, nswPrim, compute2pp, NSW_2PP, nswFlows, NSW_COAL, s);
-  }, [nswPrim, nswFlows]);
+    const baseline2pp = nswOnTcp ? compute2pp(NSW_BL, nswFlows) : NSW_2PP;
+    return computeModelledSeatsState(NSW_SEATS, nswPrim, compute2pp, baseline2pp, nswFlows, NSW_COAL, s);
+  }, [nswPrim, nswFlows, nswOnTcp]);
   const nswProjCounts = useMemo(() => { const c = {}; nswModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [nswModelledSeats]);
   const nswBaseCounts = useMemo(() => { const c = {}; NSW_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const nswChanged = useMemo(() => nswModelledSeats.filter(s => s.modelled.changed), [nswModelledSeats]);
   const nswImplied2pp = useMemo(() => { const r = nswModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [nswModelledSeats]);
-  const nswHasChanges = Object.entries(NSW_BL).some(([k, v]) => Math.abs((nswPrim[k] ?? v) - v) > 0.05) || (nswPrim.undecided || 0) > 0 || nswFlows.grn_alp !== 0.88 || nswFlows.ind_alp !== 0.55 || nswFlows.on_alp !== 0.20 || nswFlows.other_alp !== 0.45;
+  const nswHasChanges = Object.entries(NSW_BL).some(([k, v]) => Math.abs((nswPrim[k] ?? v) - v) > 0.05) || (nswPrim.undecided || 0) > 0 || nswFlows.grn_alp !== 0.88 || nswFlows.ind_alp !== 0.55 || nswFlows.on_alp !== 0.20 || nswFlows.other_alp !== 0.45 || nswOnTcp !== null;
 
   const nswNat2ppSwing = useMemo(() => {
     const onV = nswPrim.on ?? 0;
     const other = Math.max(0, 100 - nswPrim.alp - nswPrim.coal - nswPrim.grn - nswPrim.ind - onV);
+    if (nswOnTcp === "on_v_alp") {
+      const a = nswPrim.alp + nswPrim.coal * nswFlows.coal_alp_v_on + nswPrim.grn * nswFlows.grn_alp_v_on + nswPrim.ind * nswFlows.ind_alp_v_on + other * nswFlows.other_alp_v_on;
+      const on = onV + nswPrim.coal * (1 - nswFlows.coal_alp_v_on) + nswPrim.grn * (1 - nswFlows.grn_alp_v_on) + nswPrim.ind * (1 - nswFlows.ind_alp_v_on) + other * (1 - nswFlows.other_alp_v_on);
+      const blOnV = NSW_BL.on ?? 0; const blOther = Math.max(0, 100 - NSW_BL.alp - NSW_BL.coal - NSW_BL.grn - NSW_BL.ind - blOnV);
+      const blA = NSW_BL.alp + NSW_BL.coal * nswFlows.coal_alp_v_on + NSW_BL.grn * nswFlows.grn_alp_v_on + NSW_BL.ind * nswFlows.ind_alp_v_on + blOther * nswFlows.other_alp_v_on;
+      const blOn = blOnV + NSW_BL.coal * (1 - nswFlows.coal_alp_v_on) + NSW_BL.grn * (1 - nswFlows.grn_alp_v_on) + NSW_BL.ind * (1 - nswFlows.ind_alp_v_on) + blOther * (1 - nswFlows.other_alp_v_on);
+      return a / (a + on) * 100 - blA / (blA + blOn) * 100;
+    }
+    if (nswOnTcp === "on_v_coal") {
+      const on = onV + nswPrim.alp * nswFlows.alp_on_v_coal + nswPrim.grn * nswFlows.grn_on_v_coal + nswPrim.ind * nswFlows.ind_on_v_coal + other * nswFlows.other_on_v_coal;
+      const c = nswPrim.coal + nswPrim.alp * (1 - nswFlows.alp_on_v_coal) + nswPrim.grn * (1 - nswFlows.grn_on_v_coal) + nswPrim.ind * (1 - nswFlows.ind_on_v_coal) + other * (1 - nswFlows.other_on_v_coal);
+      const blOnV = NSW_BL.on ?? 0; const blOther = Math.max(0, 100 - NSW_BL.alp - NSW_BL.coal - NSW_BL.grn - NSW_BL.ind - blOnV);
+      const blOn = blOnV + NSW_BL.alp * nswFlows.alp_on_v_coal + NSW_BL.grn * nswFlows.grn_on_v_coal + NSW_BL.ind * nswFlows.ind_on_v_coal + blOther * nswFlows.other_on_v_coal;
+      const blC = NSW_BL.coal + NSW_BL.alp * (1 - nswFlows.alp_on_v_coal) + NSW_BL.grn * (1 - nswFlows.grn_on_v_coal) + NSW_BL.ind * (1 - nswFlows.ind_on_v_coal) + blOther * (1 - nswFlows.other_on_v_coal);
+      return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
+    }
     const a = nswPrim.alp + nswPrim.ind * nswFlows.ind_alp + nswPrim.grn * nswFlows.grn_alp + onV * nswFlows.on_alp + other * nswFlows.other_alp;
     const c = nswPrim.coal + nswPrim.ind * (1 - nswFlows.ind_alp) + nswPrim.grn * (1 - nswFlows.grn_alp) + onV * (1 - nswFlows.on_alp) + other * (1 - nswFlows.other_alp);
     return a / (a + c) * 100 - NSW_2PP;
-  }, [nswPrim, nswFlows]);
+  }, [nswPrim, nswFlows, nswOnTcp]);
   const nswUncertainty = useMemo(
     () => computeUncertainty(nswModelledSeats, nswNat2ppSwing, swingStd, useElasticity, 47),
     [nswModelledSeats, nswNat2ppSwing, swingStd, useElasticity]
@@ -2653,31 +2703,63 @@ export default function App() {
   const QLD_2PP = 46.3;
   const QLD_COAL = new Set(["LNP"]);
   const [qldPrim, setQldPrim] = useState({ ...QLD_BL, undecided: 0 });
-  const [qldFlows, setQldFlows] = useState({ grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40 });
+  const [qldFlows, setQldFlows] = useState({
+    grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40,
+    coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55,
+    alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28,
+  });
+  const [qldOnTcp, setQldOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const qldModelledSeats = useMemo(() => {
     const s = { alp: qldPrim.alp - QLD_BL.alp, coal: qldPrim.coal - QLD_BL.coal, grn: qldPrim.grn - QLD_BL.grn, on: qldPrim.on - QLD_BL.on };
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - (qldPrim.ind) - onV);
-      const a = p.alp + (qldPrim.ind) * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + (qldPrim.ind) * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - qldPrim.ind - onV);
+      if (qldOnTcp === "on_v_alp") {
+        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + qldPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
+        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + qldPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
+        return a / (a + on) * 100;
+      }
+      if (qldOnTcp === "on_v_coal") {
+        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + qldPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
+        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + qldPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
+        return on / (on + c) * 100;
+      }
+      const a = p.alp + qldPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
+      const c = p.coal + qldPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    return computeModelledSeatsState(QLD_SEATS, qldPrim, compute2pp, QLD_2PP, qldFlows, QLD_COAL, s);
-  }, [qldPrim, qldFlows]);
+    const baseline2pp = qldOnTcp ? compute2pp(QLD_BL, qldFlows) : QLD_2PP;
+    return computeModelledSeatsState(QLD_SEATS, qldPrim, compute2pp, baseline2pp, qldFlows, QLD_COAL, s);
+  }, [qldPrim, qldFlows, qldOnTcp]);
   const qldProjCounts = useMemo(() => { const c = {}; qldModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [qldModelledSeats]);
   const qldBaseCounts = useMemo(() => { const c = {}; QLD_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const qldChanged = useMemo(() => qldModelledSeats.filter(s => s.modelled.changed), [qldModelledSeats]);
   const qldImplied2pp = useMemo(() => { const r = qldModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [qldModelledSeats]);
-  const qldHasChanges = Object.entries(QLD_BL).some(([k, v]) => Math.abs((qldPrim[k] ?? v) - v) > 0.05) || (qldPrim.undecided || 0) > 0 || qldFlows.grn_alp !== 0.82 || qldFlows.ind_alp !== 0.50 || qldFlows.on_alp !== 0.18 || qldFlows.other_alp !== 0.40;
+  const qldHasChanges = Object.entries(QLD_BL).some(([k, v]) => Math.abs((qldPrim[k] ?? v) - v) > 0.05) || (qldPrim.undecided || 0) > 0 || qldFlows.grn_alp !== 0.82 || qldFlows.ind_alp !== 0.50 || qldFlows.on_alp !== 0.18 || qldFlows.other_alp !== 0.40 || qldOnTcp !== null;
 
   const qldNat2ppSwing = useMemo(() => {
     const onV = qldPrim.on ?? 0;
     const other = Math.max(0, 100 - qldPrim.alp - qldPrim.coal - qldPrim.grn - qldPrim.ind - onV);
+    if (qldOnTcp === "on_v_alp") {
+      const a = qldPrim.alp + qldPrim.coal * qldFlows.coal_alp_v_on + qldPrim.grn * qldFlows.grn_alp_v_on + qldPrim.ind * qldFlows.ind_alp_v_on + other * qldFlows.other_alp_v_on;
+      const on = onV + qldPrim.coal * (1 - qldFlows.coal_alp_v_on) + qldPrim.grn * (1 - qldFlows.grn_alp_v_on) + qldPrim.ind * (1 - qldFlows.ind_alp_v_on) + other * (1 - qldFlows.other_alp_v_on);
+      const blOnV = QLD_BL.on ?? 0; const blOther = Math.max(0, 100 - QLD_BL.alp - QLD_BL.coal - QLD_BL.grn - QLD_BL.ind - blOnV);
+      const blA = QLD_BL.alp + QLD_BL.coal * qldFlows.coal_alp_v_on + QLD_BL.grn * qldFlows.grn_alp_v_on + QLD_BL.ind * qldFlows.ind_alp_v_on + blOther * qldFlows.other_alp_v_on;
+      const blOn = blOnV + QLD_BL.coal * (1 - qldFlows.coal_alp_v_on) + QLD_BL.grn * (1 - qldFlows.grn_alp_v_on) + QLD_BL.ind * (1 - qldFlows.ind_alp_v_on) + blOther * (1 - qldFlows.other_alp_v_on);
+      return a / (a + on) * 100 - blA / (blA + blOn) * 100;
+    }
+    if (qldOnTcp === "on_v_coal") {
+      const on = onV + qldPrim.alp * qldFlows.alp_on_v_coal + qldPrim.grn * qldFlows.grn_on_v_coal + qldPrim.ind * qldFlows.ind_on_v_coal + other * qldFlows.other_on_v_coal;
+      const c = qldPrim.coal + qldPrim.alp * (1 - qldFlows.alp_on_v_coal) + qldPrim.grn * (1 - qldFlows.grn_on_v_coal) + qldPrim.ind * (1 - qldFlows.ind_on_v_coal) + other * (1 - qldFlows.other_on_v_coal);
+      const blOnV = QLD_BL.on ?? 0; const blOther = Math.max(0, 100 - QLD_BL.alp - QLD_BL.coal - QLD_BL.grn - QLD_BL.ind - blOnV);
+      const blOn = blOnV + QLD_BL.alp * qldFlows.alp_on_v_coal + QLD_BL.grn * qldFlows.grn_on_v_coal + QLD_BL.ind * qldFlows.ind_on_v_coal + blOther * qldFlows.other_on_v_coal;
+      const blC = QLD_BL.coal + QLD_BL.alp * (1 - qldFlows.alp_on_v_coal) + QLD_BL.grn * (1 - qldFlows.grn_on_v_coal) + QLD_BL.ind * (1 - qldFlows.ind_on_v_coal) + blOther * (1 - qldFlows.other_on_v_coal);
+      return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
+    }
     const a = qldPrim.alp + qldPrim.ind * qldFlows.ind_alp + qldPrim.grn * qldFlows.grn_alp + onV * qldFlows.on_alp + other * qldFlows.other_alp;
     const c = qldPrim.coal + qldPrim.ind * (1 - qldFlows.ind_alp) + qldPrim.grn * (1 - qldFlows.grn_alp) + onV * (1 - qldFlows.on_alp) + other * (1 - qldFlows.other_alp);
     return a / (a + c) * 100 - QLD_2PP;
-  }, [qldPrim, qldFlows]);
+  }, [qldPrim, qldFlows, qldOnTcp]);
   const qldUncertainty = useMemo(
     () => computeUncertainty(qldModelledSeats, qldNat2ppSwing, swingStd, useElasticity, 47),
     [qldModelledSeats, qldNat2ppSwing, swingStd, useElasticity]
@@ -2689,31 +2771,63 @@ export default function App() {
   const WA_2PP = 63.1;
   const WA_COAL = new Set(["LP", "NP"]);
   const [waPrim, setWaPrim] = useState({ ...WA_BL, undecided: 0 });
-  const [waFlows, setWaFlows] = useState({ grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44 });
+  const [waFlows, setWaFlows] = useState({
+    grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44,
+    coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57,
+    alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
+  });
+  const [waOnTcp, setWaOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const waModelledSeats = useMemo(() => {
     const s = { alp: waPrim.alp - WA_BL.alp, coal: waPrim.coal - WA_BL.coal, grn: waPrim.grn - WA_BL.grn, on: waPrim.on - WA_BL.on };
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - (waPrim.ind) - onV);
-      const a = p.alp + (waPrim.ind) * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + (waPrim.ind) * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - waPrim.ind - onV);
+      if (waOnTcp === "on_v_alp") {
+        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + waPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
+        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + waPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
+        return a / (a + on) * 100;
+      }
+      if (waOnTcp === "on_v_coal") {
+        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + waPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
+        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + waPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
+        return on / (on + c) * 100;
+      }
+      const a = p.alp + waPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
+      const c = p.coal + waPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    return computeModelledSeatsState(WA_SEATS, waPrim, compute2pp, WA_2PP, waFlows, WA_COAL, s);
-  }, [waPrim, waFlows]);
+    const baseline2pp = waOnTcp ? compute2pp(WA_BL, waFlows) : WA_2PP;
+    return computeModelledSeatsState(WA_SEATS, waPrim, compute2pp, baseline2pp, waFlows, WA_COAL, s);
+  }, [waPrim, waFlows, waOnTcp]);
   const waProjCounts = useMemo(() => { const c = {}; waModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [waModelledSeats]);
   const waBaseCounts = useMemo(() => { const c = {}; WA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const waChanged = useMemo(() => waModelledSeats.filter(s => s.modelled.changed), [waModelledSeats]);
   const waImplied2pp = useMemo(() => { const r = waModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [waModelledSeats]);
-  const waHasChanges = Object.entries(WA_BL).some(([k, v]) => Math.abs((waPrim[k] ?? v) - v) > 0.05) || (waPrim.undecided || 0) > 0 || waFlows.grn_alp !== 0.86 || waFlows.ind_alp !== 0.58 || waFlows.on_alp !== 0.22 || waFlows.other_alp !== 0.44;
+  const waHasChanges = Object.entries(WA_BL).some(([k, v]) => Math.abs((waPrim[k] ?? v) - v) > 0.05) || (waPrim.undecided || 0) > 0 || waFlows.grn_alp !== 0.86 || waFlows.ind_alp !== 0.58 || waFlows.on_alp !== 0.22 || waFlows.other_alp !== 0.44 || waOnTcp !== null;
 
   const waNat2ppSwing = useMemo(() => {
     const onV = waPrim.on ?? 0;
     const other = Math.max(0, 100 - waPrim.alp - waPrim.coal - waPrim.grn - waPrim.ind - onV);
+    if (waOnTcp === "on_v_alp") {
+      const a = waPrim.alp + waPrim.coal * waFlows.coal_alp_v_on + waPrim.grn * waFlows.grn_alp_v_on + waPrim.ind * waFlows.ind_alp_v_on + other * waFlows.other_alp_v_on;
+      const on = onV + waPrim.coal * (1 - waFlows.coal_alp_v_on) + waPrim.grn * (1 - waFlows.grn_alp_v_on) + waPrim.ind * (1 - waFlows.ind_alp_v_on) + other * (1 - waFlows.other_alp_v_on);
+      const blOnV = WA_BL.on ?? 0; const blOther = Math.max(0, 100 - WA_BL.alp - WA_BL.coal - WA_BL.grn - WA_BL.ind - blOnV);
+      const blA = WA_BL.alp + WA_BL.coal * waFlows.coal_alp_v_on + WA_BL.grn * waFlows.grn_alp_v_on + WA_BL.ind * waFlows.ind_alp_v_on + blOther * waFlows.other_alp_v_on;
+      const blOn = blOnV + WA_BL.coal * (1 - waFlows.coal_alp_v_on) + WA_BL.grn * (1 - waFlows.grn_alp_v_on) + WA_BL.ind * (1 - waFlows.ind_alp_v_on) + blOther * (1 - waFlows.other_alp_v_on);
+      return a / (a + on) * 100 - blA / (blA + blOn) * 100;
+    }
+    if (waOnTcp === "on_v_coal") {
+      const on = onV + waPrim.alp * waFlows.alp_on_v_coal + waPrim.grn * waFlows.grn_on_v_coal + waPrim.ind * waFlows.ind_on_v_coal + other * waFlows.other_on_v_coal;
+      const c = waPrim.coal + waPrim.alp * (1 - waFlows.alp_on_v_coal) + waPrim.grn * (1 - waFlows.grn_on_v_coal) + waPrim.ind * (1 - waFlows.ind_on_v_coal) + other * (1 - waFlows.other_on_v_coal);
+      const blOnV = WA_BL.on ?? 0; const blOther = Math.max(0, 100 - WA_BL.alp - WA_BL.coal - WA_BL.grn - WA_BL.ind - blOnV);
+      const blOn = blOnV + WA_BL.alp * waFlows.alp_on_v_coal + WA_BL.grn * waFlows.grn_on_v_coal + WA_BL.ind * waFlows.ind_on_v_coal + blOther * waFlows.other_on_v_coal;
+      const blC = WA_BL.coal + WA_BL.alp * (1 - waFlows.alp_on_v_coal) + WA_BL.grn * (1 - waFlows.grn_on_v_coal) + WA_BL.ind * (1 - waFlows.ind_on_v_coal) + blOther * (1 - waFlows.other_on_v_coal);
+      return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
+    }
     const a = waPrim.alp + waPrim.ind * waFlows.ind_alp + waPrim.grn * waFlows.grn_alp + onV * waFlows.on_alp + other * waFlows.other_alp;
     const c = waPrim.coal + waPrim.ind * (1 - waFlows.ind_alp) + waPrim.grn * (1 - waFlows.grn_alp) + onV * (1 - waFlows.on_alp) + other * (1 - waFlows.other_alp);
     return a / (a + c) * 100 - WA_2PP;
-  }, [waPrim, waFlows]);
+  }, [waPrim, waFlows, waOnTcp]);
   const waUncertainty = useMemo(
     () => computeUncertainty(waModelledSeats, waNat2ppSwing, swingStd, useElasticity, 30),
     [waModelledSeats, waNat2ppSwing, swingStd, useElasticity]
@@ -2725,31 +2839,63 @@ export default function App() {
   const SA_2PP = 54.9;
   const SA_COAL = new Set(["LP"]);
   const [saPrim, setSaPrim] = useState({ ...SA_BL, undecided: 0 });
-  const [saFlows, setSaFlows] = useState({ grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45 });
+  const [saFlows, setSaFlows] = useState({
+    grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45,
+    coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57,
+    alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
+  });
+  const [saOnTcp, setSaOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const saModelledSeats = useMemo(() => {
     const s = { alp: saPrim.alp - SA_BL.alp, coal: saPrim.coal - SA_BL.coal, grn: saPrim.grn - SA_BL.grn, on: saPrim.on - SA_BL.on };
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - (saPrim.ind) - onV);
-      const a = p.alp + (saPrim.ind) * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + (saPrim.ind) * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - saPrim.ind - onV);
+      if (saOnTcp === "on_v_alp") {
+        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + saPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
+        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + saPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
+        return a / (a + on) * 100;
+      }
+      if (saOnTcp === "on_v_coal") {
+        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + saPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
+        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + saPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
+        return on / (on + c) * 100;
+      }
+      const a = p.alp + saPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
+      const c = p.coal + saPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    return computeModelledSeatsState(SA_SEATS, saPrim, compute2pp, SA_2PP, saFlows, SA_COAL, s);
-  }, [saPrim, saFlows]);
+    const baseline2pp = saOnTcp ? compute2pp(SA_BL, saFlows) : SA_2PP;
+    return computeModelledSeatsState(SA_SEATS, saPrim, compute2pp, baseline2pp, saFlows, SA_COAL, s);
+  }, [saPrim, saFlows, saOnTcp]);
   const saProjCounts = useMemo(() => { const c = {}; saModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [saModelledSeats]);
   const saBaseCounts = useMemo(() => { const c = {}; SA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const saChanged = useMemo(() => saModelledSeats.filter(s => s.modelled.changed), [saModelledSeats]);
   const saImplied2pp = useMemo(() => { const r = saModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [saModelledSeats]);
-  const saHasChanges = Object.entries(SA_BL).some(([k, v]) => Math.abs((saPrim[k] ?? v) - v) > 0.05) || (saPrim.undecided || 0) > 0 || saFlows.grn_alp !== 0.84 || saFlows.ind_alp !== 0.52 || saFlows.on_alp !== 0.22 || saFlows.other_alp !== 0.45;
+  const saHasChanges = Object.entries(SA_BL).some(([k, v]) => Math.abs((saPrim[k] ?? v) - v) > 0.05) || (saPrim.undecided || 0) > 0 || saFlows.grn_alp !== 0.84 || saFlows.ind_alp !== 0.52 || saFlows.on_alp !== 0.22 || saFlows.other_alp !== 0.45 || saOnTcp !== null;
 
   const saNat2ppSwing = useMemo(() => {
     const onV = saPrim.on ?? 0;
     const other = Math.max(0, 100 - saPrim.alp - saPrim.coal - saPrim.grn - saPrim.ind - onV);
+    if (saOnTcp === "on_v_alp") {
+      const a = saPrim.alp + saPrim.coal * saFlows.coal_alp_v_on + saPrim.grn * saFlows.grn_alp_v_on + saPrim.ind * saFlows.ind_alp_v_on + other * saFlows.other_alp_v_on;
+      const on = onV + saPrim.coal * (1 - saFlows.coal_alp_v_on) + saPrim.grn * (1 - saFlows.grn_alp_v_on) + saPrim.ind * (1 - saFlows.ind_alp_v_on) + other * (1 - saFlows.other_alp_v_on);
+      const blOnV = SA_BL.on ?? 0; const blOther = Math.max(0, 100 - SA_BL.alp - SA_BL.coal - SA_BL.grn - SA_BL.ind - blOnV);
+      const blA = SA_BL.alp + SA_BL.coal * saFlows.coal_alp_v_on + SA_BL.grn * saFlows.grn_alp_v_on + SA_BL.ind * saFlows.ind_alp_v_on + blOther * saFlows.other_alp_v_on;
+      const blOn = blOnV + SA_BL.coal * (1 - saFlows.coal_alp_v_on) + SA_BL.grn * (1 - saFlows.grn_alp_v_on) + SA_BL.ind * (1 - saFlows.ind_alp_v_on) + blOther * (1 - saFlows.other_alp_v_on);
+      return a / (a + on) * 100 - blA / (blA + blOn) * 100;
+    }
+    if (saOnTcp === "on_v_coal") {
+      const on = onV + saPrim.alp * saFlows.alp_on_v_coal + saPrim.grn * saFlows.grn_on_v_coal + saPrim.ind * saFlows.ind_on_v_coal + other * saFlows.other_on_v_coal;
+      const c = saPrim.coal + saPrim.alp * (1 - saFlows.alp_on_v_coal) + saPrim.grn * (1 - saFlows.grn_on_v_coal) + saPrim.ind * (1 - saFlows.ind_on_v_coal) + other * (1 - saFlows.other_on_v_coal);
+      const blOnV = SA_BL.on ?? 0; const blOther = Math.max(0, 100 - SA_BL.alp - SA_BL.coal - SA_BL.grn - SA_BL.ind - blOnV);
+      const blOn = blOnV + SA_BL.alp * saFlows.alp_on_v_coal + SA_BL.grn * saFlows.grn_on_v_coal + SA_BL.ind * saFlows.ind_on_v_coal + blOther * saFlows.other_on_v_coal;
+      const blC = SA_BL.coal + SA_BL.alp * (1 - saFlows.alp_on_v_coal) + SA_BL.grn * (1 - saFlows.grn_on_v_coal) + SA_BL.ind * (1 - saFlows.ind_on_v_coal) + blOther * (1 - saFlows.other_on_v_coal);
+      return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
+    }
     const a = saPrim.alp + saPrim.ind * saFlows.ind_alp + saPrim.grn * saFlows.grn_alp + onV * saFlows.on_alp + other * saFlows.other_alp;
     const c = saPrim.coal + saPrim.ind * (1 - saFlows.ind_alp) + saPrim.grn * (1 - saFlows.grn_alp) + onV * (1 - saFlows.on_alp) + other * (1 - saFlows.other_alp);
     return a / (a + c) * 100 - SA_2PP;
-  }, [saPrim, saFlows]);
+  }, [saPrim, saFlows, saOnTcp]);
   const saUncertainty = useMemo(
     () => computeUncertainty(saModelledSeats, saNat2ppSwing, swingStd, useElasticity, 24),
     [saModelledSeats, saNat2ppSwing, swingStd, useElasticity]
@@ -2761,30 +2907,62 @@ export default function App() {
   const NT_2PP = 45.0;  // approximate (NT doesn't publish official 2PP)
   const NT_COAL = new Set(["CLP"]);
   const [ntPrim, setNtPrim] = useState({ ...NT_BL, undecided: 0 });
-  const [ntFlows, setNtFlows] = useState({ grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40 });
+  const [ntFlows, setNtFlows] = useState({
+    grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40,
+    coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50,
+    alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28,
+  });
+  const [ntOnTcp, setNtOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const ntModelledSeats = useMemo(() => {
     const s = { alp: ntPrim.alp - NT_BL.alp, coal: ntPrim.coal - NT_BL.coal, grn: ntPrim.grn - NT_BL.grn, on: ntPrim.on - NT_BL.on };
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - (ntPrim.ind) - onV);
-      const a = p.alp + (ntPrim.ind) * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + (ntPrim.ind) * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - ntPrim.ind - onV);
+      if (ntOnTcp === "on_v_alp") {
+        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + ntPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
+        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + ntPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
+        return a / (a + on) * 100;
+      }
+      if (ntOnTcp === "on_v_coal") {
+        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + ntPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
+        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + ntPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
+        return on / (on + c) * 100;
+      }
+      const a = p.alp + ntPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
+      const c = p.coal + ntPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    return computeModelledSeatsState(NT_SEATS, ntPrim, compute2pp, NT_2PP, ntFlows, NT_COAL, s);
-  }, [ntPrim, ntFlows]);
+    const baseline2pp = ntOnTcp ? compute2pp(NT_BL, ntFlows) : NT_2PP;
+    return computeModelledSeatsState(NT_SEATS, ntPrim, compute2pp, baseline2pp, ntFlows, NT_COAL, s);
+  }, [ntPrim, ntFlows, ntOnTcp]);
   const ntProjCounts = useMemo(() => { const c = {}; ntModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [ntModelledSeats]);
   const ntBaseCounts = useMemo(() => { const c = {}; NT_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const ntChanged = useMemo(() => ntModelledSeats.filter(s => s.modelled.changed), [ntModelledSeats]);
-  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40;
+  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null;
 
   const ntNat2ppSwing = useMemo(() => {
     const onV = ntPrim.on ?? 0;
     const other = Math.max(0, 100 - ntPrim.alp - ntPrim.coal - ntPrim.grn - ntPrim.ind - onV);
+    if (ntOnTcp === "on_v_alp") {
+      const a = ntPrim.alp + ntPrim.coal * ntFlows.coal_alp_v_on + ntPrim.grn * ntFlows.grn_alp_v_on + ntPrim.ind * ntFlows.ind_alp_v_on + other * ntFlows.other_alp_v_on;
+      const on = onV + ntPrim.coal * (1 - ntFlows.coal_alp_v_on) + ntPrim.grn * (1 - ntFlows.grn_alp_v_on) + ntPrim.ind * (1 - ntFlows.ind_alp_v_on) + other * (1 - ntFlows.other_alp_v_on);
+      const blOnV = NT_BL.on ?? 0; const blOther = Math.max(0, 100 - NT_BL.alp - NT_BL.coal - NT_BL.grn - NT_BL.ind - blOnV);
+      const blA = NT_BL.alp + NT_BL.coal * ntFlows.coal_alp_v_on + NT_BL.grn * ntFlows.grn_alp_v_on + NT_BL.ind * ntFlows.ind_alp_v_on + blOther * ntFlows.other_alp_v_on;
+      const blOn = blOnV + NT_BL.coal * (1 - ntFlows.coal_alp_v_on) + NT_BL.grn * (1 - ntFlows.grn_alp_v_on) + NT_BL.ind * (1 - ntFlows.ind_alp_v_on) + blOther * (1 - ntFlows.other_alp_v_on);
+      return a / (a + on) * 100 - blA / (blA + blOn) * 100;
+    }
+    if (ntOnTcp === "on_v_coal") {
+      const on = onV + ntPrim.alp * ntFlows.alp_on_v_coal + ntPrim.grn * ntFlows.grn_on_v_coal + ntPrim.ind * ntFlows.ind_on_v_coal + other * ntFlows.other_on_v_coal;
+      const c = ntPrim.coal + ntPrim.alp * (1 - ntFlows.alp_on_v_coal) + ntPrim.grn * (1 - ntFlows.grn_on_v_coal) + ntPrim.ind * (1 - ntFlows.ind_on_v_coal) + other * (1 - ntFlows.other_on_v_coal);
+      const blOnV = NT_BL.on ?? 0; const blOther = Math.max(0, 100 - NT_BL.alp - NT_BL.coal - NT_BL.grn - NT_BL.ind - blOnV);
+      const blOn = blOnV + NT_BL.alp * ntFlows.alp_on_v_coal + NT_BL.grn * ntFlows.grn_on_v_coal + NT_BL.ind * ntFlows.ind_on_v_coal + blOther * ntFlows.other_on_v_coal;
+      const blC = NT_BL.coal + NT_BL.alp * (1 - ntFlows.alp_on_v_coal) + NT_BL.grn * (1 - ntFlows.grn_on_v_coal) + NT_BL.ind * (1 - ntFlows.ind_on_v_coal) + blOther * (1 - ntFlows.other_on_v_coal);
+      return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
+    }
     const a = ntPrim.alp + ntPrim.ind * ntFlows.ind_alp + ntPrim.grn * ntFlows.grn_alp + onV * ntFlows.on_alp + other * ntFlows.other_alp;
     const c = ntPrim.coal + ntPrim.ind * (1 - ntFlows.ind_alp) + ntPrim.grn * (1 - ntFlows.grn_alp) + onV * (1 - ntFlows.on_alp) + other * (1 - ntFlows.other_alp);
     return a / (a + c) * 100 - NT_2PP;
-  }, [ntPrim, ntFlows]);
+  }, [ntPrim, ntFlows, ntOnTcp]);
   const ntUncertainty = useMemo(
     () => computeUncertainty(ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity, 13),
     [ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity]
@@ -4487,6 +4665,36 @@ export default function App() {
                 </div>
 
                 <div style={panelStyle}>
+                  <div style={sectionHead}>ON Race Flows</div>
+                  <div style={{ marginBottom: 8, fontSize: 12, color: "#6B7280" }}>Select if One Nation reaches the final two-candidate count statewide.</div>
+                  {[{ val: null, label: "Standard (ALP vs Coalition)" }, { val: "on_v_alp", label: "ON vs ALP final" }, { val: "on_v_coal", label: "ON vs Coalition final" }].map(opt => (
+                    <label key={String(opt.val)} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, cursor: "pointer" }}>
+                      <input type="radio" name="vicOnTcp" checked={vicOnTcp === opt.val} onChange={() => setVicOnTcp(opt.val)}
+                        style={{ accentColor: "#B45309", width: 14, height: 14 }} />
+                      <span style={{ fontSize: 13, fontWeight: vicOnTcp === opt.val ? 600 : 400 }}>{opt.label}</span>
+                    </label>
+                  ))}
+                  {vicOnTcp === "on_v_alp" && (
+                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "#B45309", marginBottom: 6 }}>ON vs ALP preference flows</div>
+                      <PrefInput label="Coal → ALP (vs ON)" value={vicPrefFlows.coal_alp_v_on} onChange={v => setVicPrefFlows(f => ({ ...f, coal_alp_v_on: v }))} color="#1D4ED8" />
+                      <PrefInput label="Greens → ALP (vs ON)" value={vicPrefFlows.grn_alp_v_on} onChange={v => setVicPrefFlows(f => ({ ...f, grn_alp_v_on: v }))} color="#059669" />
+                      <PrefInput label="Ind → ALP (vs ON)" value={vicPrefFlows.ind_alp_v_on} onChange={v => setVicPrefFlows(f => ({ ...f, ind_alp_v_on: v }))} color="#0891B2" />
+                      <PrefInput label="Other → ALP (vs ON)" value={vicPrefFlows.other_alp_v_on} onChange={v => setVicPrefFlows(f => ({ ...f, other_alp_v_on: v }))} color="#7C3AED" />
+                    </div>
+                  )}
+                  {vicOnTcp === "on_v_coal" && (
+                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "#B45309", marginBottom: 6 }}>ON vs Coalition preference flows</div>
+                      <PrefInput label="ALP → ON (vs Coal)" value={vicPrefFlows.alp_on_v_coal} onChange={v => setVicPrefFlows(f => ({ ...f, alp_on_v_coal: v }))} color="#DC2626" />
+                      <PrefInput label="Greens → ON (vs Coal)" value={vicPrefFlows.grn_on_v_coal} onChange={v => setVicPrefFlows(f => ({ ...f, grn_on_v_coal: v }))} color="#059669" />
+                      <PrefInput label="Ind → ON (vs Coal)" value={vicPrefFlows.ind_on_v_coal} onChange={v => setVicPrefFlows(f => ({ ...f, ind_on_v_coal: v }))} color="#0891B2" />
+                      <PrefInput label="Other → ON (vs Coal)" value={vicPrefFlows.other_on_v_coal} onChange={v => setVicPrefFlows(f => ({ ...f, other_on_v_coal: v }))} color="#7C3AED" />
+                    </div>
+                  )}
+                </div>
+
+                <div style={panelStyle}>
                   <div style={sectionHead}>Modelling options</div>
                   {/* Regional swing differentiation toggle */}
                   <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", marginBottom: 4 }}>
@@ -4508,7 +4716,7 @@ export default function App() {
                 </div>
 
                 {vicHasChanges && (
-                  <button onClick={() => { setVicPrimaries({ alp: 38.1, coal: 31.1, grn: 12.2, ind: 5.5, on: 1.3, undecided: 0 }); setVicPrefFlows({ grn_alp: 0.85, ind_alp: 0.60, on_alp: 0.25, other_alp: 0.43 }); setUseVicRegionalSwing(true); }}
+                  <button onClick={() => { setVicPrimaries({ alp: 38.1, coal: 31.1, grn: 12.2, ind: 5.5, on: 1.3, undecided: 0 }); setVicPrefFlows({ grn_alp: 0.85, ind_alp: 0.60, on_alp: 0.25, other_alp: 0.43, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }); setUseVicRegionalSwing(true); setVicOnTcp(null); }}
                     style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>
                     Reset VIC model
                   </button>
@@ -4686,15 +4894,15 @@ export default function App() {
             {/* ── Reusable state builder (NSW, QLD, WA, SA, NT) ── */}
             {(() => {
               const cfgs = {
-                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty },
-                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty },
-                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44 }, allSeats: WA_SEATS, uncertainty: waUncertainty },
-                sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45 }, allSeats: SA_SEATS, uncertainty: saUncertainty },
-                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40 }, allSeats: NT_SEATS, uncertainty: ntUncertainty },
+                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty },
+                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty },
+                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: WA_SEATS, uncertainty: waUncertainty },
+                sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: SA_SEATS, uncertainty: saUncertainty },
+                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: NT_SEATS, uncertainty: ntUncertainty },
               };
               const cfg = cfgs[selectedModelId];
               if (!el.modelEnabled || !cfg) return null;
-              const { prim, setPrim, flows, setFlows, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty } = cfg;
+              const { prim, setPrim, flows, setFlows, onTcp, setOnTcp, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty } = cfg;
               const entered = parties.reduce((s, p) => s + (prim[p.k] ?? 0), 0);
               const undecided = +(prim.undecided ?? 0);
               const other = +(100 - entered - undecided).toFixed(1);
@@ -4738,8 +4946,37 @@ export default function App() {
                       Defaults based on {source} preference distributions.
                     </div>
                   </div>
+                  <div style={panelStyle}>
+                    <div style={sectionHead}>ON Race Flows</div>
+                    <div style={{ marginBottom: 8, fontSize: 12, color: "#6B7280" }}>Select if One Nation reaches the final two-candidate count statewide.</div>
+                    {[{ val: null, label: "Standard (ALP vs Coalition)" }, { val: "on_v_alp", label: "ON vs ALP final" }, { val: "on_v_coal", label: "ON vs Coalition final" }].map(opt => (
+                      <label key={String(opt.val)} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, cursor: "pointer" }}>
+                        <input type="radio" name={`${selectedModelId}OnTcp`} checked={onTcp === opt.val} onChange={() => setOnTcp(opt.val)}
+                          style={{ accentColor: "#B45309", width: 14, height: 14 }} />
+                        <span style={{ fontSize: 13, fontWeight: onTcp === opt.val ? 600 : 400 }}>{opt.label}</span>
+                      </label>
+                    ))}
+                    {onTcp === "on_v_alp" && (
+                      <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: "#B45309", marginBottom: 6 }}>ON vs ALP preference flows</div>
+                        <PrefInput label="Coal → ALP (vs ON)" value={flows.coal_alp_v_on} onChange={v => setFlows(f => ({ ...f, coal_alp_v_on: v }))} color="#1D4ED8" />
+                        <PrefInput label="Greens → ALP (vs ON)" value={flows.grn_alp_v_on} onChange={v => setFlows(f => ({ ...f, grn_alp_v_on: v }))} color="#059669" />
+                        <PrefInput label="Ind → ALP (vs ON)" value={flows.ind_alp_v_on} onChange={v => setFlows(f => ({ ...f, ind_alp_v_on: v }))} color="#0891B2" />
+                        <PrefInput label="Other → ALP (vs ON)" value={flows.other_alp_v_on} onChange={v => setFlows(f => ({ ...f, other_alp_v_on: v }))} color="#7C3AED" />
+                      </div>
+                    )}
+                    {onTcp === "on_v_coal" && (
+                      <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: "#B45309", marginBottom: 6 }}>ON vs Coalition preference flows</div>
+                        <PrefInput label="ALP → ON (vs Coal)" value={flows.alp_on_v_coal} onChange={v => setFlows(f => ({ ...f, alp_on_v_coal: v }))} color="#DC2626" />
+                        <PrefInput label="Greens → ON (vs Coal)" value={flows.grn_on_v_coal} onChange={v => setFlows(f => ({ ...f, grn_on_v_coal: v }))} color="#059669" />
+                        <PrefInput label="Ind → ON (vs Coal)" value={flows.ind_on_v_coal} onChange={v => setFlows(f => ({ ...f, ind_on_v_coal: v }))} color="#0891B2" />
+                        <PrefInput label="Other → ON (vs Coal)" value={flows.other_on_v_coal} onChange={v => setFlows(f => ({ ...f, other_on_v_coal: v }))} color="#7C3AED" />
+                      </div>
+                    )}
+                  </div>
                   {hasChanges && (
-                    <button onClick={() => { setPrim({ ...bl, undecided: 0 }); setFlows({ ...resetFlows }); }}
+                    <button onClick={() => { setPrim({ ...bl, undecided: 0 }); setFlows({ ...resetFlows }); setOnTcp(null); }}
                       style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>
                       Reset model
                     </button>
