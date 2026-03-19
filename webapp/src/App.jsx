@@ -2039,6 +2039,109 @@ function _getVicRegion(seatName) {
   return VIC_DISTRICT_REGION[seatName] ?? "outer_metro"; // default to outer_metro
 }
 
+// ── NSW 2023 metro/regional district classification ───────────────────────────
+// Calibrated from NSWEC booth-level data: inner-metro seats (inner Sydney) respond
+// more strongly to statewide swings; rural/NP seats are more locally driven.
+const NSW_DISTRICT_REGION = {
+  // Inner metro — Sydney inner ring (GRN-competitive or safe ALP inner-city)
+  "Newtown": "inner_metro", "Balmain": "inner_metro", "Summer Hill": "inner_metro",
+  "Maroubra": "inner_metro", "Heffron": "inner_metro", "Kogarah": "inner_metro",
+  "Rockdale": "inner_metro", "Strathfield": "inner_metro", "Auburn": "inner_metro",
+  "Lakemba": "inner_metro", "Smithfield": "inner_metro",
+  // Outer metro — Sydney suburbs + Hunter cities + Illawarra coast
+  "Penrith": "outer_metro", "East Hills": "outer_metro", "Ryde": "outer_metro",
+  "Coogee": "outer_metro", "Drummoyne": "outer_metro", "Holsworthy": "outer_metro",
+  "Heathcote": "outer_metro", "Gosford": "outer_metro", "Terrigal": "outer_metro",
+  "Wakehurst": "outer_metro", "Davidson": "outer_metro", "Pittwater": "outer_metro",
+  "Epping": "outer_metro", "Lane Cove": "outer_metro", "Willoughby": "outer_metro",
+  "Manly": "outer_metro", "Castle Hill": "outer_metro", "Hornsby": "outer_metro",
+  "Blue Mountains": "outer_metro", "Liverpool": "outer_metro", "Campbelltown": "outer_metro",
+  "Bankstown": "outer_metro", "Swansea": "outer_metro", "Lake Macquarie": "outer_metro",
+  "Kotara": "outer_metro", "Charlestown": "outer_metro", "Wallsend": "outer_metro",
+  "Newcastle": "outer_metro", "Maitland": "outer_metro",
+  "Kiama": "outer_metro", "Keira": "outer_metro", "Wollongong": "outer_metro",
+  "Shellharbour": "outer_metro",
+  // Regional — rural/country; NP heartland; mining belt
+  "Cessnock": "regional", "Monaro": "regional", "Oxley": "regional",
+  "Upper Hunter": "regional", "Port Macquarie": "regional", "Tamworth": "regional",
+  "Orange": "regional", "Dubbo": "regional", "Murray": "regional",
+  "Bathurst": "regional", "Barwon": "regional",
+};
+const NSW_REGION_SWING_MULT = { inner_metro: 1.10, outer_metro: 1.00, regional: 0.80 };
+function _getNswRegion(n) { return NSW_DISTRICT_REGION[n] ?? "outer_metro"; }
+
+// ── QLD 2024 metro/regional district classification ───────────────────────────
+// Brisbane inner seats amplify swings; deep-rural and ON-contested seats are
+// insulated from statewide sentiment (local candidate/issues dominant).
+const QLD_DISTRICT_REGION = {
+  // Inner metro — Brisbane inner (GRN-competitive + safe ALP inner-city)
+  "South Brisbane": "inner_metro", "Maiwar": "inner_metro", "Cooper": "inner_metro",
+  "McConnel": "inner_metro", "Greenslopes": "inner_metro",
+  "Inala": "inner_metro", "Toohey": "inner_metro", "Miller": "inner_metro",
+  // Outer metro — Brisbane suburbs + Gold Coast + Sunshine Coast + Townsville
+  "Mount Ommaney": "outer_metro", "Oodgeroo": "outer_metro", "Macalister": "outer_metro",
+  "Everton": "outer_metro", "Macgregor": "outer_metro", "Stretton": "outer_metro",
+  "Waterford": "outer_metro", "Rochedale": "outer_metro",
+  "Currumbin": "outer_metro", "Burleigh": "outer_metro",
+  "Buderim": "outer_metro", "Caloundra": "outer_metro",
+  "Mundingburra": "outer_metro",
+  // Regional — rural QLD + ON-contested seats + regional cities
+  "Nanango": "regional", "Warrego": "regional", "Gympie": "regional",
+  "Mirani": "regional", "Condamine": "regional", "Callide": "regional",
+  "Hinchinbrook": "regional", "Southern Downs": "regional",
+  "Bundaberg": "regional", "Rockhampton": "regional", "Mulgrave": "regional",
+};
+const QLD_REGION_SWING_MULT = { inner_metro: 1.10, outer_metro: 1.00, regional: 0.75 };
+function _getQldRegion(n) { return QLD_DISTRICT_REGION[n] ?? "outer_metro"; }
+
+// ── WA 2025 metro/regional district classification ────────────────────────────
+// Nearly all WA seats are in the Perth metro belt; two-tier classification only.
+const WA_DISTRICT_REGION = {
+  // Metro — Perth metro belt
+  "Carine": "metro", "Bateman": "metro", "Churchlands": "metro", "Moore": "metro",
+  "Bicton": "metro", "Dawesville": "metro", "Scarborough": "metro", "Hillarys": "metro",
+  "Joondalup": "metro", "Balcatta": "metro", "Midland": "metro", "Armadale": "metro",
+  "Mandurah": "metro", "Rockingham": "metro", "Kwinana": "metro",
+  "Fremantle": "metro", "Maylands": "metro", "Kalamunda": "metro",
+  // Regional — South West / rural WA
+  "Roe": "regional", "Vasse": "regional",
+};
+const WA_REGION_SWING_MULT = { metro: 1.00, regional: 0.75 };
+function _getWaRegion(n) { return WA_DISTRICT_REGION[n] ?? "metro"; }
+
+// ── SA 2022 metro/regional district classification ────────────────────────────
+// Adelaide metro dominates; only two rural independents fall in the regional tier.
+const SA_DISTRICT_REGION = {
+  // Inner metro — Adelaide inner suburbs
+  "Adelaide": "inner_metro", "Unley": "inner_metro",
+  // Outer metro — Adelaide suburbs
+  "King": "outer_metro", "Gibson": "outer_metro", "Newland": "outer_metro",
+  "Florey": "outer_metro", "Kaurna": "outer_metro", "Playford": "outer_metro",
+  "Heysen": "outer_metro", "Colton": "outer_metro", "Morialta": "outer_metro",
+  "Waite": "outer_metro", "Flinders": "outer_metro", "Bragg": "outer_metro",
+  "Hartley": "outer_metro", "Cheltenham": "outer_metro", "Croydon": "outer_metro",
+  "Ramsay": "outer_metro", "Lee": "outer_metro",
+  // Regional — rural SA
+  "Mount Gambier": "regional", "Frome": "regional",
+};
+const SA_REGION_SWING_MULT = { inner_metro: 1.05, outer_metro: 1.00, regional: 0.80 };
+function _getSaRegion(n) { return SA_DISTRICT_REGION[n] ?? "outer_metro"; }
+
+// ── NT 2024 metro/regional district classification ────────────────────────────
+// Darwin metro seats track territory-wide swings; remote/indigenous seats have
+// very low sensitivity to territory-wide sentiment (personal vote dominant).
+const NT_DISTRICT_REGION = {
+  // Metro — Darwin urban belt + Palmerston
+  "Blain": "metro", "Casuarina": "metro", "Fannie Bay": "metro",
+  "Johnston": "metro", "Karama": "metro", "Brennan": "metro",
+  "Darwin": "metro", "Goyder": "metro", "Wanguri": "metro", "Drysdale": "metro",
+  // Regional/remote — remote indigenous and regional centres
+  "Arafura": "regional", "Nhulunbuy": "regional",
+  "Namatjira": "regional", "Barkly": "regional",
+};
+const NT_REGION_SWING_MULT = { metro: 1.00, regional: 0.70 };
+function _getNtRegion(n) { return NT_DISTRICT_REGION[n] ?? "metro"; }
+
 function computeVic2pp(primaries, prefFlows, onTcpMatchup = null) {
   const { alp, coal, grn, ind, on } = primaries;
   const onV = on ?? 0;
@@ -2126,7 +2229,7 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
 //   baseline2pp  – baseline ALP 2PP %
 //   prefFlows    – { grn_alp, ind_alp, other_alp }
 //   coalParties  – Set of coalition party abbreviations
-function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, prefFlows, coalParties, swings) {
+function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, prefFlows, coalParties, swings, regionMap = null, regionSwingMult = null) {
   const new2pp = compute2ppFn(newPrim, prefFlows);
   const swing2pp = new2pp - baseline2pp;
 
@@ -2144,15 +2247,19 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
     const isInd1 = !isAlp1 && !isCoal1 && !isGrn1;
     const isInd2 = !isAlp2 && !isCoal2 && !isGrn2;
 
+    // Regional swing multiplier: metro seats track state swing; regional/rural seats respond less
+    const region = regionMap ? (regionMap[seat.name] ?? "outer_metro") : null;
+    const regionMult = (regionMap && regionSwingMult) ? (regionSwingMult[region] ?? 1.0) : 1.0;
+
     let swingToT1 = 0;
-    if (isAlp1 && isCoal2) swingToT1 = swing2pp;
-    else if (isCoal1 && isAlp2) swingToT1 = -swing2pp;
-    else if (isGrn1 && isAlp2) swingToT1 = (swings.grn - swings.alp) / 2;
-    else if (isGrn1 && isCoal2) swingToT1 = (swings.grn - (swings.coal ?? 0)) / 2;
-    else if (isAlp1 && isGrn2) swingToT1 = (swings.alp - swings.grn) / 2;
-    else if (isCoal1 && isGrn2) swingToT1 = -(swings.grn - (swings.coal ?? 0)) / 2;
-    else if (isCoal1 && isInd2) swingToT1 = -swing2pp * 0.3;  // Coal drop benefits ON/IND challenger
-    else if (isInd1) swingToT1 = (isAlp2 ? -1 : 1) * swing2pp * 0.3;
+    if (isAlp1 && isCoal2) swingToT1 = swing2pp * regionMult;
+    else if (isCoal1 && isAlp2) swingToT1 = -swing2pp * regionMult;
+    else if (isGrn1 && isAlp2) swingToT1 = (swings.grn - swings.alp) / 2 * regionMult;
+    else if (isGrn1 && isCoal2) swingToT1 = (swings.grn - (swings.coal ?? 0)) / 2 * regionMult;
+    else if (isAlp1 && isGrn2) swingToT1 = (swings.alp - swings.grn) / 2 * regionMult;
+    else if (isCoal1 && isGrn2) swingToT1 = -(swings.grn - (swings.coal ?? 0)) / 2 * regionMult;
+    else if (isCoal1 && isInd2) swingToT1 = -swing2pp * 0.3;  // Coal drop benefits ON/IND challenger — no regionMult
+    else if (isInd1) swingToT1 = (isAlp2 ? -1 : 1) * swing2pp * 0.3;  // IND seats — no regionMult
 
     const newMargin = seat.margin + swingToT1;
     const holds = newMargin > 0;
@@ -2169,6 +2276,8 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
         winnerPct: 50 + Math.abs(newMargin),
         projAlp2pp,
         changed: projWinnerParty !== seat.winner.party,
+        regionMult,
+        region,
       },
     };
   });
@@ -2493,6 +2602,12 @@ export default function App() {
   // Regional swing differentiation: inner-metro seats amplify the state swing;
   // regional/rural seats respond less (calibrated from 2014-2022 VEC data).
   const [useVicRegionalSwing, setUseVicRegionalSwing] = useState(true);
+  // Regional swing differentiation for other single-member-seat states
+  const [useNswRegionalSwing, setUseNswRegionalSwing] = useState(true);
+  const [useQldRegionalSwing, setUseQldRegionalSwing] = useState(true);
+  const [useWaRegionalSwing,  setUseWaRegionalSwing]  = useState(true);
+  const [useSaRegionalSwing,  setUseSaRegionalSwing]  = useState(true);
+  const [useNtRegionalSwing,  setUseNtRegionalSwing]  = useState(true);
 
   // ── Demographics tab state ──
   const [demogSortKey, setDemogSortKey] = useState("medianHouseholdIncome");
@@ -2678,13 +2793,16 @@ export default function App() {
       return a / (a + c) * 100;
     };
     const baseline2pp = nswOnTcp ? compute2pp(NSW_BL, nswFlows) : NSW_2PP;
-    return computeModelledSeatsState(NSW_SEATS, nswPrim, compute2pp, baseline2pp, nswFlows, NSW_COAL, s);
-  }, [nswPrim, nswFlows, nswOnTcp]);
+    return computeModelledSeatsState(NSW_SEATS, nswPrim, compute2pp, baseline2pp, nswFlows, NSW_COAL, s,
+      useNswRegionalSwing ? NSW_DISTRICT_REGION : null,
+      useNswRegionalSwing ? NSW_REGION_SWING_MULT : null,
+    );
+  }, [nswPrim, nswFlows, nswOnTcp, useNswRegionalSwing]);
   const nswProjCounts = useMemo(() => { const c = {}; nswModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [nswModelledSeats]);
   const nswBaseCounts = useMemo(() => { const c = {}; NSW_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const nswChanged = useMemo(() => nswModelledSeats.filter(s => s.modelled.changed), [nswModelledSeats]);
   const nswImplied2pp = useMemo(() => { const r = nswModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [nswModelledSeats]);
-  const nswHasChanges = Object.entries(NSW_BL).some(([k, v]) => Math.abs((nswPrim[k] ?? v) - v) > 0.05) || (nswPrim.undecided || 0) > 0 || nswFlows.grn_alp !== 0.88 || nswFlows.ind_alp !== 0.55 || nswFlows.on_alp !== 0.20 || nswFlows.other_alp !== 0.45 || nswOnTcp !== null;
+  const nswHasChanges = Object.entries(NSW_BL).some(([k, v]) => Math.abs((nswPrim[k] ?? v) - v) > 0.05) || (nswPrim.undecided || 0) > 0 || nswFlows.grn_alp !== 0.88 || nswFlows.ind_alp !== 0.55 || nswFlows.on_alp !== 0.20 || nswFlows.other_alp !== 0.45 || nswOnTcp !== null || !useNswRegionalSwing;
 
   const nswNat2ppSwing = useMemo(() => {
     const onV = nswPrim.on ?? 0;
@@ -2746,13 +2864,16 @@ export default function App() {
       return a / (a + c) * 100;
     };
     const baseline2pp = qldOnTcp ? compute2pp(QLD_BL, qldFlows) : QLD_2PP;
-    return computeModelledSeatsState(QLD_SEATS, qldPrim, compute2pp, baseline2pp, qldFlows, QLD_COAL, s);
-  }, [qldPrim, qldFlows, qldOnTcp]);
+    return computeModelledSeatsState(QLD_SEATS, qldPrim, compute2pp, baseline2pp, qldFlows, QLD_COAL, s,
+      useQldRegionalSwing ? QLD_DISTRICT_REGION : null,
+      useQldRegionalSwing ? QLD_REGION_SWING_MULT : null,
+    );
+  }, [qldPrim, qldFlows, qldOnTcp, useQldRegionalSwing]);
   const qldProjCounts = useMemo(() => { const c = {}; qldModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [qldModelledSeats]);
   const qldBaseCounts = useMemo(() => { const c = {}; QLD_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const qldChanged = useMemo(() => qldModelledSeats.filter(s => s.modelled.changed), [qldModelledSeats]);
   const qldImplied2pp = useMemo(() => { const r = qldModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [qldModelledSeats]);
-  const qldHasChanges = Object.entries(QLD_BL).some(([k, v]) => Math.abs((qldPrim[k] ?? v) - v) > 0.05) || (qldPrim.undecided || 0) > 0 || qldFlows.grn_alp !== 0.82 || qldFlows.ind_alp !== 0.50 || qldFlows.on_alp !== 0.18 || qldFlows.other_alp !== 0.40 || qldOnTcp !== null;
+  const qldHasChanges = Object.entries(QLD_BL).some(([k, v]) => Math.abs((qldPrim[k] ?? v) - v) > 0.05) || (qldPrim.undecided || 0) > 0 || qldFlows.grn_alp !== 0.82 || qldFlows.ind_alp !== 0.50 || qldFlows.on_alp !== 0.18 || qldFlows.other_alp !== 0.40 || qldOnTcp !== null || !useQldRegionalSwing;
 
   const qldNat2ppSwing = useMemo(() => {
     const onV = qldPrim.on ?? 0;
@@ -2814,13 +2935,16 @@ export default function App() {
       return a / (a + c) * 100;
     };
     const baseline2pp = waOnTcp ? compute2pp(WA_BL, waFlows) : WA_2PP;
-    return computeModelledSeatsState(WA_SEATS, waPrim, compute2pp, baseline2pp, waFlows, WA_COAL, s);
-  }, [waPrim, waFlows, waOnTcp]);
+    return computeModelledSeatsState(WA_SEATS, waPrim, compute2pp, baseline2pp, waFlows, WA_COAL, s,
+      useWaRegionalSwing ? WA_DISTRICT_REGION : null,
+      useWaRegionalSwing ? WA_REGION_SWING_MULT : null,
+    );
+  }, [waPrim, waFlows, waOnTcp, useWaRegionalSwing]);
   const waProjCounts = useMemo(() => { const c = {}; waModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [waModelledSeats]);
   const waBaseCounts = useMemo(() => { const c = {}; WA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const waChanged = useMemo(() => waModelledSeats.filter(s => s.modelled.changed), [waModelledSeats]);
   const waImplied2pp = useMemo(() => { const r = waModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [waModelledSeats]);
-  const waHasChanges = Object.entries(WA_BL).some(([k, v]) => Math.abs((waPrim[k] ?? v) - v) > 0.05) || (waPrim.undecided || 0) > 0 || waFlows.grn_alp !== 0.86 || waFlows.ind_alp !== 0.58 || waFlows.on_alp !== 0.22 || waFlows.other_alp !== 0.44 || waOnTcp !== null;
+  const waHasChanges = Object.entries(WA_BL).some(([k, v]) => Math.abs((waPrim[k] ?? v) - v) > 0.05) || (waPrim.undecided || 0) > 0 || waFlows.grn_alp !== 0.86 || waFlows.ind_alp !== 0.58 || waFlows.on_alp !== 0.22 || waFlows.other_alp !== 0.44 || waOnTcp !== null || !useWaRegionalSwing;
 
   const waNat2ppSwing = useMemo(() => {
     const onV = waPrim.on ?? 0;
@@ -2882,13 +3006,16 @@ export default function App() {
       return a / (a + c) * 100;
     };
     const baseline2pp = saOnTcp ? compute2pp(SA_BL, saFlows) : SA_2PP;
-    return computeModelledSeatsState(SA_SEATS, saPrim, compute2pp, baseline2pp, saFlows, SA_COAL, s);
-  }, [saPrim, saFlows, saOnTcp]);
+    return computeModelledSeatsState(SA_SEATS, saPrim, compute2pp, baseline2pp, saFlows, SA_COAL, s,
+      useSaRegionalSwing ? SA_DISTRICT_REGION : null,
+      useSaRegionalSwing ? SA_REGION_SWING_MULT : null,
+    );
+  }, [saPrim, saFlows, saOnTcp, useSaRegionalSwing]);
   const saProjCounts = useMemo(() => { const c = {}; saModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [saModelledSeats]);
   const saBaseCounts = useMemo(() => { const c = {}; SA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const saChanged = useMemo(() => saModelledSeats.filter(s => s.modelled.changed), [saModelledSeats]);
   const saImplied2pp = useMemo(() => { const r = saModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [saModelledSeats]);
-  const saHasChanges = Object.entries(SA_BL).some(([k, v]) => Math.abs((saPrim[k] ?? v) - v) > 0.05) || (saPrim.undecided || 0) > 0 || saFlows.grn_alp !== 0.84 || saFlows.ind_alp !== 0.52 || saFlows.on_alp !== 0.22 || saFlows.other_alp !== 0.45 || saOnTcp !== null;
+  const saHasChanges = Object.entries(SA_BL).some(([k, v]) => Math.abs((saPrim[k] ?? v) - v) > 0.05) || (saPrim.undecided || 0) > 0 || saFlows.grn_alp !== 0.84 || saFlows.ind_alp !== 0.52 || saFlows.on_alp !== 0.22 || saFlows.other_alp !== 0.45 || saOnTcp !== null || !useSaRegionalSwing;
 
   const saNat2ppSwing = useMemo(() => {
     const onV = saPrim.on ?? 0;
@@ -2950,12 +3077,15 @@ export default function App() {
       return a / (a + c) * 100;
     };
     const baseline2pp = ntOnTcp ? compute2pp(NT_BL, ntFlows) : NT_2PP;
-    return computeModelledSeatsState(NT_SEATS, ntPrim, compute2pp, baseline2pp, ntFlows, NT_COAL, s);
-  }, [ntPrim, ntFlows, ntOnTcp]);
+    return computeModelledSeatsState(NT_SEATS, ntPrim, compute2pp, baseline2pp, ntFlows, NT_COAL, s,
+      useNtRegionalSwing ? NT_DISTRICT_REGION : null,
+      useNtRegionalSwing ? NT_REGION_SWING_MULT : null,
+    );
+  }, [ntPrim, ntFlows, ntOnTcp, useNtRegionalSwing]);
   const ntProjCounts = useMemo(() => { const c = {}; ntModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [ntModelledSeats]);
   const ntBaseCounts = useMemo(() => { const c = {}; NT_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const ntChanged = useMemo(() => ntModelledSeats.filter(s => s.modelled.changed), [ntModelledSeats]);
-  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null;
+  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null || !useNtRegionalSwing;
 
   const ntNat2ppSwing = useMemo(() => {
     const onV = ntPrim.on ?? 0;
@@ -5013,15 +5143,15 @@ export default function App() {
             {/* ── Reusable state builder (NSW, QLD, WA, SA, NT) ── */}
             {(() => {
               const cfgs = {
-                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty },
-                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty },
-                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: WA_SEATS, uncertainty: waUncertainty },
-                sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: SA_SEATS, uncertainty: saUncertainty },
-                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: NT_SEATS, uncertainty: ntUncertainty },
+                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80" },
+                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75" },
+                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: WA_SEATS, uncertainty: waUncertainty, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75" },
+                sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: SA_SEATS, uncertainty: saUncertainty, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80" },
+                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70" },
               };
               const cfg = cfgs[selectedModelId];
               if (!el.modelEnabled || !cfg) return null;
-              const { prim, setPrim, flows, setFlows, onTcp, setOnTcp, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty } = cfg;
+              const { prim, setPrim, flows, setFlows, onTcp, setOnTcp, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty, useRegionalSwing, setUseRegionalSwing, regionLabel } = cfg;
               const entered = parties.reduce((s, p) => s + (prim[p.k] ?? 0), 0);
               const undecided = +(prim.undecided ?? 0);
               const other = +(100 - entered - undecided).toFixed(1);
@@ -5094,8 +5224,26 @@ export default function App() {
                       </div>
                     )}
                   </div>
+                  <div style={panelStyle}>
+                    <div style={sectionHead}>Modelling options</div>
+                    <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", marginBottom: 4 }}>
+                      <input type="checkbox" checked={useRegionalSwing} onChange={e => setUseRegionalSwing(e.target.checked)}
+                        style={{ marginTop: 2, accentColor: "#6366F1", width: 16, height: 16 }} />
+                      <span>
+                        <span style={{ fontWeight: 600, fontSize: 13 }}>Regional swing differentiation</span>
+                        <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>
+                          Metro seats track the state swing; regional/rural seats respond less (local factors dominant).
+                        </div>
+                        {useRegionalSwing && (
+                          <div style={{ fontSize: 11, color: "#6366F1", marginTop: 4 }}>
+                            Active: {regionLabel}
+                          </div>
+                        )}
+                      </span>
+                    </label>
+                  </div>
                   {hasChanges && (
-                    <button onClick={() => { setPrim({ ...bl, undecided: 0 }); setFlows({ ...resetFlows }); setOnTcp(null); }}
+                    <button onClick={() => { setPrim({ ...bl, undecided: 0 }); setFlows({ ...resetFlows }); setOnTcp(null); setUseRegionalSwing(true); }}
                       style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>
                       Reset model
                     </button>
