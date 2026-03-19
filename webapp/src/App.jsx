@@ -3418,7 +3418,7 @@ export default function App() {
       </div>
 
       {/* ── AdSense banner ── */}
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: isMobile ? "8px 16px 0" : "10px 24px 0" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: isMobile ? "8px 16px 0" : "10px 24px 0", display: isMobile ? "none" : "block" }}>
         <ins
           className="adsbygoogle"
           style={{ display: "block" }}
