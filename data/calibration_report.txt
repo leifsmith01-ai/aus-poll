@@ -4,7 +4,7 @@
   102  Fenner             ALP/LP     72.06      72.08    +0.02  
   103  Banks              ALP/LP     52.41      52.39    -0.02  
   104  Barton             ALP/LP     66.05      66.00    -0.05  
-  105  Bennelong          ALP/LP     59.28      59.26    -0.02  
+  105  Bernelong          ALP/LP     59.28      59.26    -0.02  
   106  Berowra            LP/ALP     48.34      48.37    +0.03  
   107  Blaxland           ALP/LP     71.87      71.91    +0.04  
   108  Bradfield          IND/LP        --         --       --  skip (IND/LP not ALP/Coal)
