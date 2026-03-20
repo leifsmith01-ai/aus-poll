@@ -959,11 +959,11 @@ const SA_2022_SEATS = [
 // TAS 2024 — representative seats (Hare-Clark approximated)
 const TAS_2024_SEATS = [
   [8401, "Bass (1)", "TAS", "LP", "Sarah Courtney", 0.2],
-  [8402, "Darwin (1)", "TAS", "LP", "Madeleine Ogilvie", 0.3],
+  [8402, "Clark (2)", "TAS", "LP", "Madeleine Ogilvie", 0.3],
   [8403, "Braddon (1)", "TAS", "LP", "Felix Ellis", 0.4],
   [8404, "Clark (1)", "TAS", "GRN", "Rosalie Woodruff", 0.5],
   [8405, "Lyons (1)", "TAS", "ALP", "Dean Winter", 0.8],
-  [8406, "Franklin (1)", "TAS", "ALP", "David O'Byrne", 1.1],
+  [8406, "Franklin (1)", "TAS", "IND", "David O'Byrne", 1.1],
   [8407, "Bass (2)", "TAS", "ALP", "Michelle O'Byrne", 1.2],
   [8408, "Braddon (2)", "TAS", "LP", "Roger Jaensch", 1.5],
   [8409, "Lyons (2)", "TAS", "LP", "Mark Shelton", 2.0],
@@ -1426,7 +1426,7 @@ const ELECTION_DATA = {
     chamber: "House of Assembly (Hare-Clark)", date: "23 March 2024",
     totalSeats: 35, majority: 18, twopp: null,
     seats: TAS_2024_SEATS,
-    counts: { alp: 10, coalition: 15, greens: 7, teal: 3, one_nation: 0, crossbench: 0 },
+    counts: { alp: 10, coalition: 14, greens: 5, teal: 6, one_nation: 0, crossbench: 0 },
     incumbent: "Jeremy Rockliff (Liberal)", incumbentParty: "LP",
     modelEnabled: true,
   },
