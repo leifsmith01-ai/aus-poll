@@ -635,6 +635,14 @@ function estimateSeatOnFp(seatId, swings) {
   return Math.max(0, base + swings.on);
 }
 
+// Estimate ON first preference for a state seat given a per-state ON FP lookup and swing.
+// Returns null if the seat has no entry in onFpLookup (use statewide 2PP swing instead).
+function estimateStateOnFp(seatId, onSwing, onFpLookup) {
+  const base = onFpLookup?.[seatId];
+  if (base == null) return null;
+  return Math.max(0, base + (onSwing ?? 0));
+}
+
 // ── 2025 seat data from AEC final results (event_id=31496) ────────────────────
 const _S25 = [
   [318, "Bean", "ACT", "ALP", "David Smith", "ALP", "IND", 0.68],
@@ -1714,8 +1722,8 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     let activeTcpMatchup = override?.tcpMatchup ?? null;
     if (!activeTcpMatchup && estOnFp >= onThreshold && hasAlp && hasCoal) {
       const _sb = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
-      const estAlp = override?.alp != null ? override.alp : Math.max(0, _sb.alp + swings.alp);
-      const estCoal = override?.coal != null ? override.coal : Math.max(0, _sb.coal + swings.coal);
+      const estAlp = override?.alp != null ? override.alp : Math.max(0, _sb.alp + sSwings.alp);
+      const estCoal = override?.coal != null ? override.coal : Math.max(0, _sb.coal + sSwings.coal);
       if (estOnFp > estAlp && estCoal >= estAlp) {
         // ALP eliminated (fewest votes) → ON vs Coalition final
         activeTcpMatchup = "on_v_coal";
@@ -1755,11 +1763,11 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const ef = override?.prefFlows ?? prefFlows;
       const fp = newFp ?? (() => {
         const sb = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
-        const a = Math.max(0, sb.alp + swings.alp);
-        const c = Math.max(0, sb.coal + swings.coal);
-        const g = Math.max(0, sb.grn + swings.grn);
-        const t = Math.max(0, sb.teal + swings.teal);
-        const o = Math.max(0, sb.on + swings.on);
+        const a = Math.max(0, sb.alp + sSwings.alp);
+        const c = Math.max(0, sb.coal + sSwings.coal);
+        const g = Math.max(0, sb.grn + sSwings.grn);
+        const t = Math.max(0, sb.teal + sSwings.teal);
+        const o = Math.max(0, sb.on + sSwings.on);
         return { alp: a, coal: c, grn: g, teal: t, on: o, other: Math.max(0, 100 - a - c - g - t - o) };
       })();
       // Use ON-race-specific flows: grn_alp_v_on, teal_alp_v_on, other_alp_v_on (all higher
@@ -1799,11 +1807,11 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       const ef = override?.prefFlows ?? prefFlows;
       const fp = newFp ?? (() => {
         const sb = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
-        const a = Math.max(0, sb.alp + swings.alp);
-        const c = Math.max(0, sb.coal + swings.coal);
-        const g = Math.max(0, sb.grn + swings.grn);
-        const t = Math.max(0, sb.teal + swings.teal);
-        const o = Math.max(0, sb.on + swings.on);
+        const a = Math.max(0, sb.alp + sSwings.alp);
+        const c = Math.max(0, sb.coal + sSwings.coal);
+        const g = Math.max(0, sb.grn + sSwings.grn);
+        const t = Math.max(0, sb.teal + sSwings.teal);
+        const o = Math.max(0, sb.on + sSwings.on);
         return { alp: a, coal: c, grn: g, teal: t, on: o, other: Math.max(0, 100 - a - c - g - t - o) };
       })();
       // Use ON-race-specific flows: grn_on_v_coal, teal_on_v_coal, other_on_v_coal (all low
@@ -2229,7 +2237,11 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
 //   baseline2pp  – baseline ALP 2PP %
 //   prefFlows    – { grn_alp, ind_alp, other_alp }
 //   coalParties  – Set of coalition party abbreviations
-function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, prefFlows, coalParties, swings, regionMap = null, regionSwingMult = null) {
+// onFpLookup: { seatId: baselineOnFp% } — seats where ON is a real contender.
+//   For these seats, ON is estimated as baseline + swings.on and compared against
+//   statewide ALP/Coal to auto-detect on_v_alp / on_v_coal TCP matchups.
+// stateOverrides: { seatId: { tcpMatchup, tcpPct } } — manual seat-level overrides.
+function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, prefFlows, coalParties, swings, regionMap = null, regionSwingMult = null, onFpLookup = null, onThreshold = 6.5, stateOverrides = null) {
   const new2pp = compute2ppFn(newPrim, prefFlows);
   const swing2pp = new2pp - baseline2pp;
 
@@ -2244,13 +2256,133 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
     const isCoal2 = coalParties.has(t2);
     const isGrn1 = t1 === "GRN";
     const isGrn2 = t2 === "GRN";
-    const isInd1 = !isAlp1 && !isCoal1 && !isGrn1;
-    const isInd2 = !isAlp2 && !isCoal2 && !isGrn2;
+    const isOn1 = t1 === "ON";
+    const isOn2 = t2 === "ON";
+    const isInd1 = !isAlp1 && !isCoal1 && !isGrn1 && !isOn1;
+    const isInd2 = !isAlp2 && !isCoal2 && !isGrn2 && !isOn2;
 
     // Regional swing multiplier: metro seats track state swing; regional/rural seats respond less
     const region = regionMap ? (regionMap[seat.name] ?? "outer_metro") : null;
     const regionMult = (regionMap && regionSwingMult) ? (regionSwingMult[region] ?? 1.0) : 1.0;
 
+    // Per-seat override: manual TCP matchup or TCP% bypass
+    const ov = stateOverrides?.[seat.id];
+
+    // ── ON auto-detection for ALP vs Coalition seats with per-seat ON data ──────
+    // Uses per-seat ON baseline (onFpLookup) + statewide swing as proxy.
+    // Statewide ALP/Coal primaries serve as approximations of seat-level competition;
+    // this is imperfect without per-seat primaries but correctly handles large ON surges.
+    if ((isAlp1 && isCoal2) || (isCoal1 && isAlp2)) {
+      // Check if a per-seat ON estimate exists (either from lookup or manual override)
+      const estOnFp = ov?.on != null
+        ? ov.on
+        : (onFpLookup?.[seat.id] != null ? Math.max(0, onFpLookup[seat.id] + (swings.on ?? 0)) : null);
+
+      let activeTcp = ov?.tcpMatchup ?? null;
+      if (!activeTcp && estOnFp != null && estOnFp >= onThreshold) {
+        const estAlp = newPrim.alp;
+        const estCoal = newPrim.coal;
+        if (estOnFp > estAlp && estCoal >= estAlp) activeTcp = "on_v_coal";
+        else if (estOnFp > estCoal && estAlp >= estCoal) activeTcp = "on_v_alp";
+      }
+
+      if (activeTcp) {
+        // Compute TCP using statewide primaries with per-seat ON estimate.
+        // This is an approximation — per-seat primary data for states would be more precise.
+        const estOn = estOnFp ?? (onFpLookup?.[seat.id] != null ? Math.max(0, onFpLookup[seat.id] + (swings.on ?? 0)) : newPrim.on);
+        const ind = newPrim.ind ?? 0;
+        const other = Math.max(0, 100 - newPrim.alp - newPrim.coal - newPrim.grn - ind - estOn);
+        const fp = { alp: newPrim.alp, coal: newPrim.coal, grn: newPrim.grn, ind, on: estOn, other };
+        const pf = prefFlows;
+
+        let projWinnerParty, projWinnerGroup, projWinnerPct;
+        if (activeTcp === "on_v_coal") {
+          const coalParty = isCoal1 ? t1 : t2;
+          const onTcp = fp.on + fp.alp * pf.alp_on_v_coal + fp.grn * pf.grn_on_v_coal + fp.ind * pf.ind_on_v_coal + fp.other * pf.other_on_v_coal;
+          const coalTcp = fp.coal + fp.alp * (1 - pf.alp_on_v_coal) + fp.grn * (1 - pf.grn_on_v_coal) + fp.ind * (1 - pf.ind_on_v_coal) + fp.other * (1 - pf.other_on_v_coal);
+          const onPct = ov?.tcpPct != null ? ov.tcpPct : onTcp / (onTcp + coalTcp) * 100;
+          projWinnerGroup = onPct >= 50 ? "one_nation" : "coalition";
+          projWinnerParty = onPct >= 50 ? "ON" : coalParty;
+          projWinnerPct = onPct >= 50 ? onPct : 100 - onPct;
+        } else {
+          const alpTcp = fp.alp + fp.coal * pf.coal_alp_v_on + fp.grn * pf.grn_alp_v_on + fp.ind * pf.ind_alp_v_on + fp.other * pf.other_alp_v_on;
+          const onTcp = fp.on + fp.coal * (1 - pf.coal_alp_v_on) + fp.grn * (1 - pf.grn_alp_v_on) + fp.ind * (1 - pf.ind_alp_v_on) + fp.other * (1 - pf.other_alp_v_on);
+          const onPct = ov?.tcpPct != null ? ov.tcpPct : onTcp / (alpTcp + onTcp) * 100;
+          projWinnerGroup = onPct >= 50 ? "one_nation" : "alp";
+          projWinnerParty = onPct >= 50 ? "ON" : "ALP";
+          projWinnerPct = onPct >= 50 ? onPct : 100 - onPct;
+        }
+        return {
+          ...seat,
+          modelled: {
+            winnerParty: projWinnerParty, winnerGroup: projWinnerGroup, winnerPct: projWinnerPct,
+            projAlp2pp: null, // ALP not in the final TCP in one branch
+            changed: projWinnerGroup !== getParty(seat.winner.party).group,
+            isAutoMatchup: !ov?.tcpMatchup,
+            activeTcpMatchup: activeTcp,
+            regionMult, region,
+          },
+        };
+      }
+    }
+
+    // ── Manual TCP override (for non ALP-vs-Coal seats or when auto-detect didn't fire) ──
+    if (ov?.tcpMatchup || ov?.tcpPct != null) {
+      const activeTcp = ov.tcpMatchup;
+      if (activeTcp === "on_v_coal" || activeTcp === "on_v_alp") {
+        const ind = newPrim.ind ?? 0;
+        const on = newPrim.on ?? 0;
+        const other = Math.max(0, 100 - newPrim.alp - newPrim.coal - newPrim.grn - ind - on);
+        const fp = { alp: newPrim.alp, coal: newPrim.coal, grn: newPrim.grn, ind, on, other };
+        const pf = prefFlows;
+        let projWinnerParty, projWinnerGroup, projWinnerPct;
+        if (activeTcp === "on_v_coal") {
+          const coalParty = coalParties.has(t1) ? t1 : (coalParties.has(t2) ? t2 : [...coalParties][0] ?? "LNP");
+          const onTcp = fp.on + fp.alp * pf.alp_on_v_coal + fp.grn * pf.grn_on_v_coal + fp.ind * pf.ind_on_v_coal + fp.other * pf.other_on_v_coal;
+          const coalTcp = fp.coal + fp.alp * (1 - pf.alp_on_v_coal) + fp.grn * (1 - pf.grn_on_v_coal) + fp.ind * (1 - pf.ind_on_v_coal) + fp.other * (1 - pf.other_on_v_coal);
+          const onPct = ov.tcpPct != null ? ov.tcpPct : onTcp / (onTcp + coalTcp) * 100;
+          projWinnerGroup = onPct >= 50 ? "one_nation" : "coalition";
+          projWinnerParty = onPct >= 50 ? "ON" : coalParty;
+          projWinnerPct = onPct >= 50 ? onPct : 100 - onPct;
+        } else {
+          const alpTcp = fp.alp + fp.coal * pf.coal_alp_v_on + fp.grn * pf.grn_alp_v_on + fp.ind * pf.ind_alp_v_on + fp.other * pf.other_alp_v_on;
+          const onTcp = fp.on + fp.coal * (1 - pf.coal_alp_v_on) + fp.grn * (1 - pf.grn_alp_v_on) + fp.ind * (1 - pf.ind_alp_v_on) + fp.other * (1 - pf.other_alp_v_on);
+          const onPct = ov.tcpPct != null ? ov.tcpPct : onTcp / (alpTcp + onTcp) * 100;
+          projWinnerGroup = onPct >= 50 ? "one_nation" : "alp";
+          projWinnerParty = onPct >= 50 ? "ON" : "ALP";
+          projWinnerPct = onPct >= 50 ? onPct : 100 - onPct;
+        }
+        return {
+          ...seat,
+          modelled: {
+            winnerParty: projWinnerParty, winnerGroup: projWinnerGroup, winnerPct: projWinnerPct,
+            projAlp2pp: null,
+            changed: projWinnerGroup !== getParty(seat.winner.party).group,
+            isOverride: true,
+            activeTcpMatchup: activeTcp,
+            regionMult, region,
+          },
+        };
+      }
+      // tcpPct-only override for ALP/Coal seats
+      if (ov.tcpPct != null && ((isAlp1 && isCoal2) || (isCoal1 && isAlp2))) {
+        const alpPct = isAlp1 ? ov.tcpPct : 100 - ov.tcpPct;
+        const projWinnerGroup = alpPct >= 50 ? "alp" : "coalition";
+        const projWinnerParty = alpPct >= 50 ? "ALP" : (isCoal1 ? t1 : t2);
+        return {
+          ...seat,
+          modelled: {
+            winnerParty: projWinnerParty, winnerGroup: projWinnerGroup, winnerPct: Math.max(alpPct, 100 - alpPct),
+            projAlp2pp: alpPct,
+            changed: projWinnerGroup !== getParty(seat.winner.party).group,
+            isOverride: true,
+            regionMult, region,
+          },
+        };
+      }
+    }
+
+    // ── Standard 2PP-swing calculation ───────────────────────────────────────
     let swingToT1 = 0;
     if (isAlp1 && isCoal2) swingToT1 = swing2pp * regionMult;
     else if (isCoal1 && isAlp2) swingToT1 = -swing2pp * regionMult;
@@ -2258,7 +2390,14 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
     else if (isGrn1 && isCoal2) swingToT1 = (swings.grn - (swings.coal ?? 0)) / 2 * regionMult;
     else if (isAlp1 && isGrn2) swingToT1 = (swings.alp - swings.grn) / 2 * regionMult;
     else if (isCoal1 && isGrn2) swingToT1 = -(swings.grn - (swings.coal ?? 0)) / 2 * regionMult;
-    else if (isCoal1 && isInd2) swingToT1 = -swing2pp * 0.3;  // Coal drop benefits ON/IND challenger — no regionMult
+    // ON is a named-party challenger in a Coal-held seat: use primary swing differential.
+    // When LNP primary drops and ON primary rises (typical right-side fragmentation), the
+    // LNP vs ON margin responds strongly to that differential rather than the ALP 2PP swing.
+    // Factor 0.6: ~60% of the raw primary differential translates to TCP margin shift after
+    // preferences flow (ALP/GRN voters all preference LNP over ON, reducing net ON gain).
+    else if (isCoal1 && isOn2) swingToT1 = (swings.coal - (swings.on ?? 0)) * 0.6 * regionMult;
+    else if (isOn1 && isCoal2) swingToT1 = ((swings.on ?? 0) - swings.coal) * 0.6 * regionMult;
+    else if (isCoal1 && isInd2) swingToT1 = -swing2pp * 0.3;  // IND challenger (not ON) — no regionMult
     else if (isInd1) swingToT1 = (isAlp2 ? -1 : 1) * swing2pp * 0.3;  // IND seats — no regionMult
 
     const newMargin = seat.margin + swingToT1;
@@ -2575,6 +2714,7 @@ export default function App() {
   };
   const [seatOverrides, setSeatOverrides] = useState({});  // {seatId: {alp,coal,grn,teal,on,prefFlows?}}
   const [overrideSearch, setOverrideSearch] = useState("");
+  const [stateOverrideSearch, setStateOverrideSearch] = useState("");
 
   // ── Modifiable ON/Elasticity/Uncertainty settings ──
   const [onThreshold, setOnThreshold] = useState(6.5);   // % ON primary to auto-detect TCP
@@ -2766,6 +2906,28 @@ export default function App() {
   const NSW_BL = { alp: 37.6, coal: 37.0, grn: 10.4, ind: 8.5, on: 2.0 };
   const NSW_2PP = 53.2;
   const NSW_COAL = new Set(["LP", "NP"]);
+
+  // Per-seat ON first-preference baselines for NSW 2023.
+  // Includes seats where ON has historically been competitive (>5%). These enable
+  // per-seat ON TCP auto-detection (on_v_alp / on_v_coal) when ON primary surges.
+  // Source: NSWEC 2023 final results — first preferences by candidate.
+  // Key Hunter Valley seats: ON ran strongly in mining/regional electorates.
+  const NSW_SEAT_ON_FP_2023 = {
+    7062: 19.1, // Upper Hunter (NP) — strongest ON seat in NSW state
+    7081: 11.7, // Cessnock (ALP)
+    7064: 10.5, // Tamworth (NP)
+    7084:  9.8, // Maitland (ALP)
+    7061:  8.5, // Oxley (NP)
+    7071:  8.0, // Swansea (ALP) — Lake Macquarie region
+    7066:  7.9, // Dubbo (NP)
+    7082:  7.5, // Charlestown (ALP)
+    7063:  7.0, // Port Macquarie (NP)
+    7085:  6.5, // Newcastle (ALP)
+    7083:  6.0, // Wallsend (ALP)
+    7060:  5.5, // Barwon — regional NSW
+    7069:  5.2, // Barwon (NP) — far western NSW
+    7068:  5.0, // Bathurst (NP)
+  };
   const [nswPrim, setNswPrim] = useState({ ...NSW_BL, undecided: 0 });
   const [nswFlows, setNswFlows] = useState({
     grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45,
@@ -2773,6 +2935,7 @@ export default function App() {
     alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
   });
   const [nswOnTcp, setNswOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
+  const [nswSeatOverrides, setNswSeatOverrides] = useState({}); // { seatId: { tcpMatchup, tcpPct, on } }
   const nswModelledSeats = useMemo(() => {
     const s = { alp: nswPrim.alp - NSW_BL.alp, coal: nswPrim.coal - NSW_BL.coal, grn: nswPrim.grn - NSW_BL.grn, on: nswPrim.on - NSW_BL.on };
     const compute2pp = (p, f) => {
@@ -2796,13 +2959,14 @@ export default function App() {
     return computeModelledSeatsState(NSW_SEATS, nswPrim, compute2pp, baseline2pp, nswFlows, NSW_COAL, s,
       useNswRegionalSwing ? NSW_DISTRICT_REGION : null,
       useNswRegionalSwing ? NSW_REGION_SWING_MULT : null,
+      NSW_SEAT_ON_FP_2023, 6.5, nswSeatOverrides,
     );
-  }, [nswPrim, nswFlows, nswOnTcp, useNswRegionalSwing]);
+  }, [nswPrim, nswFlows, nswOnTcp, useNswRegionalSwing, nswSeatOverrides]);
   const nswProjCounts = useMemo(() => { const c = {}; nswModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [nswModelledSeats]);
   const nswBaseCounts = useMemo(() => { const c = {}; NSW_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const nswChanged = useMemo(() => nswModelledSeats.filter(s => s.modelled.changed), [nswModelledSeats]);
   const nswImplied2pp = useMemo(() => { const r = nswModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [nswModelledSeats]);
-  const nswHasChanges = Object.entries(NSW_BL).some(([k, v]) => Math.abs((nswPrim[k] ?? v) - v) > 0.05) || (nswPrim.undecided || 0) > 0 || nswFlows.grn_alp !== 0.88 || nswFlows.ind_alp !== 0.55 || nswFlows.on_alp !== 0.20 || nswFlows.other_alp !== 0.45 || nswOnTcp !== null || !useNswRegionalSwing;
+  const nswHasChanges = Object.entries(NSW_BL).some(([k, v]) => Math.abs((nswPrim[k] ?? v) - v) > 0.05) || (nswPrim.undecided || 0) > 0 || nswFlows.grn_alp !== 0.88 || nswFlows.ind_alp !== 0.55 || nswFlows.on_alp !== 0.20 || nswFlows.other_alp !== 0.45 || nswOnTcp !== null || !useNswRegionalSwing || Object.keys(nswSeatOverrides).length > 0;
 
   const nswNat2ppSwing = useMemo(() => {
     const onV = nswPrim.on ?? 0;
@@ -2837,6 +3001,28 @@ export default function App() {
   const QLD_BL = { alp: 33.4, coal: 40.3, grn: 11.5, ind: 5.5, on: 5.7 };
   const QLD_2PP = 46.3;
   const QLD_COAL = new Set(["LNP"]);
+
+  // Per-seat ON first-preference baselines for QLD 2024.
+  // The five existing LNP vs ON TCP seats (7261–7265) are included with their actual ON%.
+  // Additional LNP vs ALP seats in ON-heavy regions are included to enable auto-detection
+  // when ON primary surges past statewide ALP (currently 33.4%), which would happen in
+  // scenarios where ON has a large regional swing pushing it past ~15–18% in these seats.
+  // Source: ECQ 2024 final results — first preferences by candidate.
+  const QLD_SEAT_ON_FP_2024 = {
+    7261: 18.2, // Mirani (LNP vs ON) — LNP's current margin 1.8pp
+    7262: 17.1, // Condamine (LNP vs ON) — margin 2.6pp
+    7263: 14.9, // Callide (LNP vs ON) — margin 3.5pp
+    7265: 13.1, // Southern Downs (LNP vs ON) — margin 5.5pp
+    7264: 10.3, // Hinchinbrook (LNP vs ON) — margin 4.5pp
+    7231:  7.8, // Nanango (LNP vs ALP) — ON competitive when surging
+    7233:  7.5, // Gympie (LNP vs ALP)
+    7242:  7.2, // Rockhampton (ALP vs LNP)
+    7241:  6.5, // Bundaberg (ALP vs LNP)
+    7232:  6.2, // Warrego (LNP vs ALP)
+    7243:  5.8, // Mulgrave (ALP vs LNP)
+    7234:  5.5, // Buderim (LNP vs ALP)
+    7235:  5.0, // Caloundra (LNP vs ALP)
+  };
   const [qldPrim, setQldPrim] = useState({ ...QLD_BL, undecided: 0 });
   const [qldFlows, setQldFlows] = useState({
     grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40,
@@ -2844,6 +3030,7 @@ export default function App() {
     alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28,
   });
   const [qldOnTcp, setQldOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
+  const [qldSeatOverrides, setQldSeatOverrides] = useState({}); // { seatId: { tcpMatchup, tcpPct, on } }
   const qldModelledSeats = useMemo(() => {
     const s = { alp: qldPrim.alp - QLD_BL.alp, coal: qldPrim.coal - QLD_BL.coal, grn: qldPrim.grn - QLD_BL.grn, on: qldPrim.on - QLD_BL.on };
     const compute2pp = (p, f) => {
@@ -2867,13 +3054,14 @@ export default function App() {
     return computeModelledSeatsState(QLD_SEATS, qldPrim, compute2pp, baseline2pp, qldFlows, QLD_COAL, s,
       useQldRegionalSwing ? QLD_DISTRICT_REGION : null,
       useQldRegionalSwing ? QLD_REGION_SWING_MULT : null,
+      QLD_SEAT_ON_FP_2024, 6.5, qldSeatOverrides,
     );
-  }, [qldPrim, qldFlows, qldOnTcp, useQldRegionalSwing]);
+  }, [qldPrim, qldFlows, qldOnTcp, useQldRegionalSwing, qldSeatOverrides]);
   const qldProjCounts = useMemo(() => { const c = {}; qldModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [qldModelledSeats]);
   const qldBaseCounts = useMemo(() => { const c = {}; QLD_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const qldChanged = useMemo(() => qldModelledSeats.filter(s => s.modelled.changed), [qldModelledSeats]);
   const qldImplied2pp = useMemo(() => { const r = qldModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [qldModelledSeats]);
-  const qldHasChanges = Object.entries(QLD_BL).some(([k, v]) => Math.abs((qldPrim[k] ?? v) - v) > 0.05) || (qldPrim.undecided || 0) > 0 || qldFlows.grn_alp !== 0.82 || qldFlows.ind_alp !== 0.50 || qldFlows.on_alp !== 0.18 || qldFlows.other_alp !== 0.40 || qldOnTcp !== null || !useQldRegionalSwing;
+  const qldHasChanges = Object.entries(QLD_BL).some(([k, v]) => Math.abs((qldPrim[k] ?? v) - v) > 0.05) || (qldPrim.undecided || 0) > 0 || qldFlows.grn_alp !== 0.82 || qldFlows.ind_alp !== 0.50 || qldFlows.on_alp !== 0.18 || qldFlows.other_alp !== 0.40 || qldOnTcp !== null || !useQldRegionalSwing || Object.keys(qldSeatOverrides).length > 0;
 
   const qldNat2ppSwing = useMemo(() => {
     const onV = qldPrim.on ?? 0;
@@ -5143,15 +5331,15 @@ export default function App() {
             {/* ── Reusable state builder (NSW, QLD, WA, SA, NT) ── */}
             {(() => {
               const cfgs = {
-                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80" },
-                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75" },
+                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, seatOverrides: nswSeatOverrides, setSeatOverrides: setNswSeatOverrides, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80" },
+                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, seatOverrides: qldSeatOverrides, setSeatOverrides: setQldSeatOverrides, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75" },
                 wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: WA_SEATS, uncertainty: waUncertainty, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75" },
                 sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: SA_SEATS, uncertainty: saUncertainty, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80" },
                 nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70" },
               };
               const cfg = cfgs[selectedModelId];
               if (!el.modelEnabled || !cfg) return null;
-              const { prim, setPrim, flows, setFlows, onTcp, setOnTcp, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty, useRegionalSwing, setUseRegionalSwing, regionLabel } = cfg;
+              const { prim, setPrim, flows, setFlows, onTcp, setOnTcp, seatOverrides, setSeatOverrides, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty, useRegionalSwing, setUseRegionalSwing, regionLabel } = cfg;
               const entered = parties.reduce((s, p) => s + (prim[p.k] ?? 0), 0);
               const undecided = +(prim.undecided ?? 0);
               const other = +(100 - entered - undecided).toFixed(1);
@@ -5243,7 +5431,7 @@ export default function App() {
                     </label>
                   </div>
                   {hasChanges && (
-                    <button onClick={() => { setPrim({ ...bl, undecided: 0 }); setFlows({ ...resetFlows }); setOnTcp(null); setUseRegionalSwing(true); }}
+                    <button onClick={() => { setPrim({ ...bl, undecided: 0 }); setFlows({ ...resetFlows }); setOnTcp(null); setUseRegionalSwing(true); if (setSeatOverrides) setSeatOverrides({}); }}
                       style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>
                       Reset model
                     </button>
@@ -5372,15 +5560,23 @@ export default function App() {
                         const projP = getParty(seat.modelled.winnerParty);
                         const chg = seat.modelled.changed;
                         const winProb = uncertainty.seatWinProbs[seat.id];
+                        const hasOv = seatOverrides?.[seat.id] != null;
+                        const autoOn = seat.modelled.isAutoMatchup;
                         return (
-                          <div key={seat.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: "1px solid #F3F4F6", background: chg ? "#FFF7ED" : "transparent" }}>
+                          <div key={seat.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: "1px solid #F3F4F6", background: hasOv ? "#F0FDF4" : chg ? "#FFF7ED" : "transparent" }}>
                             <div style={{ width: 3, height: 28, background: chg ? projP.color : baseP.color, borderRadius: 2, flexShrink: 0 }} />
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
                                 {seat.name}
                                 {chg && <span style={{ fontSize: 10, background: "#FEF3C7", color: "#92400E", padding: "1px 5px", borderRadius: 8, fontWeight: 700 }}>CHANGES</span>}
+                                {hasOv && <span style={{ fontSize: 10, background: "#DCFCE7", color: "#166534", padding: "1px 5px", borderRadius: 8, fontWeight: 700 }}>OVERRIDE</span>}
+                                {autoOn && !hasOv && <span style={{ fontSize: 10, background: "#FEF3C7", color: "#B45309", padding: "1px 5px", borderRadius: 8, fontWeight: 700 }}>ON AUTO</span>}
                               </div>
-                              <div style={{ fontSize: 11, color: "#6B7280" }}>{seat.tcp[0].party} vs {seat.tcp[1].party}</div>
+                              <div style={{ fontSize: 11, color: "#6B7280" }}>
+                                {seat.modelled.activeTcpMatchup
+                                  ? seat.modelled.activeTcpMatchup.replace("on_v_alp", "ON vs ALP").replace("on_v_coal", "ON vs Coal")
+                                  : `${seat.tcp[0].party} vs ${seat.tcp[1].party}`}
+                              </div>
                             </div>
                             <PartyBadge party={seat.winner.party} />
                             {chg && <><span style={{ fontSize: 11, color: "#6B7280" }}>→</span><PartyBadge party={seat.modelled.winnerParty} /></>}
@@ -5398,6 +5594,143 @@ export default function App() {
                       Probabilistic swing model · {source} · {totalSeats} seats · ALP win% shown for ALP/Coalition contests
                     </div>
                   </div>
+
+                  {/* ── Per-seat TCP override panel ── */}
+                  {setSeatOverrides && (
+                    <div style={panelStyle}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-level TCP overrides</span>
+                        {Object.keys(seatOverrides ?? {}).length > 0 && (
+                          <>
+                            <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
+                              {Object.keys(seatOverrides).length} active
+                            </span>
+                            <button onClick={() => setSeatOverrides({})}
+                              style={{ marginLeft: "auto", fontSize: 12, color: "#EF4444", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "3px 10px", cursor: "pointer", fontWeight: 600 }}>
+                              Clear all
+                            </button>
+                          </>
+                        )}
+                      </div>
+                      <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 10px" }}>
+                        Force a specific TCP matchup or result for individual seats. Useful for modelling strong local candidates, ON surges in specific electorates, or known seat-level effects.
+                      </p>
+                      {/* Seat search */}
+                      <div style={{ position: "relative", marginBottom: 12 }}>
+                        <input
+                          value={stateOverrideSearch}
+                          onChange={e => setStateOverrideSearch(e.target.value)}
+                          placeholder="+ Search for a seat to override…"
+                          style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "7px 10px", fontSize: 13, boxSizing: "border-box", outline: "none" }}
+                        />
+                        {stateOverrideSearch.length > 0 && (() => {
+                          const matches = allSeats.filter(s =>
+                            s.name.toLowerCase().includes(stateOverrideSearch.toLowerCase()) && !seatOverrides?.[s.id]
+                          ).slice(0, 8);
+                          return matches.length > 0 ? (
+                            <div style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 100, overflow: "hidden" }}>
+                              {matches.map((s, i) => (
+                                <div key={s.id}
+                                  onMouseDown={() => {
+                                    setSeatOverrides(ov => ({ ...ov, [s.id]: { tcpMatchup: null, tcpPct: null, on: null } }));
+                                    setStateOverrideSearch("");
+                                  }}
+                                  style={{ padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderBottom: i < matches.length - 1 ? "1px solid #F3F4F6" : "none" }}>
+                                  <span style={{ fontWeight: 600, flex: 1, fontSize: 13 }}>{s.name}</span>
+                                  <span style={{ fontSize: 12, color: "#9CA3AF" }}>{s.tcp[0].party} vs {s.tcp[1].party}</span>
+                                  <PartyBadge party={s.winner.party} />
+                                  <span style={{ fontSize: 12, color: "#6B7280" }}>{s.margin.toFixed(1)}%</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : null;
+                        })()}
+                      </div>
+                      {/* Active override cards */}
+                      {Object.keys(seatOverrides ?? {}).length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "16px 0", color: "#9CA3AF", fontSize: 12 }}>
+                          No seat overrides active. Search for a seat above to add one.
+                        </div>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                          {Object.entries(seatOverrides).map(([idStr, ov]) => {
+                            const seat = allSeats.find(s => s.id === +idStr);
+                            if (!seat) return null;
+                            const ms = modelled.find(s => s.id === +idStr);
+                            const setOv = (patch) => setSeatOverrides(ovs => ({ ...ovs, [+idStr]: { ...ovs[+idStr], ...patch } }));
+                            const tcpMatchup = ov.tcpMatchup ?? null;
+                            const tcpPct = ov.tcpPct ?? null;
+                            const onFp = ov.on ?? null;
+                            return (
+                              <div key={idStr} style={{ border: "1px solid #D1D5DB", borderRadius: 8, padding: "12px 14px", background: "#FAFAFA" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                                  <PartyBadge party={seat.winner.party} />
+                                  <span style={{ fontWeight: 700, fontSize: 13, flex: 1 }}>{seat.name}</span>
+                                  <span style={{ fontSize: 12, color: "#9CA3AF" }}>Baseline: {seat.tcp[0].party} vs {seat.tcp[1].party} · {seat.margin.toFixed(1)}%</span>
+                                  {ms?.modelled.winnerParty && (
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: getParty(ms.modelled.winnerParty).color }}>
+                                      → {ms.modelled.winnerParty} {ms.modelled.winnerPct?.toFixed(1)}%
+                                    </span>
+                                  )}
+                                  <button onClick={() => setSeatOverrides(ovs => { const n = { ...ovs }; delete n[+idStr]; return n; })}
+                                    style={{ fontSize: 13, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}>✕</button>
+                                </div>
+                                {/* TCP matchup selector */}
+                                <div style={{ marginBottom: 8 }}>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>TCP matchup</div>
+                                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                    {[
+                                      { val: null, label: "Auto" },
+                                      { val: "on_v_alp", label: "ON vs ALP" },
+                                      { val: "on_v_coal", label: "ON vs Coal" },
+                                    ].map(opt => (
+                                      <button key={String(opt.val)}
+                                        onClick={() => setOv({ tcpMatchup: opt.val })}
+                                        style={{ fontSize: 11, padding: "3px 8px", borderRadius: 5, border: "1px solid", cursor: "pointer", fontWeight: tcpMatchup === opt.val ? 700 : 400, background: tcpMatchup === opt.val ? "#FEF3C7" : "#F9FAFB", borderColor: tcpMatchup === opt.val ? "#F59E0B" : "#D1D5DB", color: tcpMatchup === opt.val ? "#92400E" : "#374151" }}>
+                                        {opt.label}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                                {/* TCP% override */}
+                                <div style={{ marginBottom: 8 }}>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>
+                                    {tcpMatchup === "on_v_alp" ? "ON TCP % (≥50 = ON wins)" : tcpMatchup === "on_v_coal" ? "ON TCP % (≥50 = ON wins)" : "ALP 2CP % (≥50 = ALP wins)"}
+                                  </div>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <input
+                                      type="number" min={0} max={100} step={0.5}
+                                      value={tcpPct ?? ""}
+                                      placeholder="auto"
+                                      onChange={e => setOv({ tcpPct: e.target.value === "" ? null : +e.target.value })}
+                                      style={{ width: 70, border: "1px solid #D1D5DB", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
+                                    />
+                                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>%  (leave blank = model-computed)</span>
+                                    {tcpPct != null && <button onClick={() => setOv({ tcpPct: null })} style={{ fontSize: 11, color: "#6B7280", background: "none", border: "none", cursor: "pointer" }}>×</button>}
+                                  </div>
+                                </div>
+                                {/* ON primary override (for auto-detection seats) */}
+                                <div>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>ON primary % override</div>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <input
+                                      type="number" min={0} max={100} step={0.5}
+                                      value={onFp ?? ""}
+                                      placeholder="auto"
+                                      onChange={e => setOv({ on: e.target.value === "" ? null : +e.target.value })}
+                                      style={{ width: 70, border: "1px solid #D1D5DB", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
+                                    />
+                                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>%  (overrides auto-detected ON for this seat)</span>
+                                    {onFp != null && <button onClick={() => setOv({ on: null })} style={{ fontSize: 11, color: "#6B7280", background: "none", border: "none", cursor: "pointer" }}>×</button>}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>;
             })()}
