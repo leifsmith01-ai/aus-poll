@@ -1157,9 +1157,9 @@ const _WA = [
   // Marginal ALP/LP
   [7321, "Bicton", "WA", "ALP", "Lisa O'Malley", "ALP", "LP", 2.5],
   [7322, "Dawesville", "WA", "ALP", "Matthew Hughes", "ALP", "LP", 3.1],
-  // Greens seats
-  [7331, "Fremantle", "WA", "GRN", "Simone McGurk", "GRN", "ALP", 2.5],
-  [7332, "Maylands", "WA", "GRN", "Lisa Baker", "GRN", "ALP", 3.5],
+  // ALP marginal (Greens did not win any WA lower house seats in 2025)
+  [7331, "Fremantle", "WA", "ALP", "Simone McGurk", "ALP", "LP", 2.5],
+  [7332, "Maylands", "WA", "ALP", "Dan Bull", "ALP", "LP", 3.5],
   // LP safe (remaining LP seats — all fairly marginal given ALP landslide)
   [7341, "Scarborough", "WA", "LP", "Paul Papalia", "LP", "ALP", 3.5],
   [7342, "Hillarys", "WA", "LP", "Peter Katsambanis", "LP", "ALP", 4.0],
@@ -1173,9 +1173,9 @@ const _WA = [
   [7357, "Kwinana", "WA", "ALP", "Roger Cook", "ALP", "LP", 22.0],
 ];
 const WA_SEATS = fillStateSeats(_WA.map(r => mkSS(...r)),
-  { alp: 46, coalition: 10, greens: 2, teal: 1 }, "LP", "WA", 200);
+  { alp: 46, coalition: 13, greens: 0, teal: 0 }, "LP", "WA", 200);
 
-// ── SA 2022 (47 seats, ALP majority 26, LP 17, IND 2, crossbench 2) ──────────
+// ── SA 2022 (47 seats, ALP majority 27, LP 16, IND 4) ────────────────────────
 // Primary: ALP 38.3  LP 34.8  GRN 7.3  IND/other 19.6   ALP 2PP 54.9%
 const _SA = [
   // Marginal ALP/LP
@@ -1205,7 +1205,7 @@ const _SA = [
   [7434, "Lee", "SA", "ALP", "Tom Kenyon", "ALP", "LP", 11.0],
 ];
 const SA_SEATS = fillStateSeats(_SA.map(r => mkSS(...r)),
-  { alp: 26, coalition: 17, greens: 0, teal: 2, crossbench: 2 }, "LP", "SA", 300);
+  { alp: 27, coalition: 16, greens: 0, teal: 0, crossbench: 4 }, "LP", "SA", 300);
 
 // ── NT 2024 (25 seats, CLP majority 17, ALP 8) ───────────────────────────────
 // Primary: ALP 30.5  CLP 40.5  GRN 5.5  IND 12.5  other 11.0
@@ -1230,18 +1230,21 @@ const _NT = [
 const NT_SEATS = fillStateSeats(_NT.map(r => mkSS(...r)),
   { alp: 8, coalition: 17 }, "CLP", "NT", 400);
 
-// ── TAS 2024 ─ Hare-Clark (7 electorates × 5 seats = 35) ─────────────────────
-// LP 15, ALP 10, GRN 7, IND/other 3
+// ── TAS 2024 ─ Hare-Clark (5 electorates × 7 seats = 35) ─────────────────────
+// Lib 14, ALP 10, GRN 5, JLN 3, IND 3  (source: Tasmanian Electoral Commission 2024)
 // Model approach: quota-based proportional allocation per electorate.
-// Electorates and approximate 2024 primary votes (LP% / ALP% / GRN% / IND%):
+// Droop quota = 100/(7+1) = 12.5%.  JLN + other independents are grouped as "ind".
+// Primary votes are actual TASEC first-preference percentages, except Franklin where
+// preference flows in the full Hare-Clark count give Lib an extra seat not predicted
+// by first preferences alone; Franklin primaries are calibration-adjusted to reproduce
+// the actual seat outcome (Lib 3, ALP 2, GRN 1, IND 1).
+// Source: TASEC 2024 final results; electorate figures verified via Antony Green / Wikipedia.
 const TAS_ELECTORATES = [
-  { name: "Bass", seats: 5, coal: 36, alp: 28, grn: 11, ind: 10 },
-  { name: "Braddon", seats: 5, coal: 38, alp: 30, grn: 9, ind: 9 },
-  { name: "Clark", seats: 5, coal: 30, alp: 25, grn: 19, ind: 14 },
-  { name: "Darwin", seats: 5, coal: 36, alp: 27, grn: 12, ind: 11 },
-  { name: "Franklin", seats: 5, coal: 34, alp: 28, grn: 14, ind: 11 },
-  { name: "Lyons", seats: 5, coal: 37, alp: 29, grn: 10, ind: 10 },
-  { name: "Mersey", seats: 5, coal: 38, alp: 31, grn: 9, ind: 8 },
+  { name: "Bass",     seats: 7, coal: 39.7, alp: 28.6, grn: 11.1, ind: 20.6 }, // Lib=3,ALP=2,GRN=1,ind=1
+  { name: "Braddon",  seats: 7, coal: 45.8, alp: 24.9, grn:  6.3, ind: 23.0 }, // Lib=3,ALP=2,GRN=0,ind=2
+  { name: "Clark",    seats: 7, coal: 27.1, alp: 30.5, grn: 22.0, ind: 20.4 }, // Lib=2,ALP=2,GRN=2,ind=1
+  { name: "Franklin", seats: 7, coal: 34.0, alp: 28.0, grn: 20.0, ind: 18.0 }, // Lib=3,ALP=2,GRN=1,ind=1 (calibrated)
+  { name: "Lyons",    seats: 7, coal: 37.2, alp: 29.0, grn: 11.4, ind: 22.4 }, // Lib=3,ALP=2,GRN=1,ind=1
 ];
 
 // ── ACT 2024 ─ Hare-Clark (5 electorates × 5 seats = 25) ────────────────────
@@ -1405,7 +1408,7 @@ const ELECTION_DATA = {
     chamber: "Legislative Assembly", date: "8 March 2025",
     totalSeats: 59, majority: 30, twopp: 63.1,
     seats: WA_SEATS,
-    counts: { alp: 46, coalition: 10, greens: 2, teal: 1, one_nation: 0, crossbench: 0 },
+    counts: { alp: 46, coalition: 13, greens: 0, teal: 0, one_nation: 0, crossbench: 0 },
     incumbent: "Roger Cook (ALP)", incumbentParty: "ALP",
     modelEnabled: true,
   },
@@ -1414,7 +1417,7 @@ const ELECTION_DATA = {
     chamber: "House of Assembly", date: "19 March 2022",
     totalSeats: 47, majority: 24, twopp: 54.9,
     seats: SA_SEATS,
-    counts: { alp: 26, coalition: 17, greens: 0, teal: 2, one_nation: 0, crossbench: 2 },
+    counts: { alp: 27, coalition: 16, greens: 0, teal: 0, one_nation: 0, crossbench: 4 },
     incumbent: "Peter Malinauskas (ALP)", incumbentParty: "ALP",
     modelEnabled: true,
   },
@@ -3316,8 +3319,9 @@ export default function App() {
   );
 
   // ── TAS 2024 model state (Hare-Clark) ─────────────────────────────────────
-  // Baselines per electorate in TAS_ELECTORATES; statewide: Coalition 36  ALP 28  GRN 12  IND 10  ON 1  other 13
-  const TAS_BL = { coal: 36, alp: 28, grn: 12, ind: 10, on: 1.0 };
+  // Statewide averages of updated TAS_ELECTORATES (5 electorates × 7 seats):
+  // Coalition 37  ALP 28  GRN 14  IND/JLN 21  ON 0  (JLN and independents grouped as ind)
+  const TAS_BL = { coal: 37, alp: 28, grn: 14, ind: 21, on: 0 };
   const [tasPrim, setTasPrim] = useState({ ...TAS_BL, undecided: 0 });
   const tasProjected = useMemo(() => {
     const electorates = TAS_ELECTORATES.map(el => ({
