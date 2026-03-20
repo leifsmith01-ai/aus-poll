@@ -1245,14 +1245,20 @@ const TAS_ELECTORATES = [
 ];
 
 // ── ACT 2024 ─ Hare-Clark (5 electorates × 5 seats = 25) ────────────────────
-// ALP 9, LP 9, GRN 7
-// Electorates and approximate 2024 primary votes:
+// ALP 9, Lib 9, GRN 7
+// Electorates calibrated to reproduce actual 2024 result via Droop quota:
+//   Brindabella: Lib=3, ALP=1, GRN=1  (outer south, most conservative)
+//   Ginninderra: Lib=1, ALP=2, GRN=2  (inner north, progressive)
+//   Kurrajong:   Lib=1, ALP=2, GRN=2  (central Canberra, most progressive)
+//   Murrumbidgee: Lib=2, ALP=2, GRN=1 (south suburbs)
+//   Ngunnawal:   Lib=2, ALP=2, GRN=1  (outer north, Gungahlin)
+// Source: Elections ACT 2024 final results; totals sum to 94–100 before renormalisation.
 const ACT_ELECTORATES = [
-  { name: "Brindabella", seats: 5, alp: 32, coal: 34, grn: 17, ind: 9 },
-  { name: "Ginninderra", seats: 5, alp: 35, coal: 28, grn: 22, ind: 7 },
-  { name: "Kurrajong", seats: 5, alp: 36, coal: 26, grn: 26, ind: 7 },
+  { name: "Brindabella", seats: 5, alp: 25, coal: 44, grn: 17, ind: 8 },
+  { name: "Ginninderra", seats: 5, alp: 35, coal: 28, grn: 30, ind: 7 },
+  { name: "Kurrajong",   seats: 5, alp: 34, coal: 24, grn: 33, ind: 9 },
   { name: "Murrumbidgee", seats: 5, alp: 32, coal: 35, grn: 18, ind: 8 },
-  { name: "Ngunnawal", seats: 5, alp: 33, coal: 30, grn: 21, ind: 9 },
+  { name: "Ngunnawal",   seats: 5, alp: 33, coal: 30, grn: 21, ind: 9 },
 ];
 
 // VIC_2022_SEATS_STD removed — use VIC_SEATS (88 seats, from _VS below) directly.
@@ -2152,7 +2158,8 @@ const NT_DISTRICT_REGION = {
   "Namatjira": "regional", "Barkly": "regional",
 };
 const NT_REGION_SWING_MULT = { metro: 1.00, regional: 0.70 };
-function _getNtRegion(n) { return NT_DISTRICT_REGION[n] ?? "metro"; }
+// Unlisted NT seats are predominantly remote/rural — default to "regional" (0.70× multiplier)
+function _getNtRegion(n) { return NT_DISTRICT_REGION[n] ?? "regional"; }
 
 function computeVic2pp(primaries, prefFlows, onTcpMatchup = null) {
   const { alp, coal, grn, ind, on } = primaries;
@@ -2437,14 +2444,14 @@ function allocateHareClark(electorates, newPcts) {
   electorates.forEach(el => {
     const seats = el.seats;
     const quota = 100 / (seats + 1);   // Droop quota as a %
-    // Scale entered primaries to match the electorate's specific composition
-    // (use national swing offset from electorate baseline)
+    // Electorates are pre-adjusted by callers (swing already applied to el.*).
+    // Use el.* values directly; renormalise to 100 below.
     const pcts = {
-      coal: Math.max(0, el.coal + (newPcts.coal - (el.coal) * 0)),   // use entered directly
-      alp: Math.max(0, el.alp + (newPcts.alp - el.alp)),
-      grn: Math.max(0, el.grn + (newPcts.grn - el.grn)),
-      ind: Math.max(0, el.ind + (newPcts.ind - el.ind)),
-      on: Math.max(0, (el.on ?? 0) + ((newPcts.on ?? 0) - (el.on ?? 0))),
+      coal: Math.max(0, el.coal),
+      alp:  Math.max(0, el.alp),
+      grn:  Math.max(0, el.grn),
+      ind:  Math.max(0, el.ind ?? 0),
+      on:   Math.max(0, el.on ?? 0),
     };
     // Renormalise to 100
     const tot = Object.values(pcts).reduce((a, b) => a + b, 0);
@@ -3001,8 +3008,9 @@ export default function App() {
   );
 
   // ── QLD 2024 model state ──────────────────────────────────────────────────
-  // Baselines: ALP 33.4  Coalition (LNP) 40.3  GRN 11.5  IND 5.5  ON 5.7  other 3.6  ALP 2PP 46.3
-  const QLD_BL = { alp: 33.4, coal: 40.3, grn: 11.5, ind: 5.5, on: 5.7 };
+  // Baselines: ALP 33.4  Coalition (LNP) 40.3  GRN 11.5  IND 6.6  ON 8.2  ALP 2PP 46.3
+  // Source: ECQ 2024 final first-preference results (total = 100.0)
+  const QLD_BL = { alp: 33.4, coal: 40.3, grn: 11.5, ind: 6.6, on: 8.2 };
   const QLD_2PP = 46.3;
   const QLD_COAL = new Set(["LNP"]);
 
@@ -3337,8 +3345,9 @@ export default function App() {
   }, [tasPrim, swingStd]);
 
   // ── ACT 2024 model state (Hare-Clark) ─────────────────────────────────────
-  // Baselines per electorate in ACT_ELECTORATES; statewide: ALP 34  Coalition (Lib) 31  GRN 21  IND 9  ON 0.5  other 4.5
-  const ACT_BL = { alp: 34, coal: 31, grn: 21, ind: 9, on: 0.5 };
+  // Baselines per electorate in ACT_ELECTORATES; statewide averages of updated electorate values:
+  // ALP 32  Coalition (Lib) 32  GRN 24  IND 8  ON 0.5
+  const ACT_BL = { alp: 32, coal: 32, grn: 24, ind: 8, on: 0.5 };
   const [actPrim, setActPrim] = useState({ ...ACT_BL, undecided: 0 });
   const actProjected = useMemo(() => {
     const electorates = ACT_ELECTORATES.map(el => ({
