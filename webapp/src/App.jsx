@@ -882,7 +882,11 @@ const INITIAL_POLLS = [
   { id: 66, pollster: "YouGov", date: "2026-02-23", alp: 29, coal: 22, grn: 13, on: 24, tpp: 53 },
   { id: 67, pollster: "Newspoll", date: "2026-02-25", alp: 32, coal: 20, grn: 11, on: 27, tpp: null },
   { id: 68, pollster: "RedBridge Group", date: "2026-02-26", alp: 32, coal: 19, grn: 12, on: 28, tpp: 54 },
-].map(p => ({ ...p, n: POLL_SAMPLE_SIZES[p.pollster] ?? null }));
+].map(p => ({
+  ...p,
+  oth: p.on != null ? +(100 - p.alp - p.coal - p.grn - p.on).toFixed(1) : +(100 - p.alp - p.coal - p.grn).toFixed(1),
+  n: POLL_SAMPLE_SIZES[p.pollster] ?? null,
+}));
 
 // ─── Election data ────────────────────────────────────────────────────────────
 // Helper: build a seat object from a flat tuple
@@ -3491,7 +3495,7 @@ export default function App() {
     const tppVals = recent.map(p => ({ ...p, tpp: imputedTpp(p) })).filter(p => p.tpp != null);
     const tppTw = tppVals.reduce((s, p) => s + wt(p), 0);
     const tppAvg = tppTw ? +(tppVals.reduce((s, p) => s + p.tpp * wt(p), 0) / tppTw).toFixed(1) : null;
-    return { alp: wavg("alp"), coal: wavg("coal"), grn: wavg("grn"), oth: wavg("oth"), tpp: tppAvg, n: recent.length };
+    return { alp: wavg("alp"), coal: wavg("coal"), grn: wavg("grn"), on: wavg("on"), oth: wavg("oth"), tpp: tppAvg, n: recent.length };
   }, [sortedPolls]);
 
   // Unified chart dataset: raw poll values + weighted aggregate trend at each poll date
@@ -3577,19 +3581,20 @@ export default function App() {
   };
 
   const addPoll = () => {
-    const { pollster, date, alp, coal, grn, tpp, n } = newPoll;
+    const { pollster, date, alp, coal, grn, on, tpp, n } = newPoll;
     if (!pollster || !date || !alp || !coal || !grn) return;
-    const a = +alp, c = +coal, g = +grn;
+    const a = +alp, c = +coal, g = +grn, o = on ? +on : 0;
     setPolls(prev => [...prev, {
       id: nextPollId,
       pollster, date,
       alp: a, coal: c, grn: g,
-      oth: +(100 - a - c - g).toFixed(1),
+      on: o,
+      oth: +(100 - a - c - g - o).toFixed(1),
       tpp: tpp ? +tpp : null,
       n: n ? +n : (POLL_SAMPLE_SIZES[pollster] ?? null),
     }]);
     setNextPollId(id => id + 1);
-    setNewPoll({ pollster: "", date: "", alp: "", coal: "", grn: "", oth: "", tpp: "", n: "" });
+    setNewPoll({ pollster: "", date: "", alp: "", coal: "", grn: "", on: "", tpp: "", n: "" });
     setShowAddPoll(false);
   };
 
@@ -4011,6 +4016,7 @@ export default function App() {
                   { key: "alp", label: "ALP %", type: "number", placeholder: "e.g. 33" },
                   { key: "coal", label: "Coalition %", type: "number", placeholder: "e.g. 38" },
                   { key: "grn", label: "Greens %", type: "number", placeholder: "e.g. 13" },
+                  { key: "on", label: "One Nation %", type: "number", placeholder: "e.g. 8 (optional)" },
                   { key: "tpp", label: "2PP ALP %", type: "number", placeholder: "e.g. 49 (optional)" },
                   { key: "n", label: "Sample size", type: "number", placeholder: "e.g. 1500" },
                 ].map(({ key, label, type, placeholder }) => (
@@ -4024,7 +4030,7 @@ export default function App() {
               </div>
               {newPoll.alp && newPoll.coal && newPoll.grn && (
                 <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 10 }}>
-                  Other / minor parties: {(100 - (+newPoll.alp || 0) - (+newPoll.coal || 0) - (+newPoll.grn || 0)).toFixed(1)}%
+                  Ind / Other: {(100 - (+newPoll.alp || 0) - (+newPoll.coal || 0) - (+newPoll.grn || 0) - (+newPoll.on || 0)).toFixed(1)}%
                 </div>
               )}
               <button onClick={addPoll} style={{ ...STYLES.btnPrimary, background: "#0369A1" }}>
@@ -4040,7 +4046,7 @@ export default function App() {
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Latest: {latestPoll.pollster} · {new Date(latestPoll.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</div>
                 {pollAvg && <div style={{ fontSize: 12, color: "#6B7280" }}>30-day weighted avg ({pollAvg.n} polls) shown in brackets</div>}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 12 }}>
                 {(() => {
                   const effTpp = latestPoll.tpp ?? imputedTpp(latestPoll);
                   const tppIsEst = latestPoll.tpp == null;
@@ -4048,7 +4054,8 @@ export default function App() {
                     { label: "ALP primary", value: latestPoll.alp, avg: pollAvg?.alp, color: "#DC2626", delta: latestPoll.alp - BASELINE_2025.alp, est: false },
                     { label: "Coalition primary", value: latestPoll.coal, avg: pollAvg?.coal, color: "#1D4ED8", delta: latestPoll.coal - BASELINE_2025.coal, est: false },
                     { label: "Greens primary", value: latestPoll.grn, avg: pollAvg?.grn, color: "#059669", delta: latestPoll.grn - BASELINE_2025.grn, est: false },
-                    { label: "Other / minor", value: latestPoll.oth, avg: pollAvg?.oth, color: "#7C3AED", delta: null, est: false },
+                    { label: "One Nation", value: latestPoll.on, avg: pollAvg?.on, color: "#B45309", delta: latestPoll.on != null ? latestPoll.on - BASELINE_2025.on : null, est: false },
+                    { label: "Ind / Other", value: latestPoll.oth, avg: pollAvg?.oth, color: "#7C3AED", delta: null, est: false },
                     { label: tppIsEst ? "2PP ALP (est.)" : "2PP (ALP)", value: effTpp, avg: pollAvg?.tpp, color: "#DC2626", delta: effTpp != null ? effTpp - NATIONAL_2PP_2025 : null, est: tppIsEst },
                   ];
                 })().map(card => (
@@ -4134,7 +4141,7 @@ export default function App() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
-                  {["Pollster", "Date", "ALP %", "Coalition %", "Greens %", "Other %", "2PP ALP %", "n", ""].map((h, i) => (
+                  {["Pollster", "Date", "ALP %", "Coalition %", "Greens %", "One Nation %", "Ind/Other %", "2PP ALP %", "n", ""].map((h, i) => (
                     <th key={i} style={{ ...STYLES.tableHead, whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -4149,9 +4156,9 @@ export default function App() {
                       onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? "#fff" : "#FAFAFA"}>
                       <td style={{ padding: "9px 12px", fontWeight: 600 }}>{p.pollster}</td>
                       <td style={{ padding: "9px 12px", color: "#6B7280" }}>{new Date(p.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</td>
-                      {[p.alp, p.coal, p.grn, p.oth].map((v, j) => (
+                      {[p.alp, p.coal, p.grn, p.on, p.oth].map((v, j) => (
                         <td key={j} style={{ padding: "9px 12px" }}>
-                          <span style={{ fontWeight: 600, color: ["#DC2626", "#1D4ED8", "#059669", "#7C3AED"][j] }}>{v != null ? `${v}%` : "—"}</span>
+                          <span style={{ fontWeight: 600, color: ["#DC2626", "#1D4ED8", "#059669", "#B45309", "#7C3AED"][j] }}>{v != null ? `${v}%` : "—"}</span>
                         </td>
                       ))}
                       <td style={{ padding: "9px 12px" }}>
