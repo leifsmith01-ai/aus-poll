@@ -3559,6 +3559,17 @@ export default function App() {
     setActiveTab("model");
   };
 
+  const loadFromAvg = () => {
+    if (!pollAvg) return;
+    setPrimaries(p => ({
+      ...p,
+      alp: pollAvg.alp,
+      coal: pollAvg.coal,
+      grn: pollAvg.grn,
+    }));
+    setActiveTab("model");
+  };
+
   const PREF_FLOWS_2025 = {
     grn_alp: 0.81, teal_alp: 0.62, on_alp: 0.43, other_alp: 0.50,
     coal_alp_v_on: 0.10, grn_alp_v_on: 0.90, teal_alp_v_on: 0.75, other_alp_v_on: 0.60,
@@ -4006,7 +4017,7 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <div>
               <h2 style={STYLES.sectionTitle}>Polling Tracker</h2>
-              <p style={{ color: "#6B7280", fontSize: 13, margin: "4px 0 0" }}>{polls.length} polls · weighted aggregate with house-effect correction · tap "Load latest → Model" to run scenarios</p>
+              <p style={{ color: "#6B7280", fontSize: 13, margin: "4px 0 0" }}>{polls.length} polls · weighted aggregate with house-effect correction · tap "Load latest" or "Load avg" to run scenarios</p>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={loadFromPoll} style={STYLES.btnPrimary}>
@@ -4057,19 +4068,18 @@ export default function App() {
             <div style={{ ...panelStyle, marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Latest: {latestPoll.pollster} · {new Date(latestPoll.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</div>
-                {pollAvg && <div style={{ fontSize: 12, color: "#6B7280" }}>30-day weighted avg ({pollAvg.n} polls) shown in brackets</div>}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 12 }}>
                 {(() => {
                   const effTpp = latestPoll.tpp ?? imputedTpp(latestPoll);
                   const tppIsEst = latestPoll.tpp == null;
                   return [
-                    { label: "ALP primary", value: latestPoll.alp, avg: pollAvg?.alp, color: "#DC2626", delta: latestPoll.alp - BASELINE_2025.alp, est: false },
-                    { label: "Coalition primary", value: latestPoll.coal, avg: pollAvg?.coal, color: "#1D4ED8", delta: latestPoll.coal - BASELINE_2025.coal, est: false },
-                    { label: "Greens primary", value: latestPoll.grn, avg: pollAvg?.grn, color: "#059669", delta: latestPoll.grn - BASELINE_2025.grn, est: false },
-                    { label: "One Nation", value: latestPoll.on, avg: pollAvg?.on, color: "#B45309", delta: latestPoll.on != null ? latestPoll.on - BASELINE_2025.on : null, est: false },
-                    { label: "Ind / Other", value: latestPoll.oth, avg: pollAvg?.oth, color: "#7C3AED", delta: null, est: false },
-                    { label: tppIsEst ? "2PP ALP (est.)" : "2PP (ALP)", value: effTpp, avg: pollAvg?.tpp, color: "#DC2626", delta: effTpp != null ? effTpp - NATIONAL_2PP_2025 : null, est: tppIsEst },
+                    { label: "ALP primary", value: latestPoll.alp, color: "#DC2626", delta: latestPoll.alp - BASELINE_2025.alp, est: false },
+                    { label: "Coalition primary", value: latestPoll.coal, color: "#1D4ED8", delta: latestPoll.coal - BASELINE_2025.coal, est: false },
+                    { label: "Greens primary", value: latestPoll.grn, color: "#059669", delta: latestPoll.grn - BASELINE_2025.grn, est: false },
+                    { label: "One Nation", value: latestPoll.on, color: "#B45309", delta: latestPoll.on != null ? latestPoll.on - BASELINE_2025.on : null, est: false },
+                    { label: "Ind / Other", value: latestPoll.oth, color: "#7C3AED", delta: null, est: false },
+                    { label: tppIsEst ? "2PP ALP (est.)" : "2PP (ALP)", value: effTpp, color: "#DC2626", delta: effTpp != null ? effTpp - NATIONAL_2PP_2025 : null, est: tppIsEst },
                   ];
                 })().map(card => (
                   <div key={card.label} style={STYLES.metricCard}>
@@ -4078,8 +4088,45 @@ export default function App() {
                       <span style={{ fontSize: 24, fontWeight: 800, color: "#111827", fontStyle: card.est ? "italic" : "normal" }}>
                         {card.value != null ? `${card.est ? "~" : ""}${card.value}%` : "—"}
                       </span>
-                      {card.avg !== undefined && <span style={{ fontSize: 12, color: "#9CA3AF" }}>({card.avg}%)</span>}
                     </div>
+                    {card.delta != null && (
+                      <div style={{ fontSize: 11, fontWeight: 600, color: card.delta > 0 ? "#059669" : card.delta < 0 ? "#DC2626" : "#9CA3AF", marginTop: 2 }}>
+                        {card.delta > 0 ? "+" : ""}{card.delta.toFixed(1)} vs 2025
+                      </div>
+                    )}
+                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>{card.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 30-day weighted average tile */}
+          {pollAvg && (
+            <div style={{ ...panelStyle, marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <div>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>30-Day Weighted Average</span>
+                  <span style={{ fontSize: 12, color: "#6B7280", marginLeft: 8 }}>{pollAvg.n} poll{pollAvg.n !== 1 ? "s" : ""} · exponential decay + sample-size weighted</span>
+                </div>
+                <button onClick={loadFromAvg} style={STYLES.btnPrimary}>
+                  Load avg → Model
+                </button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 12 }}>
+                {[
+                  { label: "ALP primary", value: pollAvg.alp, color: "#DC2626", delta: pollAvg.alp != null ? pollAvg.alp - BASELINE_2025.alp : null },
+                  { label: "Coalition primary", value: pollAvg.coal, color: "#1D4ED8", delta: pollAvg.coal != null ? pollAvg.coal - BASELINE_2025.coal : null },
+                  { label: "Greens primary", value: pollAvg.grn, color: "#059669", delta: pollAvg.grn != null ? pollAvg.grn - BASELINE_2025.grn : null },
+                  { label: "One Nation", value: pollAvg.on, color: "#B45309", delta: pollAvg.on != null ? pollAvg.on - BASELINE_2025.on : null },
+                  { label: "Ind / Other", value: pollAvg.oth, color: "#7C3AED", delta: null },
+                  { label: "2PP (ALP)", value: pollAvg.tpp, color: "#DC2626", delta: pollAvg.tpp != null ? pollAvg.tpp - NATIONAL_2PP_2025 : null },
+                ].map(card => (
+                  <div key={card.label} style={STYLES.metricCard}>
+                    <div style={{ width: 20, height: 3, background: card.color, borderRadius: 2, marginBottom: 6 }} />
+                    <span style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>
+                      {card.value != null ? `${card.value}%` : "—"}
+                    </span>
                     {card.delta != null && (
                       <div style={{ fontSize: 11, fontWeight: 600, color: card.delta > 0 ? "#059669" : card.delta < 0 ? "#DC2626" : "#9CA3AF", marginTop: 2 }}>
                         {card.delta > 0 ? "+" : ""}{card.delta.toFixed(1)} vs 2025
