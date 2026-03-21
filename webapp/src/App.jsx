@@ -2874,7 +2874,7 @@ export default function App() {
       ind: +(vicPrimaries.ind - VIC_BASELINE_2022.ind).toFixed(2),
       on: +(vicPrimaries.on - VIC_BASELINE_2022.on).toFixed(2),
     };
-    const baseline2pp = vicOnTcp ? computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp) : VIC_2PP_2022;
+    const baseline2pp = computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp);
     return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing, vicOnTcp, baseline2pp);
   }, [vicPrimaries, vicPrefFlows, useVicRegionalSwing, vicOnTcp]);
 
@@ -2969,7 +2969,7 @@ export default function App() {
       const c = p.coal + nswPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    const baseline2pp = nswOnTcp ? compute2pp(NSW_BL, nswFlows) : NSW_2PP;
+    const baseline2pp = compute2pp(NSW_BL, nswFlows);
     return computeModelledSeatsState(NSW_SEATS, nswPrim, compute2pp, baseline2pp, nswFlows, NSW_COAL, s,
       useNswRegionalSwing ? NSW_DISTRICT_REGION : null,
       useNswRegionalSwing ? NSW_REGION_SWING_MULT : null,
@@ -3065,7 +3065,7 @@ export default function App() {
       const c = p.coal + qldPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    const baseline2pp = qldOnTcp ? compute2pp(QLD_BL, qldFlows) : QLD_2PP;
+    const baseline2pp = compute2pp(QLD_BL, qldFlows);
     return computeModelledSeatsState(QLD_SEATS, qldPrim, compute2pp, baseline2pp, qldFlows, QLD_COAL, s,
       useQldRegionalSwing ? QLD_DISTRICT_REGION : null,
       useQldRegionalSwing ? QLD_REGION_SWING_MULT : null,
@@ -3137,7 +3137,7 @@ export default function App() {
       const c = p.coal + waPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    const baseline2pp = waOnTcp ? compute2pp(WA_BL, waFlows) : WA_2PP;
+    const baseline2pp = compute2pp(WA_BL, waFlows);
     return computeModelledSeatsState(WA_SEATS, waPrim, compute2pp, baseline2pp, waFlows, WA_COAL, s,
       useWaRegionalSwing ? WA_DISTRICT_REGION : null,
       useWaRegionalSwing ? WA_REGION_SWING_MULT : null,
@@ -3208,7 +3208,7 @@ export default function App() {
       const c = p.coal + saPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    const baseline2pp = saOnTcp ? compute2pp(SA_BL, saFlows) : SA_2PP;
+    const baseline2pp = compute2pp(SA_BL, saFlows);
     return computeModelledSeatsState(SA_SEATS, saPrim, compute2pp, baseline2pp, saFlows, SA_COAL, s,
       useSaRegionalSwing ? SA_DISTRICT_REGION : null,
       useSaRegionalSwing ? SA_REGION_SWING_MULT : null,
@@ -3279,7 +3279,7 @@ export default function App() {
       const c = p.coal + ntPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
-    const baseline2pp = ntOnTcp ? compute2pp(NT_BL, ntFlows) : NT_2PP;
+    const baseline2pp = compute2pp(NT_BL, ntFlows);
     return computeModelledSeatsState(NT_SEATS, ntPrim, compute2pp, baseline2pp, ntFlows, NT_COAL, s,
       useNtRegionalSwing ? NT_DISTRICT_REGION : null,
       useNtRegionalSwing ? NT_REGION_SWING_MULT : null,
