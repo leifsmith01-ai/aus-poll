@@ -2745,7 +2745,8 @@ function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
         <span style={{ fontSize: 13, color: "#6B7280" }}>%</span>
       </div>
       <span style={{
-        fontSize: 12, fontWeight: 600, minWidth: 58, textAlign: "right",
+        fontSize: 12, fontWeight: 600, width: 58, flexShrink: 0,
+        display: "inline-flex", justifyContent: "flex-end", alignItems: "center",
         color: delta > 0 ? "#059669" : delta < 0 ? "#DC2626" : "#9CA3AF"
       }}>
         {delta === 0 ? "±0" : `${delta > 0 ? "+" : ""}${delta} pp`}
