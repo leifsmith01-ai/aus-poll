@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { Analytics } from "@vercel/analytics/react";
 import DEMOGRAPHICS from "./data/demographics.js";
+import STATE_DEMOGRAPHICS from "./data/state_demographics.js";
 import BETTING_ODDS from "./data/betting_odds.json";
 
 // VIC_SEATS_KNOWN removed — full 88-seat data is in _VS / VIC_SEATS below.
@@ -2185,7 +2186,7 @@ function computeVic2pp(primaries, prefFlows, onTcpMatchup = null) {
 // Regional multipliers reflect the historically observed pattern that inner-metro seats
 // swing more than suburban seats, which in turn swing more than regional/rural seats.
 // The useRegionalSwing parameter enables/disables regional differentiation.
-function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing = true, onTcpMatchup = null, baseline2pp = VIC_2PP_2022) {
+function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing = true, onTcpMatchup = null, baseline2pp = VIC_2PP_2022, seatOverrides = null) {
   const newPrim = {
     alp: Math.max(0, VIC_BASELINE_2022.alp + swings.alp),
     coal: Math.max(0, VIC_BASELINE_2022.coal + (swings.coal ?? 0)),
@@ -2203,6 +2204,71 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
     const regionMult = useRegionalSwing
       ? (VIC_REGION_SWING_MULT[_getVicRegion(seat.name)] ?? 1.0)
       : 1.0;
+    const region = _getVicRegion(seat.name);
+
+    const ov = seatOverrides?.[seat.id];
+
+    // Force winner override: bypass all TCP calculation
+    if (ov?.forceGroup) {
+      const forcePartyMap = { alp: "ALP", coalition: "LP", greens: "GRN", ind: "IND", one_nation: "ON", crossbench: "KAP" };
+      return {
+        ...seat,
+        modelled: {
+          winnerParty: forcePartyMap[ov.forceGroup] ?? seat.winner.party,
+          winnerGroup: ov.forceGroup,
+          winnerPct: null, projAlp2pp: null,
+          changed: ov.forceGroup !== getParty(seat.winner.party).group,
+          isOverride: true, regionMult, region,
+        },
+      };
+    }
+
+    // TCP% direct override
+    if (ov?.tcpPct != null && (t1 === "ALP" || t2 === "ALP")) {
+      const alpPct = t1 === "ALP" ? ov.tcpPct : 100 - ov.tcpPct;
+      const projWinnerParty = alpPct >= 50 ? "ALP" : (t1 === "ALP" ? t2 : t1);
+      return {
+        ...seat,
+        modelled: {
+          winnerParty: projWinnerParty, winnerGroup: getParty(projWinnerParty).group,
+          winnerPct: Math.max(alpPct, 100 - alpPct), projAlp2pp: alpPct,
+          changed: projWinnerParty !== seat.winner.party,
+          isOverride: true, regionMult, region,
+        },
+      };
+    }
+
+    // Per-seat primary override: derive effective swing from override primaries
+    if (ov && (ov.alp != null || ov.coal != null || ov.grn != null || ov.ind != null || ov.on != null) && ov.tcpPct == null) {
+      const ovPrim = {
+        alp: ov.alp != null ? ov.alp : newPrim.alp,
+        coal: ov.coal != null ? ov.coal : newPrim.coal,
+        grn: ov.grn != null ? ov.grn : newPrim.grn,
+        ind: ov.ind != null ? ov.ind : newPrim.ind,
+        on: ov.on != null ? ov.on : newPrim.on,
+      };
+      const ovNew2pp = computeVic2pp(ovPrim, prefFlows, onTcpMatchup);
+      const effectiveSwing = (ovNew2pp - baseline2pp) * regionMult;
+      let swingToT1 = 0;
+      if (t1 === "ALP" && ["LP", "NP"].includes(t2)) swingToT1 = effectiveSwing;
+      else if (["LP", "NP"].includes(t1) && t2 === "ALP") swingToT1 = -effectiveSwing;
+      else if (t1 === "GRN" && t2 === "ALP") swingToT1 = ((ov.grn ?? swings.grn) - (ov.alp ?? swings.alp)) / 2 * regionMult;
+      else if (t1 === "GRN" && ["LP", "NP"].includes(t2)) swingToT1 = ((ov.grn ?? swings.grn) - (ov.coal ?? swings.coal ?? 0)) / 2 * regionMult;
+      else if (t1 === "IND") swingToT1 = (t2 === "ALP" ? -1 : 1) * effectiveSwing * 0.3;
+      const newMargin = seat.margin + swingToT1;
+      const holds = newMargin > 0;
+      const projWinnerParty = holds ? t1 : t2;
+      const projAlp2pp = (t1 === "ALP" || t2 === "ALP") ? (t1 === "ALP" ? 50 + newMargin : 50 - newMargin) : null;
+      return {
+        ...seat,
+        modelled: {
+          winnerParty: projWinnerParty, winnerGroup: getParty(projWinnerParty).group,
+          winnerPct: 50 + Math.abs(newMargin), projAlp2pp,
+          changed: projWinnerParty !== seat.winner.party,
+          isOverride: true, regionMult, region,
+        },
+      };
+    }
 
     let swingToT1 = 0;
     if (t1 === "ALP" && ["LP", "NP"].includes(t2)) {
@@ -2234,7 +2300,7 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
         projAlp2pp,
         changed: projWinnerParty !== seat.winner.party,
         regionMult,
-        region: _getVicRegion(seat.name),
+        region,
       },
     };
   });
@@ -2254,7 +2320,7 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
 // onFpLookup: { seatId: baselineOnFp% } — seats where ON is a real contender.
 //   For these seats, ON is estimated as baseline + swings.on and compared against
 //   statewide ALP/Coal to auto-detect on_v_alp / on_v_coal TCP matchups.
-// stateOverrides: { seatId: { tcpMatchup, tcpPct } } — manual seat-level overrides.
+// stateOverrides: { seatId: { tcpMatchup, tcpPct, on, alp, coal, grn, ind, forceGroup } } — seat-level overrides.
 function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, prefFlows, coalParties, swings, regionMap = null, regionSwingMult = null, onFpLookup = null, onThreshold = 6.5, stateOverrides = null) {
   const new2pp = compute2ppFn(newPrim, prefFlows);
   const swing2pp = new2pp - baseline2pp;
@@ -2281,6 +2347,21 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
 
     // Per-seat override: manual TCP matchup or TCP% bypass
     const ov = stateOverrides?.[seat.id];
+
+    // Force winner override: bypass all TCP calculation
+    if (ov?.forceGroup) {
+      const forcePartyMap = { alp: "ALP", coalition: coalParties.size ? [...coalParties][0] : "LP", greens: "GRN", ind: "IND", one_nation: "ON", crossbench: "KAP" };
+      return {
+        ...seat,
+        modelled: {
+          winnerParty: forcePartyMap[ov.forceGroup] ?? seat.winner.party,
+          winnerGroup: ov.forceGroup,
+          winnerPct: null, projAlp2pp: null,
+          changed: ov.forceGroup !== getParty(seat.winner.party).group,
+          isOverride: true, region,
+        },
+      };
+    }
 
     // ── ON auto-detection for ALP vs Coalition seats with per-seat ON data ──────
     // Uses per-seat ON baseline (onFpLookup) + statewide swing as proxy.
@@ -2394,6 +2475,38 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
           },
         };
       }
+    }
+
+    // ── Per-seat primary override: derive effective 2PP swing from override primaries ──
+    if (ov && (ov.alp != null || ov.coal != null || ov.grn != null || ov.ind != null) && ov.tcpPct == null && !ov.tcpMatchup) {
+      const ovPrim = {
+        alp: ov.alp != null ? ov.alp : newPrim.alp,
+        coal: ov.coal != null ? ov.coal : newPrim.coal,
+        grn: ov.grn != null ? ov.grn : newPrim.grn,
+        ind: ov.ind != null ? ov.ind : (newPrim.ind ?? 0),
+        on: ov.on != null ? ov.on : (newPrim.on ?? 0),
+      };
+      const ovNew2pp = compute2ppFn(ovPrim, prefFlows);
+      const ovSwing2pp = (ovNew2pp - baseline2pp) * regionMult;
+      let ovSwingToT1 = 0;
+      if (isAlp1 && isCoal2) ovSwingToT1 = ovSwing2pp;
+      else if (isCoal1 && isAlp2) ovSwingToT1 = -ovSwing2pp;
+      else if (isGrn1 && isAlp2) ovSwingToT1 = ((ov.grn ?? swings.grn) - (ov.alp ?? swings.alp)) / 2 * regionMult;
+      else if (isGrn1 && isCoal2) ovSwingToT1 = ((ov.grn ?? swings.grn) - (ov.coal ?? swings.coal ?? 0)) / 2 * regionMult;
+      else if (isInd1) ovSwingToT1 = (isAlp2 ? -1 : 1) * ovSwing2pp * 0.3;
+      const ovNewMargin = seat.margin + ovSwingToT1;
+      const ovHolds = ovNewMargin > 0;
+      const ovWinnerParty = ovHolds ? t1 : t2;
+      const ovProjAlp2pp = (isAlp1 || isAlp2) ? (isAlp1 ? 50 + ovNewMargin : 50 - ovNewMargin) : null;
+      return {
+        ...seat,
+        modelled: {
+          winnerParty: ovWinnerParty, winnerGroup: getParty(ovWinnerParty).group,
+          winnerPct: 50 + Math.abs(ovNewMargin), projAlp2pp: ovProjAlp2pp,
+          changed: ovWinnerParty !== seat.winner.party,
+          isOverride: true, regionMult, region,
+        },
+      };
     }
 
     // ── Standard 2PP-swing calculation ───────────────────────────────────────
@@ -2763,6 +2876,12 @@ export default function App() {
   const [useSaRegionalSwing,  setUseSaRegionalSwing]  = useState(true);
   const [useNtRegionalSwing,  setUseNtRegionalSwing]  = useState(true);
 
+  // ── State model seat-filter / expand / override state ──
+  const [stateRiskFilter, setStateRiskFilter] = useState("all"); // "all" | "changing" | "marginal"
+  const [expandedStateSeatId, setExpandedStateSeatId] = useState(null);
+  const [vicSeatOverrides, setVicSeatOverrides] = useState({});
+  const [vicOverrideSearch, setVicOverrideSearch] = useState("");
+
   // ── Demographics tab state ──
   const [demogSortKey, setDemogSortKey] = useState("medianHouseholdIncome");
   const [demogSortDir, setDemogSortDir] = useState("desc");
@@ -2875,8 +2994,8 @@ export default function App() {
       on: +(vicPrimaries.on - VIC_BASELINE_2022.on).toFixed(2),
     };
     const baseline2pp = computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp);
-    return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing, vicOnTcp, baseline2pp);
-  }, [vicPrimaries, vicPrefFlows, useVicRegionalSwing, vicOnTcp]);
+    return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing, vicOnTcp, baseline2pp, vicSeatOverrides);
+  }, [vicPrimaries, vicPrefFlows, useVicRegionalSwing, vicOnTcp, vicSeatOverrides]);
 
   const vicProjCounts = useMemo(() => {
     const c = {};
@@ -2904,7 +3023,7 @@ export default function App() {
     vicPrimaries.grn !== 12.2 || vicPrimaries.ind !== 5.5 || vicPrimaries.on !== 1.3 ||
     (vicPrimaries.undecided || 0) > 0 ||
     vicPrefFlows.grn_alp !== 0.85 || vicPrefFlows.ind_alp !== 0.60 || vicPrefFlows.on_alp !== 0.25 || vicPrefFlows.other_alp !== 0.43 ||
-    !useVicRegionalSwing || vicOnTcp !== null;
+    !useVicRegionalSwing || vicOnTcp !== null || Object.keys(vicSeatOverrides).length > 0;
 
   const vicNat2ppSwing = useMemo(() => {
     const baseline = vicOnTcp ? computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp) : VIC_2PP_2022;
@@ -3118,6 +3237,7 @@ export default function App() {
     alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
   });
   const [waOnTcp, setWaOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
+  const [waSeatOverrides, setWaSeatOverrides] = useState({});
   const waModelledSeats = useMemo(() => {
     const s = { alp: waPrim.alp - WA_BL.alp, coal: waPrim.coal - WA_BL.coal, grn: waPrim.grn - WA_BL.grn, on: waPrim.on - WA_BL.on };
     const compute2pp = (p, f) => {
@@ -3141,13 +3261,14 @@ export default function App() {
     return computeModelledSeatsState(WA_SEATS, waPrim, compute2pp, baseline2pp, waFlows, WA_COAL, s,
       useWaRegionalSwing ? WA_DISTRICT_REGION : null,
       useWaRegionalSwing ? WA_REGION_SWING_MULT : null,
+      null, 6.5, waSeatOverrides,
     );
-  }, [waPrim, waFlows, waOnTcp, useWaRegionalSwing]);
+  }, [waPrim, waFlows, waOnTcp, useWaRegionalSwing, waSeatOverrides]);
   const waProjCounts = useMemo(() => { const c = {}; waModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [waModelledSeats]);
   const waBaseCounts = useMemo(() => { const c = {}; WA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const waChanged = useMemo(() => waModelledSeats.filter(s => s.modelled.changed), [waModelledSeats]);
   const waImplied2pp = useMemo(() => { const r = waModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [waModelledSeats]);
-  const waHasChanges = Object.entries(WA_BL).some(([k, v]) => Math.abs((waPrim[k] ?? v) - v) > 0.05) || (waPrim.undecided || 0) > 0 || waFlows.grn_alp !== 0.86 || waFlows.ind_alp !== 0.58 || waFlows.on_alp !== 0.22 || waFlows.other_alp !== 0.44 || waOnTcp !== null || !useWaRegionalSwing;
+  const waHasChanges = Object.entries(WA_BL).some(([k, v]) => Math.abs((waPrim[k] ?? v) - v) > 0.05) || (waPrim.undecided || 0) > 0 || waFlows.grn_alp !== 0.86 || waFlows.ind_alp !== 0.58 || waFlows.on_alp !== 0.22 || waFlows.other_alp !== 0.44 || waOnTcp !== null || !useWaRegionalSwing || Object.keys(waSeatOverrides).length > 0;
 
   const waNat2ppSwing = useMemo(() => {
     const onV = waPrim.on ?? 0;
@@ -3189,6 +3310,7 @@ export default function App() {
     alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
   });
   const [saOnTcp, setSaOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
+  const [saSeatOverrides, setSaSeatOverrides] = useState({});
   const saModelledSeats = useMemo(() => {
     const s = { alp: saPrim.alp - SA_BL.alp, coal: saPrim.coal - SA_BL.coal, grn: saPrim.grn - SA_BL.grn, on: saPrim.on - SA_BL.on };
     const compute2pp = (p, f) => {
@@ -3212,13 +3334,14 @@ export default function App() {
     return computeModelledSeatsState(SA_SEATS, saPrim, compute2pp, baseline2pp, saFlows, SA_COAL, s,
       useSaRegionalSwing ? SA_DISTRICT_REGION : null,
       useSaRegionalSwing ? SA_REGION_SWING_MULT : null,
+      null, 6.5, saSeatOverrides,
     );
-  }, [saPrim, saFlows, saOnTcp, useSaRegionalSwing]);
+  }, [saPrim, saFlows, saOnTcp, useSaRegionalSwing, saSeatOverrides]);
   const saProjCounts = useMemo(() => { const c = {}; saModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [saModelledSeats]);
   const saBaseCounts = useMemo(() => { const c = {}; SA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const saChanged = useMemo(() => saModelledSeats.filter(s => s.modelled.changed), [saModelledSeats]);
   const saImplied2pp = useMemo(() => { const r = saModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [saModelledSeats]);
-  const saHasChanges = Object.entries(SA_BL).some(([k, v]) => Math.abs((saPrim[k] ?? v) - v) > 0.05) || (saPrim.undecided || 0) > 0 || saFlows.grn_alp !== 0.84 || saFlows.ind_alp !== 0.52 || saFlows.on_alp !== 0.22 || saFlows.other_alp !== 0.45 || saOnTcp !== null || !useSaRegionalSwing;
+  const saHasChanges = Object.entries(SA_BL).some(([k, v]) => Math.abs((saPrim[k] ?? v) - v) > 0.05) || (saPrim.undecided || 0) > 0 || saFlows.grn_alp !== 0.84 || saFlows.ind_alp !== 0.52 || saFlows.on_alp !== 0.22 || saFlows.other_alp !== 0.45 || saOnTcp !== null || !useSaRegionalSwing || Object.keys(saSeatOverrides).length > 0;
 
   const saNat2ppSwing = useMemo(() => {
     const onV = saPrim.on ?? 0;
@@ -3260,6 +3383,7 @@ export default function App() {
     alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28,
   });
   const [ntOnTcp, setNtOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
+  const [ntSeatOverrides, setNtSeatOverrides] = useState({});
   const ntModelledSeats = useMemo(() => {
     const s = { alp: ntPrim.alp - NT_BL.alp, coal: ntPrim.coal - NT_BL.coal, grn: ntPrim.grn - NT_BL.grn, on: ntPrim.on - NT_BL.on };
     const compute2pp = (p, f) => {
@@ -3283,12 +3407,13 @@ export default function App() {
     return computeModelledSeatsState(NT_SEATS, ntPrim, compute2pp, baseline2pp, ntFlows, NT_COAL, s,
       useNtRegionalSwing ? NT_DISTRICT_REGION : null,
       useNtRegionalSwing ? NT_REGION_SWING_MULT : null,
+      null, 6.5, ntSeatOverrides,
     );
-  }, [ntPrim, ntFlows, ntOnTcp, useNtRegionalSwing]);
+  }, [ntPrim, ntFlows, ntOnTcp, useNtRegionalSwing, ntSeatOverrides]);
   const ntProjCounts = useMemo(() => { const c = {}; ntModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [ntModelledSeats]);
   const ntBaseCounts = useMemo(() => { const c = {}; NT_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const ntChanged = useMemo(() => ntModelledSeats.filter(s => s.modelled.changed), [ntModelledSeats]);
-  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null || !useNtRegionalSwing;
+  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null || !useNtRegionalSwing || Object.keys(ntSeatOverrides).length > 0;
 
   const ntNat2ppSwing = useMemo(() => {
     const onV = ntPrim.on ?? 0;
@@ -3405,6 +3530,7 @@ export default function App() {
 
   // ── Demographics helpers ──
   const getDemog = (id) => DEMOGRAPHICS[id] ?? {};
+  const getStateDemog = (id) => STATE_DEMOGRAPHICS[id] ?? {};
 
   const DEMOG_METRICS = [
     { key: "medianPersonalIncome", label: "Median Personal Income", fmt: v => `$${(v / 1000).toFixed(0)}k` },
@@ -5220,7 +5346,7 @@ export default function App() {
                 </div>
 
                 {vicHasChanges && (
-                  <button onClick={() => { setVicPrimaries({ alp: 38.1, coal: 31.1, grn: 12.2, ind: 5.5, on: 1.3, undecided: 0 }); setVicPrefFlows({ grn_alp: 0.85, ind_alp: 0.60, on_alp: 0.25, other_alp: 0.43, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }); setUseVicRegionalSwing(true); setVicOnTcp(null); }}
+                  <button onClick={() => { setVicPrimaries({ alp: 38.1, coal: 31.1, grn: 12.2, ind: 5.5, on: 1.3, undecided: 0 }); setVicPrefFlows({ grn_alp: 0.85, ind_alp: 0.60, on_alp: 0.25, other_alp: 0.43, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }); setUseVicRegionalSwing(true); setVicOnTcp(null); setVicSeatOverrides({}); }}
                     style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>
                     Reset VIC model
                   </button>
@@ -5357,40 +5483,246 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Seat-at-risk table */}
-                <div style={panelStyle}>
-                  <div style={STYLES.panelTitle}>Seats at risk (tightest 25)</div>
-                  <div style={{ maxHeight: 440, overflowY: "auto" }}>
-                    {[...vicModelledSeats].sort((a, b) => a.margin - b.margin).slice(0, 25).map(seat => {
-                      const base = getParty(seat.winner.party);
-                      const proj = getParty(seat.modelled.winnerParty);
-                      const changed = seat.modelled.changed;
-                      const winProb = vicUncertainty.seatWinProbs[seat.id];
-                      return (
-                        <div key={seat.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: "1px solid #F3F4F6", background: changed ? "#FFF7ED" : "transparent" }}>
-                          <div style={{ width: 3, height: 28, background: changed ? proj.color : base.color, borderRadius: 2, flexShrink: 0 }} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
-                              {seat.name}
-                              {changed && <span style={{ fontSize: 10, background: "#FEF3C7", color: "#92400E", padding: "1px 5px", borderRadius: 8, fontWeight: 700 }}>CHANGES</span>}
-                            </div>
-                            <div style={{ fontSize: 11, color: "#6B7280" }}>{seat.tcp[0].party} vs {seat.tcp[1].party}</div>
-                          </div>
-                          <PartyBadge party={seat.winner.party} />
-                          {changed && <><span style={{ fontSize: 11, color: "#6B7280" }}>→</span><PartyBadge party={seat.modelled.winnerParty} /></>}
-                          <span style={{ fontWeight: 700, fontSize: 13, color: MARGIN_COLOR[getMarginCat(seat.margin)], minWidth: 40, textAlign: "right" }}>
-                            {seat.margin.toFixed(1)}%
-                          </span>
-                          <span style={{ fontSize: 11, fontWeight: 700, minWidth: 36, textAlign: "right", color: winProb == null ? "#9CA3AF" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "#6B7280" : "#1D4ED8" }}>
-                            {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
-                          </span>
+                {/* Seat-at-risk table — filterable */}
+                {(() => {
+                  const filterBtnStyle = (active) => ({
+                    padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid #D1D5DB",
+                    background: active ? "#374151" : "#fff", color: active ? "#fff" : "#374151",
+                  });
+                  let vicFiltered = [...vicModelledSeats].sort((a, b) => {
+                    const ma = Math.abs((a.modelled.projAlp2pp ?? 50) - 50);
+                    const mb = Math.abs((b.modelled.projAlp2pp ?? 50) - 50);
+                    return ma - mb;
+                  });
+                  if (stateRiskFilter === "changing") vicFiltered = vicFiltered.filter(s => s.modelled.changed);
+                  if (stateRiskFilter === "marginal") vicFiltered = vicFiltered.filter(s => Math.abs((s.modelled.projAlp2pp ?? 50) - 50) < 5);
+                  return (
+                    <div style={panelStyle}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "#111827", flex: 1 }}>Seat-at-risk rankings</span>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          {[["all", `All 88`], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"]].map(([val, label]) => (
+                            <button key={val} onClick={() => setStateRiskFilter(val)} style={filterBtnStyle(stateRiskFilter === val)}>{label}</button>
+                          ))}
                         </div>
-                      );
-                    })}
+                      </div>
+                      <div style={{ overflowX: "auto" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 400 }}>
+                          {[["Seat", "#374151"], ["2022", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP%", "#6B7280"], ["", ""]].map(([label, color], i) => (
+                            <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
+                          ))}
+                        </div>
+                        <div style={{ maxHeight: 440, overflowY: "auto" }}>
+                          {vicFiltered.map(seat => {
+                            const margin = Math.abs((seat.modelled.projAlp2pp ?? 50) - 50);
+                            const changed = seat.modelled.changed;
+                            const projColor = GROUP_CONFIG[seat.modelled.winnerGroup]?.color ?? "#6B7280";
+                            const winProb = vicUncertainty.seatWinProbs[seat.id];
+                            const isExpanded = expandedStateSeatId === seat.id;
+                            const d = getStateDemog(seat.id);
+                            const hasOv = vicSeatOverrides[seat.id] != null;
+                            return (
+                              <div key={seat.id}>
+                                <div onClick={() => setExpandedStateSeatId(prev => prev === seat.id ? null : seat.id)}
+                                  style={{
+                                    display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, alignItems: "center", minWidth: 400,
+                                    padding: "5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
+                                    borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
+                                    background: hasOv ? "#F0FDF4" : isExpanded ? "#F0F9FF" : changed ? "#FFF7ED" : "transparent",
+                                    cursor: "pointer",
+                                  }}>
+                                  <span style={{ fontWeight: changed ? 700 : 400, fontSize: 13, color: "#111827", paddingLeft: changed ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    {isExpanded ? "▾ " : "▸ "}{seat.name}
+                                  </span>
+                                  <div><PartyBadge party={seat.winner.party} /></div>
+                                  <div>
+                                    {changed ? <PartyBadge party={seat.modelled.winnerParty} /> : <span style={{ fontSize: 11, color: "#9CA3AF" }}>holds</span>}
+                                  </div>
+                                  <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
+                                    {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
+                                  </span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: winProb == null ? "#9CA3AF" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "#6B7280" : "#1D4ED8" }}>
+                                    {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
+                                  </span>
+                                  <span style={{ fontSize: 10, color: changed ? projColor : hasOv ? "#059669" : "#9CA3AF", fontWeight: 600 }}>
+                                    {changed ? "CHANGED" : hasOv ? "OVERRIDE" : ""}
+                                  </span>
+                                </div>
+                                {isExpanded && (
+                                  <div style={{ background: "#F8FAFC", borderBottom: "1px solid #E5E7EB", padding: "10px 14px", marginBottom: 2 }}>
+                                    {Object.keys(d).length > 0 && d.medianAge != null ? (
+                                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+                                        <div>
+                                          <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Income</div>
+                                          {[{ k: "medianPersonalIncome", l: "Personal" }, { k: "medianHouseholdIncome", l: "Household" }].map(({ k, l }) => d[k] != null && (
+                                            <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
+                                              <span style={{ color: "#6B7280" }}>{l}</span>
+                                              <span style={{ fontWeight: 600 }}>${(d[k] / 1000).toFixed(0)}k</span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                        <div>
+                                          <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Housing</div>
+                                          {[{ k: "renterPct", l: "Renters", fmt: v => `${v}%` }, { k: "medianWeeklyRent", l: "Weekly rent", fmt: v => `$${v}` }, { k: "ownerMortgagePct", l: "Owner+mort", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
+                                            <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
+                                              <span style={{ color: "#6B7280" }}>{l}</span>
+                                              <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                        <div>
+                                          <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>People</div>
+                                          {[{ k: "medianAge", l: "Median age", fmt: v => v }, { k: "bachelorsOrAbovePct", l: "Degree+", fmt: v => `${v}%` }, { k: "overseasBornPct", l: "Overseas born", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
+                                            <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
+                                              <span style={{ color: "#6B7280" }}>{l}</span>
+                                              <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
+                                            </div>
+                                          ))}
+                                          {d.urbanClass && <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4 }}>{d.urbanClass}</div>}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div style={{ fontSize: 11, color: "#9CA3AF" }}>Region: {seat.modelled.region ?? "—"} · No demographic data yet (run pipeline/fetch_demographics.py to populate)</div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
+                        Probabilistic swing model · VEC 2022 · 88 Legislative Assembly districts · ALP% shown for ALP/Coalition contests
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* ── VIC Per-seat overrides panel ── */}
+                <div style={panelStyle}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-level overrides</span>
+                    {Object.keys(vicSeatOverrides).length > 0 && (
+                      <>
+                        <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
+                          {Object.keys(vicSeatOverrides).length} active
+                        </span>
+                        <button onClick={() => setVicSeatOverrides({})}
+                          style={{ marginLeft: "auto", fontSize: 12, color: "#EF4444", background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "3px 10px", cursor: "pointer", fontWeight: 600 }}>
+                          Clear all
+                        </button>
+                      </>
+                    )}
                   </div>
-                  <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
-                    Probabilistic swing model · VEC 2022 official results · 88 Legislative Assembly districts · ALP win% shown for ALP/Coalition contests
+                  <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 10px" }}>
+                    Override primary votes, TCP %, or force a winner for individual seats.
+                  </p>
+                  <div style={{ position: "relative", marginBottom: 12 }}>
+                    <input
+                      value={vicOverrideSearch}
+                      onChange={e => setVicOverrideSearch(e.target.value)}
+                      placeholder="+ Search for a seat to override…"
+                      style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "7px 10px", fontSize: 13, boxSizing: "border-box", outline: "none" }}
+                    />
+                    {vicOverrideSearch.length > 0 && (() => {
+                      const matches = VIC_SEATS.filter(s =>
+                        s.name.toLowerCase().includes(vicOverrideSearch.toLowerCase()) && !vicSeatOverrides[s.id]
+                      ).slice(0, 8);
+                      return matches.length > 0 ? (
+                        <div style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 100, overflow: "hidden" }}>
+                          {matches.map((s, i) => (
+                            <div key={s.id}
+                              onMouseDown={() => {
+                                setVicSeatOverrides(ov => ({ ...ov, [s.id]: { tcpMatchup: null, tcpPct: null, forceGroup: null } }));
+                                setVicOverrideSearch("");
+                              }}
+                              style={{ padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderBottom: i < matches.length - 1 ? "1px solid #F3F4F6" : "none" }}>
+                              <span style={{ fontWeight: 600, flex: 1, fontSize: 13 }}>{s.name}</span>
+                              <span style={{ fontSize: 12, color: "#9CA3AF" }}>{s.tcp[0].party} vs {s.tcp[1].party}</span>
+                              <PartyBadge party={s.winner.party} />
+                              <span style={{ fontSize: 12, color: "#6B7280" }}>{s.margin.toFixed(1)}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null;
+                    })()}
                   </div>
+                  {Object.keys(vicSeatOverrides).length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "16px 0", color: "#9CA3AF", fontSize: 12 }}>
+                      No seat overrides active. Search for a VIC seat above to add one.
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {Object.entries(vicSeatOverrides).map(([idStr, ov]) => {
+                        const seat = VIC_SEATS.find(s => s.id === +idStr);
+                        if (!seat) return null;
+                        const ms = vicModelledSeats.find(s => s.id === +idStr);
+                        const setOv = (patch) => setVicSeatOverrides(ovs => ({ ...ovs, [+idStr]: { ...ovs[+idStr], ...patch } }));
+                        const tcpMatchup = ov.tcpMatchup ?? null;
+                        const tcpPct = ov.tcpPct ?? null;
+                        return (
+                          <div key={idStr} style={{ border: "1px solid #D1D5DB", borderRadius: 8, padding: "12px 14px", background: "#FAFAFA" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                              <PartyBadge party={seat.winner.party} />
+                              <span style={{ fontWeight: 700, fontSize: 13, flex: 1 }}>{seat.name}</span>
+                              <span style={{ fontSize: 12, color: "#9CA3AF" }}>Baseline: {seat.tcp[0].party} vs {seat.tcp[1].party} · {seat.margin.toFixed(1)}%</span>
+                              {ms?.modelled.winnerParty && ms.modelled.winnerPct != null && (
+                                <span style={{ fontSize: 12, fontWeight: 700, color: getParty(ms.modelled.winnerParty).color }}>
+                                  → {ms.modelled.winnerParty} {ms.modelled.winnerPct.toFixed(1)}%
+                                </span>
+                              )}
+                              <button onClick={() => setVicSeatOverrides(ovs => { const n = { ...ovs }; delete n[+idStr]; return n; })}
+                                style={{ fontSize: 13, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>✕</button>
+                            </div>
+                            {/* Primary vote overrides */}
+                            <div style={{ marginBottom: 8 }}>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Primary vote % overrides (blank = use statewide)</div>
+                              <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6 }}>
+                                {[{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coal", c: "#1D4ED8" }, { k: "grn", l: "Grn", c: "#059669" }, { k: "ind", l: "Ind", c: "#0891B2" }, { k: "on", l: "ON", c: "#B45309" }].map(({ k, l, c }) => (
+                                  <div key={k} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                    <span style={{ fontSize: 10, fontWeight: 700, color: c }}>{l}</span>
+                                    <input type="number" min={0} max={100} step={0.5}
+                                      value={ov[k] ?? ""}
+                                      placeholder="—"
+                                      onChange={e => setOv({ [k]: e.target.value === "" ? null : +e.target.value })}
+                                      style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 4, padding: "3px 4px", fontSize: 11, textAlign: "right", boxSizing: "border-box" }}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            {/* TCP% override */}
+                            <div style={{ marginBottom: 8 }}>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>ALP 2PP % (≥50 = ALP wins)</div>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <input type="number" min={0} max={100} step={0.5}
+                                  value={tcpPct ?? ""}
+                                  placeholder="auto"
+                                  onChange={e => setOv({ tcpPct: e.target.value === "" ? null : +e.target.value })}
+                                  style={{ width: 70, border: "1px solid #D1D5DB", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
+                                />
+                                <span style={{ fontSize: 11, color: "#9CA3AF" }}>% (overrides model)</span>
+                                {tcpPct != null && <button onClick={() => setOv({ tcpPct: null })} style={{ fontSize: 11, color: "#6B7280", background: "none", border: "none", cursor: "pointer" }}>×</button>}
+                              </div>
+                            </div>
+                            {/* Force winner */}
+                            <div>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Force projected winner</div>
+                              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                                {[["alp", "ALP", "#DC2626"], ["coalition", "Coalition", "#1D4ED8"], ["greens", "Greens", "#059669"], ["ind", "Ind", "#0891B2"], ["one_nation", "ON", "#B45309"]].map(([g, label, c]) => (
+                                  <button key={g}
+                                    onClick={() => setOv({ forceGroup: ov.forceGroup === g ? null : g })}
+                                    style={{ fontSize: 11, padding: "3px 8px", borderRadius: 5, border: `1px solid ${c}`, cursor: "pointer", fontWeight: ov.forceGroup === g ? 700 : 400, background: ov.forceGroup === g ? c : "#fff", color: ov.forceGroup === g ? "#fff" : c }}>
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>}
@@ -5400,9 +5732,9 @@ export default function App() {
               const cfgs = {
                 nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, seatOverrides: nswSeatOverrides, setSeatOverrides: setNswSeatOverrides, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80" },
                 qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, seatOverrides: qldSeatOverrides, setSeatOverrides: setQldSeatOverrides, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75" },
-                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: WA_SEATS, uncertainty: waUncertainty, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75" },
-                sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: SA_SEATS, uncertainty: saUncertainty, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80" },
-                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70" },
+                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, seatOverrides: waSeatOverrides, setSeatOverrides: setWaSeatOverrides, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: WA_SEATS, uncertainty: waUncertainty, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75" },
+                sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, seatOverrides: saSeatOverrides, setSeatOverrides: setSaSeatOverrides, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: SA_SEATS, uncertainty: saUncertainty, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80" },
+                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, seatOverrides: ntSeatOverrides, setSeatOverrides: setNtSeatOverrides, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70" },
               };
               const cfg = cfgs[selectedModelId];
               if (!el.modelEnabled || !cfg) return null;
@@ -5619,54 +5951,131 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div style={panelStyle}>
-                    <div style={STYLES.panelTitle}>Seats at risk (tightest 25)</div>
-                    <div style={{ maxHeight: 440, overflowY: "auto" }}>
-                      {[...modelled].sort((a, b) => a.margin - b.margin).slice(0, 25).map(seat => {
-                        const baseP = getParty(seat.winner.party);
-                        const projP = getParty(seat.modelled.winnerParty);
-                        const chg = seat.modelled.changed;
-                        const winProb = uncertainty.seatWinProbs[seat.id];
-                        const hasOv = seatOverrides?.[seat.id] != null;
-                        const autoOn = seat.modelled.isAutoMatchup;
-                        return (
-                          <div key={seat.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: "1px solid #F3F4F6", background: hasOv ? "#F0FDF4" : chg ? "#FFF7ED" : "transparent" }}>
-                            <div style={{ width: 3, height: 28, background: chg ? projP.color : baseP.color, borderRadius: 2, flexShrink: 0 }} />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
-                                {seat.name}
-                                {chg && <span style={{ fontSize: 10, background: "#FEF3C7", color: "#92400E", padding: "1px 5px", borderRadius: 8, fontWeight: 700 }}>CHANGES</span>}
-                                {hasOv && <span style={{ fontSize: 10, background: "#DCFCE7", color: "#166534", padding: "1px 5px", borderRadius: 8, fontWeight: 700 }}>OVERRIDE</span>}
-                                {autoOn && !hasOv && <span style={{ fontSize: 10, background: "#FEF3C7", color: "#B45309", padding: "1px 5px", borderRadius: 8, fontWeight: 700 }}>ON AUTO</span>}
-                              </div>
-                              <div style={{ fontSize: 11, color: "#6B7280" }}>
-                                {seat.modelled.activeTcpMatchup
-                                  ? seat.modelled.activeTcpMatchup.replace("on_v_alp", "ON vs ALP").replace("on_v_coal", "ON vs Coal")
-                                  : `${seat.tcp[0].party} vs ${seat.tcp[1].party}`}
-                              </div>
-                            </div>
-                            <PartyBadge party={seat.winner.party} />
-                            {chg && <><span style={{ fontSize: 11, color: "#6B7280" }}>→</span><PartyBadge party={seat.modelled.winnerParty} /></>}
-                            <span style={{ fontWeight: 700, fontSize: 13, color: MARGIN_COLOR[getMarginCat(seat.margin)], minWidth: 40, textAlign: "right" }}>
-                              {seat.margin.toFixed(1)}%
-                            </span>
-                            <span style={{ fontSize: 11, fontWeight: 700, minWidth: 36, textAlign: "right", color: winProb == null ? "#9CA3AF" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "#6B7280" : "#1D4ED8" }}>
-                              {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
-                            </span>
+                  {/* Seat-at-risk table — filterable */}
+                  {(() => {
+                    const filterBtnStyle = (active) => ({
+                      padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid #D1D5DB",
+                      background: active ? "#374151" : "#fff", color: active ? "#fff" : "#374151",
+                    });
+                    let stateFiltered = [...modelled].sort((a, b) => {
+                      const ma = Math.abs((a.modelled.projAlp2pp ?? 50) - 50);
+                      const mb = Math.abs((b.modelled.projAlp2pp ?? 50) - 50);
+                      return ma - mb;
+                    });
+                    if (stateRiskFilter === "changing") stateFiltered = stateFiltered.filter(s => s.modelled.changed);
+                    if (stateRiskFilter === "marginal") stateFiltered = stateFiltered.filter(s => Math.abs((s.modelled.projAlp2pp ?? 50) - 50) < 5);
+                    return (
+                      <div style={panelStyle}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: "#111827", flex: 1 }}>Seat-at-risk rankings</span>
+                          <div style={{ display: "flex", gap: 4 }}>
+                            {[["all", `All ${totalSeats}`], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"]].map(([val, label]) => (
+                              <button key={val} onClick={() => setStateRiskFilter(val)} style={filterBtnStyle(stateRiskFilter === val)}>{label}</button>
+                            ))}
                           </div>
-                        );
-                      })}
-                    </div>
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
-                      Probabilistic swing model · {source} · {totalSeats} seats · ALP win% shown for ALP/Coalition contests
-                    </div>
-                  </div>
+                        </div>
+                        <div style={{ overflowX: "auto" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 400 }}>
+                            {[["Seat", "#374151"], ["Baseline", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP%", "#6B7280"], ["", ""]].map(([label, color], i) => (
+                              <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
+                            ))}
+                          </div>
+                          <div style={{ maxHeight: 440, overflowY: "auto" }}>
+                            {stateFiltered.map(seat => {
+                              const margin = Math.abs((seat.modelled.projAlp2pp ?? 50) - 50);
+                              const chg = seat.modelled.changed;
+                              const projColor = GROUP_CONFIG[seat.modelled.winnerGroup]?.color ?? "#6B7280";
+                              const winProb = uncertainty.seatWinProbs[seat.id];
+                              const isExpanded = expandedStateSeatId === seat.id;
+                              const d = getStateDemog(seat.id);
+                              const hasOv = seatOverrides?.[seat.id] != null;
+                              const autoOn = seat.modelled.isAutoMatchup;
+                              return (
+                                <div key={seat.id}>
+                                  <div onClick={() => setExpandedStateSeatId(prev => prev === seat.id ? null : seat.id)}
+                                    style={{
+                                      display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, alignItems: "center", minWidth: 400,
+                                      padding: "5px 2px", borderLeft: `4px solid ${chg ? projColor : "transparent"}`,
+                                      borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
+                                      background: hasOv ? "#F0FDF4" : isExpanded ? "#F0F9FF" : chg ? "#FFF7ED" : "transparent",
+                                      cursor: "pointer",
+                                    }}>
+                                    <span style={{ fontWeight: chg ? 700 : 400, fontSize: 13, color: "#111827", paddingLeft: chg ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                      {isExpanded ? "▾ " : "▸ "}{seat.name}
+                                    </span>
+                                    <div><PartyBadge party={seat.winner.party} /></div>
+                                    <div>
+                                      {chg ? <PartyBadge party={seat.modelled.winnerParty} /> : <span style={{ fontSize: 11, color: "#9CA3AF" }}>holds</span>}
+                                    </div>
+                                    <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
+                                      {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
+                                    </span>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: winProb == null ? "#9CA3AF" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "#6B7280" : "#1D4ED8" }}>
+                                      {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
+                                    </span>
+                                    <span style={{ fontSize: 10, color: chg ? projColor : hasOv ? "#059669" : autoOn ? "#B45309" : "#9CA3AF", fontWeight: 600 }}>
+                                      {chg ? "CHANGED" : hasOv ? "OVERRIDE" : autoOn ? "ON AUTO" : ""}
+                                    </span>
+                                  </div>
+                                  {isExpanded && (
+                                    <div style={{ background: "#F8FAFC", borderBottom: "1px solid #E5E7EB", padding: "10px 14px", marginBottom: 2 }}>
+                                      {Object.keys(d).length > 0 && d.medianAge != null ? (
+                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+                                          <div>
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Income</div>
+                                            {[{ k: "medianPersonalIncome", l: "Personal" }, { k: "medianHouseholdIncome", l: "Household" }].map(({ k, l }) => d[k] != null && (
+                                              <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
+                                                <span style={{ color: "#6B7280" }}>{l}</span>
+                                                <span style={{ fontWeight: 600 }}>${(d[k] / 1000).toFixed(0)}k</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                          <div>
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Housing</div>
+                                            {[{ k: "renterPct", l: "Renters", fmt: v => `${v}%` }, { k: "medianWeeklyRent", l: "Weekly rent", fmt: v => `$${v}` }, { k: "ownerMortgagePct", l: "Owner+mort", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
+                                              <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
+                                                <span style={{ color: "#6B7280" }}>{l}</span>
+                                                <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                          <div>
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>People</div>
+                                            {[{ k: "medianAge", l: "Median age", fmt: v => v }, { k: "bachelorsOrAbovePct", l: "Degree+", fmt: v => `${v}%` }, { k: "overseasBornPct", l: "Overseas born", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
+                                              <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
+                                                <span style={{ color: "#6B7280" }}>{l}</span>
+                                                <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
+                                              </div>
+                                            ))}
+                                            {d.urbanClass && <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4 }}>{d.urbanClass}</div>}
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <div style={{ fontSize: 11, color: "#9CA3AF" }}>
+                                          TCP: {seat.modelled.activeTcpMatchup ? seat.modelled.activeTcpMatchup.replace("on_v_alp", "ON vs ALP").replace("on_v_coal", "ON vs Coal") : `${seat.tcp[0].party} vs ${seat.tcp[1].party}`}
+                                          {seat.modelled.region ? ` · Region: ${seat.modelled.region}` : ""}
+                                          {" · No demographic data yet (run pipeline/fetch_demographics.py to populate)"}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
+                          Probabilistic swing model · {source} · {totalSeats} seats · ALP% shown for ALP/Coalition contests
+                        </div>
+                      </div>
+                    );
+                  })()}
 
-                  {/* ── Per-seat TCP override panel ── */}
+                  {/* ── Per-seat override panel ── */}
                   {setSeatOverrides && (
                     <div style={panelStyle}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-level TCP overrides</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-level overrides</span>
                         {Object.keys(seatOverrides ?? {}).length > 0 && (
                           <>
                             <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
@@ -5680,7 +6089,7 @@ export default function App() {
                         )}
                       </div>
                       <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 10px" }}>
-                        Force a specific TCP matchup or result for individual seats. Useful for modelling strong local candidates, ON surges in specific electorates, or known seat-level effects.
+                        Override primary votes, TCP %, TCP matchup, or force a winner for individual seats.
                       </p>
                       {/* Seat search */}
                       <div style={{ position: "relative", marginBottom: 12 }}>
@@ -5734,13 +6143,30 @@ export default function App() {
                                   <PartyBadge party={seat.winner.party} />
                                   <span style={{ fontWeight: 700, fontSize: 13, flex: 1 }}>{seat.name}</span>
                                   <span style={{ fontSize: 12, color: "#9CA3AF" }}>Baseline: {seat.tcp[0].party} vs {seat.tcp[1].party} · {seat.margin.toFixed(1)}%</span>
-                                  {ms?.modelled.winnerParty && (
+                                  {ms?.modelled.winnerParty && ms.modelled.winnerPct != null && (
                                     <span style={{ fontSize: 12, fontWeight: 700, color: getParty(ms.modelled.winnerParty).color }}>
-                                      → {ms.modelled.winnerParty} {ms.modelled.winnerPct?.toFixed(1)}%
+                                      → {ms.modelled.winnerParty} {ms.modelled.winnerPct.toFixed(1)}%
                                     </span>
                                   )}
                                   <button onClick={() => setSeatOverrides(ovs => { const n = { ...ovs }; delete n[+idStr]; return n; })}
                                     style={{ fontSize: 13, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}>✕</button>
+                                </div>
+                                {/* Primary vote overrides */}
+                                <div style={{ marginBottom: 8 }}>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Primary vote % overrides (blank = use statewide)</div>
+                                  <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6 }}>
+                                    {parties.map(p => (
+                                      <div key={p.k} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                        <span style={{ fontSize: 10, fontWeight: 700, color: p.c }}>{p.l}</span>
+                                        <input type="number" min={0} max={100} step={0.5}
+                                          value={ov[p.k] ?? ""}
+                                          placeholder="—"
+                                          onChange={e => setOv({ [p.k]: e.target.value === "" ? null : +e.target.value })}
+                                          style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 4, padding: "3px 4px", fontSize: 11, textAlign: "right", boxSizing: "border-box" }}
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                                 {/* TCP matchup selector */}
                                 <div style={{ marginBottom: 8 }}>
@@ -5762,7 +6188,7 @@ export default function App() {
                                 {/* TCP% override */}
                                 <div style={{ marginBottom: 8 }}>
                                   <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>
-                                    {tcpMatchup === "on_v_alp" ? "ON TCP % (≥50 = ON wins)" : tcpMatchup === "on_v_coal" ? "ON TCP % (≥50 = ON wins)" : "ALP 2CP % (≥50 = ALP wins)"}
+                                    {tcpMatchup === "on_v_alp" || tcpMatchup === "on_v_coal" ? "ON TCP % (≥50 = ON wins)" : "ALP 2CP % (≥50 = ALP wins)"}
                                   </div>
                                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     <input
@@ -5776,8 +6202,8 @@ export default function App() {
                                     {tcpPct != null && <button onClick={() => setOv({ tcpPct: null })} style={{ fontSize: 11, color: "#6B7280", background: "none", border: "none", cursor: "pointer" }}>×</button>}
                                   </div>
                                 </div>
-                                {/* ON primary override (for auto-detection seats) */}
-                                <div>
+                                {/* ON primary override */}
+                                <div style={{ marginBottom: 8 }}>
                                   <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>ON primary % override</div>
                                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     <input
@@ -5787,8 +6213,21 @@ export default function App() {
                                       onChange={e => setOv({ on: e.target.value === "" ? null : +e.target.value })}
                                       style={{ width: 70, border: "1px solid #D1D5DB", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
                                     />
-                                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>%  (overrides auto-detected ON for this seat)</span>
+                                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>% (overrides auto-detected ON for this seat)</span>
                                     {onFp != null && <button onClick={() => setOv({ on: null })} style={{ fontSize: 11, color: "#6B7280", background: "none", border: "none", cursor: "pointer" }}>×</button>}
+                                  </div>
+                                </div>
+                                {/* Force winner */}
+                                <div>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Force projected winner</div>
+                                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                                    {[["alp", "ALP", "#DC2626"], ["coalition", "Coalition", "#1D4ED8"], ["greens", "Greens", "#059669"], ["ind", "Ind", "#0891B2"], ["one_nation", "ON", "#B45309"]].map(([g, label, c]) => (
+                                      <button key={g}
+                                        onClick={() => setOv({ forceGroup: ov.forceGroup === g ? null : g })}
+                                        style={{ fontSize: 11, padding: "3px 8px", borderRadius: 5, border: `1px solid ${c}`, cursor: "pointer", fontWeight: ov.forceGroup === g ? 700 : 400, background: ov.forceGroup === g ? c : "#fff", color: ov.forceGroup === g ? "#fff" : c }}>
+                                        {label}
+                                      </button>
+                                    ))}
                                   </div>
                                 </div>
                               </div>
