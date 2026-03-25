@@ -1178,35 +1178,45 @@ const WA_SEATS = fillStateSeats(_WA.map(r => mkSS(...r)),
 
 // ── SA 2022 (47 seats, ALP majority 27, LP 16, IND 4) ────────────────────────
 // Primary: ALP 38.3  LP 34.8  GRN 7.3  IND/other 19.6   ALP 2PP 54.9%
+// ── SA 2026 provisional results (21 Mar 2026 — 6 seats still being counted 25 Mar 2026) ──
+// ALP: 33 seats, 39.1%  LP: 4 seats, 18.7%  ON: 1 seat, 21.6%  IND: 3 seats, 4.7%  GRN: 0 seats, 11.1%
+// Historic Liberal collapse: LP fell 16pp, ON surged 20pp (mostly ex-Liberal voters).
+// LP won only Schubert, Bragg, Morphett, Heysen — all on first-preference leads; ON won Ngadjuri (with LP prefs).
+// Seat names and margins are provisional pending full count; incumbents for flipped seats are placeholders.
 const _SA = [
-  // Marginal ALP/LP
-  [7401, "King", "SA", "ALP", "Dana Wortley", "ALP", "LP", 0.1],
-  [7402, "Gibson", "SA", "ALP", "Eddie Hughes", "ALP", "LP", 0.4],
-  [7403, "Newland", "SA", "ALP", "Blair Boyer", "ALP", "LP", 0.6],
-  [7404, "Florey", "SA", "ALP", "Frances Bedford", "ALP", "LP", 1.0],
-  [7405, "Adelaide", "SA", "ALP", "Lucy Hood", "ALP", "LP", 3.0],
-  [7406, "Kaurna", "SA", "ALP", "Chris Picton", "ALP", "LP", 4.5],
-  [7407, "Playford", "SA", "ALP", "Tom Koutsantonis", "ALP", "LP", 5.5],
-  // Marginal LP/ALP
-  [7411, "Heysen", "SA", "LP", "Josh Teague", "LP", "ALP", 0.3],
-  [7412, "Colton", "SA", "LP", "Jeff Brock", "LP", "ALP", 1.8],
-  [7413, "Morialta", "SA", "LP", "John Gardner", "LP", "ALP", 2.0],
-  [7414, "Waite", "SA", "LP", "Sam Duluk", "LP", "ALP", 2.5],
-  [7415, "Flinders", "SA", "LP", "Peter Treloar", "LP", "ALP", 3.5],
-  [7416, "Bragg", "SA", "LP", "Vickie Chapman", "LP", "ALP", 5.0],
-  [7417, "Unley", "SA", "LP", "David Pisoni", "LP", "ALP", 6.0],
-  [7418, "Hartley", "SA", "LP", "Vincent Tarzia", "LP", "ALP", 7.5],
-  // Independent/crossbench seats
-  [7421, "Mount Gambier", "SA", "IND", "Troy Bell", "IND", "LP", 4.5],
-  [7422, "Frome", "SA", "IND", "Geoff Brock", "IND", "LP", 8.0],
-  // ALP safe
-  [7431, "Cheltenham", "SA", "ALP", "Tom Koutsantonis", "ALP", "LP", 10.0],
-  [7432, "Croydon", "SA", "ALP", "Joe Szakacs", "ALP", "LP", 15.0],
-  [7433, "Ramsay", "SA", "ALP", "Peter Malinauskas", "ALP", "LP", 12.0],
-  [7434, "Lee", "SA", "ALP", "Tom Kenyon", "ALP", "LP", 11.0],
+  // ── LP retained (4 seats — all won on first preferences without needing ALP prefs) ──
+  [7411, "Heysen", "SA", "LP", "Josh Teague", "LP", "ALP", 3.0],
+  [7416, "Bragg", "SA", "LP", "Rachel Sanderson", "LP", "ALP", 4.5],
+  [7419, "Morphett", "SA", "LP", "David Speirs", "LP", "ALP", 5.0],
+  [7420, "Schubert", "SA", "LP", "Ashton Hurn", "LP", "ALP", 6.0],
+  // ── One Nation (1 seat — Ngadjuri won with LP preferences over ALP) ──
+  [7423, "Ngadjuri", "SA", "ON", "ON member", "ON", "ALP", 1.5],
+  // ── Independent/crossbench seats (3) ──
+  [7421, "Mount Gambier", "SA", "IND", "Troy Bell", "IND", "ALP", 5.0],
+  [7422, "Frome", "SA", "IND", "Geoff Brock", "IND", "ALP", 7.0],
+  [7424, "Narungga", "SA", "IND", "Tim Whetstone", "IND", "ALP", 4.5],
+  // ── Former LP marginals now held by ALP (LP primary collapsed 16pp) ──
+  [7412, "Colton", "SA", "ALP", "ALP (provisional)", "ALP", "LP", 7.5],
+  [7413, "Morialta", "SA", "ALP", "ALP (provisional)", "ALP", "LP", 7.0],
+  [7414, "Waite", "SA", "ALP", "ALP (provisional)", "ALP", "LP", 7.0],
+  [7415, "Flinders", "SA", "ALP", "ALP (provisional)", "ALP", "LP", 6.5],
+  [7417, "Unley", "SA", "ALP", "ALP (provisional)", "ALP", "LP", 3.5],
+  [7418, "Hartley", "SA", "ALP", "ALP (provisional)", "ALP", "LP", 2.5],
+  // ── Former ALP marginals now safely held ──
+  [7401, "King", "SA", "ALP", "Dana Wortley", "ALP", "LP", 8.0],
+  [7402, "Gibson", "SA", "ALP", "ALP member", "ALP", "LP", 8.5],
+  [7403, "Newland", "SA", "ALP", "Blair Boyer", "ALP", "LP", 9.0],
+  [7404, "Florey", "SA", "ALP", "Nat Cook", "ALP", "LP", 9.5],
+  [7405, "Adelaide", "SA", "ALP", "Lucy Hood", "ALP", "LP", 10.0],
+  [7406, "Kaurna", "SA", "ALP", "Chris Picton", "ALP", "LP", 11.0],
+  [7407, "Playford", "SA", "ALP", "Tom Koutsantonis", "ALP", "LP", 12.0],
+  // ── ALP safe ──
+  [7432, "Croydon", "SA", "ALP", "Joe Szakacs", "ALP", "LP", 17.0],
+  [7433, "Ramsay", "SA", "ALP", "Peter Malinauskas", "ALP", "LP", 14.0],
+  [7434, "Lee", "SA", "ALP", "ALP member", "ALP", "LP", 13.0],
 ];
 const SA_SEATS = fillStateSeats(_SA.map(r => mkSS(...r)),
-  { alp: 27, coalition: 16, greens: 0, teal: 0, crossbench: 4 }, "LP", "SA", 300);
+  { alp: 33, coalition: 4, greens: 0, teal: 0, one_nation: 1, crossbench: 3 }, "LP", "SA", 300);
 
 // ── NT 2024 (25 seats, CLP majority 17, ALP 8) ───────────────────────────────
 // Primary: ALP 30.5  CLP 40.5  GRN 5.5  IND 12.5  other 11.0
@@ -1413,12 +1423,12 @@ const ELECTION_DATA = {
     incumbent: "Roger Cook (ALP)", incumbentParty: "ALP",
     modelEnabled: true,
   },
-  sa_2022: {
+  sa_2026: {
     label: "South Aus.", jurisdiction: "South Australia",
-    chamber: "House of Assembly", date: "19 March 2022",
-    totalSeats: 47, majority: 24, twopp: 54.9,
+    chamber: "House of Assembly", date: "21 March 2026",
+    totalSeats: 47, majority: 24, twopp: 57.4,
     seats: SA_SEATS,
-    counts: { alp: 27, coalition: 16, greens: 0, teal: 0, one_nation: 0, crossbench: 4 },
+    counts: { alp: 33, coalition: 4, greens: 0, teal: 0, one_nation: 1, crossbench: 3 },
     incumbent: "Peter Malinauskas (ALP)", incumbentParty: "ALP",
     modelEnabled: true,
   },
@@ -1452,7 +1462,7 @@ const ELECTION_DATA = {
 };
 const ELECTION_OPTIONS = [
   "federal_2025", "nsw_2023", "vic_2022", "qld_2024",
-  "wa_2025", "sa_2022", "tas_2024", "act_2024", "nt_2024",
+  "wa_2025", "sa_2026", "tas_2024", "act_2024", "nt_2024",
 ];
 
 // ─── Helper functions ─────────────────────────────────────────────────────────
@@ -2136,15 +2146,18 @@ function _getWaRegion(n) { return WA_DISTRICT_REGION[n] ?? "metro"; }
 const SA_DISTRICT_REGION = {
   // Inner metro — Adelaide inner suburbs
   "Adelaide": "inner_metro", "Unley": "inner_metro",
-  // Outer metro — Adelaide suburbs
+  // Outer metro — Adelaide suburbs (includes 2026 retained LP seats and flipped seats)
   "King": "outer_metro", "Gibson": "outer_metro", "Newland": "outer_metro",
   "Florey": "outer_metro", "Kaurna": "outer_metro", "Playford": "outer_metro",
   "Heysen": "outer_metro", "Colton": "outer_metro", "Morialta": "outer_metro",
   "Waite": "outer_metro", "Flinders": "outer_metro", "Bragg": "outer_metro",
-  "Hartley": "outer_metro", "Cheltenham": "outer_metro", "Croydon": "outer_metro",
+  "Hartley": "outer_metro", "Croydon": "outer_metro",
   "Ramsay": "outer_metro", "Lee": "outer_metro",
-  // Regional — rural SA
+  // 2026 new/retained LP seats
+  "Morphett": "outer_metro", "Schubert": "outer_metro",
+  // Regional — rural SA (includes 2026 ON win Ngadjuri and IND seats)
   "Mount Gambier": "regional", "Frome": "regional",
+  "Ngadjuri": "regional", "Narungga": "regional",
 };
 const SA_REGION_SWING_MULT = { inner_metro: 1.05, outer_metro: 1.00, regional: 0.80 };
 function _getSaRegion(n) { return SA_DISTRICT_REGION[n] ?? "outer_metro"; }
@@ -3067,11 +3080,13 @@ export default function App() {
     grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45,
     coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58,
     alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
+    onCoalOriginFactor: 0.0,
   });
   const [nswOnTcp, setNswOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const [nswSeatOverrides, setNswSeatOverrides] = useState({}); // { seatId: { tcpMatchup, tcpPct, on } }
   const nswModelledSeats = useMemo(() => {
     const s = { alp: nswPrim.alp - NSW_BL.alp, coal: nswPrim.coal - NSW_BL.coal, grn: nswPrim.grn - NSW_BL.grn, on: nswPrim.on - NSW_BL.on };
+    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
       const other = Math.max(0, 100 - p.alp - p.coal - p.grn - nswPrim.ind - onV);
@@ -3085,8 +3100,9 @@ export default function App() {
         const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + nswPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
         return on / (on + c) * 100;
       }
-      const a = p.alp + nswPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + nswPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
+      const a = p.alp + nswPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
+      const c = p.coal + nswPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
     const baseline2pp = compute2pp(NSW_BL, nswFlows);
@@ -3100,7 +3116,7 @@ export default function App() {
   const nswBaseCounts = useMemo(() => { const c = {}; NSW_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const nswChanged = useMemo(() => nswModelledSeats.filter(s => s.modelled.changed), [nswModelledSeats]);
   const nswImplied2pp = useMemo(() => { const r = nswModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [nswModelledSeats]);
-  const nswHasChanges = Object.entries(NSW_BL).some(([k, v]) => Math.abs((nswPrim[k] ?? v) - v) > 0.05) || (nswPrim.undecided || 0) > 0 || nswFlows.grn_alp !== 0.88 || nswFlows.ind_alp !== 0.55 || nswFlows.on_alp !== 0.20 || nswFlows.other_alp !== 0.45 || nswOnTcp !== null || !useNswRegionalSwing || Object.keys(nswSeatOverrides).length > 0;
+  const nswHasChanges = Object.entries(NSW_BL).some(([k, v]) => Math.abs((nswPrim[k] ?? v) - v) > 0.05) || (nswPrim.undecided || 0) > 0 || nswFlows.grn_alp !== 0.88 || nswFlows.ind_alp !== 0.55 || nswFlows.on_alp !== 0.20 || nswFlows.other_alp !== 0.45 || nswOnTcp !== null || !useNswRegionalSwing || Object.keys(nswSeatOverrides).length > 0 || (nswFlows.onCoalOriginFactor ?? 0) !== 0;
 
   const nswNat2ppSwing = useMemo(() => {
     const onV = nswPrim.on ?? 0;
@@ -3121,8 +3137,11 @@ export default function App() {
       const blC = NSW_BL.coal + NSW_BL.alp * (1 - nswFlows.alp_on_v_coal) + NSW_BL.grn * (1 - nswFlows.grn_on_v_coal) + NSW_BL.ind * (1 - nswFlows.ind_on_v_coal) + blOther * (1 - nswFlows.other_on_v_coal);
       return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
     }
-    const a = nswPrim.alp + nswPrim.ind * nswFlows.ind_alp + nswPrim.grn * nswFlows.grn_alp + onV * nswFlows.on_alp + other * nswFlows.other_alp;
-    const c = nswPrim.coal + nswPrim.ind * (1 - nswFlows.ind_alp) + nswPrim.grn * (1 - nswFlows.grn_alp) + onV * (1 - nswFlows.on_alp) + other * (1 - nswFlows.other_alp);
+    const nswOnSwing = onV - NSW_BL.on; const nswCoalSwing = nswPrim.coal - NSW_BL.coal;
+    const nswCoalToOnXfer = (nswOnSwing > 0 && nswCoalSwing < 0) ? Math.max(0, Math.min(1, -nswCoalSwing / nswOnSwing)) : 0;
+    const nswEffOnAlp = nswFlows.on_alp + (nswFlows.onCoalOriginFactor ?? 0) * nswCoalToOnXfer * (1 - nswFlows.on_alp);
+    const a = nswPrim.alp + nswPrim.ind * nswFlows.ind_alp + nswPrim.grn * nswFlows.grn_alp + onV * nswEffOnAlp + other * nswFlows.other_alp;
+    const c = nswPrim.coal + nswPrim.ind * (1 - nswFlows.ind_alp) + nswPrim.grn * (1 - nswFlows.grn_alp) + onV * (1 - nswEffOnAlp) + other * (1 - nswFlows.other_alp);
     return a / (a + c) * 100 - NSW_2PP;
   }, [nswPrim, nswFlows, nswOnTcp]);
   const nswUncertainty = useMemo(
@@ -3163,11 +3182,13 @@ export default function App() {
     grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40,
     coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55,
     alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28,
+    onCoalOriginFactor: 0.0,
   });
   const [qldOnTcp, setQldOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const [qldSeatOverrides, setQldSeatOverrides] = useState({}); // { seatId: { tcpMatchup, tcpPct, on } }
   const qldModelledSeats = useMemo(() => {
     const s = { alp: qldPrim.alp - QLD_BL.alp, coal: qldPrim.coal - QLD_BL.coal, grn: qldPrim.grn - QLD_BL.grn, on: qldPrim.on - QLD_BL.on };
+    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
       const other = Math.max(0, 100 - p.alp - p.coal - p.grn - qldPrim.ind - onV);
@@ -3181,8 +3202,9 @@ export default function App() {
         const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + qldPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
         return on / (on + c) * 100;
       }
-      const a = p.alp + qldPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + qldPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
+      const a = p.alp + qldPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
+      const c = p.coal + qldPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
     const baseline2pp = compute2pp(QLD_BL, qldFlows);
@@ -3196,7 +3218,7 @@ export default function App() {
   const qldBaseCounts = useMemo(() => { const c = {}; QLD_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const qldChanged = useMemo(() => qldModelledSeats.filter(s => s.modelled.changed), [qldModelledSeats]);
   const qldImplied2pp = useMemo(() => { const r = qldModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [qldModelledSeats]);
-  const qldHasChanges = Object.entries(QLD_BL).some(([k, v]) => Math.abs((qldPrim[k] ?? v) - v) > 0.05) || (qldPrim.undecided || 0) > 0 || qldFlows.grn_alp !== 0.82 || qldFlows.ind_alp !== 0.50 || qldFlows.on_alp !== 0.18 || qldFlows.other_alp !== 0.40 || qldOnTcp !== null || !useQldRegionalSwing || Object.keys(qldSeatOverrides).length > 0;
+  const qldHasChanges = Object.entries(QLD_BL).some(([k, v]) => Math.abs((qldPrim[k] ?? v) - v) > 0.05) || (qldPrim.undecided || 0) > 0 || qldFlows.grn_alp !== 0.82 || qldFlows.ind_alp !== 0.50 || qldFlows.on_alp !== 0.18 || qldFlows.other_alp !== 0.40 || qldOnTcp !== null || !useQldRegionalSwing || Object.keys(qldSeatOverrides).length > 0 || (qldFlows.onCoalOriginFactor ?? 0) !== 0;
 
   const qldNat2ppSwing = useMemo(() => {
     const onV = qldPrim.on ?? 0;
@@ -3217,8 +3239,11 @@ export default function App() {
       const blC = QLD_BL.coal + QLD_BL.alp * (1 - qldFlows.alp_on_v_coal) + QLD_BL.grn * (1 - qldFlows.grn_on_v_coal) + QLD_BL.ind * (1 - qldFlows.ind_on_v_coal) + blOther * (1 - qldFlows.other_on_v_coal);
       return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
     }
-    const a = qldPrim.alp + qldPrim.ind * qldFlows.ind_alp + qldPrim.grn * qldFlows.grn_alp + onV * qldFlows.on_alp + other * qldFlows.other_alp;
-    const c = qldPrim.coal + qldPrim.ind * (1 - qldFlows.ind_alp) + qldPrim.grn * (1 - qldFlows.grn_alp) + onV * (1 - qldFlows.on_alp) + other * (1 - qldFlows.other_alp);
+    const qldOnSwing = onV - QLD_BL.on; const qldCoalSwing = qldPrim.coal - QLD_BL.coal;
+    const qldCoalToOnXfer = (qldOnSwing > 0 && qldCoalSwing < 0) ? Math.max(0, Math.min(1, -qldCoalSwing / qldOnSwing)) : 0;
+    const qldEffOnAlp = qldFlows.on_alp + (qldFlows.onCoalOriginFactor ?? 0) * qldCoalToOnXfer * (1 - qldFlows.on_alp);
+    const a = qldPrim.alp + qldPrim.ind * qldFlows.ind_alp + qldPrim.grn * qldFlows.grn_alp + onV * qldEffOnAlp + other * qldFlows.other_alp;
+    const c = qldPrim.coal + qldPrim.ind * (1 - qldFlows.ind_alp) + qldPrim.grn * (1 - qldFlows.grn_alp) + onV * (1 - qldEffOnAlp) + other * (1 - qldFlows.other_alp);
     return a / (a + c) * 100 - QLD_2PP;
   }, [qldPrim, qldFlows, qldOnTcp]);
   const qldUncertainty = useMemo(
@@ -3236,11 +3261,13 @@ export default function App() {
     grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44,
     coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57,
     alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
+    onCoalOriginFactor: 0.0,
   });
   const [waOnTcp, setWaOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const [waSeatOverrides, setWaSeatOverrides] = useState({});
   const waModelledSeats = useMemo(() => {
     const s = { alp: waPrim.alp - WA_BL.alp, coal: waPrim.coal - WA_BL.coal, grn: waPrim.grn - WA_BL.grn, on: waPrim.on - WA_BL.on };
+    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
       const other = Math.max(0, 100 - p.alp - p.coal - p.grn - waPrim.ind - onV);
@@ -3254,8 +3281,9 @@ export default function App() {
         const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + waPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
         return on / (on + c) * 100;
       }
-      const a = p.alp + waPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + waPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
+      const a = p.alp + waPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
+      const c = p.coal + waPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
     const baseline2pp = compute2pp(WA_BL, waFlows);
@@ -3269,7 +3297,7 @@ export default function App() {
   const waBaseCounts = useMemo(() => { const c = {}; WA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const waChanged = useMemo(() => waModelledSeats.filter(s => s.modelled.changed), [waModelledSeats]);
   const waImplied2pp = useMemo(() => { const r = waModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [waModelledSeats]);
-  const waHasChanges = Object.entries(WA_BL).some(([k, v]) => Math.abs((waPrim[k] ?? v) - v) > 0.05) || (waPrim.undecided || 0) > 0 || waFlows.grn_alp !== 0.86 || waFlows.ind_alp !== 0.58 || waFlows.on_alp !== 0.22 || waFlows.other_alp !== 0.44 || waOnTcp !== null || !useWaRegionalSwing || Object.keys(waSeatOverrides).length > 0;
+  const waHasChanges = Object.entries(WA_BL).some(([k, v]) => Math.abs((waPrim[k] ?? v) - v) > 0.05) || (waPrim.undecided || 0) > 0 || waFlows.grn_alp !== 0.86 || waFlows.ind_alp !== 0.58 || waFlows.on_alp !== 0.22 || waFlows.other_alp !== 0.44 || waOnTcp !== null || !useWaRegionalSwing || Object.keys(waSeatOverrides).length > 0 || (waFlows.onCoalOriginFactor ?? 0) !== 0;
 
   const waNat2ppSwing = useMemo(() => {
     const onV = waPrim.on ?? 0;
@@ -3290,8 +3318,11 @@ export default function App() {
       const blC = WA_BL.coal + WA_BL.alp * (1 - waFlows.alp_on_v_coal) + WA_BL.grn * (1 - waFlows.grn_on_v_coal) + WA_BL.ind * (1 - waFlows.ind_on_v_coal) + blOther * (1 - waFlows.other_on_v_coal);
       return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
     }
-    const a = waPrim.alp + waPrim.ind * waFlows.ind_alp + waPrim.grn * waFlows.grn_alp + onV * waFlows.on_alp + other * waFlows.other_alp;
-    const c = waPrim.coal + waPrim.ind * (1 - waFlows.ind_alp) + waPrim.grn * (1 - waFlows.grn_alp) + onV * (1 - waFlows.on_alp) + other * (1 - waFlows.other_alp);
+    const waOnSwing = onV - WA_BL.on; const waCoalSwing = waPrim.coal - WA_BL.coal;
+    const waCoalToOnXfer = (waOnSwing > 0 && waCoalSwing < 0) ? Math.max(0, Math.min(1, -waCoalSwing / waOnSwing)) : 0;
+    const waEffOnAlp = waFlows.on_alp + (waFlows.onCoalOriginFactor ?? 0) * waCoalToOnXfer * (1 - waFlows.on_alp);
+    const a = waPrim.alp + waPrim.ind * waFlows.ind_alp + waPrim.grn * waFlows.grn_alp + onV * waEffOnAlp + other * waFlows.other_alp;
+    const c = waPrim.coal + waPrim.ind * (1 - waFlows.ind_alp) + waPrim.grn * (1 - waFlows.grn_alp) + onV * (1 - waEffOnAlp) + other * (1 - waFlows.other_alp);
     return a / (a + c) * 100 - WA_2PP;
   }, [waPrim, waFlows, waOnTcp]);
   const waUncertainty = useMemo(
@@ -3299,21 +3330,29 @@ export default function App() {
     [waModelledSeats, waNat2ppSwing, swingStd, useElasticity]
   );
 
-  // ── SA 2022 model state ───────────────────────────────────────────────────
-  // Baselines: ALP 38.3  Coalition (LP) 34.8  GRN 7.3  IND 12.1  ON 1.5  other 6.0  2PP 54.9
-  const SA_BL = { alp: 38.3, coal: 34.8, grn: 7.3, ind: 12.1, on: 1.5 };
-  const SA_2PP = 54.9;
+  // ── SA 2026 model state ───────────────────────────────────────────────────
+  // Provisional result (21 Mar 2026 — 6 seats still being counted as of 25 Mar 2026)
+  // ALP 39.1%  LP 18.7%  ON 21.6%  GRN 11.1%  IND 4.7%  other ~4.8%  2PP 57.4% ALP
+  // ON preference flows: despite LP's 16pp primary collapse, ON voters (mostly ex-LP)
+  // preferenced back to LP at ~78%, keeping 2PP change modest (+2.5pp) vs the primary vote drama.
+  // onCoalOriginFactor lets users model higher ALP flows when ON surge is driven by LP defection.
+  const SA_BL = { alp: 39.1, coal: 18.7, grn: 11.1, ind: 4.7, on: 21.6 };
+  const SA_2PP = 57.4;
   const SA_COAL = new Set(["LP"]);
   const [saPrim, setSaPrim] = useState({ ...SA_BL, undecided: 0 });
   const [saFlows, setSaFlows] = useState({
     grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45,
     coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57,
     alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
+    onCoalOriginFactor: 0.0,
   });
   const [saOnTcp, setSaOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const [saSeatOverrides, setSaSeatOverrides] = useState({});
   const saModelledSeats = useMemo(() => {
     const s = { alp: saPrim.alp - SA_BL.alp, coal: saPrim.coal - SA_BL.coal, grn: saPrim.grn - SA_BL.grn, on: saPrim.on - SA_BL.on };
+    // When ON rises at Coalition's expense, ex-LP defectors preference ALP at a higher rate than
+    // baseline ON voters. onCoalOriginFactor (0–1) scales this adjustment up when the signal is clear.
+    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
       const other = Math.max(0, 100 - p.alp - p.coal - p.grn - saPrim.ind - onV);
@@ -3327,8 +3366,9 @@ export default function App() {
         const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + saPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
         return on / (on + c) * 100;
       }
-      const a = p.alp + saPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + saPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
+      const a = p.alp + saPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
+      const c = p.coal + saPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
     const baseline2pp = compute2pp(SA_BL, saFlows);
@@ -3342,7 +3382,7 @@ export default function App() {
   const saBaseCounts = useMemo(() => { const c = {}; SA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const saChanged = useMemo(() => saModelledSeats.filter(s => s.modelled.changed), [saModelledSeats]);
   const saImplied2pp = useMemo(() => { const r = saModelledSeats.filter(s => s.modelled.projAlp2pp !== null); return r.length ? r.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / r.length : null; }, [saModelledSeats]);
-  const saHasChanges = Object.entries(SA_BL).some(([k, v]) => Math.abs((saPrim[k] ?? v) - v) > 0.05) || (saPrim.undecided || 0) > 0 || saFlows.grn_alp !== 0.84 || saFlows.ind_alp !== 0.52 || saFlows.on_alp !== 0.22 || saFlows.other_alp !== 0.45 || saOnTcp !== null || !useSaRegionalSwing || Object.keys(saSeatOverrides).length > 0;
+  const saHasChanges = Object.entries(SA_BL).some(([k, v]) => Math.abs((saPrim[k] ?? v) - v) > 0.05) || (saPrim.undecided || 0) > 0 || saFlows.grn_alp !== 0.84 || saFlows.ind_alp !== 0.52 || saFlows.on_alp !== 0.22 || saFlows.other_alp !== 0.45 || saOnTcp !== null || !useSaRegionalSwing || Object.keys(saSeatOverrides).length > 0 || (saFlows.onCoalOriginFactor ?? 0) !== 0;
 
   const saNat2ppSwing = useMemo(() => {
     const onV = saPrim.on ?? 0;
@@ -3363,8 +3403,11 @@ export default function App() {
       const blC = SA_BL.coal + SA_BL.alp * (1 - saFlows.alp_on_v_coal) + SA_BL.grn * (1 - saFlows.grn_on_v_coal) + SA_BL.ind * (1 - saFlows.ind_on_v_coal) + blOther * (1 - saFlows.other_on_v_coal);
       return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
     }
-    const a = saPrim.alp + saPrim.ind * saFlows.ind_alp + saPrim.grn * saFlows.grn_alp + onV * saFlows.on_alp + other * saFlows.other_alp;
-    const c = saPrim.coal + saPrim.ind * (1 - saFlows.ind_alp) + saPrim.grn * (1 - saFlows.grn_alp) + onV * (1 - saFlows.on_alp) + other * (1 - saFlows.other_alp);
+    const onSwing = onV - SA_BL.on; const coalSwing = saPrim.coal - SA_BL.coal;
+    const saCoalToOnXfer = (onSwing > 0 && coalSwing < 0) ? Math.max(0, Math.min(1, -coalSwing / onSwing)) : 0;
+    const saEffOnAlp = saFlows.on_alp + (saFlows.onCoalOriginFactor ?? 0) * saCoalToOnXfer * (1 - saFlows.on_alp);
+    const a = saPrim.alp + saPrim.ind * saFlows.ind_alp + saPrim.grn * saFlows.grn_alp + onV * saEffOnAlp + other * saFlows.other_alp;
+    const c = saPrim.coal + saPrim.ind * (1 - saFlows.ind_alp) + saPrim.grn * (1 - saFlows.grn_alp) + onV * (1 - saEffOnAlp) + other * (1 - saFlows.other_alp);
     return a / (a + c) * 100 - SA_2PP;
   }, [saPrim, saFlows, saOnTcp]);
   const saUncertainty = useMemo(
@@ -3382,11 +3425,13 @@ export default function App() {
     grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40,
     coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50,
     alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28,
+    onCoalOriginFactor: 0.0,
   });
   const [ntOnTcp, setNtOnTcp] = useState(null); // null | "on_v_alp" | "on_v_coal"
   const [ntSeatOverrides, setNtSeatOverrides] = useState({});
   const ntModelledSeats = useMemo(() => {
     const s = { alp: ntPrim.alp - NT_BL.alp, coal: ntPrim.coal - NT_BL.coal, grn: ntPrim.grn - NT_BL.grn, on: ntPrim.on - NT_BL.on };
+    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
       const other = Math.max(0, 100 - p.alp - p.coal - p.grn - ntPrim.ind - onV);
@@ -3400,8 +3445,9 @@ export default function App() {
         const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + ntPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
         return on / (on + c) * 100;
       }
-      const a = p.alp + ntPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp;
-      const c = p.coal + ntPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp);
+      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
+      const a = p.alp + ntPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
+      const c = p.coal + ntPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
       return a / (a + c) * 100;
     };
     const baseline2pp = compute2pp(NT_BL, ntFlows);
@@ -3414,7 +3460,7 @@ export default function App() {
   const ntProjCounts = useMemo(() => { const c = {}; ntModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [ntModelledSeats]);
   const ntBaseCounts = useMemo(() => { const c = {}; NT_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const ntChanged = useMemo(() => ntModelledSeats.filter(s => s.modelled.changed), [ntModelledSeats]);
-  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null || !useNtRegionalSwing || Object.keys(ntSeatOverrides).length > 0;
+  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null || !useNtRegionalSwing || Object.keys(ntSeatOverrides).length > 0 || (ntFlows.onCoalOriginFactor ?? 0) !== 0;
 
   const ntNat2ppSwing = useMemo(() => {
     const onV = ntPrim.on ?? 0;
@@ -3435,8 +3481,11 @@ export default function App() {
       const blC = NT_BL.coal + NT_BL.alp * (1 - ntFlows.alp_on_v_coal) + NT_BL.grn * (1 - ntFlows.grn_on_v_coal) + NT_BL.ind * (1 - ntFlows.ind_on_v_coal) + blOther * (1 - ntFlows.other_on_v_coal);
       return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
     }
-    const a = ntPrim.alp + ntPrim.ind * ntFlows.ind_alp + ntPrim.grn * ntFlows.grn_alp + onV * ntFlows.on_alp + other * ntFlows.other_alp;
-    const c = ntPrim.coal + ntPrim.ind * (1 - ntFlows.ind_alp) + ntPrim.grn * (1 - ntFlows.grn_alp) + onV * (1 - ntFlows.on_alp) + other * (1 - ntFlows.other_alp);
+    const ntOnSwing = onV - NT_BL.on; const ntCoalSwing = ntPrim.coal - NT_BL.coal;
+    const ntCoalToOnXfer = (ntOnSwing > 0 && ntCoalSwing < 0) ? Math.max(0, Math.min(1, -ntCoalSwing / ntOnSwing)) : 0;
+    const ntEffOnAlp = ntFlows.on_alp + (ntFlows.onCoalOriginFactor ?? 0) * ntCoalToOnXfer * (1 - ntFlows.on_alp);
+    const a = ntPrim.alp + ntPrim.ind * ntFlows.ind_alp + ntPrim.grn * ntFlows.grn_alp + onV * ntEffOnAlp + other * ntFlows.other_alp;
+    const c = ntPrim.coal + ntPrim.ind * (1 - ntFlows.ind_alp) + ntPrim.grn * (1 - ntFlows.grn_alp) + onV * (1 - ntEffOnAlp) + other * (1 - ntFlows.other_alp);
     return a / (a + c) * 100 - NT_2PP;
   }, [ntPrim, ntFlows, ntOnTcp]);
   const ntUncertainty = useMemo(
@@ -5731,11 +5780,11 @@ export default function App() {
             {/* ── Reusable state builder (NSW, QLD, WA, SA, NT) ── */}
             {(() => {
               const cfgs = {
-                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, seatOverrides: nswSeatOverrides, setSeatOverrides: setNswSeatOverrides, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80" },
-                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, seatOverrides: qldSeatOverrides, setSeatOverrides: setQldSeatOverrides, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75" },
-                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, seatOverrides: waSeatOverrides, setSeatOverrides: setWaSeatOverrides, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: WA_SEATS, uncertainty: waUncertainty, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75" },
-                sa_2022: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, seatOverrides: saSeatOverrides, setSeatOverrides: setSaSeatOverrides, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2022 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22 }, allSeats: SA_SEATS, uncertainty: saUncertainty, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80" },
-                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, seatOverrides: ntSeatOverrides, setSeatOverrides: setNtSeatOverrides, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70" },
+                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, seatOverrides: nswSeatOverrides, setSeatOverrides: setNswSeatOverrides, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80" },
+                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, seatOverrides: qldSeatOverrides, setSeatOverrides: setQldSeatOverrides, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75" },
+                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, seatOverrides: waSeatOverrides, setSeatOverrides: setWaSeatOverrides, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: WA_SEATS, uncertainty: waUncertainty, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75" },
+                sa_2026: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, seatOverrides: saSeatOverrides, setSeatOverrides: setSaSeatOverrides, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2026 provisional results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: SA_SEATS, uncertainty: saUncertainty, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80" },
+                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, seatOverrides: ntSeatOverrides, setSeatOverrides: setNtSeatOverrides, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70" },
               };
               const cfg = cfgs[selectedModelId];
               if (!el.modelEnabled || !cfg) return null;
@@ -5779,6 +5828,12 @@ export default function App() {
                     <PrefInput label="Independents → ALP" value={flows.ind_alp} onChange={v => setFlows(f => ({ ...f, ind_alp: v }))} color="#0891B2" />
                     <PrefInput label="One Nation → ALP" value={flows.on_alp} onChange={v => setFlows(f => ({ ...f, on_alp: v }))} color="#B45309" />
                     <PrefInput label="Other → ALP" value={flows.other_alp} onChange={v => setFlows(f => ({ ...f, other_alp: v }))} color="#7C3AED" />
+                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                      <PrefInput label="ON from Coalition adj." value={flows.onCoalOriginFactor ?? 0} onChange={v => setFlows(f => ({ ...f, onCoalOriginFactor: v }))} color="#92400E" />
+                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2, lineHeight: 1.4 }}>
+                        When ON rises mainly from Coalition defectors (e.g. SA 2026), those voters preference ALP at a higher rate. Set 0.3–0.7 to model this effect. 0 = off (default).
+                      </div>
+                    </div>
                     <div style={{ fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
                       Defaults based on {source} preference distributions.
                     </div>
