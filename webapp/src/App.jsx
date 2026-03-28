@@ -3939,6 +3939,29 @@ export default function App() {
               {t.label}
             </button>
           ))}
+          {/* Buy Me a Coffee */}
+          <a
+            href="https://buymeacoffee.com/auspoll"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              background: "#FBBF24",
+              color: "#1C1917",
+              borderRadius: 6,
+              padding: isMobile ? "4px 8px" : "5px 12px",
+              fontSize: isMobile ? 11 : 12,
+              fontWeight: 700,
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            ☕ {isMobile ? "" : "Buy me a coffee"}
+          </a>
         </div>
         {/* Mobile: tabs row below title */}
         {isMobile && (
