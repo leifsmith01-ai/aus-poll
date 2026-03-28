@@ -889,6 +889,9 @@ const INITIAL_POLLS = [
   n: POLL_SAMPLE_SIZES[p.pollster] ?? null,
 }));
 
+// Latest poll at module load — used to initialise federal model state
+const _initPoll = [...INITIAL_POLLS].sort((a, b) => b.date.localeCompare(a.date))[0];
+
 // ─── Election data ────────────────────────────────────────────────────────────
 // Helper: build a seat object from a flat tuple
 const mkSeat = (id, name, state, party, winner, margin) =>
@@ -2832,7 +2835,14 @@ export default function App() {
   const [newPoll, setNewPoll] = useState({ pollster: "", date: "", alp: "", coal: "", grn: "", oth: "", tpp: "", n: "" });
 
   // ── Model tab state ──
-  const [primaries, setPrimaries] = useState({ alp: BASELINE_2025.alp, coal: BASELINE_2025.coal, grn: BASELINE_2025.grn, teal: BASELINE_2025.teal, on: BASELINE_2025.on, undecided: 0 });
+  const [primaries, setPrimaries] = useState({
+    alp:  _initPoll?.alp  ?? BASELINE_2025.alp,
+    coal: _initPoll?.coal ?? BASELINE_2025.coal,
+    grn:  _initPoll?.grn  ?? BASELINE_2025.grn,
+    teal: BASELINE_2025.teal,  // not tracked in polls
+    on:   _initPoll?.on   ?? BASELINE_2025.on,
+    undecided: 0,
+  });
   const [prefFlows, setPrefFlows] = useState({
     // Standard flows (used in ALP vs Coalition finals)
     grn_alp: 0.81,
@@ -3748,10 +3758,10 @@ export default function App() {
     if (!latestPoll) return;
     setPrimaries(p => ({
       ...p,
-      alp: latestPoll.alp,
+      alp:  latestPoll.alp,
       coal: latestPoll.coal,
-      grn: latestPoll.grn,
-      // teal and on remain unchanged — not tracked separately in most polls
+      grn:  latestPoll.grn,
+      on:   latestPoll.on ?? p.on,   // teal not tracked in polls
     }));
     setActiveTab("model");
   };
@@ -3760,9 +3770,10 @@ export default function App() {
     if (!pollAvg) return;
     setPrimaries(p => ({
       ...p,
-      alp: pollAvg.alp,
+      alp:  pollAvg.alp,
       coal: pollAvg.coal,
-      grn: pollAvg.grn,
+      grn:  pollAvg.grn,
+      on:   pollAvg.on ?? p.on,      // teal not tracked in polls
     }));
     setActiveTab("model");
   };
