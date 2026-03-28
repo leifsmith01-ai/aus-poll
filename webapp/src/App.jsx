@@ -2736,19 +2736,38 @@ function TallyBar({ seats, useModelled = false }) {
 
 // ─── Primary vote % input ─────────────────────────────────────────────────────
 function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
+  const [raw, setRaw] = React.useState(String(value));
+
+  // Sync display when parent resets value (e.g. Reset button)
+  React.useEffect(() => {
+    setRaw(String(value));
+  }, [value]);
+
   const delta = +(value - baseline).toFixed(1);
+
+  function handleBlur() {
+    const v = parseFloat(raw);
+    if (!isNaN(v)) {
+      const clamped = Math.max(0, Math.min(100, +v.toFixed(1)));
+      onChange(clamped);
+      setRaw(String(clamped));
+    } else {
+      // Empty or invalid — revert display to last committed value
+      setRaw(String(value));
+    }
+  }
+
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
       <div style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
       <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", minWidth: 112 }}>{label}</label>
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
         <input
-          type="number" min={0} max={100} step={0.1}
-          value={value}
-          onChange={e => {
-            const v = parseFloat(e.target.value);
-            if (!isNaN(v)) onChange(Math.max(0, Math.min(100, +v.toFixed(1))));
-          }}
+          type="text"
+          inputMode="decimal"
+          value={raw}
+          onChange={e => setRaw(e.target.value)}
+          onBlur={handleBlur}
           style={{
             width: 68, border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 9px",
             fontSize: 14, fontWeight: 700, textAlign: "right", outline: "none",
