@@ -2736,10 +2736,10 @@ function TallyBar({ seats, useModelled = false }) {
 
 // ─── Primary vote % input ─────────────────────────────────────────────────────
 function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
-  const [raw, setRaw] = React.useState(String(value));
+  const [raw, setRaw] = useState(String(value));
 
   // Sync display when parent resets value (e.g. Reset button)
-  React.useEffect(() => {
+  useEffect(() => {
     setRaw(String(value));
   }, [value]);
 
