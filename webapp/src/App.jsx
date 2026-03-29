@@ -808,6 +808,28 @@ function applyPrefDelta(seatBase, prefFlows) {
   };
 }
 
+// Compute the 2PP delta between using per-seat DOP flows vs national-average flows
+// at zero swing for a given seat.  This corrects SEAT_CALIB_2025, which was computed
+// against national-average flows; subtracting this delta from the stored calibration
+// gives a residual calibrated against the actual per-seat DOP flows instead.
+// Returns 0 for seats without DOP or FP data (no correction needed).
+function dopCalibDelta(seatId) {
+  const fp = SEAT_FP_2025[seatId];
+  const dop = SEAT_PREF_FLOWS_2025[seatId];
+  if (!fp || !dop) return 0;
+  const nat = PREF_FLOWS_2025;
+  const gd = dop.grn_alp   ?? nat.grn_alp,  gn = nat.grn_alp;
+  const td = dop.teal_alp  ?? nat.teal_alp, tn = nat.teal_alp;
+  const od = dop.on_alp    ?? nat.on_alp,   on_ = nat.on_alp;
+  const xd = dop.other_alp ?? nat.other_alp, xn = nat.other_alp;
+  const a_dop = fp.alp + fp.grn*gd + fp.teal*td + fp.on*od  + fp.other*xd;
+  const c_dop = fp.coal + fp.grn*(1-gd) + fp.teal*(1-td) + fp.on*(1-od)  + fp.other*(1-xd);
+  const a_nat = fp.alp + fp.grn*gn + fp.teal*tn + fp.on*on_ + fp.other*xn;
+  const c_nat = fp.coal + fp.grn*(1-gn) + fp.teal*(1-tn) + fp.on*(1-on_) + fp.other*(1-xn);
+  if ((a_dop + c_dop) === 0 || (a_nat + c_nat) === 0) return 0;
+  return (a_dop / (a_dop + c_dop) - a_nat / (a_nat + c_nat)) * 100;
+}
+
 // Return per-seat 2025 AEC first preferences, or null if not available.
 // Falls back to null (caller uses UNS 2PP-swing for seats without FP data).
 function getSeatFpBaseline(seatId) {
@@ -2085,10 +2107,13 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         const c2 = newFp.coal + newFp.grn * (1 - ef.grn_alp) + newFp.teal * (1 - ef.teal_alp) + newFp.on * (1 - ef.on_alp) + newFp.other * (1 - ef.other_alp);
         projAlp2pp = a2 / (a2 + c2) * 100;
         // Apply calibration offset (Phase 1): blends to zero at ±5pp national swing.
+        // dopCalibDelta corrects for SEAT_CALIB_2025 having been computed against national
+        // average flows; subtracting it re-bases the calibration to the actual DOP flows.
         // Not applied when the user has set a per-seat pref flow override.
         if (!override.prefFlows) {
           const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / 5);
-          projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + (SEAT_CALIB_2025[seat.id] ?? 0) * calibBlend));
+          const calib = (SEAT_CALIB_2025[seat.id] ?? 0) - dopCalibDelta(seat.id);
+          projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + calib * calibBlend));
         }
       } else {
         const seatFp = getSeatFpBaseline(seat.id);
@@ -2112,8 +2137,11 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
           const c2 = projFp.coal + projFp.grn * (1 - ef.grn_alp) + projFp.teal * (1 - ef.teal_alp) + projFp.on * (1 - ef.on_alp) + projFp.other * (1 - ef.other_alp);
           projAlp2pp = a2 / (a2 + c2) * 100;
           // Apply calibration offset (Phase 1): blends to zero at ±5pp national swing.
+          // dopCalibDelta corrects for SEAT_CALIB_2025 having been computed against national
+          // average flows; subtracting it re-bases the calibration to the actual DOP flows.
           const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / 5);
-          projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + (SEAT_CALIB_2025[seat.id] ?? 0) * calibBlend));
+          const calib = (SEAT_CALIB_2025[seat.id] ?? 0) - dopCalibDelta(seat.id);
+          projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + calib * calibBlend));
         } else {
           // Fallback UNS for seats without per-seat primary data: uniform national 2PP swing
           // applied to the seat's 2025 TCP baseline. Elasticity scales the swing for marginals.
@@ -4030,14 +4058,26 @@ export default function App() {
   const deletePoll = (id) => setPolls(prev => prev.filter(p => p.id !== id));
 
   const addSeatOverride = (seatId) => {
-    // Seed from the seat's actual 2025 AEC primary votes (not the national average).
-    // Falls back to the currently-modelled national primaries if no seat data exists.
+    // Seed FP primaries from the seat's actual 2025 AEC data, falling back to the
+    // currently-modelled national primaries if no seat data exists.
     const base = getSeatFpBaseline(seatId);
+    // Also auto-populate pref flows from the AEC per-seat DOP baseline (+ current
+    // national slider delta) when data is available, so sliders open pre-seeded.
+    const seatBase = SEAT_PREF_FLOWS_2025[seatId];
+    const eff = seatBase ? applyPrefDelta(seatBase, prefFlows) : null;
     setSeatOverrides(prev => ({
       ...prev,
-      [seatId]: base
-        ? { alp: +base.alp.toFixed(1), coal: +base.coal.toFixed(1), grn: +base.grn.toFixed(1), teal: +base.teal.toFixed(1), on: +base.on.toFixed(1) }
-        : { alp: primaries.alp, coal: primaries.coal, grn: primaries.grn, teal: primaries.teal, on: primaries.on },
+      [seatId]: {
+        ...(base
+          ? { alp: +base.alp.toFixed(1), coal: +base.coal.toFixed(1), grn: +base.grn.toFixed(1), teal: +base.teal.toFixed(1), on: +base.on.toFixed(1) }
+          : { alp: primaries.alp, coal: primaries.coal, grn: primaries.grn, teal: primaries.teal, on: primaries.on }),
+        ...(eff ? { prefFlows: {
+          grn_alp: eff.grn_alp, teal_alp: eff.teal_alp, on_alp: eff.on_alp, other_alp: eff.other_alp,
+          grn_alp_v_on: prefFlows.grn_alp_v_on, teal_alp_v_on: prefFlows.teal_alp_v_on,
+          other_alp_v_on: prefFlows.other_alp_v_on, grn_on_v_coal: prefFlows.grn_on_v_coal,
+          teal_on_v_coal: prefFlows.teal_on_v_coal, other_on_v_coal: prefFlows.other_on_v_coal,
+        }} : {}),
+      },
     }));
     setOverrideSearch("");
   };
