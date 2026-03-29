@@ -1067,6 +1067,13 @@ const INITIAL_POLLS = [
   { id: 66, pollster: "YouGov", date: "2026-02-23", alp: 29, coal: 22, grn: 13, on: 24, tpp: 53 },
   { id: 67, pollster: "Newspoll", date: "2026-02-25", alp: 32, coal: 20, grn: 11, on: 27, tpp: null },
   { id: 68, pollster: "RedBridge Group", date: "2026-02-26", alp: 32, coal: 19, grn: 12, on: 28, tpp: 54 },
+  { id: 69, pollster: "Roy Morgan", date: "2026-03-01", alp: 30.5, coal: 23.5, grn: 11.5, on: 22, tpp: 53.5 },
+  { id: 70, pollster: "Roy Morgan", date: "2026-03-08", alp: 26.5, coal: 22.5, grn: 14.5, on: 22.5, tpp: 53 },
+  { id: 71, pollster: "YouGov", date: "2026-03-10", alp: 30, coal: 19, grn: 13, on: 26, tpp: 55 },
+  { id: 72, pollster: "Resolve Strategic", date: "2026-03-14", alp: 29, coal: 22, grn: 12, on: 24, tpp: null },
+  { id: 73, pollster: "Roy Morgan", date: "2026-03-15", alp: 28.5, coal: 24, grn: 12.5, on: 22.5, tpp: 53 },
+  { id: 74, pollster: "Roy Morgan", date: "2026-03-22", alp: 27, coal: 25.5, grn: 13.5, on: 23.5, tpp: 51 },
+  { id: 75, pollster: "YouGov", date: "2026-03-24", alp: 29, coal: 19, grn: 13, on: 27, tpp: null },
 ].map(p => ({
   ...p,
   oth: p.on != null ? +(100 - p.alp - p.coal - p.grn - p.on).toFixed(1) : +(100 - p.alp - p.coal - p.grn).toFixed(1),
