@@ -27,12 +27,15 @@ jobs:
           ODDS_API_KEY:          ${{ secrets.ODDS_API_KEY }}
         run: python pipeline/betting_odds.py
 
+      - name: Copy odds to frontend source
+        run: cp data/polls/betting_odds.json webapp/src/data/betting_odds.json
+
       - name: Commit updated odds if changed
         run: |
-          git diff --quiet data/polls/betting_odds.json && exit 0
+          git diff --quiet data/polls/betting_odds.json webapp/src/data/betting_odds.json && exit 0
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/polls/betting_odds.json
-          git commit -m "chore: auto-refresh betting odds [skip ci]"
+          git add data/polls/betting_odds.json webapp/src/data/betting_odds.json
+          git commit -m "chore: auto-refresh betting odds"
           git pull --rebase origin main
           git push
