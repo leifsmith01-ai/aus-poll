@@ -2085,8 +2085,8 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         const c2 = newFp.coal + newFp.grn * (1 - ef.grn_alp) + newFp.teal * (1 - ef.teal_alp) + newFp.on * (1 - ef.on_alp) + newFp.other * (1 - ef.other_alp);
         projAlp2pp = a2 / (a2 + c2) * 100;
         // Apply calibration offset (Phase 1): blends to zero at ±5pp national swing.
-        // Only applied when using national-average pref flows (not per-seat or user overrides).
-        if (!override.prefFlows && !SEAT_PREF_FLOWS_2025[seat.id]) {
+        // Not applied when the user has set a per-seat pref flow override.
+        if (!override.prefFlows) {
           const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / 5);
           projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + (SEAT_CALIB_2025[seat.id] ?? 0) * calibBlend));
         }
@@ -2112,11 +2112,8 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
           const c2 = projFp.coal + projFp.grn * (1 - ef.grn_alp) + projFp.teal * (1 - ef.teal_alp) + projFp.on * (1 - ef.on_alp) + projFp.other * (1 - ef.other_alp);
           projAlp2pp = a2 / (a2 + c2) * 100;
           // Apply calibration offset (Phase 1): blends to zero at ±5pp national swing.
-          // Only applied when per-seat flows are unavailable (national average used).
-          if (!SEAT_PREF_FLOWS_2025[seat.id]) {
-            const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / 5);
-            projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + (SEAT_CALIB_2025[seat.id] ?? 0) * calibBlend));
-          }
+          const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / 5);
+          projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + (SEAT_CALIB_2025[seat.id] ?? 0) * calibBlend));
         } else {
           // Fallback UNS for seats without per-seat primary data: uniform national 2PP swing
           // applied to the seat's 2025 TCP baseline. Elasticity scales the swing for marginals.
