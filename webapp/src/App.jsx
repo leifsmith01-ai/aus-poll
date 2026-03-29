@@ -1540,6 +1540,15 @@ const SEAT_RESIDUAL_STD = 1.0;
 // effective 2PP uncertainty per seat, modelled as independent noise.
 const PREF_FLOW_STD = 0.8;
 
+// Evidence-based late-decider split for Australian federal elections.
+// Post-election survey data (2019–2025) shows late deciders favour minor parties
+// above their overall vote share and give the incumbent major party (ALP) a
+// below-proportional share. Keys must match the five primary party fields.
+const LATE_DECIDER_SPLIT = { alp: 0.38, coal: 0.34, grn: 0.12, teal: 0.06, on: 0.10 };
+// Blend weight: 0 = pure proportional allocation, 1 = pure late-decider profile.
+// Default 0.5 blends evidence with the proportional baseline symmetrically.
+const LATE_DECIDER_WEIGHT = 0.5;
+
 function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majority = 76) {
   const COALITION = new Set(["LP", "LNP", "NP", "CLP"]);
 
@@ -2961,26 +2970,35 @@ export default function App() {
   const marginCounts = useMemo(() => { const c = {}; SEATS.forEach(s => { const cat = getMarginCat(s.margin); c[cat] = (c[cat] || 0) + 1; }); return c; }, []);
 
   // ── Modelling ──
-  // Allocate undecided voters proportionally to all parties (with a small
-  // incumbency penalty: incumbent ALP gets slightly less of the undecided pool).
+  // Allocate undecided voters using a blend of proportional allocation and an
+  // evidence-based late-decider profile (LATE_DECIDER_SPLIT / LATE_DECIDER_WEIGHT).
+  // Australian post-election surveys show late deciders break disproportionately
+  // toward minor parties and give the incumbent major party a below-proportional
+  // share — captured here without a hard-coded single-party penalty.
   const effectivePrimaries = useMemo(() => {
     const undec = primaries.undecided ?? 0;
     if (undec <= 0) return primaries;
     const declared = primaries.alp + primaries.coal + primaries.grn + primaries.teal + primaries.on;
     if (declared <= 0) return primaries;
-    // Incumbency penalty: incumbent party (ALP) gets 0.85× proportional share;
-    // the rest is redistributed to other parties proportionally.
-    const alpRaw = primaries.alp / declared;
-    const INCUMB_PENALTY = 0.85;
-    const alpShare = alpRaw * INCUMB_PENALTY;
-    const otherTotal = (primaries.coal + primaries.grn + primaries.teal + primaries.on) / declared;
-    const otherScale = (1 - alpShare) / (otherTotal || 1);
+
+    // Blend proportional share with the late-decider profile, then normalise.
+    const parties = ["alp", "coal", "grn", "teal", "on"];
+    const blendedShares = {};
+    let shareSum = 0;
+    for (const p of parties) {
+      const propShare = primaries[p] / declared;
+      blendedShares[p] = (1 - LATE_DECIDER_WEIGHT) * propShare + LATE_DECIDER_WEIGHT * LATE_DECIDER_SPLIT[p];
+      shareSum += blendedShares[p];
+    }
+    // Normalise so shares always sum to 1 regardless of rounding.
+    for (const p of parties) blendedShares[p] /= shareSum;
+
     return {
-      alp: +(primaries.alp + undec * alpShare).toFixed(2),
-      coal: +(primaries.coal + undec * (primaries.coal / declared) * otherScale).toFixed(2),
-      grn: +(primaries.grn + undec * (primaries.grn / declared) * otherScale).toFixed(2),
-      teal: +(primaries.teal + undec * (primaries.teal / declared) * otherScale).toFixed(2),
-      on: +(primaries.on + undec * (primaries.on / declared) * otherScale).toFixed(2),
+      alp:  +(primaries.alp  + undec * blendedShares.alp).toFixed(2),
+      coal: +(primaries.coal + undec * blendedShares.coal).toFixed(2),
+      grn:  +(primaries.grn  + undec * blendedShares.grn).toFixed(2),
+      teal: +(primaries.teal + undec * blendedShares.teal).toFixed(2),
+      on:   +(primaries.on   + undec * blendedShares.on).toFixed(2),
       undecided: 0,
     };
   }, [primaries]);
@@ -2993,9 +3011,14 @@ export default function App() {
     computeModelledSeats(SEATS, swings, prefFlows, seatOverrides, nat2ppSwing, onThreshold, useElasticity),
     [swings, prefFlows, seatOverrides, nat2ppSwing, onThreshold, useElasticity]);
 
+  // Scale polling uncertainty upward when there is a large undecided pool —
+  // more undecided voters means the electorate is more volatile.
+  // +0.06pp σ per 1pp undecided (e.g. 10% undecided → +0.6pp extra σ).
+  const undecAdjStd = swingStd + 0.06 * (primaries.undecided ?? 0);
+
   const uncertainty = useMemo(() =>
-    computeUncertainty(modelledSeats, nat2ppSwing, swingStd, useElasticity),
-    [modelledSeats, nat2ppSwing, swingStd, useElasticity]);
+    computeUncertainty(modelledSeats, nat2ppSwing, undecAdjStd, useElasticity),
+    [modelledSeats, nat2ppSwing, undecAdjStd, useElasticity]);
 
   const projCounts = useMemo(() => {
     const c = {};
@@ -4592,6 +4615,37 @@ export default function App() {
                   <PrimaryInput label="Independents" value={primaries.teal} onChange={v => setPrimaries(p => ({ ...p, teal: v }))} color="#0891B2" baseline={BASELINE_2025.teal} />
                   <PrimaryInput label="One Nation" value={primaries.on} onChange={v => setPrimaries(p => ({ ...p, on: v }))} color="#B45309" baseline={BASELINE_2025.on} />
                   <PrimaryInput label="Undecided" value={primaries.undecided ?? 0} onChange={v => setPrimaries(p => ({ ...p, undecided: v }))} color="#9CA3AF" baseline={0} />
+                  {/* ── Undecided allocation breakdown ── */}
+                  {(primaries.undecided ?? 0) > 0 && (() => {
+                    const undec = primaries.undecided;
+                    const declared = primaries.alp + primaries.coal + primaries.grn + primaries.teal + primaries.on;
+                    if (declared <= 0) return null;
+                    const parties = ["alp", "coal", "grn", "teal", "on"];
+                    const pLabels = { alp: "ALP", coal: "Coal", grn: "Grn", teal: "Ind", on: "ON" };
+                    const pColors = { alp: "#DC2626", coal: "#1D4ED8", grn: "#059669", teal: "#0891B2", on: "#B45309" };
+                    const blended = {};
+                    let shareSum = 0;
+                    for (const p of parties) {
+                      blended[p] = (1 - LATE_DECIDER_WEIGHT) * (primaries[p] / declared) + LATE_DECIDER_WEIGHT * LATE_DECIDER_SPLIT[p];
+                      shareSum += blended[p];
+                    }
+                    for (const p of parties) blended[p] /= shareSum;
+                    return (
+                      <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 6, padding: "7px 10px", marginTop: 4 }}>
+                        <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>Undecided allocated (late-decider model):</div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 10px" }}>
+                          {parties.map(p => (
+                            <span key={p} style={{ fontSize: 11, fontWeight: 600, color: pColors[p] }}>
+                              {pLabels[p]} +{(undec * blended[p]).toFixed(1)}%
+                            </span>
+                          ))}
+                        </div>
+                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4 }}>
+                          Uncertainty +{(0.06 * undec).toFixed(2)}pp σ · blend {Math.round(LATE_DECIDER_WEIGHT * 100)}% late-decider / {Math.round((1 - LATE_DECIDER_WEIGHT) * 100)}% proportional
+                        </div>
+                      </div>
+                    );
+                  })()}
                   {(() => {
                     const entered = +(primaries.alp + primaries.coal + primaries.grn + primaries.teal + primaries.on).toFixed(1);
                     const undecided = +(primaries.undecided ?? 0);
