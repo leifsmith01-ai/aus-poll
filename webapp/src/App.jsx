@@ -2846,11 +2846,11 @@ export default function App() {
     // Standard flows (used in ALP vs Coalition finals)
     grn_alp: 0.81,
     teal_alp: 0.62,
-    // ON→ALP: historical range 0.15 (2022) to 0.43 (2025, peak anti-ON sentiment).
-    // Default 0.27 = approximate historical average, giving a realistic baseline
-    // where an ON surge meaningfully hurts Coalition at TCP rather than being
-    // offset by 2025's unusually high ON→ALP preference flow.
-    on_alp: 0.27,
+    // ON→ALP: 2025 AEC DOP result (43.0%). This matches PREF_FLOWS_2025 so that
+    // the model loads clean (no scenario active) and the Reset button restores
+    // to the same state. Use the slider to explore other historical values
+    // (range: 0.14–0.43, historical average ~0.27).
+    on_alp: 0.43,
     other_alp: 0.50,
     coal_alp: 0.05, // Coal → ALP in 3rd party contests (usually very low)
     alp_grn: 0.85,
@@ -2862,8 +2862,8 @@ export default function App() {
     on_grn: 0.15,
     on_teal: 0.25,
     // ON vs ALP final — sources distribute between ALP and ON
-    // Coal→ALP in ON vs ALP: 2025 was ~15%, reflecting voters preferring ALP over ON.
-    coal_alp_v_on: 0.15,
+    // Coal→ALP in ON vs ALP: 2025 AEC DOP (~10%). Matches PREF_FLOWS_2025.
+    coal_alp_v_on: 0.10,
     grn_alp_v_on: 0.90,
     teal_alp_v_on: 0.75,
     other_alp_v_on: 0.60,
@@ -3004,7 +3004,7 @@ export default function App() {
   }, [primaries]);
 
   const nat2ppSwing = useMemo(() =>
-    computeNat2pp(effectivePrimaries, prefFlows) - NATIONAL_2PP_2025,
+    computeNat2pp(effectivePrimaries, prefFlows) - computeNat2pp(BASELINE_2025, prefFlows),
     [effectivePrimaries, prefFlows]);
 
   const modelledSeats = useMemo(() =>
