@@ -624,6 +624,31 @@ const SEAT_CALIB_2025 = {
 // Format: { seatId: { grn_alp, teal_alp, on_alp, other_alp } }
 const SEAT_PREF_FLOWS_2025 = {};
 
+// ── 2025 national-average preference flows (AEC DOP) ──────────────────────────
+// These are the baseline values the aggregate sliders default to.  Used as the
+// reference point for the additive-delta calculation in applyPrefDelta().
+const PREF_FLOWS_2025 = {
+  grn_alp: 0.81, teal_alp: 0.62, on_alp: 0.43, other_alp: 0.50,
+  coal_alp_v_on: 0.10, grn_alp_v_on: 0.90, teal_alp_v_on: 0.75, other_alp_v_on: 0.60,
+  alp_on_v_coal: 0.20, grn_on_v_coal: 0.08, teal_on_v_coal: 0.12, other_on_v_coal: 0.25,
+};
+
+// Apply the national slider delta on top of a per-seat AEC flow baseline.
+// When the slider is at the 2025 default, delta = 0 and the seat baseline is
+// used as-is.  Moving the slider shifts every seat's effective flow by the same
+// amount, preserving inter-seat variation while enabling national scenario analysis.
+// Missing keys in seatBase fall back to the national baseline so partial per-seat
+// data (e.g. a seat with no ON candidate) is handled gracefully.
+function applyPrefDelta(seatBase, prefFlows) {
+  const clamp = (v) => Math.max(0, Math.min(1, v));
+  return {
+    grn_alp:   clamp((seatBase.grn_alp   ?? PREF_FLOWS_2025.grn_alp)   + (prefFlows.grn_alp   - PREF_FLOWS_2025.grn_alp)),
+    teal_alp:  clamp((seatBase.teal_alp  ?? PREF_FLOWS_2025.teal_alp)  + (prefFlows.teal_alp  - PREF_FLOWS_2025.teal_alp)),
+    on_alp:    clamp((seatBase.on_alp    ?? PREF_FLOWS_2025.on_alp)    + (prefFlows.on_alp    - PREF_FLOWS_2025.on_alp)),
+    other_alp: clamp((seatBase.other_alp ?? PREF_FLOWS_2025.other_alp) + (prefFlows.other_alp - PREF_FLOWS_2025.other_alp)),
+  };
+}
+
 // Return per-seat 2025 AEC first preferences, or null if not available.
 // Falls back to null (caller uses UNS 2PP-swing for seats without FP data).
 function getSeatFpBaseline(seatId) {
@@ -1889,8 +1914,14 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         // Compute 2PP from override first preferences via preference flows.
         // newFp was built from the seat-level 2025 baseline (set above), so unset parties
         // default to that seat's actual 2025 primary, not the national average.
-        // Use per-seat preference flows if available (Phase 3), otherwise national average.
-        const ef = override.prefFlows ?? SEAT_PREF_FLOWS_2025[seat.id] ?? prefFlows;
+        // Priority: user override > AEC per-seat baseline+delta > national slider.
+        // User-explicit overrides are used as-is (no delta applied); AEC baselines
+        // have the national slider delta applied on top (Option B additive delta).
+        const ef = override.prefFlows
+          ? override.prefFlows
+          : SEAT_PREF_FLOWS_2025[seat.id]
+            ? applyPrefDelta(SEAT_PREF_FLOWS_2025[seat.id], prefFlows)
+            : prefFlows;
         const a2 = newFp.alp + newFp.grn * ef.grn_alp + newFp.teal * ef.teal_alp + newFp.on * ef.on_alp + newFp.other * ef.other_alp;
         const c2 = newFp.coal + newFp.grn * (1 - ef.grn_alp) + newFp.teal * (1 - ef.teal_alp) + newFp.on * (1 - ef.on_alp) + newFp.other * (1 - ef.other_alp);
         projAlp2pp = a2 / (a2 + c2) * 100;
@@ -1914,7 +1945,10 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
             on: Math.max(0, seatFp.on + sSwings.on),
           };
           projFp.other = Math.max(0, 100 - projFp.alp - projFp.coal - projFp.grn - projFp.teal - projFp.on);
-          const ef = SEAT_PREF_FLOWS_2025[seat.id] ?? prefFlows;
+          // AEC per-seat baseline + national slider delta; fall back to slider only.
+          const ef = SEAT_PREF_FLOWS_2025[seat.id]
+            ? applyPrefDelta(SEAT_PREF_FLOWS_2025[seat.id], prefFlows)
+            : prefFlows;
           const a2 = projFp.alp + projFp.grn * ef.grn_alp + projFp.teal * ef.teal_alp + projFp.on * ef.on_alp + projFp.other * ef.other_alp;
           const c2 = projFp.coal + projFp.grn * (1 - ef.grn_alp) + projFp.teal * (1 - ef.teal_alp) + projFp.on * (1 - ef.on_alp) + projFp.other * (1 - ef.other_alp);
           projAlp2pp = a2 / (a2 + c2) * 100;
@@ -3791,12 +3825,6 @@ export default function App() {
     setActiveTab("model");
   };
 
-  const PREF_FLOWS_2025 = {
-    grn_alp: 0.81, teal_alp: 0.62, on_alp: 0.43, other_alp: 0.50,
-    coal_alp_v_on: 0.10, grn_alp_v_on: 0.90, teal_alp_v_on: 0.75, other_alp_v_on: 0.60,
-    alp_on_v_coal: 0.20, grn_on_v_coal: 0.08, teal_on_v_coal: 0.12, other_on_v_coal: 0.25,
-  };
-
   // Observed min–max ranges across 2019, 2022, and 2025 federal elections (AEC DOP data).
   // ON-race flows have limited historical data; ranges are estimated from available seats.
   const PREF_FLOW_RANGES = {
@@ -3886,19 +3914,23 @@ export default function App() {
   };
 
   const initSeatPrefFlows = (seatId) => {
+    // Seed the per-seat override from the seat's current effective flow:
+    // AEC per-seat baseline + slider delta if available, otherwise slider value.
+    const seatBase = SEAT_PREF_FLOWS_2025[seatId];
+    const eff = seatBase ? applyPrefDelta(seatBase, prefFlows) : prefFlows;
     setSeatOverrides(prev => ({
       ...prev,
       [seatId]: {
         ...prev[seatId],
         prefFlows: {
-          grn_alp: prefFlows.grn_alp,
-          teal_alp: prefFlows.teal_alp,
-          on_alp: prefFlows.on_alp,
-          other_alp: prefFlows.other_alp,
-          grn_alp_v_on: prefFlows.grn_alp_v_on,
-          teal_alp_v_on: prefFlows.teal_alp_v_on,
+          grn_alp:        eff.grn_alp,
+          teal_alp:       eff.teal_alp,
+          on_alp:         eff.on_alp,
+          other_alp:      eff.other_alp,
+          grn_alp_v_on:   prefFlows.grn_alp_v_on,
+          teal_alp_v_on:  prefFlows.teal_alp_v_on,
           other_alp_v_on: prefFlows.other_alp_v_on,
-          grn_on_v_coal: prefFlows.grn_on_v_coal,
+          grn_on_v_coal:  prefFlows.grn_on_v_coal,
           teal_on_v_coal: prefFlows.teal_on_v_coal,
           other_on_v_coal: prefFlows.other_on_v_coal,
         },
@@ -4696,13 +4728,19 @@ export default function App() {
                       ↺ Reset to 2025
                     </button>
                   </div>
-                  <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 8 }}>Used in standard ALP vs Coalition finals. Remainder flows to Coalition.</div>
+                  <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 8 }}>
+                    {Object.keys(SEAT_PREF_FLOWS_2025).length > 0
+                      ? "Sliders set a national shift applied on top of each seat's AEC 2025 baseline. At default values (zero shift) each seat uses its own observed DOP flows."
+                      : "Used in standard ALP vs Coalition finals. Remainder flows to Coalition."}
+                  </div>
                   <PrefInput label="Greens → ALP" value={prefFlows.grn_alp} onChange={v => setPrefFlows(f => ({ ...f, grn_alp: v }))} color="#059669" historicalRange={PREF_FLOW_RANGES.grn_alp} />
                   <PrefInput label="Independents → ALP" value={prefFlows.teal_alp} onChange={v => setPrefFlows(f => ({ ...f, teal_alp: v }))} color="#0891B2" historicalRange={PREF_FLOW_RANGES.teal_alp} />
                   <PrefInput label="One Nation → ALP" value={prefFlows.on_alp} onChange={v => setPrefFlows(f => ({ ...f, on_alp: v }))} color="#B45309" historicalRange={PREF_FLOW_RANGES.on_alp} />
                   <PrefInput label="Other → ALP" value={prefFlows.other_alp} onChange={v => setPrefFlows(f => ({ ...f, other_alp: v }))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_alp} />
                   <div style={{ fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
-                    Defaults: Grn 81% (2025) · Ind 62% (2025) · ON 27% (avg 2022…15%, 2025…43%) · Other 50%. Use "↺ Reset to 2025" to restore 2025 actuals.
+                    {Object.keys(SEAT_PREF_FLOWS_2025).length > 0
+                      ? "2025 national averages: Grn 81% · Ind 62% · ON 43% · Other 50%. Per-seat AEC DOP flows active — sliders shift all seats by the same delta."
+                      : "Defaults: Grn 81% (2025) · Ind 62% (2025) · ON 27% (avg 2022…15%, 2025…43%) · Other 50%. Use \"↺ Reset to 2025\" to restore 2025 actuals."}
                   </div>
                 </div>
 

@@ -388,26 +388,173 @@ def export_booths_geojson(election_id: int, db_path: str = None,
 
 # ── preference_flows.json ─────────────────────────────────────────────────────
 
+# Parties that map to individual flow keys in App.jsx (grn_alp, teal_alp, on_alp).
+# All others are aggregated into the "OTHER" bucket.
+_COALITION_PARTY_ABS = {"LP", "LNP", "NP", "CLP"}
+_TRACKED_PARTIES = {"GRN", "GVIC", "IND", "XEN", "CA", "ON", "PHON"}
+
+
+def _compute_division_pref_flows(conn, election_id: int, div_id: int) -> dict | None:
+    """
+    Compute per-party ALP preference flow rates for one division from DOP data.
+
+    For each non-finalist party's candidate, find the Transfer Count rows at the
+    count when they are excluded and tally how many of their preferences went to
+    the ALP candidate vs the Coalition candidate.
+
+    Returns a dict {party_ab: {"alp_share": float}} for each non-finalist party
+    that had a meaningful transfer to either ALP or Coalition, plus an "OTHER"
+    aggregate for parties not individually tracked.  Returns None if the seat
+    does not have an ALP vs Coalition TCP final or if no usable DOP data exists.
+    """
+    # Identify the ALP and Coalition TCP finalists from the final DOP count.
+    finalists = conn.execute(
+        """
+        SELECT c.candidate_id, c.party_ab
+        FROM distribution_of_preferences d
+        JOIN candidates c ON c.candidate_id = d.candidate_id
+                          AND c.election_id = d.election_id
+        WHERE d.election_id = ?
+          AND d.division_id = ?
+          AND d.calculation_type = 'Preference Count'
+          AND d.count_number = (
+              SELECT MAX(d2.count_number)
+              FROM distribution_of_preferences d2
+              WHERE d2.election_id = ? AND d2.division_id = ?
+          )
+        GROUP BY c.candidate_id
+        """,
+        (election_id, div_id, election_id, div_id),
+    ).fetchall()
+
+    alp_id = next((r["candidate_id"] for r in finalists if r["party_ab"] == "ALP"), None)
+    coal_id = next(
+        (r["candidate_id"] for r in finalists if r["party_ab"] in _COALITION_PARTY_ABS),
+        None,
+    )
+    if alp_id is None or coal_id is None:
+        return None  # Not an ALP vs Coalition final
+
+    # Fetch all Transfer Count rows for this division.
+    transfers = conn.execute(
+        """
+        SELECT d.count_number, d.calculation_value, c.candidate_id, c.party_ab
+        FROM distribution_of_preferences d
+        JOIN candidates c ON c.candidate_id = d.candidate_id
+                          AND c.election_id = d.election_id
+        WHERE d.election_id = ? AND d.division_id = ?
+          AND d.calculation_type = 'Transfer Count'
+        ORDER BY d.count_number
+        """,
+        (election_id, div_id),
+    ).fetchall()
+
+    if not transfers:
+        return None
+
+    # Group rows by count number.
+    by_count: dict[int, list] = {}
+    for row in transfers:
+        by_count.setdefault(row["count_number"], []).append(dict(row))
+
+    # For each count (after the first), identify the excluded party and tally
+    # how many preferences went to the ALP vs Coalition finalist.
+    party_flows: dict[str, dict[str, float]] = {}
+
+    for cn, rows in sorted(by_count.items()):
+        if cn == 1:
+            continue
+
+        losing = [r for r in rows if r["calculation_value"] is not None and r["calculation_value"] < 0]
+        gaining = [r for r in rows if r["calculation_value"] is not None and r["calculation_value"] > 0]
+
+        if not losing or not gaining:
+            continue
+
+        # Only handle single-party exclusions to avoid attribution ambiguity.
+        excluded_parties = {r["party_ab"] for r in losing}
+        if len(excluded_parties) != 1:
+            continue
+
+        from_party = next(iter(excluded_parties))
+        if from_party == "ALP" or from_party in _COALITION_PARTY_ABS:
+            continue  # Finalists don't transfer away
+
+        to_alp = sum(r["calculation_value"] for r in gaining if r["candidate_id"] == alp_id)
+        to_coal = sum(r["calculation_value"] for r in gaining if r["candidate_id"] == coal_id)
+
+        entry = party_flows.setdefault(from_party, {"to_alp": 0.0, "to_coal": 0.0})
+        entry["to_alp"] += to_alp
+        entry["to_coal"] += to_coal
+
+    # Convert to alp_share fractions; aggregate unknown parties into "OTHER".
+    result: dict[str, dict] = {}
+    other_alp = 0.0
+    other_coal = 0.0
+
+    for party, flows in party_flows.items():
+        total = flows["to_alp"] + flows["to_coal"]
+        if total <= 0:
+            continue
+        if party in _TRACKED_PARTIES:
+            result[party] = {"alp_share": round(flows["to_alp"] / total, 4)}
+        else:
+            other_alp += flows["to_alp"]
+            other_coal += flows["to_coal"]
+
+    other_total = other_alp + other_coal
+    if other_total > 0:
+        result["OTHER"] = {"alp_share": round(other_alp / other_total, 4)}
+
+    return result if result else None
+
+
 def export_preference_flows(election_id: int, db_path: str = None,
                               exports_dir: str = None) -> None:
+    """
+    Compute per-seat preference flows from DOP transfer counts and write
+    data/exports/{election_id}/preference_flows.json.
+
+    Output format:
+        {
+          "election_id": <int>,
+          "by_division": {
+            "<div_id>": {
+              "<party_ab>": {"alp_share": <float 0-1>},
+              ...
+            }
+          }
+        }
+
+    This format is consumed by scripts/update_s25_from_exports.py to populate
+    SEAT_PREF_FLOWS_2025 in App.jsx.  Only ALP vs Coalition TCP finals are
+    included; Teal/ON finals are handled by separate preference flow paths.
+    """
     conn = get_connection(db_path)
     try:
-        rows = conn.execute(
-            """
-            SELECT scope, scope_value, from_party, to_party, flow_pct, is_observed, label
-            FROM preference_flows
-            WHERE election_id = ?
-            ORDER BY scope, from_party, flow_pct DESC
-            """,
-            (election_id,),
-        ).fetchall()
-        data = [dict(r) for r in rows]
+        division_ids = [
+            r["division_id"]
+            for r in conn.execute(
+                "SELECT division_id FROM divisions WHERE election_id = ?",
+                (election_id,),
+            ).fetchall()
+        ]
+
+        by_division: dict[str, dict] = {}
+        for div_id in division_ids:
+            flows = _compute_division_pref_flows(conn, election_id, div_id)
+            if flows:
+                by_division[str(div_id)] = flows
     finally:
         conn.close()
 
+    data = {"election_id": election_id, "by_division": by_division}
     out = Path(exports_dir or DATA_EXPORTS_DIR) / str(election_id) / "preference_flows.json"
     _write_json(data, out)
-    logger.info("Exported preference flows for %d → %s", election_id, out)
+    logger.info(
+        "Exported preference flows for %d → %s (%d divisions)",
+        election_id, out, len(by_division),
+    )
 
 
 # ── Full export for one election ──────────────────────────────────────────────

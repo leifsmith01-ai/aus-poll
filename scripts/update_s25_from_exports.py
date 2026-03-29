@@ -142,7 +142,9 @@ def _build_pref_flows(pref_data: dict, div_id: int) -> dict | None:
         if shares:
             result[flow_key] = round(sum(shares) / len(shares), 4)
 
-    return result if len(result) == 4 else None
+    # Return whatever keys are available; App.jsx applyPrefDelta() falls back to
+    # national average (PREF_FLOWS_2025) for any missing key.
+    return result if result else None
 
 
 def main():
