@@ -622,7 +622,166 @@ const SEAT_CALIB_2025 = {
 // the primary-based 2PP computation, further reducing zero-swing calibration error.
 // Populate via: python scripts/update_s25_from_exports.py (after running the pipeline)
 // Format: { seatId: { grn_alp, teal_alp, on_alp, other_alp } }
-const SEAT_PREF_FLOWS_2025 = {};
+const SEAT_PREF_FLOWS_2025 = {
+  // ΓöÇΓöÇ ACT ΓöÇΓöÇ
+  101: { grn_alp: 0.8100, teal_alp: 0.6231, on_alp: 0.4300, other_alp: 0.7074 },  // Canberra
+  102: { grn_alp: 0.8926, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Fenner
+  // ΓöÇΓöÇ NSW ΓöÇΓöÇ
+  103: { grn_alp: 0.8563, teal_alp: 0.5748, on_alp: 0.1977, other_alp: 0.3620 },  // Banks
+  104: { grn_alp: 0.8329, teal_alp: 0.6200, on_alp: 0.3361, other_alp: 0.3735 },  // Barton
+  105: { grn_alp: 0.8772, teal_alp: 0.6200, on_alp: 0.1712, other_alp: 0.5002 },  // Bennelong
+  106: { grn_alp: 0.8793, teal_alp: 0.7328, on_alp: 0.1233, other_alp: 0.1620 },  // Berowra
+  107: { grn_alp: 0.8609, teal_alp: 0.8408, on_alp: 0.2010, other_alp: 0.3801 },  // Blaxland
+  108: { grn_alp: 0.8711, teal_alp: 0.5693, on_alp: 0.0935, other_alp: 0.2476 },  // Bradfield
+  109: { grn_alp: 0.8805, teal_alp: 0.0000, on_alp: 0.1240, other_alp: 0.4570 },  // Calare
+  111: { grn_alp: 0.7912, teal_alp: 0.6200, on_alp: 0.2828, other_alp: 0.5721 },  // Chifley
+  112: { grn_alp: 0.8167, teal_alp: 0.6200, on_alp: 0.1525, other_alp: 0.2886 },  // Cook
+  113: { grn_alp: 0.8133, teal_alp: 0.5398, on_alp: 0.1401, other_alp: 0.4508 },  // Cowper
+  114: { grn_alp: 0.8521, teal_alp: 0.6200, on_alp: 0.2502, other_alp: 0.6434 },  // Cunningham
+  115: { grn_alp: 0.7429, teal_alp: 0.6200, on_alp: 0.2512, other_alp: 0.6834 },  // Dobell
+  117: { grn_alp: 0.8537, teal_alp: 0.3956, on_alp: 0.1983, other_alp: 0.3721 },  // Eden-Monaro
+  118: { grn_alp: 0.8145, teal_alp: 0.6200, on_alp: 0.1515, other_alp: 0.2958 },  // Farrer
+  119: { grn_alp: 0.8542, teal_alp: 0.6200, on_alp: 0.3533, other_alp: 0.4645 },  // Fowler
+  120: { grn_alp: 0.8784, teal_alp: 0.6991, on_alp: 0.1730, other_alp: 0.5531 },  // Gilmore
+  121: { grn_alp: 0.8100, teal_alp: 0.6585, on_alp: 0.1459, other_alp: 0.5000 },  // Grayndler
+  122: { grn_alp: 0.7577, teal_alp: 0.5429, on_alp: 0.3050, other_alp: 0.4557 },  // Greenway
+  124: { grn_alp: 0.8252, teal_alp: 0.6200, on_alp: 0.1797, other_alp: 0.3719 },  // Hughes
+  125: { grn_alp: 0.8315, teal_alp: 0.6390, on_alp: 0.3207, other_alp: 0.3158 },  // Hume
+  126: { grn_alp: 0.8399, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5779 },  // Hunter
+  127: { grn_alp: 0.8709, teal_alp: 0.6200, on_alp: 0.2944, other_alp: 0.5000 },  // Kingsford Smith
+  128: { grn_alp: 0.8597, teal_alp: 0.6200, on_alp: 0.3327, other_alp: 0.4059 },  // Lindsay
+  130: { grn_alp: 0.8700, teal_alp: 0.5041, on_alp: 0.1774, other_alp: 0.3473 },  // Lyne
+  131: { grn_alp: 0.8195, teal_alp: 0.6200, on_alp: 0.2556, other_alp: 0.4438 },  // Macarthur
+  132: { grn_alp: 0.6012, teal_alp: 0.3170, on_alp: 0.0874, other_alp: 0.1669 },  // Mackellar
+  133: { grn_alp: 0.8695, teal_alp: 0.6200, on_alp: 0.1866, other_alp: 0.4460 },  // Macquarie
+  315: { grn_alp: 0.8817, teal_alp: 0.3912, on_alp: 0.4300, other_alp: 0.5000 },  // McMahon
+  134: { grn_alp: 0.7933, teal_alp: 0.6200, on_alp: 0.2011, other_alp: 0.5000 },  // Mitchell
+  135: { grn_alp: 0.7977, teal_alp: 0.5565, on_alp: 0.2664, other_alp: 0.4056 },  // New England
+  136: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.2720, other_alp: 0.4960 },  // Newcastle
+  138: { grn_alp: 0.7768, teal_alp: 0.6031, on_alp: 0.1499, other_alp: 0.4082 },  // Page
+  139: { grn_alp: 0.8135, teal_alp: 0.4936, on_alp: 0.3342, other_alp: 0.4550 },  // Parkes
+  140: { grn_alp: 0.8527, teal_alp: 0.6166, on_alp: 0.1719, other_alp: 0.4081 },  // Parramatta
+  249: { grn_alp: 0.9143, teal_alp: 0.5099, on_alp: 0.3046, other_alp: 0.5193 },  // Paterson
+  144: { grn_alp: 0.8321, teal_alp: 0.6562, on_alp: 0.1969, other_alp: 0.2896 },  // Reid
+  145: { grn_alp: 0.8599, teal_alp: 0.4154, on_alp: 0.1389, other_alp: 0.4139 },  // Richmond
+  250: { grn_alp: 0.8621, teal_alp: 0.5167, on_alp: 0.3628, other_alp: 0.4405 },  // Riverina
+  146: { grn_alp: 0.7862, teal_alp: 0.6784, on_alp: 0.2116, other_alp: 0.6352 },  // Robertson
+  148: { grn_alp: 0.7800, teal_alp: 0.7143, on_alp: 0.2631, other_alp: 0.3657 },  // Shortland
+  149: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.1772, other_alp: 0.5000 },  // Sydney
+  151: { grn_alp: 0.8008, teal_alp: 0.6200, on_alp: 0.0904, other_alp: 0.2603 },  // Warringah
+  251: { grn_alp: 0.8097, teal_alp: 0.6200, on_alp: 0.2797, other_alp: 0.4195 },  // Watson
+  152: { grn_alp: 0.8481, teal_alp: 0.6200, on_alp: 0.0947, other_alp: 0.5000 },  // Wentworth
+  153: { grn_alp: 0.7268, teal_alp: 0.5342, on_alp: 0.2461, other_alp: 0.4241 },  // Werriwa
+  150: { grn_alp: 0.7114, teal_alp: 0.5037, on_alp: 0.2780, other_alp: 0.3879 },  // Whitlam
+  // ΓöÇΓöÇ NT ΓöÇΓöÇ
+  306: { grn_alp: 0.7635, teal_alp: 0.6200, on_alp: 0.1632, other_alp: 0.7733 },  // Lingiari
+  307: { grn_alp: 0.7194, teal_alp: 0.6536, on_alp: 0.1245, other_alp: 0.5000 },  // Solomon
+  // ΓöÇΓöÇ QLD ΓöÇΓöÇ
+  304: { grn_alp: 0.8773, teal_alp: 0.6200, on_alp: 0.3337, other_alp: 0.5061 },  // Blair
+  310: { grn_alp: 0.8434, teal_alp: 0.6200, on_alp: 0.1946, other_alp: 0.3833 },  // Bonner
+  155: { grn_alp: 0.7701, teal_alp: 0.6657, on_alp: 0.2118, other_alp: 0.3473 },  // Bowman
+  156: { grn_alp: 0.9141, teal_alp: 0.6200, on_alp: 0.2093, other_alp: 0.4049 },  // Brisbane
+  157: { grn_alp: 0.8377, teal_alp: 0.6200, on_alp: 0.2705, other_alp: 0.4923 },  // Capricornia
+  158: { grn_alp: 0.8646, teal_alp: 0.6200, on_alp: 0.2545, other_alp: 0.3113 },  // Dawson
+  252: { grn_alp: 0.9244, teal_alp: 0.7697, on_alp: 0.1500, other_alp: 0.5449 },  // Dickson
+  159: { grn_alp: 0.8259, teal_alp: 0.6426, on_alp: 0.2984, other_alp: 0.3689 },  // Fadden
+  160: { grn_alp: 0.8711, teal_alp: 0.6629, on_alp: 0.1455, other_alp: 0.2521 },  // Fairfax
+  161: { grn_alp: 0.8583, teal_alp: 0.5800, on_alp: 0.1794, other_alp: 0.3466 },  // Fisher
+  311: { grn_alp: 0.8707, teal_alp: 0.7395, on_alp: 0.2619, other_alp: 0.4428 },  // Flynn
+  162: { grn_alp: 0.8223, teal_alp: 0.6295, on_alp: 0.3260, other_alp: 0.3222 },  // Forde
+  163: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.1754, other_alp: 0.2639 },  // Griffith
+  164: { grn_alp: 0.8465, teal_alp: 0.4613, on_alp: 0.1181, other_alp: 0.2248 },  // Groom
+  165: { grn_alp: 0.8462, teal_alp: 0.6200, on_alp: 0.1677, other_alp: 0.3317 },  // Herbert
+  166: { grn_alp: 0.6901, teal_alp: 0.6200, on_alp: 0.3027, other_alp: 0.4136 },  // Hinkler
+  167: { grn_alp: 0.8423, teal_alp: 0.6200, on_alp: 0.2926, other_alp: 0.4211 },  // Kennedy
+  168: { grn_alp: 0.8587, teal_alp: 0.5071, on_alp: 0.3590, other_alp: 0.5581 },  // Leichhardt
+  169: { grn_alp: 0.8842, teal_alp: 0.6200, on_alp: 0.1951, other_alp: 0.5591 },  // Lilley
+  302: { grn_alp: 0.8547, teal_alp: 0.6200, on_alp: 0.3375, other_alp: 0.4105 },  // Longman
+  170: { grn_alp: 0.7976, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.3215 },  // Maranoa
+  171: { grn_alp: 0.8212, teal_alp: 0.5903, on_alp: 0.1188, other_alp: 0.4550 },  // McPherson
+  172: { grn_alp: 0.6728, teal_alp: 0.5477, on_alp: 0.1744, other_alp: 0.4322 },  // Moncrieff
+  173: { grn_alp: 0.8856, teal_alp: 0.6200, on_alp: 0.2001, other_alp: 0.5101 },  // Moreton
+  174: { grn_alp: 0.7977, teal_alp: 0.6200, on_alp: 0.2754, other_alp: 0.4537 },  // Oxley
+  175: { grn_alp: 0.7749, teal_alp: 0.6200, on_alp: 0.2589, other_alp: 0.4132 },  // Petrie
+  176: { grn_alp: 0.7129, teal_alp: 0.6200, on_alp: 0.2646, other_alp: 0.3455 },  // Rankin
+  177: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.1611, other_alp: 0.3926 },  // Ryan
+  178: { grn_alp: 0.8177, teal_alp: 0.6022, on_alp: 0.2926, other_alp: 0.5636 },  // Wide Bay
+  316: { grn_alp: 0.8520, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.4090 },  // Wright
+  // ΓöÇΓöÇ SA ΓöÇΓöÇ
+  179: { grn_alp: 0.8917, teal_alp: 0.6200, on_alp: 0.2210, other_alp: 0.6906 },  // Adelaide
+  180: { grn_alp: 1.0000, teal_alp: 1.0000, on_alp: 1.0000, other_alp: 1.0000 },  // Barker
+  182: { grn_alp: 0.8809, teal_alp: 0.6200, on_alp: 0.3014, other_alp: 0.3659 },  // Boothby
+  183: { grn_alp: 1.0000, teal_alp: 1.0000, on_alp: 1.0000, other_alp: 1.0000 },  // Grey
+  185: { grn_alp: 0.8415, teal_alp: 0.6353, on_alp: 0.2179, other_alp: 0.4685 },  // Hindmarsh
+  186: { grn_alp: 0.8217, teal_alp: 0.6200, on_alp: 0.2493, other_alp: 0.4323 },  // Kingston
+  187: { grn_alp: 0.7122, teal_alp: 0.6200, on_alp: 0.2452, other_alp: 0.5218 },  // Makin
+  188: { grn_alp: 0.8901, teal_alp: 0.6200, on_alp: 0.1977, other_alp: 0.2637 },  // Mayo
+  325: { grn_alp: 0.6698, teal_alp: 0.6620, on_alp: 0.3470, other_alp: 0.5698 },  // Spence
+  190: { grn_alp: 0.8559, teal_alp: 0.5344, on_alp: 0.1398, other_alp: 0.3234 },  // Sturt
+  // ΓöÇΓöÇ TAS ΓöÇΓöÇ
+  192: { grn_alp: 0.8180, teal_alp: 0.5629, on_alp: 0.2949, other_alp: 0.4626 },  // Bass
+  193: { grn_alp: 0.9074, teal_alp: 0.5682, on_alp: 0.4603, other_alp: 0.5000 },  // Braddon
+  319: { grn_alp: 0.8857, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Clark
+  195: { grn_alp: 0.9176, teal_alp: 0.3903, on_alp: 0.4300, other_alp: 0.5000 },  // Franklin
+  196: { grn_alp: 0.7680, teal_alp: 0.6746, on_alp: 0.3504, other_alp: 0.5395 },  // Lyons
+  // ΓöÇΓöÇ VIC ΓöÇΓöÇ
+  197: { grn_alp: 0.8449, teal_alp: 0.6252, on_alp: 0.1941, other_alp: 0.3259 },  // Aston
+  198: { grn_alp: 0.8441, teal_alp: 0.5953, on_alp: 0.2557, other_alp: 0.4438 },  // Ballarat
+  200: { grn_alp: 1.0000, teal_alp: 0.7280, on_alp: 0.3883, other_alp: 0.5972 },  // Bendigo
+  201: { grn_alp: 0.8402, teal_alp: 0.6200, on_alp: 0.2616, other_alp: 0.4759 },  // Bruce
+  203: { grn_alp: 0.9121, teal_alp: 0.5410, on_alp: 0.2831, other_alp: 0.6240 },  // Calwell
+  204: { grn_alp: 0.8769, teal_alp: 0.7613, on_alp: 0.1471, other_alp: 0.2192 },  // Casey
+  205: { grn_alp: 0.8513, teal_alp: 0.6106, on_alp: 0.1068, other_alp: 0.3096 },  // Chisholm
+  320: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.2927, other_alp: 0.6046 },  // Cooper
+  328: { grn_alp: 0.8812, teal_alp: 0.5190, on_alp: 0.1821, other_alp: 0.5205 },  // Corangamite
+  208: { grn_alp: 0.7719, teal_alp: 0.5624, on_alp: 0.2674, other_alp: 0.5000 },  // Corio
+  209: { grn_alp: 0.8573, teal_alp: 0.5924, on_alp: 0.1001, other_alp: 0.2088 },  // Deakin
+  210: { grn_alp: 0.8409, teal_alp: 0.5309, on_alp: 0.2208, other_alp: 0.6025 },  // Dunkley
+  211: { grn_alp: 0.8604, teal_alp: 0.6200, on_alp: 0.1300, other_alp: 0.2184 },  // Flinders
+  321: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.2074, other_alp: 0.6286 },  // Fraser
+  212: { grn_alp: 0.8293, teal_alp: 0.6200, on_alp: 0.2664, other_alp: 0.5000 },  // Gellibrand
+  213: { grn_alp: 0.8001, teal_alp: 0.6200, on_alp: 0.1527, other_alp: 0.5000 },  // Gippsland
+  214: { grn_alp: 0.8572, teal_alp: 0.6200, on_alp: 0.0916, other_alp: 0.4364 },  // Goldstein
+  309: { grn_alp: 0.7613, teal_alp: 0.6200, on_alp: 0.2901, other_alp: 0.6591 },  // Gorton
+  326: { grn_alp: 0.8177, teal_alp: 0.6200, on_alp: 0.2536, other_alp: 0.5647 },  // Hawke
+  216: { grn_alp: 0.8263, teal_alp: 0.6200, on_alp: 0.2682, other_alp: 0.4903 },  // Holt
+  217: { grn_alp: 0.8766, teal_alp: 0.6200, on_alp: 0.2138, other_alp: 0.4294 },  // Hotham
+  218: { grn_alp: 0.8048, teal_alp: 0.6200, on_alp: 0.0000, other_alp: 0.3114 },  // Indi
+  219: { grn_alp: 0.8473, teal_alp: 0.6200, on_alp: 0.1809, other_alp: 0.5000 },  // Isaacs
+  220: { grn_alp: 0.9023, teal_alp: 0.5370, on_alp: 0.1764, other_alp: 0.1927 },  // Jagajaga
+  221: { grn_alp: 0.7588, teal_alp: 0.6200, on_alp: 0.0864, other_alp: 0.1243 },  // Kooyong
+  223: { grn_alp: 0.7693, teal_alp: 0.6200, on_alp: 0.2050, other_alp: 0.5046 },  // La Trobe
+  222: { grn_alp: 0.8249, teal_alp: 0.4994, on_alp: 0.2736, other_alp: 0.4701 },  // Lalor
+  322: { grn_alp: 0.9188, teal_alp: 0.4961, on_alp: 0.1782, other_alp: 0.5000 },  // Macnamara
+  224: { grn_alp: 0.6492, teal_alp: 0.6200, on_alp: 0.2399, other_alp: 0.3260 },  // Mallee
+  225: { grn_alp: 0.8995, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Maribyrnong
+  226: { grn_alp: 0.7558, teal_alp: 0.6200, on_alp: 0.2286, other_alp: 0.5463 },  // McEwen
+  228: { grn_alp: 0.8100, teal_alp: 0.4066, on_alp: 0.3474, other_alp: 0.6646 },  // Melbourne
+  229: { grn_alp: 0.8317, teal_alp: 0.5722, on_alp: 0.1364, other_alp: 0.2443 },  // Menzies
+  323: { grn_alp: 0.8794, teal_alp: 0.5415, on_alp: 0.3396, other_alp: 0.5027 },  // Monash
+  324: { grn_alp: 0.7543, teal_alp: 0.6200, on_alp: 0.2142, other_alp: 0.3947 },  // Nicholls
+  232: { grn_alp: 0.6939, teal_alp: 0.6200, on_alp: 0.2639, other_alp: 0.5657 },  // Scullin
+  233: { grn_alp: 0.7843, teal_alp: 0.6200, on_alp: 0.1880, other_alp: 0.3567 },  // Wannon
+  234: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.2034, other_alp: 0.7178 },  // Wills
+  // ΓöÇΓöÇ WA ΓöÇΓöÇ
+  235: { grn_alp: 0.7811, teal_alp: 0.6200, on_alp: 0.2764, other_alp: 0.5000 },  // Brand
+  329: { grn_alp: 0.9080, teal_alp: 0.6200, on_alp: 0.2144, other_alp: 0.6229 },  // Bullwinkel
+  317: { grn_alp: 0.8745, teal_alp: 0.6200, on_alp: 0.2933, other_alp: 0.5886 },  // Burt
+  236: { grn_alp: 0.8438, teal_alp: 0.6200, on_alp: 0.2737, other_alp: 0.5722 },  // Canning
+  237: { grn_alp: 0.7526, teal_alp: 0.6342, on_alp: 0.2411, other_alp: 0.4483 },  // Cowan
+  238: { grn_alp: 0.8642, teal_alp: 0.6200, on_alp: 0.1145, other_alp: 0.5000 },  // Curtin
+  312: { grn_alp: 0.8706, teal_alp: 0.6200, on_alp: 0.2870, other_alp: 0.5200 },  // Durack
+  239: { grn_alp: 0.8606, teal_alp: 0.6558, on_alp: 0.1507, other_alp: 0.4534 },  // Forrest
+  240: { grn_alp: 0.8939, teal_alp: 0.6200, on_alp: 0.1507, other_alp: 0.8101 },  // Fremantle
+  305: { grn_alp: 0.7701, teal_alp: 0.6200, on_alp: 0.2462, other_alp: 0.5212 },  // Hasluck
+  242: { grn_alp: 0.8682, teal_alp: 0.5716, on_alp: 0.1134, other_alp: 0.4457 },  // Moore
+  243: { grn_alp: 0.8855, teal_alp: 0.6200, on_alp: 0.2387, other_alp: 0.4425 },  // O'Connor
+  244: { grn_alp: 0.6869, teal_alp: 0.6200, on_alp: 0.2265, other_alp: 0.5709 },  // Pearce
+  245: { grn_alp: 0.8790, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Perth
+  247: { grn_alp: 0.8596, teal_alp: 0.6200, on_alp: 0.1875, other_alp: 0.6728 },  // Swan
+  248: { grn_alp: 0.7921, teal_alp: 0.6200, on_alp: 0.1850, other_alp: 0.2888 },  // Tangney
+};
+
 
 // ── 2025 national-average preference flows (AEC DOP) ──────────────────────────
 // These are the baseline values the aggregate sliders default to.  Used as the
