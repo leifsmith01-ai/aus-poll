@@ -7109,7 +7109,7 @@ export default function App() {
         const sourceBadge = {
           betfair:      { label: "Betfair Exchange", color: "#059669", bg: "#D1FAE5" },
           "the-odds-api": { label: "The Odds API", color: "#1D4ED8", bg: "#DBEAFE" },
-          manual:       { label: "Manual placeholder", color: "#D97706", bg: "#FEF3C7" },
+          manual:       { label: "Indicative", color: "#D97706", bg: "#FEF3C7" },
         }[mktSource] ?? { label: mktSource, color: "#6B7280", bg: "#F3F4F6" };
 
         const alpMajority = mktNational.alp_majority;
@@ -7146,13 +7146,6 @@ export default function App() {
               </div>
             </div>
 
-            {isManual && (
-              <div style={{ background: "#FEF3C7", border: "1px solid #FCD34D", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#92400E" }}>
-                <strong>Placeholder data</strong> — these are illustrative values, not live market prices.
-                To fetch real odds, set <code>BETFAIR_APP_KEY</code> + <code>BETFAIR_SESSION_TOKEN</code> or <code>ODDS_API_KEY</code>
-                environment variables and run: <code>python pipeline/betting_odds.py</code>
-              </div>
-            )}
 
             {/* National government odds */}
             <div style={{ ...panelStyle, marginBottom: 14 }}>
@@ -7237,7 +7230,7 @@ export default function App() {
               </div>
               {seatRows.length === 0 ? (
                 <div style={{ padding: "20px 16px", fontSize: 13, color: "#9CA3AF", textAlign: "center" }}>
-                  No seat market data available. Run <code>python pipeline/betting_odds.py</code> with API keys to fetch seat-level markets.
+                  No seat market data available.
                 </div>
               ) : (
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
@@ -7308,11 +7301,6 @@ export default function App() {
                         : null;
                       return (
                         <div key={stateCode} style={{ ...STYLES.metricCard, position: "relative" }}>
-                          {isManualState && (
-                            <div style={{ position: "absolute", top: 8, right: 10, fontSize: 9, fontWeight: 700, color: "#D97706", background: "#FEF3C7", padding: "2px 5px", borderRadius: 4 }}>
-                              placeholder
-                            </div>
-                          )}
                           <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 2 }}>
                             {stateCode.toUpperCase()}
                           </div>
@@ -7364,8 +7352,6 @@ export default function App() {
               {" "}<em>2PP = 50 + σ × Φ⁻¹(P_win)</em>, where σ = {BETTING_ODDS?.sigma_per_seat ?? 2.5}pp
               (seat-level prediction uncertainty from historical calibration). For teal/Greens seats
               with no ALP 2PP equivalent, the raw win probability is shown directly.
-              {" "}To update with live data:{" "}
-              <code style={{ background: "#E5E7EB", padding: "1px 4px", borderRadius: 4 }}>python pipeline/betting_odds.py</code>
             </div>
 
           </div>
