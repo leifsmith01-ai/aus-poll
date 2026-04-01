@@ -7136,14 +7136,16 @@ export default function App() {
                   Market-implied probabilities and estimated 2PP values. Read-only overlay — does not affect the model.
                 </p>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: sourceBadge.color, background: sourceBadge.bg, padding: "3px 8px", borderRadius: 8 }}>
-                  {sourceBadge.label}
-                </span>
-                {mktGenerated && (
-                  <span style={{ fontSize: 11, color: "#9CA3AF" }}>Updated {mktGenerated}</span>
-                )}
-              </div>
+              {!isManual && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: sourceBadge.color, background: sourceBadge.bg, padding: "3px 8px", borderRadius: 8 }}>
+                    {sourceBadge.label}
+                  </span>
+                  {mktGenerated && (
+                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>Updated {mktGenerated}</span>
+                  )}
+                </div>
+              )}
             </div>
 
 
@@ -7236,7 +7238,7 @@ export default function App() {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                   <thead>
                     <tr style={{ borderBottom: "1px solid #E5E7EB", background: "#F9FAFB" }}>
-                      {["Seat", "Finalist A", "Prob", "Finalist B", "Prob", "Implied 2PP (ALP)", "Source"].map((h, i) => (
+                      {["Seat", "Finalist A", "Prob", "Finalist B", "Prob", "Implied 2PP (ALP)"].map((h, i) => (
                         <th key={i} style={{ padding: "9px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#6B7280" }}>{h}</th>
                       ))}
                     </tr>
@@ -7268,9 +7270,6 @@ export default function App() {
                               ? <strong style={{ color: mkt.implied_2pp_alp >= 50 ? "#DC2626" : "#1D4ED8" }}>{mkt.implied_2pp_alp}%</strong>
                               : <span style={{ color: "#9CA3AF" }}>—</span>
                             }
-                          </td>
-                          <td style={{ padding: "8px 12px", fontSize: 11, color: "#9CA3AF" }}>
-                            {mkt.source ?? mktSource}
                           </td>
                         </tr>
                       );
