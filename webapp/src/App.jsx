@@ -870,7 +870,7 @@ const _S25 = [
   [114, "Cunningham", "NSW", "ALP", "Alison Byrnes", "ALP", "LP", 35.04],
   [115, "Dobell", "NSW", "ALP", "Emma Mcbride", "ALP", "LP", 18.86],
   [117, "Eden-Monaro", "NSW", "ALP", "Kristy Mcbain", "ALP", "LP", 14.43],
-  [118, "Farrer", "NSW", "LP", "Sussan Ley", "LP", "IND", 12.39],
+  [118, "Farrer", "NSW", "LP", "Vacant (by-election)", "LP", "IND", 12.39],
   [119, "Fowler", "NSW", "IND", "Dai Le", "IND", "ALP", 5.35],
   [120, "Gilmore", "NSW", "ALP", "Fiona Phillips", "ALP", "LP", 10.26],
   [121, "Grayndler", "NSW", "ALP", "Anthony Albanese", "ALP", "GRN", 33.73],
