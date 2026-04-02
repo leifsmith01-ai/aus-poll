@@ -12,6 +12,8 @@ import { Analytics } from "@vercel/analytics/react";
 import DEMOGRAPHICS from "./data/demographics.js";
 import STATE_DEMOGRAPHICS from "./data/state_demographics.js";
 import BETTING_ODDS from "./data/betting_odds.json";
+import ECONOMICS_DATA from "./data/economics.json";
+import LEADERS_DATA from "./data/leaders.json";
 
 // VIC_SEATS_KNOWN removed — full 88-seat data is in _VS / VIC_SEATS below.
 
@@ -4758,6 +4760,237 @@ export default function App() {
               </tbody>
             </table>
           </div>
+
+          {/* ── Leader Approval Ratings ─────────────────────────────────────── */}
+          {(() => {
+            const leaders = LEADERS_DATA.leaders ?? [];
+            const prefPm = LEADERS_DATA.preferred_pm?.data ?? [];
+            const govtSat = LEADERS_DATA.government_satisfaction?.data ?? [];
+            if (!leaders.length) return null;
+            const latestGovtSat = govtSat[govtSat.length - 1];
+            const latestPrefPm = prefPm[prefPm.length - 1];
+            return (
+              <div style={{ ...panelStyle, marginTop: 16 }}>
+                <div style={STYLES.panelTitle}>Leader Approval Ratings</div>
+                <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 14px" }}>
+                  Net approval (approve% − disapprove%) over time. Source: {LEADERS_DATA.source}
+                </p>
+                {/* Summary cards */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12, marginBottom: 16 }}>
+                  {leaders.map(leader => {
+                    const latest = leader.data[leader.data.length - 1];
+                    if (!latest) return null;
+                    const net = latest.net;
+                    const netColor = net >= 0 ? "#059669" : "#DC2626";
+                    return (
+                      <div key={leader.name} style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 14px" }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: leader.party_color, marginBottom: 2 }}>{leader.role}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#111827", marginBottom: 6 }}>{leader.name}</div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                          <span style={{ fontSize: 22, fontWeight: 800, color: netColor }}>{net >= 0 ? "+" : ""}{net}</span>
+                          <span style={{ fontSize: 11, color: "#6B7280" }}>net approval</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: "#6B7280", marginTop: 3 }}>
+                          Approve {latest.approve}% · Disapprove {latest.disapprove}%
+                        </div>
+                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>
+                          {latest.pollster} · {new Date(latest.date).toLocaleDateString("en-AU", { month: "short", year: "numeric" })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {latestGovtSat && (
+                    <div style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 14px" }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", marginBottom: 2 }}>Government</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#111827", marginBottom: 6 }}>Satisfaction Rating</div>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                        <span style={{ fontSize: 22, fontWeight: 800, color: latestGovtSat.net >= 0 ? "#059669" : "#DC2626" }}>
+                          {latestGovtSat.net >= 0 ? "+" : ""}{latestGovtSat.net}
+                        </span>
+                        <span style={{ fontSize: 11, color: "#6B7280" }}>net sat.</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 3 }}>
+                        Satisfied {latestGovtSat.satisfied}% · Dissatisfied {latestGovtSat.dissatisfied}%
+                      </div>
+                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>
+                        {latestGovtSat.pollster} · {new Date(latestGovtSat.date).toLocaleDateString("en-AU", { month: "short", year: "numeric" })}
+                      </div>
+                    </div>
+                  )}
+                  {latestPrefPm && (
+                    <div style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 14px" }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", marginBottom: 2 }}>Preferred</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#111827", marginBottom: 6 }}>Prime Minister</div>
+                      <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+                        <div>
+                          <span style={{ fontSize: 18, fontWeight: 800, color: "#DC2626" }}>{latestPrefPm.alp_pct}%</span>
+                          <div style={{ fontSize: 10, color: "#6B7280" }}>ALP leader</div>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: 18, fontWeight: 800, color: "#1D4ED8" }}>{latestPrefPm.opp_pct}%</span>
+                          <div style={{ fontSize: 10, color: "#6B7280" }}>Opp leader</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4 }}>
+                        {latestPrefPm.pollster} · {new Date(latestPrefPm.date).toLocaleDateString("en-AU", { month: "short", year: "numeric" })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* Net approval trend chart */}
+                <div style={{ height: 200 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                      <XAxis dataKey="date" type="category" allowDuplicatedCategory={false}
+                        tick={{ fontSize: 11, fill: "#6B7280" }}
+                        tickFormatter={d => new Date(d).toLocaleDateString("en-AU", { month: "short", year: "2-digit" })} />
+                      <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} domain={[-20, 40]}
+                        tickFormatter={v => `${v > 0 ? "+" : ""}${v}`} />
+                      <Tooltip formatter={(v, name) => [`${v > 0 ? "+" : ""}${v}pp net`, name]} />
+                      <ReferenceLine y={0} stroke="#9CA3AF" strokeDasharray="4 2" />
+                      <Legend />
+                      {leaders.map(leader => (
+                        <Line key={leader.name} data={leader.data} type="monotone"
+                          dataKey="net" name={leader.name} stroke={leader.party_color}
+                          strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4, textAlign: "center" }}>
+                  Net approval = approve% − disapprove%. Higher = more popular. Source: {LEADERS_DATA.source}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ── Economic Indicators ─────────────────────────────────────────── */}
+          {(() => {
+            const econ = ECONOMICS_DATA;
+            const cc = econ?.cameron_crosby_model?.current_estimate ?? {};
+            const cpiData = (econ?.cpi?.data ?? []).slice(-8);
+            const unempData = (econ?.unemployment?.data ?? []).slice(-12);
+            const rbaData = (econ?.rba_cash_rate?.data ?? []).slice(-8);
+            const currentCpi = cpiData[cpiData.length - 1]?.value;
+            const currentUnemp = unempData[unempData.length - 1]?.value;
+            const currentRba = rbaData[rbaData.length - 1]?.value;
+            const elecCpi = econ?.election_reference?.cpi_annual_pct;
+            const elecUnemp = econ?.election_reference?.unemployment_pct;
+            const elecRba = econ?.election_reference?.rba_rate_pct;
+            if (!econ) return null;
+            const netEffect = cc?.net_vote_effect_pp ?? 0;
+            const netColor = netEffect > 0 ? "#059669" : netEffect < -0.2 ? "#DC2626" : "#F59E0B";
+            return (
+              <div style={{ ...panelStyle, marginTop: 16 }}>
+                <div style={STYLES.panelTitle}>Economic Indicators</div>
+                <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 14px" }}>
+                  Cameron &amp; Crosby (2000) structural model: inflation and unemployment change predict incumbent vote. Source: ABS, RBA.
+                </p>
+                {/* Key metrics */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 16 }}>
+                  {[
+                    {
+                      label: "Inflation (CPI)", unit: "% YoY",
+                      current: currentCpi, election: elecCpi,
+                      higherIsBad: true, description: "Annual CPI change",
+                    },
+                    {
+                      label: "Unemployment", unit: "%",
+                      current: currentUnemp, election: elecUnemp,
+                      higherIsBad: true, description: "Seasonally adjusted",
+                    },
+                    {
+                      label: "RBA Cash Rate", unit: "%",
+                      current: currentRba, election: elecRba,
+                      higherIsBad: false, description: "Rate cuts = stimulus",
+                    },
+                    {
+                      label: "Economic Effect", unit: "pp",
+                      current: netEffect, election: 0,
+                      higherIsBad: false, description: "C&C structural model",
+                      isEffect: true,
+                    },
+                  ].map(m => {
+                    if (m.current == null) return null;
+                    const change = m.current - (m.election ?? m.current);
+                    const changeStr = change > 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
+                    const isNeutral = Math.abs(change) < 0.05;
+                    const changeColor = isNeutral ? "#6B7280"
+                      : ((change > 0) === m.higherIsBad) ? "#DC2626" : "#059669";
+                    return (
+                      <div key={m.label} style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 14px" }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 3 }}>{m.label}</div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                          <span style={{ fontSize: 22, fontWeight: 800, color: m.isEffect ? netColor : "#111827" }}>
+                            {m.isEffect && netEffect > 0 ? "+" : ""}{m.current?.toFixed(1)}
+                          </span>
+                          <span style={{ fontSize: 12, color: "#6B7280" }}>{m.unit}</span>
+                        </div>
+                        {m.election != null && !m.isEffect && (
+                          <div style={{ fontSize: 11, color: changeColor, marginTop: 3, fontWeight: 600 }}>
+                            {changeStr} since election
+                          </div>
+                        )}
+                        {m.isEffect && (
+                          <div style={{ fontSize: 11, color: netColor, marginTop: 3, fontWeight: 600 }}>
+                            {netEffect > 0 ? "Incumbent benefit" : netEffect < -0.2 ? "Incumbent penalty" : "Approx. neutral"}
+                          </div>
+                        )}
+                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>{m.description}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* CPI trend */}
+                {cpiData.length > 1 && (
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 6 }}>CPI Annual Change (%) — quarterly</div>
+                    <div style={{ height: 160 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={cpiData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                          <XAxis dataKey="period" tick={{ fontSize: 10, fill: "#6B7280" }} />
+                          <YAxis tick={{ fontSize: 10, fill: "#6B7280" }} domain={[0, "auto"]} tickFormatter={v => `${v}%`} />
+                          <Tooltip formatter={(v) => [`${v}%`, "CPI YoY"]} />
+                          <ReferenceLine y={elecCpi} stroke="#DC2626" strokeDasharray="4 2" label={{ value: "Election", fill: "#DC2626", fontSize: 10 }} />
+                          <ReferenceLine y={2.5} stroke="#059669" strokeDasharray="4 2" label={{ value: "RBA target", fill: "#059669", fontSize: 10 }} />
+                          <Line type="monotone" dataKey="value" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} name="CPI YoY %" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+                {/* Unemployment trend */}
+                {unempData.length > 1 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 6 }}>Unemployment Rate (%) — monthly</div>
+                    <div style={{ height: 140 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={unempData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                          <XAxis dataKey="period" tick={{ fontSize: 10, fill: "#6B7280" }}
+                            tickFormatter={p => p.replace(/^(\d{4})-(\d{2})$/, (_, y, m) => `${["", "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m]} ${y.slice(2)}`)} />
+                          <YAxis tick={{ fontSize: 10, fill: "#6B7280" }} domain={[3, 6]} tickFormatter={v => `${v}%`} />
+                          <Tooltip formatter={(v) => [`${v}%`, "Unemployment"]} />
+                          <ReferenceLine y={elecUnemp} stroke="#DC2626" strokeDasharray="4 2" label={{ value: "Election", fill: "#DC2626", fontSize: 10 }} />
+                          <Line type="monotone" dataKey="value" stroke="#7C3AED" strokeWidth={2} dot={{ r: 2 }} name="Unemployment %" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+                <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 12px", fontSize: 12, color: "#92400E" }}>
+                  <strong>Cameron &amp; Crosby model note:</strong> {cc?.interpretation ?? "Economic model not yet computed."}
+                  {" "}This is a structural baseline signal only — polling data is the primary forecast input.
+                  <span style={{ display: "block", fontSize: 11, color: "#B45309", marginTop: 4 }}>
+                    Refresh with: <code style={{ background: "#FEF3C7", padding: "1px 4px", borderRadius: 3 }}>python pipeline/fetch_economics.py</code>
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
+
         </div>
       )}
 

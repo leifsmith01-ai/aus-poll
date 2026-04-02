@@ -53,6 +53,30 @@ def copy_election_data(year: int) -> None:
         print(f"  ✓ Updated sample_{year}.json")
 
 
+def copy_economics() -> None:
+    """Copy economics.json to webapp/src/data/ for the React frontend."""
+    WEBAPP_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    src = BASE_DIR / "data" / "economics.json"
+    dst = WEBAPP_DATA_DIR / "economics.json"
+    if not src.exists():
+        print(f"  ✗ No economics.json found (run: python pipeline/fetch_economics.py)")
+        return
+    shutil.copy2(src, dst)
+    print(f"  ✓ economics.json → {dst}")
+
+
+def copy_leaders() -> None:
+    """Copy leaders.json (approval ratings) to webapp/src/data/ for the React frontend."""
+    WEBAPP_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    src = BASE_DIR / "data" / "polls" / "leaders.json"
+    dst = WEBAPP_DATA_DIR / "leaders.json"
+    if not src.exists():
+        print(f"  ✗ No leaders.json found at {src}")
+        return
+    shutil.copy2(src, dst)
+    print(f"  ✓ leaders.json → {dst}")
+
+
 def main():
     print("Copying pipeline exports → frontend/public/data/")
     print("=" * 50)
@@ -70,6 +94,12 @@ def main():
 
     # ── Betting odds → webapp/src/data/ ──────────────────────────────────────
     copy_betting_odds()
+
+    # ── Economic indicators → webapp/src/data/ ────────────────────────────────
+    copy_economics()
+
+    # ── Leader approval ratings → webapp/src/data/ ───────────────────────────
+    copy_leaders()
 
     print()
     print("Done. Start the frontend with: cd webapp && npm run dev")

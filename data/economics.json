@@ -1,0 +1,211 @@
+{
+  "generated": "2026-04-02",
+  "source": "ABS (abs.gov.au) and RBA (rba.gov.au); refresh via: python pipeline/fetch_economics.py",
+  "note": "CPI and unemployment sourced from ABS; RBA cash rate from rba.gov.au. Cameron & Crosby model uses CPI annual change and unemployment change to estimate structural incumbent vote effect.",
+  "election_reference": {
+    "date": "2025-05-03",
+    "alp_2pp": 55.2,
+    "cpi_annual_pct": 2.4,
+    "unemployment_pct": 4.1,
+    "rba_rate_pct": 4.1,
+    "notes": "2025 federal election result. All economic changes measured relative to this baseline."
+  },
+  "cpi": {
+    "series": "Consumer Price Index, All Groups, Australia (ABS 6401.0)",
+    "unit": "% annual change (YoY)",
+    "series_id": "A2325846C",
+    "data": [
+      {
+        "period": "2023-Q3",
+        "value": 5.4
+      },
+      {
+        "period": "2023-Q4",
+        "value": 4.1
+      },
+      {
+        "period": "2024-Q1",
+        "value": 3.6
+      },
+      {
+        "period": "2024-Q2",
+        "value": 3.8
+      },
+      {
+        "period": "2024-Q3",
+        "value": 2.8
+      },
+      {
+        "period": "2024-Q4",
+        "value": 2.4
+      },
+      {
+        "period": "2025-Q1",
+        "value": 2.4,
+        "note": "pre-election"
+      },
+      {
+        "period": "2025-Q2",
+        "value": 2.6
+      },
+      {
+        "period": "2025-Q3",
+        "value": 2.7
+      },
+      {
+        "period": "2025-Q4",
+        "value": 2.9
+      },
+      {
+        "period": "2026-Q1",
+        "value": 3.0,
+        "note": "estimated"
+      }
+    ]
+  },
+  "unemployment": {
+    "series": "Unemployment Rate, Seasonally Adjusted, Australia (ABS 6202.0)",
+    "unit": "% of labour force",
+    "series_id": "A84423349L",
+    "data": [
+      {
+        "period": "2025-01",
+        "value": 4.1
+      },
+      {
+        "period": "2025-02",
+        "value": 4.1
+      },
+      {
+        "period": "2025-03",
+        "value": 4.2
+      },
+      {
+        "period": "2025-04",
+        "value": 4.1,
+        "note": "pre-election"
+      },
+      {
+        "period": "2025-05",
+        "value": 4.1,
+        "note": "election month"
+      },
+      {
+        "period": "2025-06",
+        "value": 4.2
+      },
+      {
+        "period": "2025-07",
+        "value": 4.2
+      },
+      {
+        "period": "2025-08",
+        "value": 4.3
+      },
+      {
+        "period": "2025-09",
+        "value": 4.2
+      },
+      {
+        "period": "2025-10",
+        "value": 4.1
+      },
+      {
+        "period": "2025-11",
+        "value": 4.2
+      },
+      {
+        "period": "2025-12",
+        "value": 4.3
+      },
+      {
+        "period": "2026-01",
+        "value": 4.3
+      },
+      {
+        "period": "2026-02",
+        "value": 4.2
+      },
+      {
+        "period": "2026-03",
+        "value": 4.1,
+        "note": "estimated"
+      }
+    ]
+  },
+  "rba_cash_rate": {
+    "series": "RBA Cash Rate Target (rba.gov.au)",
+    "unit": "% per annum",
+    "data": [
+      {
+        "date": "2023-06-06",
+        "value": 4.1,
+        "change": 0.25,
+        "note": "hike"
+      },
+      {
+        "date": "2023-11-07",
+        "value": 4.35,
+        "change": 0.25,
+        "note": "hike — peak"
+      },
+      {
+        "date": "2025-02-18",
+        "value": 4.1,
+        "change": -0.25,
+        "note": "cut — first cut since 2020"
+      },
+      {
+        "date": "2025-05-20",
+        "value": 3.85,
+        "change": -0.25,
+        "note": "cut — post-election"
+      },
+      {
+        "date": "2025-07-08",
+        "value": 3.6,
+        "change": -0.25,
+        "note": "cut"
+      },
+      {
+        "date": "2025-09-02",
+        "value": 3.35,
+        "change": -0.25,
+        "note": "cut"
+      },
+      {
+        "date": "2025-11-04",
+        "value": 3.1,
+        "change": -0.25,
+        "note": "cut"
+      },
+      {
+        "date": "2026-02-03",
+        "value": 2.85,
+        "change": -0.25,
+        "note": "cut — estimated"
+      }
+    ]
+  },
+  "cameron_crosby_model": {
+    "description": "Cameron & Crosby (2000, Uni Melbourne): structural economic model estimating incumbent primary vote effect. Key variables: CPI annual change (inflation) and change in unemployment rate. GDP and real wage growth are NOT significant in Australia.",
+    "citation": "Cameron, L. & Crosby, M. (2000). Economic Record, 76(235), 354-364.",
+    "coefficients": {
+      "inflation_per_pp": -0.08,
+      "unemployment_change_per_pp": -0.58,
+      "note": "1pp rise in CPI → approx -0.08pp incumbent primary. 1pp rise in unemployment → -0.58pp incumbent primary. Coalition govts punished more for unemployment rises than Labor govts."
+    },
+    "current_estimate": {
+      "election_cpi": 2.4,
+      "current_cpi": 3.0,
+      "cpi_change_pp": 0.6,
+      "election_unemployment": 4.1,
+      "current_unemployment": 4.1,
+      "unemployment_change_pp": 0.0,
+      "cpi_vote_effect_pp": -0.05,
+      "unemployment_vote_effect_pp": -0.0,
+      "net_vote_effect_pp": -0.05,
+      "interpretation": "Economic conditions are broadly unchanged since the election (-0.05pp, within noise margin)."
+    }
+  }
+}
