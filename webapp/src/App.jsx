@@ -4183,8 +4183,6 @@ export default function App() {
     { id: "markets",     label: "Markets" },
     { id: "methodology", label: "Methodology" },
     { id: "about",       label: "About" },
-    { id: "faq",         label: "FAQ" },
-    { id: "glossary",    label: "Glossary" },
     { id: "changelog",   label: "Changelog" },
   ];
 
@@ -4204,7 +4202,7 @@ export default function App() {
         {/* Title row */}
         <div style={{ padding: isMobile ? "0 16px" : "0 24px", display: "flex", alignItems: "center", gap: 4, height: isMobile ? 44 : 56 }}>
           <span style={{ fontSize: isMobile ? 13 : 15, fontWeight: 800, letterSpacing: "-0.02em", marginRight: isMobile ? 0 : 16, whiteSpace: "nowrap", color: "#F8FAFC", flex: isMobile ? 1 : "none" }}>
-            🇦🇺 {isMobile ? "AU Election Dashboard" : "Australian Election Dashboard"}
+            🇦🇺 aus poll
           </span>
           {/* Desktop: tabs in title row */}
           {!isMobile && tabs.map(t => (
@@ -7954,7 +7952,7 @@ export default function App() {
             <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
             <div style={{ position: "relative" }}>
               <div style={STYLES.sectionLabel}>🇦🇺  About aus-poll</div>
-              <h1 style={{ ...STYLES.pageHeaderTitle, fontSize: isMobile ? 22 : 30 }}>Australian Election Dashboard</h1>
+              <h1 style={{ ...STYLES.pageHeaderTitle, fontSize: isMobile ? 22 : 30 }}>aus poll</h1>
               <p style={STYLES.pageHeaderSubtitle}>A seat-by-seat federal election modelling tool for all 151 House of Representatives divisions.</p>
             </div>
           </div>
@@ -8015,155 +8013,6 @@ export default function App() {
         </div>
       )}
 
-      {/* ══════════════════════ FAQ TAB ══════════════════════════════════════════ */}
-      {activeTab === "faq" && (
-        <div style={{ maxWidth: 960, margin: "0 auto", padding: isMobile ? "16px 14px" : "24px 24px" }}>
-
-          {/* Page header */}
-          <div style={{ ...STYLES.pageHeader, ...(isMobile && { padding: "20px 16px 18px" }) }}>
-            <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
-            <div style={{ position: "relative" }}>
-              <div style={STYLES.sectionLabel}>Help</div>
-              <h1 style={{ ...STYLES.pageHeaderTitle, fontSize: isMobile ? 22 : 30 }}>Frequently Asked Questions</h1>
-              <p style={STYLES.pageHeaderSubtitle}>Answers to the most common questions about how aus-poll works.</p>
-            </div>
-          </div>
-
-          <div style={STYLES.panel}>
-            {[
-              {
-                q: "Is this a prediction?",
-                a: "No. aus-poll is a scenario modelling tool. It shows seat outcomes given the polling inputs you specify. It does not make forward predictions, account for campaign dynamics, or claim to forecast the result of any election.",
-              },
-              {
-                q: "What is two-party preferred (2PP)?",
-                a: "In Australian preferential voting, every vote is eventually counted as a preference for either the ALP or the Coalition (the two major parties) after all minor party preferences are distributed. This final count is called two-party preferred and is used to determine the winner in most seats.",
-              },
-              {
-                q: "What is a swing?",
-                a: "A swing is the change in a party's vote share compared to a baseline — usually the previous election result. A +2% ALP swing means ALP primary votes increased by 2 percentage points from the baseline.",
-              },
-              {
-                q: "How often is data updated?",
-                a: "Poll data is updated as new polls are published. The election result constants (seat baselines, preference flows) reflect the 2025 AEC federal election results and are updated after each federal election.",
-              },
-              {
-                q: "Why does my seat show an unexpected result?",
-                a: "Seats where the final contest is not ALP vs. Coalition — such as a Teal independent or Greens seat — are not automatically modelled by the swing engine. For these seats, use the TCP Override control on the Model tab to manually enter the expected two-candidate preferred percentage.",
-              },
-              {
-                q: "What are teal independents?",
-                a: "Teal independents are moderate, community-backed independent candidates who primarily contest inner-city seats previously held by the Liberal Party. They typically run on platforms centred on climate action, integrity in politics, and gender equality. In this model, six seats are identified as teal contests: Warringah, Wentworth, Bradfield, Mackellar, Kooyong, and Goldstein.",
-              },
-              {
-                q: "Why are some seats excluded from the swing model?",
-                a: "Seats where the AEC two-candidate preferred count is not between ALP and the Coalition — for example, a Greens vs. Teal race, or an independent vs. ALP contest — cannot be modelled using a simple national swing. These seats require manual overrides.",
-              },
-              {
-                q: "What is a house effect?",
-                a: "A house effect is the systematic bias of a particular polling firm relative to the average of all polls. For example, if one pollster consistently shows ALP 2pp about 1 point higher than other pollsters, it has a +1% ALP house effect. The poll aggregation corrects for these biases so the aggregate is not skewed by any single firm's methodology.",
-              },
-              {
-                q: "What data sources are used?",
-                a: "Election result baselines come from the AEC (results.aec.gov.au) for the 2022 and 2025 federal elections. Polling data comes from Newspoll, RedBridge, DemosAU, Resolve/SMH, Roy Morgan, Essential Research, and YouGov. Betting markets come from Sportsbet and Betfair.",
-              },
-              {
-                q: "What is UNS and why doesn't this model use it?",
-                a: "UNS stands for Uniform National Swing — the assumption that every seat swings by the same amount as the national average. This is a simplification that ignores the fact that seats have very different compositions of minor party voters (Greens, Teal, One Nation) whose preferences flow very differently to ALP and Coalition. This model instead applies swings at the primary vote level and flows them through each seat's actual preference distribution.",
-              },
-            ].map(({ q, a }, i) => (
-              <div
-                key={i}
-                style={openFaq === i ? STYLES.faqItemOpen : { ...STYLES.faqItem, borderBottom: i < 9 ? "1px solid #E5E7EB" : "none" }}
-              >
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  onMouseEnter={e => { if (openFaq !== i) e.currentTarget.parentElement.style.background = "#F9FAFB"; }}
-                  onMouseLeave={e => { if (openFaq !== i) e.currentTarget.parentElement.style.background = ""; }}
-                  style={{ width: "100%", background: "none", border: "none", textAlign: "left", padding: "16px 16px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}
-                >
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172A", lineHeight: 1.5 }}>{q}</span>
-                  <span style={{
-                    width: 22, height: 22, borderRadius: "50%",
-                    background: openFaq === i ? "#3B82F6" : "#F1F5F9",
-                    color: openFaq === i ? "#fff" : "#6B7280",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 12, flexShrink: 0,
-                    transform: openFaq === i ? "rotate(180deg)" : "none",
-                    transition: "transform 0.2s, background 0.15s",
-                  }}>▾</span>
-                </button>
-                {openFaq === i && (
-                  <div style={STYLES.faqAnswer}>{a}</div>
-                )}
-              </div>
-            ))}
-          </div>
-
-        </div>
-      )}
-
-      {/* ══════════════════════ GLOSSARY TAB ══════════════════════════════════════ */}
-      {activeTab === "glossary" && (
-        <div style={{ maxWidth: 960, margin: "0 auto", padding: isMobile ? "16px 14px" : "24px 24px" }}>
-
-          {/* Page header */}
-          <div style={{ ...STYLES.pageHeader, ...(isMobile && { padding: "20px 16px 18px" }) }}>
-            <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
-            <div style={{ position: "relative" }}>
-              <div style={STYLES.sectionLabel}>Reference</div>
-              <h1 style={{ ...STYLES.pageHeaderTitle, fontSize: isMobile ? 22 : 30 }}>Glossary of Terms</h1>
-              <p style={STYLES.pageHeaderSubtitle}>Key electoral and modelling terms used throughout this dashboard.</p>
-            </div>
-          </div>
-
-          <div style={STYLES.panel}>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "8px 24px", alignItems: "start" }}>
-              {(() => {
-                const terms = [
-                  ["2CP", "Two-candidate preferred — the same concept as 2PP but used in state elections where the contest may not be ALP vs. Coalition."],
-                  ["2PP", "Two-party preferred — the final count of votes as either ALP or Coalition after all preference distributions are complete. Determines the winner in most House of Representatives seats."],
-                  ["AEC", "Australian Electoral Commission — the independent federal body responsible for conducting federal elections and publishing results."],
-                  ["Booth", "A polling place where voters cast ballots on election day. The AEC publishes results at booth level, enabling fine-grained geographic analysis."],
-                  ["DOP", "Distribution of Preferences — the count-by-count process of eliminating minor candidates and distributing their preferences until only two candidates remain."],
-                  ["Elasticity", "A measure of how strongly a seat responds to a national swing. Marginal seats tend to be more elastic; very safe seats less so."],
-                  ["FP / Primary vote", "First-preference votes — the voter's number-one choice before any preferences are distributed. Also called 'primary votes'."],
-                  ["House effect", "The systematic bias of a polling firm relative to the average of all pollsters. Corrected during poll aggregation so no single firm skews the aggregate."],
-                  ["Hung parliament", "An election result where no single party or coalition commands a majority of 76 seats in the 151-seat House of Representatives."],
-                  ["Majority", "76 seats or more in the 151-seat House of Representatives — the threshold required to govern in one's own right."],
-                  ["Redistribution", "A redrawing of electoral division boundaries, typically carried out by the AEC before each election cycle. Redistributions can shift notional margins."],
-                  ["Swing", "The change in a party's vote share compared to a prior election result or modelled baseline, expressed in percentage points."],
-                  ["TCP", "Two-candidate preferred — the count of votes between the final two candidates after all other candidates have been eliminated in a seat's preference distribution."],
-                  ["Teal independents", "Moderate, community-backed independents primarily contesting inner-city seats formerly held by the Liberal Party, running on climate and integrity platforms."],
-                  ["UNS", "Uniform National Swing — the (simplified) assumption that every seat swings by the same amount as the national average. This model does not use UNS; it applies swings at the primary vote level."],
-                  ["VEC", "Victorian Electoral Commission — the body responsible for conducting Victorian state elections."],
-                ];
-                let lastLetter = null;
-                return terms.flatMap(([term, def]) => {
-                  const letter = /^\d/.test(term) ? "#" : term[0].toUpperCase();
-                  const showHeader = letter !== lastLetter;
-                  if (showHeader) lastLetter = letter;
-                  const items = [];
-                  if (showHeader) items.push(
-                    <div key={`hdr-${letter}`} style={STYLES.glossaryLetterHead}>{letter}</div>
-                  );
-                  items.push(
-                    <div key={term} style={STYLES.glossaryTerm}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, fontSize: 13, color: "#0F172A", marginBottom: 4 }}>
-                        <span style={{ width: 4, height: 4, borderRadius: 2, background: "#3B82F6", flexShrink: 0, display: "inline-block" }} />
-                        {term}
-                      </div>
-                      <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.65 }}>{def}</div>
-                    </div>
-                  );
-                  return items;
-                });
-              })()}
-            </div>
-          </div>
-
-        </div>
-      )}
 
       {/* ══════════════════════ CHANGELOG TAB ══════════════════════════════════════ */}
       {activeTab === "changelog" && (
