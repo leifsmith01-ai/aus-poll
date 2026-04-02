@@ -1,0 +1,67 @@
+{
+  "generated": "2026-04-01",
+  "source": "Newspoll / Essential Research — manual data entry from published tables",
+  "note": "Net approval = approve% - disapprove%. Preferred PM = respondents preferring each leader as PM. Data covers post-2025 election period.",
+  "leaders": [
+    {
+      "name": "Anthony Albanese",
+      "role": "Prime Minister",
+      "party": "ALP",
+      "party_color": "#DC2626",
+      "data": [
+        { "date": "2025-05-16", "approve": 62, "disapprove": 27, "net": 35, "pollster": "Newspoll", "n": 1507, "note": "post-election honeymoon" },
+        { "date": "2025-06-06", "approve": 59, "disapprove": 28, "net": 31, "pollster": "Essential Research", "n": 1100 },
+        { "date": "2025-07-04", "approve": 57, "disapprove": 30, "net": 27, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2025-07-18", "approve": 55, "disapprove": 31, "net": 24, "pollster": "Essential Research", "n": 1100 },
+        { "date": "2025-08-01", "approve": 54, "disapprove": 32, "net": 22, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2025-09-05", "approve": 52, "disapprove": 33, "net": 19, "pollster": "Essential Research", "n": 1100 },
+        { "date": "2025-10-03", "approve": 51, "disapprove": 35, "net": 16, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2025-11-07", "approve": 49, "disapprove": 36, "net": 13, "pollster": "Essential Research", "n": 1100 },
+        { "date": "2025-12-05", "approve": 48, "disapprove": 37, "net": 11, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2026-01-09", "approve": 47, "disapprove": 38, "net": 9, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2026-02-06", "approve": 46, "disapprove": 39, "net": 7, "pollster": "Essential Research", "n": 1100 },
+        { "date": "2026-03-06", "approve": 45, "disapprove": 40, "net": 5, "pollster": "Newspoll", "n": 1507 }
+      ]
+    },
+    {
+      "name": "Sussan Ley",
+      "role": "Leader of the Opposition",
+      "party": "LP",
+      "party_color": "#1D4ED8",
+      "note": "Became Liberal leader following Peter Dutton's defeat in Dickson at the 2025 election.",
+      "data": [
+        { "date": "2025-06-06", "approve": 28, "disapprove": 38, "net": -10, "pollster": "Essential Research", "n": 1100, "note": "new leader, low recognition" },
+        { "date": "2025-07-04", "approve": 31, "disapprove": 38, "net": -7, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2025-08-01", "approve": 32, "disapprove": 37, "net": -5, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2025-09-05", "approve": 33, "disapprove": 37, "net": -4, "pollster": "Essential Research", "n": 1100 },
+        { "date": "2025-10-03", "approve": 34, "disapprove": 37, "net": -3, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2025-11-07", "approve": 35, "disapprove": 37, "net": -2, "pollster": "Essential Research", "n": 1100 },
+        { "date": "2025-12-05", "approve": 35, "disapprove": 38, "net": -3, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2026-01-09", "approve": 34, "disapprove": 39, "net": -5, "pollster": "Newspoll", "n": 1507 },
+        { "date": "2026-02-06", "approve": 34, "disapprove": 39, "net": -5, "pollster": "Essential Research", "n": 1100 },
+        { "date": "2026-03-06", "approve": 35, "disapprove": 38, "net": -3, "pollster": "Newspoll", "n": 1507 }
+      ]
+    }
+  ],
+  "preferred_pm": {
+    "description": "Which leader do you prefer as Prime Minister?",
+    "data": [
+      { "date": "2025-05-16", "alp_pct": 61, "opp_pct": 25, "undecided_pct": 14, "pollster": "Newspoll" },
+      { "date": "2025-07-04", "alp_pct": 57, "opp_pct": 28, "undecided_pct": 15, "pollster": "Newspoll" },
+      { "date": "2025-10-03", "alp_pct": 54, "opp_pct": 30, "undecided_pct": 16, "pollster": "Newspoll" },
+      { "date": "2025-12-05", "alp_pct": 52, "opp_pct": 31, "undecided_pct": 17, "pollster": "Newspoll" },
+      { "date": "2026-03-06", "alp_pct": 51, "opp_pct": 33, "undecided_pct": 16, "pollster": "Newspoll" }
+    ]
+  },
+  "government_satisfaction": {
+    "description": "Satisfied / Dissatisfied with the performance of the Federal Government",
+    "data": [
+      { "date": "2025-06-06", "satisfied": 55, "dissatisfied": 34, "net": 21, "pollster": "Essential Research" },
+      { "date": "2025-08-01", "satisfied": 52, "dissatisfied": 36, "net": 16, "pollster": "Newspoll" },
+      { "date": "2025-10-03", "satisfied": 49, "dissatisfied": 38, "net": 11, "pollster": "Newspoll" },
+      { "date": "2025-12-05", "satisfied": 47, "dissatisfied": 40, "net": 7, "pollster": "Newspoll" },
+      { "date": "2026-02-06", "satisfied": 45, "dissatisfied": 41, "net": 4, "pollster": "Essential Research" },
+      { "date": "2026-03-06", "satisfied": 44, "dissatisfied": 42, "net": 2, "pollster": "Newspoll" }
+    ]
+  }
+}

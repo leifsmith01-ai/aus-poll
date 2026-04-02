@@ -535,6 +535,69 @@ def build_trend(
     return trend
 
 
+def compute_state_swings(
+    polls: list[dict],
+    national_house_effects: dict[str, dict[str, float]],
+    ref_date: date,
+    window_days: int = 60,
+) -> dict[str, dict]:
+    """
+    Compute state-level TPP deviations from the national aggregate.
+
+    For each state that has at least MIN_POLLS_FOR_HE polls with scope=<STATE>,
+    computes the state-level weighted aggregate TPP and returns the deviation
+    from the national aggregate as the state swing differential.
+
+    Returns:
+        Dict mapping state code (e.g. "NSW") to:
+          { "tpp_mean", "tpp_lo95", "tpp_hi95", "deviation_from_national", "n" }
+
+    When no state polls are available, returns an empty dict.
+    This is a framework for when state-level polling data becomes available
+    (e.g. YouGov MRP sub-national estimates, state-specific ReachTEL polls).
+
+    To add state polls, include entries in bludgertrack.json with scope="NSW" etc.
+    and a tpp or alp/coal/grn/on fields for that state. The aggregator will then
+    compute the deviation from national and populate this field automatically.
+    """
+    STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"]
+    result = {}
+
+    # National TPP at ref_date for computing deviations
+    nat_he = national_house_effects.get("tpp_eff", {})
+    nat_agg = aggregate_at_date(polls, ref_date, nat_he, "tpp_eff", window_days)
+    if nat_agg is None:
+        return {}
+    national_mean = nat_agg["mean"]
+
+    for state in STATES:
+        state_polls = [p for p in polls if p.get("scope", "NAT").upper() == state]
+        if len(state_polls) < MIN_POLLS_FOR_HE:
+            continue
+
+        # For state polls, augment with tpp_eff (same imputation as national)
+        for p in state_polls:
+            if p.get("tpp_eff") is None:
+                p["tpp_eff"] = p.get("tpp") if p.get("tpp") is not None else _impute_tpp(p)
+
+        # State-level house effects (computed within state poll sample)
+        state_he = compute_house_effects(state_polls, "tpp_eff", ref_date)
+        agg = aggregate_at_date(state_polls, ref_date, state_he, "tpp_eff", window_days)
+        if agg is None:
+            continue
+
+        result[state] = {
+            "tpp_mean": agg["mean"],
+            "tpp_lo95": agg["lo95"],
+            "tpp_hi95": agg["hi95"],
+            "deviation_from_national": round(agg["mean"] - national_mean, 2),
+            "n": agg["n"],
+        }
+        logger.info("State %s: TPP=%.1f%% (deviation=%.1fpp from national)", state, agg["mean"], agg["mean"] - national_mean)
+
+    return result
+
+
 def run(
     input_path: Path = INPUT_FILE,
     output_path: Path = OUTPUT_FILE,
@@ -619,6 +682,14 @@ def run(
             k: v for k, v in sorted(he.items(), key=lambda x: -abs(x[1]))
         }
 
+    # Step 5b: State-level swing deviations (populated when state polls are present)
+    logger.info("Computing state-level swing deviations ...")
+    state_swings = compute_state_swings(polls, house_effects, ref_date)
+    if state_swings:
+        logger.info("State swings computed for: %s", list(state_swings.keys()))
+    else:
+        logger.info("No state-level polls found (scope=<STATE> entries needed in bludgertrack.json)")
+
     # Step 6: Assemble and write output
     output = {
         "generated": ref_date.isoformat(),
@@ -636,6 +707,7 @@ def run(
         "house_effects": he_summary,
         "current": current,
         "trend": trend,
+        "state_swings": state_swings,
         "polls_with_imputed_tpp": [
             {k: v for k, v in p.items() if k != "tpp_imputed" or p["tpp_imputed"] is not None}
             for p in polls
