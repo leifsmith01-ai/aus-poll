@@ -140,6 +140,55 @@ VIC_PRIMARY_PARTIES = ["alp", "lp", "grn", "ind", "on"]
 VIC_POLLS_FILE = POLLS_DIR / "vic_polls.json"
 VIC_OUTPUT_FILE = POLLS_DIR / "vic_aggregated.json"
 
+# ── NSW state election preference flows ───────────────────────────────────────
+# NSW uses full compulsory preferential voting. Flows based on NSWEC 2023 DOP.
+NSW_PREF_FLOWS = {
+    "grn_alp":   0.880,  # Greens → ALP (NSWEC 2023: statewide avg ~88%)
+    "ind_alp":   0.550,  # Independents → ALP (varies; suburban independents ~55%)
+    "on_alp":    0.200,  # One Nation → ALP (NSWEC 2023: ~20%)
+    "other_alp": 0.450,  # Other minor parties → ALP
+}
+NSW_PRIMARY_PARTIES = ["alp", "lp", "np", "grn", "ind", "on"]
+NSW_POLLS_FILE  = POLLS_DIR / "nsw_polls.json"
+NSW_OUTPUT_FILE = POLLS_DIR / "nsw_aggregated.json"
+
+# ── QLD state election preference flows ───────────────────────────────────────
+# QLD uses full compulsory preferential voting. Flows based on ECQ 2024 DOP.
+QLD_PREF_FLOWS = {
+    "grn_alp":   0.820,  # Greens → ALP (ECQ 2024: statewide avg ~82%)
+    "ind_alp":   0.500,  # Independents → ALP
+    "on_alp":    0.180,  # One Nation → ALP (ECQ 2024: ~18%)
+    "other_alp": 0.400,  # Other minor parties → ALP
+}
+QLD_PRIMARY_PARTIES = ["alp", "lnp", "grn", "ind", "on"]
+QLD_POLLS_FILE  = POLLS_DIR / "qld_polls.json"
+QLD_OUTPUT_FILE = POLLS_DIR / "qld_aggregated.json"
+
+# Registry of supported state aggregations
+STATE_AGGREGATION_REGISTRY = {
+    "vic": {
+        "polls_file":    VIC_POLLS_FILE,
+        "output_file":   VIC_OUTPUT_FILE,
+        "pref_flows":    VIC_PREF_FLOWS,
+        "primary_parties": VIC_PRIMARY_PARTIES,
+        "coal_key":      "lp",
+    },
+    "nsw": {
+        "polls_file":    NSW_POLLS_FILE,
+        "output_file":   NSW_OUTPUT_FILE,
+        "pref_flows":    NSW_PREF_FLOWS,
+        "primary_parties": NSW_PRIMARY_PARTIES,
+        "coal_key":      "lp",  # LP is the major Coalition party in NSW state
+    },
+    "qld": {
+        "polls_file":    QLD_POLLS_FILE,
+        "output_file":   QLD_OUTPUT_FILE,
+        "pref_flows":    QLD_PREF_FLOWS,
+        "primary_parties": QLD_PRIMARY_PARTIES,
+        "coal_key":      "lnp",
+    },
+}
+
 
 def _impute_vic_tpp(poll: dict, flows: dict = VIC_PREF_FLOWS) -> Optional[float]:
     """
@@ -278,6 +327,160 @@ def run_vic(
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     logger.info("Wrote VIC aggregated polls → %s", output_path)
+
+    return output
+
+
+def _impute_state_tpp(poll: dict, pref_flows: dict, coal_key: str = "lp") -> Optional[float]:
+    """
+    Estimate ALP 2PP from state primary votes when TPP not reported.
+
+    Generalised version of _impute_vic_tpp for any state. Uses the state's
+    pref_flows and the coalition party key (e.g. 'lp' for NSW/VIC, 'lnp' for QLD).
+    """
+    alp  = poll.get("alp")
+    coal = poll.get(coal_key)
+    grn  = poll.get("grn")
+    if any(v is None for v in [alp, coal, grn]):
+        return None
+
+    ind   = poll.get("ind",  0.0) or 0.0
+    on    = poll.get("on",   0.0) or 0.0
+    other = max(0.0, 100.0 - alp - coal - grn - ind - on)
+
+    alp_tcp = (
+        alp
+        + grn   * pref_flows["grn_alp"]
+        + ind   * pref_flows["ind_alp"]
+        + on    * pref_flows["on_alp"]
+        + other * pref_flows["other_alp"]
+    )
+    coal_tcp = (
+        coal
+        + grn   * (1 - pref_flows["grn_alp"])
+        + ind   * (1 - pref_flows["ind_alp"])
+        + on    * (1 - pref_flows["on_alp"])
+        + other * (1 - pref_flows["other_alp"])
+    )
+    total = alp_tcp + coal_tcp
+    if total <= 0:
+        return None
+    return round(alp_tcp / total * 100, 2)
+
+
+def run_state(
+    state: str,
+    input_path: Path = None,
+    output_path: Path = None,
+    verbose: bool = False,
+) -> dict:
+    """
+    State poll aggregation pipeline (NSW, QLD, and other registered states).
+
+    Mirrors run_vic() but is parameterised by the state registry entry so the
+    same logic covers any state with a polls JSON file.
+
+    Usage:
+        python -m pipeline.poll_aggregator --state nsw
+        python -m pipeline.poll_aggregator --state qld
+    """
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+    cfg = STATE_AGGREGATION_REGISTRY.get(state.lower())
+    if cfg is None:
+        logger.error("No aggregation config for state '%s'. Supported: %s",
+                     state, list(STATE_AGGREGATION_REGISTRY))
+        return {}
+
+    in_path  = input_path  or cfg["polls_file"]
+    out_path = output_path or cfg["output_file"]
+    pref_flows = cfg["pref_flows"]
+    coal_key   = cfg["coal_key"]
+    primary_parties = cfg["primary_parties"]
+
+    if not in_path.exists():
+        logger.error("%s polls file not found: %s", state.upper(), in_path)
+        return {}
+
+    with open(in_path, encoding="utf-8") as f:
+        raw = json.load(f)
+
+    polls = raw.get("polls", [])
+    logger.info("Loaded %d %s polls from %s", len(polls), state.upper(), in_path)
+
+    if not polls:
+        logger.warning("No %s polls to aggregate.", state.upper())
+        return {}
+
+    # Impute TPP where missing
+    n_imputed = 0
+    for p in polls:
+        if p.get("tpp") is None:
+            imputed = _impute_state_tpp(p, pref_flows, coal_key)
+            if imputed is not None:
+                p["tpp_imputed"] = imputed
+                n_imputed += 1
+        else:
+            p["tpp_imputed"] = None
+    for p in polls:
+        p["tpp_eff"] = p.get("tpp") if p.get("tpp") is not None else p.get("tpp_imputed")
+
+    logger.info("Imputed %s TPP for %d polls", state.upper(), n_imputed)
+
+    metrics = primary_parties + ["tpp_eff"]
+    for p in polls:
+        for m in metrics:
+            if p.get(m) is None and m not in ("tpp_eff",):
+                p[m] = None  # ensure key present for house-effect computation
+
+    poll_dates = [date.fromisoformat(p["date"]) for p in polls]
+    ref_date   = max(poll_dates)
+
+    house_effects: dict = {}
+    for metric in metrics:
+        house_effects[metric] = compute_house_effects(polls, metric, ref_date)
+
+    first_date = min(poll_dates)
+    logger.info("Building %s trend %s → %s ...", state.upper(), first_date, ref_date)
+    trend = build_trend(polls, house_effects, metrics, first_date, ref_date)
+
+    current_window = 60
+    current: dict = {}
+    for metric in metrics:
+        he = house_effects.get(metric, {})
+        result = aggregate_at_date(polls, ref_date, he, metric, window_days=current_window)
+        current[metric] = result
+
+    he_summary = {
+        metric: {k: v for k, v in sorted(he.items(), key=lambda x: -abs(x[1]))}
+        for metric, he in house_effects.items()
+    }
+
+    output = {
+        "generated":   ref_date.isoformat(),
+        "jurisdiction": raw.get("jurisdiction", f"{state.lower()}_state"),
+        "election_date": raw.get("election_date"),
+        "source":      raw.get("source"),
+        "methodology": {
+            "half_life_days":        HALF_LIFE_DAYS,
+            "smoothing_window_days": SMOOTHING_WINDOW_DAYS,
+            "trend_step_days":       TREND_STEP_DAYS,
+            "tpp_pref_flows":        pref_flows,
+            "coalition_key":         coal_key,
+        },
+        "house_effects": he_summary,
+        "current":       current,
+        "trend":         trend,
+        "polls":         polls,
+    }
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
+    logger.info("Wrote %s aggregated polls → %s", state.upper(), out_path)
 
     return output
 
@@ -731,15 +934,21 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
-    if args.state.lower() == "vic":
-        # VIC state poll aggregation
-        vic_input  = Path(args.input)  if args.input  != str(INPUT_FILE)  else VIC_POLLS_FILE
-        vic_output = Path(args.output) if args.output != str(OUTPUT_FILE) else VIC_OUTPUT_FILE
-        result = run_vic(vic_input, vic_output, verbose=args.verbose)
+    state_arg = args.state.lower() if args.state else ""
+    if state_arg in STATE_AGGREGATION_REGISTRY:
+        # State-specific aggregation (VIC, NSW, QLD, ...)
+        cfg = STATE_AGGREGATION_REGISTRY[state_arg]
+        in_path  = Path(args.input)  if args.input  != str(INPUT_FILE)  else cfg["polls_file"]
+        out_path = Path(args.output) if args.output != str(OUTPUT_FILE) else cfg["output_file"]
+        if state_arg == "vic":
+            result = run_vic(in_path, out_path, verbose=args.verbose)
+        else:
+            result = run_state(state_arg, in_path, out_path, verbose=args.verbose)
         if args.plot and result:
-            print("\n=== VIC Current Aggregate (house-effect corrected, last 60 days) ===")
+            primary_parties = cfg.get("primary_parties", ["alp", cfg["coal_key"], "grn", "ind"])
+            print(f"\n=== {state_arg.upper()} Current Aggregate (house-effect corrected, last 60 days) ===")
             current = result.get("current", {})
-            for m in ["alp", "lp", "grn", "ind", "tpp_eff"]:
+            for m in primary_parties + ["tpp_eff"]:
                 c = current.get(m)
                 if c:
                     label = m.upper().replace("_EFF", " TPP")

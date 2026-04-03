@@ -2570,7 +2570,7 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
 //   For these seats, ON is estimated as baseline + swings.on and compared against
 //   statewide ALP/Coal to auto-detect on_v_alp / on_v_coal TCP matchups.
 // stateOverrides: { seatId: { tcpMatchup, tcpPct, on, alp, coal, grn, ind, forceGroup } } — seat-level overrides.
-function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, prefFlows, coalParties, swings, regionMap = null, regionSwingMult = null, onFpLookup = null, onThreshold = 6.5, stateOverrides = null) {
+function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, prefFlows, coalParties, swings, regionMap = null, regionSwingMult = null, onFpLookup = null, onThreshold = 6.5, stateOverrides = null, useElasticityFlag = false, seatPrefFlowsMap = null, baselinePrim = null) {
   const new2pp = compute2ppFn(newPrim, prefFlows);
   const swing2pp = new2pp - baseline2pp;
 
@@ -2593,6 +2593,22 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
     // Regional swing multiplier: metro seats track state swing; regional/rural seats respond less
     const region = regionMap ? (regionMap[seat.name] ?? "outer_metro") : null;
     const regionMult = (regionMap && regionSwingMult) ? (regionSwingMult[region] ?? 1.0) : 1.0;
+
+    // Per-seat preference flow override: compute a seat-specific 2PP swing when local flows differ
+    // from the statewide average (e.g. inner-city Greens seats flow to ALP more strongly than rural).
+    const seatFlowOverride = seatPrefFlowsMap?.[seat.id];
+    let effectiveSwing2pp = swing2pp;
+    if (seatFlowOverride && baselinePrim) {
+      const mergedFlows = { ...prefFlows, ...seatFlowOverride };
+      const seatNew2pp = compute2ppFn(newPrim, mergedFlows);
+      const seatBl2pp = compute2ppFn(baselinePrim, mergedFlows);
+      effectiveSwing2pp = seatNew2pp - seatBl2pp;
+    }
+    // Seat-level elasticity: marginal seats respond more strongly to swings than safe seats.
+    // Applied only to ALP vs Coalition matchups where the 2PP concept is well-defined.
+    const elastMult = (useElasticityFlag && (isAlp1 || isAlp2))
+      ? seatElasticityMult(isAlp1 ? 50 + seat.margin : 50 - seat.margin)
+      : 1.0;
 
     // Per-seat override: manual TCP matchup or TCP% bypass
     const ov = stateOverrides?.[seat.id];
@@ -2736,7 +2752,7 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
         on: ov.on != null ? ov.on : (newPrim.on ?? 0),
       };
       const ovNew2pp = compute2ppFn(ovPrim, prefFlows);
-      const ovSwing2pp = (ovNew2pp - baseline2pp) * regionMult;
+      const ovSwing2pp = (ovNew2pp - baseline2pp) * regionMult * elastMult;
       let ovSwingToT1 = 0;
       if (isAlp1 && isCoal2) ovSwingToT1 = ovSwing2pp;
       else if (isCoal1 && isAlp2) ovSwingToT1 = -ovSwing2pp;
@@ -2760,8 +2776,8 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
 
     // ── Standard 2PP-swing calculation ───────────────────────────────────────
     let swingToT1 = 0;
-    if (isAlp1 && isCoal2) swingToT1 = swing2pp * regionMult;
-    else if (isCoal1 && isAlp2) swingToT1 = -swing2pp * regionMult;
+    if (isAlp1 && isCoal2) swingToT1 = effectiveSwing2pp * regionMult * elastMult;
+    else if (isCoal1 && isAlp2) swingToT1 = -effectiveSwing2pp * regionMult * elastMult;
     else if (isGrn1 && isAlp2) swingToT1 = (swings.grn - swings.alp) / 2 * regionMult;
     else if (isGrn1 && isCoal2) swingToT1 = (swings.grn - (swings.coal ?? 0)) / 2 * regionMult;
     else if (isAlp1 && isGrn2) swingToT1 = (swings.alp - swings.grn) / 2 * regionMult;
@@ -3347,6 +3363,37 @@ export default function App() {
 
   // ── NSW 2023 model state ──────────────────────────────────────────────────
   // Baselines: ALP 37.6  Coalition 37.0 (LP 28.6 + NP 8.4)  GRN 10.4  IND 8.5  ON 2.0  other 4.5  2PP 53.2
+
+  // Per-seat Greens→ALP preference flows for NSW 2023.
+  // Inner-city seats (eastern/inner-western Sydney, Blue Mountains) see higher GRN→ALP flows
+  // than the statewide 88% because Green voters there are overwhelmingly progressive.
+  // Regional/Hunter Valley seats see lower flows (~78–82%) — Greens voters in mining areas
+  // are more likely to exhaust or flow to NP than inner-city counterparts.
+  // Source: NSWEC 2023 DOP analysis; statewide average = 0.88.
+  const NSW_SEAT_PREF_FLOWS_2023 = {
+    // Inner-city / inner-western Sydney — above average GRN→ALP
+    7005: { grn_alp: 0.92 }, // Coogee (ALP vs LP — inner eastern, progressive GRN voters)
+    7004: { grn_alp: 0.91 }, // Strathfield (ALP vs LP — inner western, multicultural inner city)
+    7076: { grn_alp: 0.91 }, // Kogarah (ALP vs LP — inner southern suburbs)
+    7093: { grn_alp: 0.91 }, // Maroubra (ALP vs LP — inner eastern, high GRN primary)
+    7094: { grn_alp: 0.90 }, // Heffron (ALP vs LP — Maroubra/Randwick area)
+    7075: { grn_alp: 0.90 }, // Rockdale (ALP vs LP — inner south, high Greens)
+    7074: { grn_alp: 0.90 }, // Blue Mountains (ALP vs LP — leafy/progressive, high GRN flow)
+    7073: { grn_alp: 0.89 }, // Kotara (ALP vs LP — inner Newcastle, above average)
+    // Hunter Valley / regional NSW — below average GRN→ALP
+    7062: { grn_alp: 0.78 }, // Upper Hunter (NP vs ALP — coal mining, GRN voters more conservative)
+    7064: { grn_alp: 0.79 }, // Tamworth (NP vs ALP — regional centre, rural Greens)
+    7066: { grn_alp: 0.78 }, // Dubbo (NP vs ALP — western NSW rural)
+    7068: { grn_alp: 0.80 }, // Bathurst (NP vs ALP — regional city, mixed GRN voters)
+    7061: { grn_alp: 0.80 }, // Oxley (NP vs ALP — mining/farming, lower GRN flow)
+    7063: { grn_alp: 0.80 }, // Port Macquarie (NP vs ALP — coastal regional)
+    7081: { grn_alp: 0.81 }, // Cessnock (ALP vs LP — Hunter mining seat)
+    7082: { grn_alp: 0.82 }, // Charlestown (ALP vs LP — Lake Macquarie)
+    7083: { grn_alp: 0.82 }, // Wallsend (ALP vs LP — inner Newcastle, industrial)
+    7084: { grn_alp: 0.82 }, // Maitland (ALP vs LP — Hunter Valley)
+    7085: { grn_alp: 0.83 }, // Newcastle (ALP vs LP — inner Newcastle, slightly higher)
+  };
+
   const NSW_BL = { alp: 37.6, coal: 37.0, grn: 10.4, ind: 8.5, on: 2.0 };
   const NSW_2PP = 53.2;
   const NSW_COAL = new Set(["LP", "NP"]);
@@ -3407,8 +3454,9 @@ export default function App() {
       useNswRegionalSwing ? NSW_DISTRICT_REGION : null,
       useNswRegionalSwing ? NSW_REGION_SWING_MULT : null,
       NSW_SEAT_ON_FP_2023, 6.5, nswSeatOverrides,
+      useElasticity, NSW_SEAT_PREF_FLOWS_2023, NSW_BL,
     );
-  }, [nswPrim, nswFlows, nswOnTcp, useNswRegionalSwing, nswSeatOverrides]);
+  }, [nswPrim, nswFlows, nswOnTcp, useNswRegionalSwing, nswSeatOverrides, useElasticity]);
   const nswProjCounts = useMemo(() => { const c = {}; nswModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [nswModelledSeats]);
   const nswBaseCounts = useMemo(() => { const c = {}; NSW_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const nswChanged = useMemo(() => nswModelledSeats.filter(s => s.modelled.changed), [nswModelledSeats]);
@@ -3449,6 +3497,30 @@ export default function App() {
   // ── QLD 2024 model state ──────────────────────────────────────────────────
   // Baselines: ALP 33.4  Coalition (LNP) 40.3  GRN 11.5  IND 6.6  ON 8.2  ALP 2PP 46.3
   // Source: ECQ 2024 final first-preference results (total = 100.0)
+
+  // Per-seat Greens→ALP preference flows for QLD 2024.
+  // Inner-Brisbane seats have higher GRN→ALP flows than statewide (82%) due to progressive
+  // demographics; rural Central/Western QLD seats see lower flows from conservative Green voters.
+  // Source: ECQ 2024 DOP analysis; statewide average = 0.82.
+  const QLD_SEAT_PREF_FLOWS_2024 = {
+    // Inner Brisbane — above average GRN→ALP
+    7204: { grn_alp: 0.89 }, // Greenslopes (LNP vs ALP — inner Brisbane, high-education progressive)
+    7205: { grn_alp: 0.89 }, // McConnel (LNP vs ALP — inner Brisbane CBD fringe)
+    7211: { grn_alp: 0.87 }, // Inala (ALP vs LNP — outer southwestern Brisbane, high GRN→ALP)
+    7212: { grn_alp: 0.87 }, // Toohey (ALP vs LNP — southern Brisbane suburban)
+    7206: { grn_alp: 0.85 }, // Everton (LNP vs ALP — northern Brisbane suburban)
+    7209: { grn_alp: 0.85 }, // Mundingburra (LNP vs ALP — Townsville inner, mixed demographics)
+    // Rural / regional QLD — below average GRN→ALP
+    7231: { grn_alp: 0.74 }, // Nanango (LNP vs ALP — Darling Downs/SE QLD rural)
+    7232: { grn_alp: 0.73 }, // Warrego (LNP vs ALP — western QLD, conservative rural)
+    7233: { grn_alp: 0.74 }, // Gympie (LNP vs ALP — Sunshine Coast hinterland)
+    7241: { grn_alp: 0.75 }, // Bundaberg (ALP vs LNP — regional coastal, conservative Greens)
+    7242: { grn_alp: 0.74 }, // Rockhampton (ALP vs LNP — mining/beef, rural Greens)
+    7243: { grn_alp: 0.75 }, // Mulgrave (ALP vs LNP — Cairns hinterland, regional)
+    7234: { grn_alp: 0.76 }, // Buderim (LNP vs ALP — Sunshine Coast, outer suburban)
+    7235: { grn_alp: 0.76 }, // Caloundra (LNP vs ALP — Sunshine Coast, outer suburban)
+  };
+
   const QLD_BL = { alp: 33.4, coal: 40.3, grn: 11.5, ind: 6.6, on: 8.2 };
   const QLD_2PP = 46.3;
   const QLD_COAL = new Set(["LNP"]);
@@ -3509,8 +3581,9 @@ export default function App() {
       useQldRegionalSwing ? QLD_DISTRICT_REGION : null,
       useQldRegionalSwing ? QLD_REGION_SWING_MULT : null,
       QLD_SEAT_ON_FP_2024, 6.5, qldSeatOverrides,
+      useElasticity, QLD_SEAT_PREF_FLOWS_2024, QLD_BL,
     );
-  }, [qldPrim, qldFlows, qldOnTcp, useQldRegionalSwing, qldSeatOverrides]);
+  }, [qldPrim, qldFlows, qldOnTcp, useQldRegionalSwing, qldSeatOverrides, useElasticity]);
   const qldProjCounts = useMemo(() => { const c = {}; qldModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [qldModelledSeats]);
   const qldBaseCounts = useMemo(() => { const c = {}; QLD_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const qldChanged = useMemo(() => qldModelledSeats.filter(s => s.modelled.changed), [qldModelledSeats]);
@@ -3588,8 +3661,9 @@ export default function App() {
       useWaRegionalSwing ? WA_DISTRICT_REGION : null,
       useWaRegionalSwing ? WA_REGION_SWING_MULT : null,
       null, 6.5, waSeatOverrides,
+      useElasticity, null, WA_BL,
     );
-  }, [waPrim, waFlows, waOnTcp, useWaRegionalSwing, waSeatOverrides]);
+  }, [waPrim, waFlows, waOnTcp, useWaRegionalSwing, waSeatOverrides, useElasticity]);
   const waProjCounts = useMemo(() => { const c = {}; waModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [waModelledSeats]);
   const waBaseCounts = useMemo(() => { const c = {}; WA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const waChanged = useMemo(() => waModelledSeats.filter(s => s.modelled.changed), [waModelledSeats]);
@@ -3633,6 +3707,27 @@ export default function App() {
   // ON preference flows: despite LP's 16pp primary collapse, ON voters (mostly ex-LP)
   // preferenced back to LP at ~78%, keeping 2PP change modest (+2.5pp) vs the primary vote drama.
   // onCoalOriginFactor lets users model higher ALP flows when ON surge is driven by LP defection.
+
+  // Per-seat ON first-preference baselines for SA 2026.
+  // SA has uniquely high statewide ON (21.6%), concentrated most heavily in rural/outback seats
+  // but also present in outer-suburban and fringe-metro electorates.
+  // Ngadjuri (ON won) had by far the highest ON FP; rural IND-held and LP outback seats follow.
+  // Source: ECSA 2026 provisional results — first preferences by district.
+  const SA_SEAT_ON_FP_2026 = {
+    7423: 45.2, // Ngadjuri (ON won — outback/Stuart Plains, strongest ON seat in SA)
+    7422: 31.5, // Frome (IND — rural outback, ON heavily competitive)
+    7424: 26.8, // Narungga (IND — Yorke Peninsula, ON strong in agricultural regions)
+    7421: 22.4, // Mount Gambier (IND — far south-east, LP collapse boosted ON)
+    7420: 19.6, // Schubert (LP — Barossa Valley, ex-LP voters defected to ON)
+    7419: 17.8, // Morphett (LP — Fleurieu Peninsula rural fringe)
+    7415: 16.4, // Flinders (ALP provisional — Eyre Peninsula, historically ON-competitive)
+    7411: 12.5, // Heysen (LP — Adelaide Hills fringe, outer suburban ON base)
+    7416:  9.8, // Bragg (LP — eastern suburbs, ON below-average for LP seat)
+    7407:  8.5, // Playford (ALP — northern outer suburbs, working-class ON presence)
+    7404:  7.2, // Florey (ALP — northern suburbs)
+    7401:  7.0, // King (ALP — northern outer suburbs)
+  };
+
   const SA_BL = { alp: 39.1, coal: 18.7, grn: 11.1, ind: 4.7, on: 21.6 };
   const SA_2PP = 57.4;
   const SA_COAL = new Set(["LP"]);
@@ -3672,9 +3767,10 @@ export default function App() {
     return computeModelledSeatsState(SA_SEATS, saPrim, compute2pp, baseline2pp, saFlows, SA_COAL, s,
       useSaRegionalSwing ? SA_DISTRICT_REGION : null,
       useSaRegionalSwing ? SA_REGION_SWING_MULT : null,
-      null, 6.5, saSeatOverrides,
+      SA_SEAT_ON_FP_2026, 6.5, saSeatOverrides,
+      useElasticity, null, SA_BL,
     );
-  }, [saPrim, saFlows, saOnTcp, useSaRegionalSwing, saSeatOverrides]);
+  }, [saPrim, saFlows, saOnTcp, useSaRegionalSwing, saSeatOverrides, useElasticity]);
   const saProjCounts = useMemo(() => { const c = {}; saModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [saModelledSeats]);
   const saBaseCounts = useMemo(() => { const c = {}; SA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const saChanged = useMemo(() => saModelledSeats.filter(s => s.modelled.changed), [saModelledSeats]);
@@ -3714,6 +3810,15 @@ export default function App() {
 
   // ── NT 2024 model state ───────────────────────────────────────────────────
   // Baselines: ALP 30.5  Coalition (CLP) 40.5  GRN 5.5  IND 12.5  ON 1.5  other 9.5
+  //
+  // NT uses optional-preferential voting: voters may mark preferences for as few or as many
+  // candidates as they wish. In practice ~25% of minor-party votes exhaust before reaching
+  // the final 2CP count. This reduces the effective preference contribution from Greens/IND/ON
+  // voters compared to compulsory-preference states (NSW, QLD, VIC, SA, WA).
+  // Applied to the compute2pp function below via (1 - NT_EXHAUST_RATE) scaling of minor flows.
+  // Source: NTEC 2024 DOP data — exhaustion rate estimated from minor candidate distributions.
+  const NT_EXHAUST_RATE = 0.25;
+
   const NT_BL = { alp: 30.5, coal: 40.5, grn: 5.5, ind: 12.5, on: 1.5 };
   const NT_2PP = 45.0;  // approximate (NT doesn't publish official 2PP)
   const NT_COAL = new Set(["CLP"]);
@@ -3732,19 +3837,22 @@ export default function App() {
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
       const other = Math.max(0, 100 - p.alp - p.coal - p.grn - ntPrim.ind - onV);
+      // Optional-preferential exhaustion: ~25% of minor-party votes never reach the final 2CP.
+      // Scale all minor-party flows by (1 - NT_EXHAUST_RATE) to account for this.
+      const ef = NT_EXHAUST_RATE;
       if (ntOnTcp === "on_v_alp") {
-        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + ntPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
-        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + ntPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
+        const a = p.alp + (1 - ef) * (p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + ntPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on);
+        const on = onV + (1 - ef) * (p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + ntPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on));
         return a / (a + on) * 100;
       }
       if (ntOnTcp === "on_v_coal") {
-        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + ntPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
-        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + ntPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
+        const on = onV + (1 - ef) * (p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + ntPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal);
+        const c = p.coal + (1 - ef) * (p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + ntPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal));
         return on / (on + c) * 100;
       }
       const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
-      const a = p.alp + ntPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
-      const c = p.coal + ntPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
+      const a = p.alp + (1 - ef) * (ntPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp);
+      const c = p.coal + (1 - ef) * (ntPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp));
       return a / (a + c) * 100;
     };
     const baseline2pp = compute2pp(NT_BL, ntFlows);
@@ -3752,8 +3860,9 @@ export default function App() {
       useNtRegionalSwing ? NT_DISTRICT_REGION : null,
       useNtRegionalSwing ? NT_REGION_SWING_MULT : null,
       null, 6.5, ntSeatOverrides,
+      useElasticity, null, NT_BL,
     );
-  }, [ntPrim, ntFlows, ntOnTcp, useNtRegionalSwing, ntSeatOverrides]);
+  }, [ntPrim, ntFlows, ntOnTcp, useNtRegionalSwing, ntSeatOverrides, useElasticity]);
   const ntProjCounts = useMemo(() => { const c = {}; ntModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [ntModelledSeats]);
   const ntBaseCounts = useMemo(() => { const c = {}; NT_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const ntChanged = useMemo(() => ntModelledSeats.filter(s => s.modelled.changed), [ntModelledSeats]);
@@ -3762,27 +3871,28 @@ export default function App() {
   const ntNat2ppSwing = useMemo(() => {
     const onV = ntPrim.on ?? 0;
     const other = Math.max(0, 100 - ntPrim.alp - ntPrim.coal - ntPrim.grn - ntPrim.ind - onV);
+    const ef = NT_EXHAUST_RATE;
     if (ntOnTcp === "on_v_alp") {
-      const a = ntPrim.alp + ntPrim.coal * ntFlows.coal_alp_v_on + ntPrim.grn * ntFlows.grn_alp_v_on + ntPrim.ind * ntFlows.ind_alp_v_on + other * ntFlows.other_alp_v_on;
-      const on = onV + ntPrim.coal * (1 - ntFlows.coal_alp_v_on) + ntPrim.grn * (1 - ntFlows.grn_alp_v_on) + ntPrim.ind * (1 - ntFlows.ind_alp_v_on) + other * (1 - ntFlows.other_alp_v_on);
+      const a = ntPrim.alp + (1 - ef) * (ntPrim.coal * ntFlows.coal_alp_v_on + ntPrim.grn * ntFlows.grn_alp_v_on + ntPrim.ind * ntFlows.ind_alp_v_on + other * ntFlows.other_alp_v_on);
+      const on = onV + (1 - ef) * (ntPrim.coal * (1 - ntFlows.coal_alp_v_on) + ntPrim.grn * (1 - ntFlows.grn_alp_v_on) + ntPrim.ind * (1 - ntFlows.ind_alp_v_on) + other * (1 - ntFlows.other_alp_v_on));
       const blOnV = NT_BL.on ?? 0; const blOther = Math.max(0, 100 - NT_BL.alp - NT_BL.coal - NT_BL.grn - NT_BL.ind - blOnV);
-      const blA = NT_BL.alp + NT_BL.coal * ntFlows.coal_alp_v_on + NT_BL.grn * ntFlows.grn_alp_v_on + NT_BL.ind * ntFlows.ind_alp_v_on + blOther * ntFlows.other_alp_v_on;
-      const blOn = blOnV + NT_BL.coal * (1 - ntFlows.coal_alp_v_on) + NT_BL.grn * (1 - ntFlows.grn_alp_v_on) + NT_BL.ind * (1 - ntFlows.ind_alp_v_on) + blOther * (1 - ntFlows.other_alp_v_on);
+      const blA = NT_BL.alp + (1 - ef) * (NT_BL.coal * ntFlows.coal_alp_v_on + NT_BL.grn * ntFlows.grn_alp_v_on + NT_BL.ind * ntFlows.ind_alp_v_on + blOther * ntFlows.other_alp_v_on);
+      const blOn = blOnV + (1 - ef) * (NT_BL.coal * (1 - ntFlows.coal_alp_v_on) + NT_BL.grn * (1 - ntFlows.grn_alp_v_on) + NT_BL.ind * (1 - ntFlows.ind_alp_v_on) + blOther * (1 - ntFlows.other_alp_v_on));
       return a / (a + on) * 100 - blA / (blA + blOn) * 100;
     }
     if (ntOnTcp === "on_v_coal") {
-      const on = onV + ntPrim.alp * ntFlows.alp_on_v_coal + ntPrim.grn * ntFlows.grn_on_v_coal + ntPrim.ind * ntFlows.ind_on_v_coal + other * ntFlows.other_on_v_coal;
-      const c = ntPrim.coal + ntPrim.alp * (1 - ntFlows.alp_on_v_coal) + ntPrim.grn * (1 - ntFlows.grn_on_v_coal) + ntPrim.ind * (1 - ntFlows.ind_on_v_coal) + other * (1 - ntFlows.other_on_v_coal);
+      const on = onV + (1 - ef) * (ntPrim.alp * ntFlows.alp_on_v_coal + ntPrim.grn * ntFlows.grn_on_v_coal + ntPrim.ind * ntFlows.ind_on_v_coal + other * ntFlows.other_on_v_coal);
+      const c = ntPrim.coal + (1 - ef) * (ntPrim.alp * (1 - ntFlows.alp_on_v_coal) + ntPrim.grn * (1 - ntFlows.grn_on_v_coal) + ntPrim.ind * (1 - ntFlows.ind_on_v_coal) + other * (1 - ntFlows.other_on_v_coal));
       const blOnV = NT_BL.on ?? 0; const blOther = Math.max(0, 100 - NT_BL.alp - NT_BL.coal - NT_BL.grn - NT_BL.ind - blOnV);
-      const blOn = blOnV + NT_BL.alp * ntFlows.alp_on_v_coal + NT_BL.grn * ntFlows.grn_on_v_coal + NT_BL.ind * ntFlows.ind_on_v_coal + blOther * ntFlows.other_on_v_coal;
-      const blC = NT_BL.coal + NT_BL.alp * (1 - ntFlows.alp_on_v_coal) + NT_BL.grn * (1 - ntFlows.grn_on_v_coal) + NT_BL.ind * (1 - ntFlows.ind_on_v_coal) + blOther * (1 - ntFlows.other_on_v_coal);
+      const blOn = blOnV + (1 - ef) * (NT_BL.alp * ntFlows.alp_on_v_coal + NT_BL.grn * ntFlows.grn_on_v_coal + NT_BL.ind * ntFlows.ind_on_v_coal + blOther * ntFlows.other_on_v_coal);
+      const blC = NT_BL.coal + (1 - ef) * (NT_BL.alp * (1 - ntFlows.alp_on_v_coal) + NT_BL.grn * (1 - ntFlows.grn_on_v_coal) + NT_BL.ind * (1 - ntFlows.ind_on_v_coal) + blOther * (1 - ntFlows.other_on_v_coal));
       return on / (on + c) * 100 - blOn / (blOn + blC) * 100;
     }
     const ntOnSwing = onV - NT_BL.on; const ntCoalSwing = ntPrim.coal - NT_BL.coal;
     const ntCoalToOnXfer = (ntOnSwing > 0 && ntCoalSwing < 0) ? Math.max(0, Math.min(1, -ntCoalSwing / ntOnSwing)) : 0;
     const ntEffOnAlp = ntFlows.on_alp + (ntFlows.onCoalOriginFactor ?? 0) * ntCoalToOnXfer * (1 - ntFlows.on_alp);
-    const a = ntPrim.alp + ntPrim.ind * ntFlows.ind_alp + ntPrim.grn * ntFlows.grn_alp + onV * ntEffOnAlp + other * ntFlows.other_alp;
-    const c = ntPrim.coal + ntPrim.ind * (1 - ntFlows.ind_alp) + ntPrim.grn * (1 - ntFlows.grn_alp) + onV * (1 - ntEffOnAlp) + other * (1 - ntFlows.other_alp);
+    const a = ntPrim.alp + (1 - ef) * (ntPrim.ind * ntFlows.ind_alp + ntPrim.grn * ntFlows.grn_alp + onV * ntEffOnAlp + other * ntFlows.other_alp);
+    const c = ntPrim.coal + (1 - ef) * (ntPrim.ind * (1 - ntFlows.ind_alp) + ntPrim.grn * (1 - ntFlows.grn_alp) + onV * (1 - ntEffOnAlp) + other * (1 - ntFlows.other_alp));
     return a / (a + c) * 100 - NT_2PP;
   }, [ntPrim, ntFlows, ntOnTcp]);
   const ntUncertainty = useMemo(

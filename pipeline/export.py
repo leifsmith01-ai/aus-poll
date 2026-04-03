@@ -35,6 +35,8 @@ from .database import (
     get_state_summary,
     get_state_polling_places,
     get_state_booth_votes,
+    get_state_previous_election_id,
+    get_state_district_tcp_pcts,
     DB_PATH,
 )
 
@@ -971,7 +973,12 @@ def export_state_summary(state_ab: str, election_id: int,
 
 def export_state_districts_list(state_ab: str, election_id: int,
                                  db_path: str = None, exports_dir: str = None) -> None:
-    """Export {state_ab}/{election_id}/districts.json."""
+    """Export {state_ab}/{election_id}/districts.json.
+
+    For preferential states, includes an ``alp_swing_2pp`` field (pp change in ALP
+    2CP% vs the previous election) wherever both elections have ALP TCP data.
+    Hare-Clark systems (TAS, ACT) do not have 2CP data, so no swing is included.
+    """
     cfg = STATE_REGISTRY[state_ab.lower()]
     hare_clark = cfg["system"] == "hare-clark"
     districts = get_state_districts(state_ab, election_id, db_path)
@@ -991,6 +998,13 @@ def export_state_districts_list(state_ab: str, election_id: int,
                 "party_seats":       detail.get("party_seats", []),
             })
     else:
+        # Attempt to load previous election TCP for swing computation
+        prev_election_id = get_state_previous_election_id(state_ab, election_id, db_path)
+        prev_tcp: dict = {}
+        if prev_election_id is not None:
+            prev_tcp = get_state_district_tcp_pcts(state_ab, prev_election_id, db_path)
+        curr_tcp = get_state_district_tcp_pcts(state_ab, election_id, db_path)
+
         output = []
         for d in districts:
             # Fetch FP summary for top candidates
@@ -999,15 +1013,27 @@ def export_state_districts_list(state_ab: str, election_id: int,
             )
             fp_rows = detail.get("first_prefs", [])
             fp_total = sum(r.get("total_votes", 0) for r in fp_rows) or 1
+
+            # Compute ALP 2PP swing vs previous election (None if data missing)
+            did = d["district_id"]
+            alp_swing_2pp = None
+            curr_alp_pct = curr_tcp.get(did, {}).get("alp_pct")
+            prev_alp_pct = prev_tcp.get(did, {}).get("alp_pct")
+            if curr_alp_pct is not None and prev_alp_pct is not None:
+                alp_swing_2pp = _round2(curr_alp_pct - prev_alp_pct)
+
             output.append({
-                "district_id":   d["district_id"],
-                "district_name": d["district_name"],
-                "enrolment":     d.get("enrolment"),
-                "winner_party":  d.get("party_ab"),
-                "winner_name":   (
+                "district_id":    d["district_id"],
+                "district_name":  d["district_name"],
+                "enrolment":      d.get("enrolment"),
+                "winner_party":   d.get("party_ab"),
+                "winner_name":    (
                     f"{d.get('surname', '')} {d.get('given_name', '')}".strip()
                     if d.get("surname") else None
                 ),
+                "alp_2pp":        _round2(curr_alp_pct),
+                "alp_swing_2pp":  alp_swing_2pp,
+                "prev_alp_2pp":   _round2(prev_alp_pct),
                 "top_candidates": [
                     {
                         "party_ab": r.get("party_ab"),
