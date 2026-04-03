@@ -944,6 +944,69 @@ def get_state_district_results(state_ab: str, district_id: int,
         conn.close()
 
 
+def get_state_previous_election_id(state_ab: str, election_id: int,
+                                    db_path: str = None) -> int | None:
+    """Return the most recent prior election_id for a state, or None if not found."""
+    ab = state_ab.lower()
+    conn = get_connection(db_path)
+    try:
+        row = conn.execute(
+            f"""
+            SELECT election_id FROM {ab}_elections
+            WHERE election_id < ?
+            ORDER BY election_id DESC
+            LIMIT 1
+            """,
+            (election_id,),
+        ).fetchone()
+        return row["election_id"] if row else None
+    except Exception:
+        return None
+    finally:
+        conn.close()
+
+
+def get_state_district_tcp_pcts(state_ab: str, election_id: int,
+                                 db_path: str = None) -> dict[int, dict]:
+    """
+    Return TCP/2CP percentages per district for a state election.
+
+    Returns a dict keyed by district_id:
+      { district_id: { alp_pct: float | None, winner_party: str | None } }
+
+    ALP 2CP% is None if ALP was not in the final TCP (e.g. GRN vs Coalition,
+    ON vs Coalition seats).
+    """
+    ab = state_ab.lower()
+    conn = get_connection(db_path)
+    result: dict[int, dict] = {}
+    try:
+        rows = conn.execute(
+            f"""
+            SELECT t.district_id, c.party_ab, t.vote_pct, c.elected
+            FROM {ab}_district_2cp t
+            JOIN {ab}_candidates c ON c.candidate_id = t.candidate_id
+                                   AND c.election_id = t.election_id
+            WHERE t.election_id = ?
+            ORDER BY t.district_id, t.vote_pct DESC
+            """,
+            (election_id,),
+        ).fetchall()
+        for row in rows:
+            did = row["district_id"]
+            if did not in result:
+                result[did] = {"alp_pct": None, "winner_party": None}
+            if row["party_ab"] == "ALP":
+                result[did]["alp_pct"] = row["vote_pct"]
+            if row["elected"]:
+                result[did]["winner_party"] = row["party_ab"]
+    except Exception:
+        pass
+    finally:
+        conn.close()
+    return result
+
+
 def get_state_summary(state_ab: str, election_id: int,
                        db_path: str = None) -> dict:
     """Return state-level first preference totals by party and seats won."""
