@@ -1012,7 +1012,7 @@ const SEATS = _S25.map(([id, name, state, wp, wn, t1, t2, m]) => ({
 }));
 
 // ─── Sample polling data (pre-loaded) ────────────────────────────────────────
-// BludgerTrack national polls — sourced from pollbludger.net/fed2028/bludgertrack
+// National polls — primary vote and 2PP figures as published
 // 'on' = One Nation first-preference %; 'oth' computed as 100 - alp - coal - grn - on
 // tpp = ALP two-party preferred (null if not reported by pollster)
 // n = approximate sample size (used for weighted aggregation)
@@ -7995,7 +7995,7 @@ P(ALP wins seat i) = Φ( (2PP_ALP(i) − 50) / σ_seat(i) )`
             <div style={panel}>
               <div style={secHead}>6. Poll aggregation</div>
               <h2 style={secTitle}>Exponential decay with house effects</h2>
-              <p style={prose}>Published polls are aggregated using a BludgerTrack-style weighted average:</p>
+              <p style={prose}>Published polls are aggregated using an exponential-decay weighted average:</p>
               <pre style={codeBlock}>{
 `w(t) = 2^(−d / 90)           (exponential decay, 90-day half-life; d = days since poll)
 
