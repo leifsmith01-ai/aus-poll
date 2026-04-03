@@ -73,10 +73,14 @@ def adaptive_half_life(days_to_election: float | None = None) -> float:
 # Sources: Australian Polling Council methodology disclosures; Jackman (2009)
 # "Bayesian Analysis for the Social Sciences"; historical MAE comparison.
 POLLSTER_METHODOLOGY = {
-    # Tier 1: Live-phone or large mixed-mode panels
-    "Newspoll":            "live_phone",    # Newspoll uses live phone + online panel (YouGov methodology)
-    "Roy Morgan":          "mixed_mode",    # SMS + online + phone
-    # Tier 2: Online panels (larger sample, established methodology)
+    # Tier 1: Large established panels with strong track record in Australian elections.
+    # Note: Newspoll was reclassified from "live_phone" to "online_panel" as of 2023.
+    # It now uses YouGov's online panel methodology (not live callers). Post-2022
+    # research shows online panels have closed the accuracy gap with live-phone polling
+    # for Australian federal elections (lower social-desirability bias, larger samples).
+    "Newspoll":            "online_panel",  # YouGov online methodology since 2022
+    "Roy Morgan":          "mixed_mode",    # SMS + online + phone multi-mode
+    # Tier 2: Online panels (established methodology)
     "Essential Research":  "online_panel",
     "YouGov":              "online_panel",
     "Resolve Strategic":   "online_panel",
@@ -88,10 +92,10 @@ POLLSTER_METHODOLOGY = {
 }
 
 METHODOLOGY_QUALITY_WEIGHT = {
-    "live_phone":   1.20,   # Gold standard — fewer mode effects
-    "mixed_mode":   1.10,   # High quality multi-mode approach
+    "live_phone":   1.10,   # Live-phone: still slightly preferred for higher engagement
+    "mixed_mode":   1.05,   # Multi-mode: marginal advantage over pure online
     "ivr":          1.00,   # Interactive voice response — adequate
-    "online_panel": 0.90,   # Online panels — well-established but can have selection bias
+    "online_panel": 1.00,   # Online panels — accuracy comparable to live-phone post-2022
     "unknown":      1.00,   # Default weight for unclassified pollsters
 }
 

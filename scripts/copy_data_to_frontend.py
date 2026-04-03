@@ -77,6 +77,18 @@ def copy_leaders() -> None:
     print(f"  ✓ leaders.json → {dst}")
 
 
+def copy_aggregated_polls() -> None:
+    """Copy aggregated.json (house-effect-corrected poll aggregate) to webapp/src/data/."""
+    WEBAPP_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    src = BASE_DIR / "data" / "polls" / "aggregated.json"
+    dst = WEBAPP_DATA_DIR / "aggregated.json"
+    if not src.exists():
+        print(f"  ✗ No aggregated.json found (run: python -m pipeline.poll_aggregator)")
+        return
+    shutil.copy2(src, dst)
+    print(f"  ✓ aggregated.json → {dst}")
+
+
 def main():
     print("Copying pipeline exports → frontend/public/data/")
     print("=" * 50)
@@ -100,6 +112,9 @@ def main():
 
     # ── Leader approval ratings → webapp/src/data/ ───────────────────────────
     copy_leaders()
+
+    # ── House-effect-corrected poll aggregate → webapp/src/data/ ─────────────
+    copy_aggregated_polls()
 
     print()
     print("Done. Start the frontend with: cd webapp && npm run dev")
