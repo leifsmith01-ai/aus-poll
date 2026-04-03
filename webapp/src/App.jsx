@@ -2953,32 +2953,6 @@ const STYLES = {
   btnSecondary: { padding: "7px 16px", background: "#F8FAFC", color: "#374151", borderRadius: 7, fontSize: 13, fontWeight: 600, border: "1px solid #D1D5DB",    cursor: "pointer", letterSpacing: "0.01em" },
   btnDanger:    { padding: "7px 16px", background: "#FEF2F2", color: "#DC2626", borderRadius: 7, fontSize: 13, fontWeight: 600, border: "1px solid #FECACA",    cursor: "pointer", letterSpacing: "0.01em" },
   btnInfo:      { padding: "7px 16px", background: "#F0F9FF", color: "#0369A1", borderRadius: 7, fontSize: 13, fontWeight: 600, border: "1px solid #BAE6FD",    cursor: "pointer", letterSpacing: "0.01em" },
-  // ── Info pages: shared page header strip ──────────────────────────────────
-  pageHeader:         { background: "linear-gradient(135deg, #0F172A 0%, #1E3A5F 60%, #1E40AF 100%)", borderRadius: 14, padding: "28px 28px 24px", marginBottom: 20, position: "relative", overflow: "hidden" },
-  pageHeaderTitle:    { fontSize: 30, fontWeight: 800, color: "#F8FAFC", letterSpacing: "-0.03em", lineHeight: 1.2, margin: 0, marginBottom: 8 },
-  pageHeaderSubtitle: { fontSize: 15, color: "#93C5FD", lineHeight: 1.7, maxWidth: 600, margin: 0 },
-  // ── Info pages: section label (blue, replaces grey sectionHead) ────────────
-  sectionLabel:       { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#3B82F6", marginBottom: 6 },
-  panelTitleLg:       { fontSize: 17, fontWeight: 700, color: "#0F172A", marginBottom: 12, letterSpacing: "-0.01em" },
-  // ── Info pages: callout boxes ──────────────────────────────────────────────
-  calloutWarning:     { background: "#FFFBEB", borderLeft: "4px solid #F59E0B", borderRadius: "0 10px 10px 0", padding: "14px 18px", marginBottom: 20, display: "flex", gap: 12, alignItems: "flex-start" },
-  calloutSuccess:     { background: "#F0FDF4", borderLeft: "4px solid #10B981", borderRadius: "0 10px 10px 0", padding: "16px 20px", display: "flex", gap: 12, alignItems: "flex-start" },
-  // ── Info pages: computation step badge ────────────────────────────────────
-  stepBadge:          { width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #3B82F6, #1D4ED8)", color: "#fff", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 6px rgba(59,130,246,0.35)" },
-  // ── Info pages: comparison cards ──────────────────────────────────────────
-  compareCardBad:     { background: "#FEF2F2", border: "1px solid #FECACA", borderTop: "3px solid #EF4444", borderRadius: 10, padding: "16px 18px" },
-  compareCardGood:    { background: "#F0FDF4", border: "1px solid #BBF7D0", borderTop: "3px solid #10B981", borderRadius: 10, padding: "16px 18px" },
-  // ── Info pages: FAQ accordion ──────────────────────────────────────────────
-  faqItem:            { borderBottom: "1px solid #E5E7EB", transition: "background 0.15s" },
-  faqItemOpen:        { background: "#F0F7FF", borderLeft: "3px solid #3B82F6", borderBottom: "1px solid #E5E7EB", borderRadius: "0 6px 6px 0" },
-  faqAnswer:          { fontSize: 14, color: "#374151", lineHeight: 1.8, padding: "0 24px 16px 16px" },
-  // ── Info pages: glossary ──────────────────────────────────────────────────
-  glossaryLetterHead: { fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: "#3B82F6", padding: "16px 0 6px", borderBottom: "2px solid #3B82F6", marginBottom: 4, gridColumn: "1 / -1" },
-  glossaryTerm:       { padding: "12px 14px", borderRadius: 8, background: "#fff", border: "1px solid #E5E7EB" },
-  // ── Info pages: about feature & coverage cards ────────────────────────────
-  featureCard:        { background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "16px 16px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" },
-  featureCardIcon:    { width: 38, height: 38, borderRadius: 9, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, marginBottom: 10 },
-  coverageCard:       { background: "#fff", border: "1px solid #E5E7EB", borderTop: "3px solid #3B82F6", borderRadius: 10, padding: "16px 14px", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" },
 };
 
 function TallyBar({ seats, useModelled = false }) {
@@ -3096,8 +3070,6 @@ export default function App() {
   const [sortKey, setSortKey] = useState("margin");
   const [sortDir, setSortDir] = useState("asc");
   const [activeTab, setActiveTab] = useState("model");
-  // Overview uses all elections; Model uses only elections with a full model built
-  const [selectedOverviewId, setSelectedOverviewId] = useState("federal_2025");
   const [selectedModelId, setSelectedModelId] = useState("federal_2025");
 
   // ── Seats tab mobile state ──
@@ -4287,12 +4259,10 @@ export default function App() {
 
   const tabs = [
     { id: "model",       label: `Model${hasChanges ? " ●" : ""}` },
-    { id: "overview",    label: "Overview" },
     { id: "seats",       label: "Seats" },
     { id: "polls",       label: "Polls" },
     { id: "markets",     label: "Markets" },
     { id: "methodology", label: "Methodology" },
-    { id: "about",       label: "About" },
     { id: "changelog",   label: "Changelog" },
   ];
 
@@ -4397,77 +4367,6 @@ export default function App() {
           data-full-width-responsive="true"
         />
       </div>
-
-      {/* ══════════════════════ OVERVIEW TAB ══════════════════════════════════ */}
-      {activeTab === "overview" && (() => {
-        const el = ELECTION_DATA[selectedOverviewId];
-        const tallySeats = el.counts ? mkSeatsFromCounts(el.counts) : el.seats;
-        const tightest = [...el.seats].sort((a, b) => a.margin - b.margin).slice(0, 10);
-        const alpCount = el.counts ? el.counts.alp : el.seats.filter(s => getParty(s.winner.party).group === "alp").length;
-        const coalCount = el.counts ? el.counts.coalition : el.seats.filter(s => getParty(s.winner.party).group === "coalition").length;
-        const crossCount = el.counts
-          ? Object.entries(el.counts).filter(([g]) => g !== "alp" && g !== "coalition").reduce((a, [, v]) => a + v, 0)
-          : el.seats.filter(s => !["alp", "coalition"].includes(getParty(s.winner.party).group)).length;
-        const marginalCount = el.seats.filter(s => s.margin < 5).length;
-        const veryMargCount = el.seats.filter(s => s.margin < 2).length;
-        const incumbentColor = GROUP_CONFIG[PARTY[el.incumbentParty]?.group]?.color ?? "#374151";
-        return (
-          <div style={{ padding: isMobile ? "14px 16px" : "20px 24px", maxWidth: 900, margin: "0 auto" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 4 }}>
-              <h2 style={STYLES.sectionTitle}>{el.jurisdiction} Election Results</h2>
-              <select value={selectedOverviewId} onChange={e => setSelectedOverviewId(e.target.value)}
-                style={{ ...STYLES.input, fontWeight: 700, background: "#fff", cursor: "pointer" }}>
-                {ELECTION_OPTIONS.map(id => <option key={id} value={id}>{ELECTION_DATA[id].label}</option>)}
-              </select>
-            </div>
-            <p style={{ color: "#6B7280", marginBottom: 18 }}>
-              {el.date} · {el.chamber} · {el.totalSeats} seats
-              {el.twopp ? ` · ${el.twopp}% 2PP (ALP)` : ""}
-              {" · "}<span style={{ fontWeight: 600, color: incumbentColor }}>{el.incumbent}</span>
-            </p>
-            <TallyBar seats={tallySeats} />
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 12, marginBottom: 18 }}>
-              {[
-                { label: `${GROUP_CONFIG.alp.label} seats`, value: alpCount, color: GROUP_CONFIG.alp.color },
-                { label: `${GROUP_CONFIG.coalition.label} seats`, value: coalCount, color: GROUP_CONFIG.coalition.color },
-                { label: "Crossbench", value: crossCount, color: "#059669" },
-                { label: `Marginal (<5%)${el.counts ? " *" : ""}`, value: marginalCount, color: "#F59E0B" },
-                { label: `Very marginal${el.counts ? " *" : ""}`, value: veryMargCount, color: "#EF4444" },
-              ].map(card => (
-                <div key={card.label} style={STYLES.statCard}>
-                  <div style={{ width: 24, height: 3, background: card.color, borderRadius: 2, marginBottom: 8 }} />
-                  <div style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{card.value}</div>
-                  <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{card.label}</div>
-                </div>
-              ))}
-            </div>
-            <div style={panelStyle}>
-              <div style={STYLES.panelTitle}>
-                {tightest.length > 0 ? `${Math.min(tightest.length, 10)} tightest seats` : "No seat data available"}
-              </div>
-              {tightest.map(s => {
-                const p = getParty(s.winner.party);
-                return (
-                  <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: "1px solid #F3F4F6" }}>
-                    <div style={{ width: 3, height: 34, background: p.color, borderRadius: 2, flexShrink: 0 }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, fontSize: 13 }}>{s.name} <span style={{ color: "#9CA3AF", fontWeight: 400 }}>({s.state})</span></div>
-                      <div style={{ fontSize: 11, color: "#6B7280" }}>{s.winner.name}</div>
-                    </div>
-                    <PartyBadge party={s.winner.party} />
-                    <span style={{ fontWeight: 700, color: MARGIN_COLOR[getMarginCat(s.margin)], minWidth: 40, textAlign: "right" }}>{s.margin.toFixed(1)}%</span>
-                  </div>
-                );
-              })}
-              {el.counts && (
-                <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
-                  * Showing representative marginal seats only · Full seat-by-seat data not available for state elections
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}
 
       {/* ══════════════════════ SEATS TAB ═════════════════════════════════════ */}
       {activeTab === "seats" && (
@@ -7874,255 +7773,313 @@ export default function App() {
       )}
 
       {/* ══════════════════════ METHODOLOGY TAB ══════════════════════════════════ */}
-      {activeTab === "methodology" && (
-        <div style={{ maxWidth: 960, margin: "0 auto", padding: isMobile ? "16px 14px" : "24px 24px" }}>
+      {activeTab === "methodology" && (() => {
+        const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 };
+        const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "#0F172A", margin: "0 0 10px" };
+        const prose = { fontSize: 13, color: "#374151", lineHeight: 1.75, margin: "0 0 12px" };
+        const codeBlock = {
+          fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace",
+          fontSize: isMobile ? 11 : 12,
+          background: "#0F172A",
+          color: "#E2E8F0",
+          borderRadius: 8,
+          padding: "14px 16px",
+          overflowX: "auto",
+          whiteSpace: "pre",
+          lineHeight: 1.7,
+          margin: "0 0 16px",
+        };
+        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "#374151", borderBottom: "1px solid #CBD5E1", background: "#F8FAFC" };
+        const tblCell = { padding: "8px 12px", fontSize: 13, color: "#374151", borderBottom: "1px solid #F1F5F9" };
+        const tblCellR = { ...tblCell, textAlign: "right", fontVariantNumeric: "tabular-nums" };
+        const divider = { borderTop: "1px solid #E2E8F0", margin: "20px 0" };
+        const panel = { ...STYLES.panel, marginBottom: 16 };
+        return (
+          <div style={{ maxWidth: 800, margin: "0 auto", padding: isMobile ? "20px 14px" : "28px 24px" }}>
 
-          {/* Page header */}
-          <div style={{ ...STYLES.pageHeader, ...(isMobile && { padding: "20px 16px 18px" }) }}>
-            <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
-            <div style={{ position: "relative" }}>
-              <div style={STYLES.sectionLabel}>Methodology</div>
-              <h1 style={{ ...STYLES.pageHeaderTitle, fontSize: isMobile ? 22 : 30 }}>How the Model Works</h1>
-              <p style={STYLES.pageHeaderSubtitle}>Understanding the assumptions, preference flows, and data sources behind every projection.</p>
+            {/* Page title */}
+            <div style={{ marginBottom: 28 }}>
+              <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: "#0F172A", margin: "0 0 8px", letterSpacing: "-0.02em" }}>Methodology</h1>
+              <p style={{ ...prose, color: "#64748B", marginBottom: 0 }}>
+                aus-poll is a scenario modelling tool — it projects seat outcomes given the primary vote inputs you specify.
+                It is not a forward prediction and does not account for campaign dynamics or candidate-specific factors.
+              </p>
             </div>
-          </div>
 
-          {/* Not-a-prediction callout */}
-          <div style={STYLES.calloutWarning}>
-            <div style={{ width: 32, height: 32, background: "#FEF3C7", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>⚠️</div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 14, color: "#92400E", marginBottom: 4 }}>This is not a prediction</div>
-              <div style={{ fontSize: 13, color: "#78350F", lineHeight: 1.6 }}>
-                aus-poll is a scenario modelling tool. It shows seat outcomes <em>given the polling inputs you specify</em>. It does not make forward predictions, account for campaign dynamics, or attempt to forecast the result of any future election.
-              </div>
+            {/* §1 Primary-vote baseline */}
+            <div style={panel}>
+              <div style={secHead}>1. Primary-vote baseline</div>
+              <h2 style={secTitle}>Per-seat first-preference baselines</h2>
+              <p style={prose}>
+                The model uses each division's actual 2025 AEC first-preference result as its starting point, drawn from
+                the <code style={{ fontFamily: "monospace", background: "#F1F5F9", padding: "1px 5px", borderRadius: 3 }}>SEAT_FP_2025</code> constant
+                (booth-level totals aggregated to division level). For the handful of seats missing granular data, the
+                2025 national primary average is substituted.
+              </p>
+              <p style={prose}>
+                This approach differs from Uniform National Swing (UNS), which assumes the same swing adds identically to
+                every seat's 2PP regardless of its minor-party composition. Because Greens voters preference ALP at ~86%
+                while One Nation voters do so at only ~15%, two seats with the same 2PP margin but different primary
+                compositions will respond very differently to the same national swing. The primary-vote method captures
+                this seat-by-seat variation automatically.
+              </p>
             </div>
-          </div>
 
-          {/* How the model works */}
-          <div style={{ ...STYLES.panel, marginBottom: 16 }}>
-            <div style={STYLES.sectionLabel}>Computation Model</div>
-            <div style={STYLES.panelTitleLg}>Primary-Vote Based Projection</div>
-            <p style={{ fontSize: 14, color: "#374151", marginBottom: 16, lineHeight: 1.7 }}>
-              The model uses a <strong>primary-vote-based, seat-level projection</strong> rather than Uniform National Swing (UNS). This matters because the same national swing produces very different seat outcomes depending on each seat's starting composition.
-            </p>
-            {/* UNS vs Primary comparison */}
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 20 }}>
-              <div style={STYLES.compareCardBad}>
-                <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#FEE2E2", color: "#991B1B", marginBottom: 8 }}>Not used</span>
-                <div style={{ fontWeight: 700, fontSize: 13, color: "#991B1B", marginBottom: 8 }}>Uniform National Swing</div>
-                <div style={{ fontSize: 13, color: "#7F1D1D", lineHeight: 1.6 }}>
-                  Assumes a +2% ALP national primary swing adds exactly 2% to every seat's 2PP — ignoring that each seat has a different mix of minor party voters whose preferences flow very differently.
-                </div>
-              </div>
-              <div style={STYLES.compareCardGood}>
-                <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#DCFCE7", color: "#166534", marginBottom: 8 }}>This model</span>
-                <div style={{ fontWeight: 700, fontSize: 13, color: "#14532D", marginBottom: 8 }}>Primary-Vote Based</div>
-                <div style={{ fontSize: 13, color: "#166534", lineHeight: 1.6 }}>
-                  Adds the swing to each seat's actual 2025 AEC first-preference baseline, then flows all primaries through that seat's preference distribution to derive a seat-specific 2PP.
-                </div>
-              </div>
-            </div>
-            {/* Computation steps */}
-            <div style={{ fontSize: 13, color: "#374151" }}>
-              <div style={{ fontWeight: 700, marginBottom: 12, fontSize: 13, color: "#0F172A" }}>Computation flow (per seat):</div>
-              {[
-                ["1", "Start from 2025 AEC first-preference baseline", "Each seat's actual {ALP, Coalition, Greens, Teal, One Nation, Other} primary percentages from the 2025 federal election."],
-                ["2", "Apply national primary swings", "Add the user-specified swing (e.g. +2% ALP, −1% Coalition) to every seat's baseline primaries. An elasticity multiplier dampens swings in very safe or very unsafe seats."],
-                ["3", "Flow through preference distributions", "Greens, Teal, One Nation, and Other primaries are distributed to ALP or Coalition using fixed preference flow rates (see table below)."],
-                ["4", "Derive 2PP and count seats", "Seats where modelled ALP 2PP > 50% are called for ALP; below 50% for Coalition. Uncertainty bands are centred on the modelled 2PP."],
-              ].map(([n, title, desc]) => (
-                <div key={n} style={{ display: "flex", gap: 12, marginBottom: 14, alignItems: "flex-start" }}>
-                  <div style={STYLES.stepBadge}>{n}</div>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "#0F172A", marginBottom: 3 }}>{title}</div>
-                    <div style={{ fontSize: 13, color: "#4B5563", lineHeight: 1.6 }}>{desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Preference Flows */}
-          <div style={{ ...STYLES.panel, marginBottom: 16 }}>
-            <div style={STYLES.sectionLabel}>Preference Flows</div>
-            <div style={STYLES.panelTitleLg}>Assumed Flows to Major Parties</div>
-            <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 14, lineHeight: 1.6 }}>
-              These flows are held constant across all scenarios. They are derived from the AEC 2025 distribution of preferences (DOP) national totals.
-            </p>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-              <thead>
-                <tr style={{ background: "#F9FAFB" }}>
-                  <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 700, color: "#374151", borderBottom: "2px solid #E5E7EB" }}>Voter group</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#DC2626", borderBottom: "2px solid #E5E7EB" }}>→ ALP</th>
-                  <th style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#1D4ED8", borderBottom: "2px solid #E5E7EB" }}>→ Coalition</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ["Greens",             "85.7%", "14.3%", "#059669"],
-                  ["Teal independents",  "73.5%", "26.5%", "#0891B2"],
-                  ["One Nation",         "14.9%", "85.1%", "#B45309"],
-                  ["UAP / Clive Palmer", "27.0%", "73.0%", "#7C3AED"],
-                  ["Other / Minor parties", "57.4%", "42.6%", "#6B7280"],
-                ].map(([group, alp, coal, color]) => (
-                  <tr key={group} style={{ borderLeft: `3px solid ${color}`, background: `${color}0D` }}>
-                    <td style={{ padding: "9px 12px", color: "#374151", borderBottom: "1px solid #F3F4F6", fontWeight: 500 }}>{group}</td>
-                    <td style={{ padding: "9px 12px", textAlign: "right", color: "#DC2626", fontWeight: 700, borderBottom: "1px solid #F3F4F6" }}>{alp}</td>
-                    <td style={{ padding: "9px 12px", textAlign: "right", color: "#1D4ED8", fontWeight: 700, borderBottom: "1px solid #F3F4F6" }}>{coal}</td>
+            {/* §2 2PP computation */}
+            <div style={panel}>
+              <div style={secHead}>2. Two-candidate preferred computation</div>
+              <h2 style={secTitle}>Per-seat 2PP formula</h2>
+              <p style={prose}>After applying swings (see §3), the modelled 2PP for seat <em>i</em> is:</p>
+              <pre style={codeBlock}>{
+`                FP_ALP + FP_GRN·f_GRN + FP_TEAL·f_TEAL + FP_ON·f_ON + FP_UAP·f_UAP + FP_OTH·f_OTH
+2PP_ALP(i) = ──────────────────────────────────────────────────────────────────────────────────────────
+                FP_ALP + FP_COAL + FP_GRN + FP_TEAL + FP_ON + FP_UAP + FP_OTH`
+              }</pre>
+              <p style={{ ...prose, color: "#6B7280", fontSize: 12, marginBottom: 14 }}>
+                FP_X(i) is the primary vote share for party X in seat <em>i</em> after swing adjustment. f_X is the
+                preference flow rate to ALP for that voter group (see table). Primaries are floored at 0 and Other
+                is the residual after summing all named parties.
+              </p>
+              <p style={prose}>Preference flow constants — derived from the AEC 2025 national distribution of preferences:</p>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginBottom: 8 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Voter group</th>
+                    <th style={{ ...tblHead, textAlign: "right", color: "#DC2626" }}>f (→ ALP)</th>
+                    <th style={{ ...tblHead, textAlign: "right", color: "#1D4ED8" }}>→ Coalition</th>
+                    <th style={{ ...tblHead, textAlign: "right", color: "#6B7280" }}>Source</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Polling Aggregation */}
-          <div style={{ ...STYLES.panel, marginBottom: 16 }}>
-            <div style={STYLES.sectionLabel}>Poll Aggregation</div>
-            <div style={STYLES.panelTitleLg}>Polling Aggregation Methodology</div>
-            <p style={{ fontSize: 14, color: "#374151", marginBottom: 14, lineHeight: 1.7 }}>
-              The Polls tab aggregates published polls using a BludgerTrack-style methodology:
-            </p>
-            <div style={{ background: "#F8FAFC", borderRadius: 10, padding: "14px 18px" }}>
-              {[
-                ["Exponential decay weighting", "Polls are weighted by recency with a 90-day half-life; older polls contribute less to the aggregate."],
-                ["Per-pollster house effect correction", "Each pollster's systematic bias (relative to the field average) is estimated and subtracted. Pollsters included: Newspoll, RedBridge, DemosAU, Roy Morgan, Essential, YouGov."],
-                ["95% confidence intervals", "Derived from weighted variance across polls, accounting for effective sample size."],
-                ["Effective sample size", "Adjusted for temporal weighting; a burst of polls in a short window does not count as independent evidence."],
-              ].map(([title, desc]) => (
-                <div key={title} style={{ display: "flex", gap: 10, marginBottom: 12, alignItems: "flex-start" }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3B82F6", flexShrink: 0, marginTop: 6 }} />
-                  <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.7 }}><strong>{title}</strong> — {desc}</div>
-                </div>
-              ))}
+                </thead>
+                <tbody>
+                  {[
+                    ["Greens",             "0.857", "0.143", "AEC 2025 DOP"],
+                    ["Teal independents",  "0.735", "0.265", "AEC 2025 DOP"],
+                    ["One Nation",         "0.149", "0.851", "AEC 2025 DOP"],
+                    ["UAP / Clive Palmer", "0.270", "0.730", "AEC 2025 DOP"],
+                    ["Other / minor",      "0.574", "0.426", "AEC 2025 DOP"],
+                  ].map(([group, alp, coal, src]) => (
+                    <tr key={group}>
+                      <td style={tblCell}>{group}</td>
+                      <td style={{ ...tblCellR, color: "#DC2626", fontWeight: 600 }}>{alp}</td>
+                      <td style={{ ...tblCellR, color: "#1D4ED8", fontWeight: 600 }}>{coal}</td>
+                      <td style={{ ...tblCellR, color: "#94A3B8", fontSize: 12 }}>{src}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ ...prose, color: "#6B7280", fontSize: 12, marginBottom: 0 }}>
+                Per-seat DOP flows are available for most divisions and take precedence over the national averages above
+                where present (<code style={{ fontFamily: "monospace" }}>SEAT_PREF_FLOWS_2025</code>). A calibration delta
+                corrects for the difference between national-average and per-seat flows at zero swing.
+              </p>
             </div>
-          </div>
 
-          {/* Model Accuracy */}
-          <div style={{ ...STYLES.panel, marginBottom: 16 }}>
-            <div style={STYLES.calloutSuccess}>
-              <div style={{ width: 32, height: 32, background: "#DCFCE7", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>✓</div>
-              <div>
-                <div style={{ ...STYLES.sectionLabel, marginBottom: 4 }}>Model Accuracy</div>
-                <p style={{ fontSize: 14, color: "#166534", lineHeight: 1.7, margin: 0 }}>
-                  Calibrated against 2025 AEC actual results. Across 115 ALP/Coalition seats,{" "}
-                  <strong>mean absolute error ≈ 0.003 percentage points</strong> — the model's primary-vote-derived 2PP almost exactly matches the actual AEC 2PP when given the true primary vote inputs. Seats with non-ALP/Coalition TCP races are excluded from calibration.
-                </p>
-              </div>
+            {/* §3 Swing application */}
+            <div style={panel}>
+              <div style={secHead}>3. Swing application</div>
+              <h2 style={secTitle}>Per-seat primary adjustment</h2>
+              <p style={prose}>
+                The user specifies national primary swings Δ for each party on the Model tab. These are applied to each
+                seat's baseline:
+              </p>
+              <pre style={codeBlock}>{
+`FP_X(i) = max(0, FP_X_baseline(i) + Δ_X)     for X ∈ {ALP, Coal, GRN, TEAL, ON}
+FP_OTH(i) = max(0, 100 − FP_ALP − FP_COAL − FP_GRN − FP_TEAL − FP_ON)`
+              }</pre>
+              <p style={prose}>
+                When state-level swings are configured, a blend of national and state swings is used for seats in that
+                state (<code style={{ fontFamily: "monospace" }}>blendSwings()</code>). Seat-level primary overrides on the Model
+                tab replace the baseline+swing value directly for the overridden parties; un-overridden parties still
+                use national swings from the seat's actual baseline.
+              </p>
+              <div style={divider} />
+              <h3 style={{ ...secTitle, fontSize: 14, marginBottom: 8 }}>Seat elasticity (optional)</h3>
+              <p style={prose}>
+                An optional logistic multiplier scales the national 2PP swing before it is added to a seat's baseline,
+                reflecting the empirical observation that marginal seats tend to swing more than safe seats:
+              </p>
+              <pre style={codeBlock}>{
+`ε(i) = 0.80 + 0.50 / (1 + exp(0.20 · (|2PP_ALP(i) − 50| − 8)))`
+              }</pre>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginBottom: 0 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Margin (pp from 50%)</th>
+                    <th style={{ ...tblHead, textAlign: "right" }}>ε</th>
+                    <th style={{ ...tblHead, textAlign: "right" }}>Effect</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["0  (knife-edge)", "~1.30×", "Swing amplified"],
+                    ["8  (marginal)",   "~1.05×", "Near neutral"],
+                    ["15 (competitive)","~0.90×", "Slightly dampened"],
+                    ["25+ (safe)",      "~0.80×", "Swing dampened"],
+                  ].map(([m, e, fx]) => (
+                    <tr key={m}>
+                      <td style={tblCell}>{m}</td>
+                      <td style={{ ...tblCellR, fontWeight: 600 }}>{e}</td>
+                      <td style={{ ...tblCellR, color: "#6B7280" }}>{fx}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
 
-          {/* Assumptions & Caveats */}
-          <div style={{ ...STYLES.panel, marginBottom: 16 }}>
-            <div style={STYLES.sectionLabel}>Limitations</div>
-            <div style={STYLES.panelTitleLg}>Assumptions & Caveats</div>
-            <div style={{ borderLeft: "2px solid #E5E7EB", paddingLeft: 16, marginLeft: 4 }}>
-              {[
-                ["National swings are applied uniformly to all seats.", "State-level variation in swing is not modelled. In reality, Labor may swing harder in Queensland than Victoria, for example."],
-                ["Preference flows are fixed constants.", "They do not vary by candidate, campaign, or electoral division. Real flows can differ by several percentage points from these averages."],
-                ["Six teal seats are hardcoded:", "Warringah, Wentworth, Bradfield, Mackellar, Kooyong, Goldstein. Teal candidates emerging in other seats are not automatically modelled."],
-                ["Independent seats require manual TCP overrides.", "For seats where the contest is ALP vs. an independent (not Coalition), the user must manually set the TCP percentage on the Model tab."],
-                ["No redistribution modelling.", "Electoral boundary changes between elections are not automatically reflected. Seat baselines use the boundaries in place at the 2025 election."],
-                ["No candidate or incumbency effects.", "The model does not adjust for individual candidate quality, retirement of incumbents, or local campaign factors."],
-              ].map(([title, desc], i) => (
-                <div key={i} style={{ marginBottom: 10, lineHeight: 1.75, fontSize: 13, color: "#374151" }}>
-                  <strong>{title}</strong> {desc}
-                </div>
-              ))}
+            {/* §4 Three-party races */}
+            <div style={panel}>
+              <div style={secHead}>4. Three-party race detection</div>
+              <h2 style={secTitle}>One Nation TCP auto-detection</h2>
+              <p style={prose}>
+                When a seat's estimated One Nation primary exceeds a threshold (default 6.5 pp), the model checks whether
+                ON could plausibly reach the final two-candidate count. The test compares estimated primaries for the three
+                main parties:
+              </p>
+              <pre style={codeBlock}>{
+`if ON > ALP  and COAL ≥ ALP  →  ALP eliminated  →  ON vs Coalition final
+if ON > COAL and ALP  ≥ COAL  →  Coalition eliminated  →  ON vs ALP final`
+              }</pre>
+              <p style={prose}>
+                In ON-race branches, separate preference flow constants apply (
+                <code style={{ fontFamily: "monospace", background: "#F1F5F9", padding: "1px 5px", borderRadius: 3 }}>grn_alp_v_on</code>,
+                <code style={{ fontFamily: "monospace", background: "#F1F5F9", padding: "1px 5px", borderRadius: 3 }}> teal_alp_v_on</code>, etc.).
+                These are higher toward ALP than standard flows, reflecting strong anti-ON preference sorting.
+                The detection can be overridden per seat on the Model tab.
+              </p>
             </div>
-          </div>
 
-          {/* Data Sources */}
-          <div style={{ ...STYLES.panel, marginBottom: 0 }}>
-            <div style={STYLES.sectionLabel}>Sources</div>
-            <div style={STYLES.panelTitleLg}>Data Sources</div>
-            <div style={{ background: "#F8FAFC", borderRadius: 10, padding: "14px 18px" }}>
-              {[
-                ["Election results", <><a href="https://results.aec.gov.au" target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>Australian Electoral Commission</a> — booth-level and division-level CSV files for 2022 and 2025 federal elections.</>],
-                ["Polls", "Newspoll, Resolve/SMH, RedBridge, DemosAU, Roy Morgan, Essential Research, YouGov."],
-                ["Betting markets", "Sportsbet, Betfair Exchange — national government odds and seat-level markets."],
-                ["Demographics", "ABS Census 2021 — SA1/SA2 demographic overlays mapped to electoral divisions."],
-              ].map(([title, desc]) => (
-                <div key={title} style={{ display: "flex", gap: 10, marginBottom: 12, alignItems: "flex-start" }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3B82F6", flexShrink: 0, marginTop: 6 }} />
-                  <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.7 }}><strong>{title}:</strong> {desc}</div>
-                </div>
-              ))}
+            {/* §5 Uncertainty model */}
+            <div style={panel}>
+              <div style={secHead}>5. Uncertainty quantification</div>
+              <h2 style={secTitle}>Seat-level win probabilities</h2>
+              <p style={prose}>
+                The model integrates three sources of uncertainty to produce a seat-count distribution rather than a point
+                estimate:
+              </p>
+              <pre style={codeBlock}>{
+`σ_seat(i) = √( ε(i)² · σ_nat² + σ_res² + σ_pref² )
+
+P(ALP wins seat i) = Φ( (2PP_ALP(i) − 50) / σ_seat(i) )`
+              }</pre>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginBottom: 12 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Parameter</th>
+                    <th style={{ ...tblHead, textAlign: "right" }}>Value</th>
+                    <th style={tblHead}>Source</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["σ_nat", "from poll CI", "National 2PP swing uncertainty; correlated across all seats"],
+                    ["σ_res", "1.0 pp", "Seat-level deviation from national swing — calibrated from 2019→2022 RMSE"],
+                    ["σ_pref", "0.8 pp", "Historical inter-election preference flow variation (e.g. ON→ALP: 14.9% in 2022, 43.0% in 2025)"],
+                    ["Φ", "Normal CDF", "Abramowitz & Stegun 26.2.17 polynomial approximation, max error 7.5×10⁻⁸"],
+                  ].map(([p, v, src]) => (
+                    <tr key={p}>
+                      <td style={{ ...tblCell, fontFamily: "monospace", fontSize: 12 }}>{p}</td>
+                      <td style={{ ...tblCellR, fontWeight: 600 }}>{v}</td>
+                      <td style={{ ...tblCell, color: "#6B7280", fontSize: 12 }}>{src}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ ...prose, marginBottom: 0, color: "#6B7280", fontSize: 12 }}>
+                σ_nat is correlated across seats (a polling error moves all seats together); σ_res and σ_pref are
+                independent per seat. The seat-count CDF is computed by integrating over a 100-point grid of ±3σ_nat
+                national swing values, summing per-seat win probabilities at each grid point.
+              </p>
             </div>
-          </div>
 
-        </div>
-      )}
+            {/* §6 Poll aggregation */}
+            <div style={panel}>
+              <div style={secHead}>6. Poll aggregation</div>
+              <h2 style={secTitle}>Exponential decay with house effects</h2>
+              <p style={prose}>Published polls are aggregated using a BludgerTrack-style weighted average:</p>
+              <pre style={codeBlock}>{
+`w(t) = 2^(−d / 90)           (exponential decay, 90-day half-life; d = days since poll)
 
-      {/* ══════════════════════ ABOUT TAB ══════════════════════════════════════ */}
-      {activeTab === "about" && (
-        <div style={{ maxWidth: 960, margin: "0 auto", padding: isMobile ? "16px 14px" : "24px 24px" }}>
-
-          {/* Page header */}
-          <div style={{ ...STYLES.pageHeader, ...(isMobile && { padding: "20px 16px 18px" }) }}>
-            <div style={{ position: "absolute", inset: 0, opacity: 0.06, backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "20px 20px", pointerEvents: "none" }} />
-            <div style={{ position: "relative" }}>
-              <div style={STYLES.sectionLabel}>🇦🇺  About aus-poll</div>
-              <h1 style={{ ...STYLES.pageHeaderTitle, fontSize: isMobile ? 22 : 30 }}>aus poll</h1>
-              <p style={STYLES.pageHeaderSubtitle}>A seat-by-seat federal election modelling tool for all 151 House of Representatives divisions.</p>
+aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
+            ────────────────────────────────────────────────
+                          Σ_t w(t)`
+              }</pre>
+              <p style={prose}>
+                House effects are estimated iteratively: for each pollster, the effect is the weighted mean deviation of
+                that pollster's adjusted polls from the current aggregate estimate, repeated until convergence. Pollsters
+                covered: Newspoll, RedBridge, DemosAU, Roy Morgan, Essential Research, YouGov.
+              </p>
+              <p style={prose}>
+                The 95% confidence interval is ±1.96·√(weighted variance / effective sample size), where effective
+                sample size accounts for temporal clustering — a burst of polls in a short window is not treated as
+                independent evidence.
+              </p>
             </div>
-          </div>
 
-          {/* What is it */}
-          <div style={{ ...STYLES.panel, marginBottom: 16 }}>
-            <div style={STYLES.sectionLabel}>What is aus-poll?</div>
-            <div style={{ ...STYLES.panelTitleLg, marginBottom: 14 }}>Scenario modelling, not prediction</div>
-            <p style={{ fontSize: 15, color: "#374151", lineHeight: 1.85, margin: 0 }}>
-              aus-poll is an interactive scenario modelling dashboard for Australian federal elections. Rather than simply showing national polling averages, it translates primary vote inputs into seat-by-seat projections using each division's actual 2025 AEC first-preference baseline and realistic preference flows.
-            </p>
-            <p style={{ fontSize: 15, color: "#374151", lineHeight: 1.85, marginBottom: 0, marginTop: 12 }}>
-              It is designed to be used on election night as a live wall — tracking swings seat by seat as results come in — or as an exploratory tool for testing polling scenarios at any time.
-            </p>
-          </div>
-
-          {/* How to use */}
-          <div style={{ ...STYLES.panel, marginBottom: 16 }}>
-            <div style={STYLES.sectionLabel}>Navigation</div>
-            <div style={{ ...STYLES.panelTitleLg, marginBottom: 14 }}>How to Use It</div>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 12 }}>
-              {[
-                { tab: "Model", icon: "🎛️", desc: "Adjust national primary vote sliders to see how seat counts change. Override individual seats for finer control." },
-                { tab: "Seats", icon: "🗺️", desc: "Browse all 151 seats with margins, swings, demographics, and modelled 2PP projections." },
-                { tab: "Polls", icon: "📊", desc: "Enter new polls or load existing ones. The aggregated estimate feeds directly into the model." },
-                { tab: "Overview", icon: "🏛️", desc: "Compare historical federal election results side-by-side." },
-                { tab: "Markets", icon: "💹", desc: "View betting market odds for national government outcomes and individual seats." },
-                { tab: "Methodology", icon: "📐", desc: "Understand the assumptions, preference flows, and data sources behind every projection." },
-              ].map(({ tab, icon, desc }) => (
-                <div key={tab} style={STYLES.featureCard}>
-                  <div style={STYLES.featureCardIcon}>{icon}</div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: "#0F172A", marginBottom: 6 }}>{tab}</div>
-                  <div style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.65 }}>{desc}</div>
-                </div>
-              ))}
+            {/* §7 Calibration */}
+            <div style={panel}>
+              <div style={secHead}>7. Calibration</div>
+              <h2 style={secTitle}>Backtested against 2025 AEC results</h2>
+              <p style={prose}>
+                When the model is given the true 2025 AEC primary votes as input (zero swing from baseline), the
+                mean absolute error between modelled and actual AEC 2PP across the 115 ALP–Coalition TCP seats is
+                <strong> 0.003 percentage points</strong>. This near-zero error confirms that the preference-flow
+                arithmetic is correctly reproducing the AEC distribution of preferences. Seats with non-ALP/Coalition
+                TCP races (Greens, Teal, Independent contests) are excluded from calibration as the model does not
+                compute a standard 2PP for them.
+              </p>
+              <p style={{ ...prose, marginBottom: 0, color: "#6B7280", fontSize: 12 }}>
+                Residual uncertainty (σ_res = 1.0 pp) was calibrated from the 2019→2022 RMSE of seat-level swing
+                deviations after removing the national swing component.
+              </p>
             </div>
-          </div>
 
-          {/* Coverage */}
-          <div style={{ ...STYLES.panel, marginBottom: 0 }}>
-            <div style={STYLES.sectionLabel}>Coverage</div>
-            <div style={{ ...STYLES.panelTitleLg, marginBottom: 14 }}>What's Included</div>
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: 12 }}>
-              {[
-                { label: "Federal elections", value: "2019 · 2022 · 2025" },
-                { label: "Seats modelled", value: "151" },
-                { label: "State elections", value: "VIC · NSW · QLD · WA" },
-                { label: "Polls tracked", value: "6+ pollsters" },
-              ].map(({ label, value }) => (
-                <div key={label} style={STYLES.coverageCard}>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", marginBottom: 4 }}>{value}</div>
-                  <div style={{ fontSize: 11, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
-                </div>
-              ))}
+            {/* Limitations */}
+            <div style={panel}>
+              <div style={secHead}>Limitations</div>
+              <h2 style={secTitle}>Assumptions and caveats</h2>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <tbody>
+                  {[
+                    ["Uniform national swings", "State-level swing variation is not modelled. Labor may swing harder in Queensland than Victoria; the model applies the same national Δ everywhere unless state swings are set manually."],
+                    ["Fixed preference flows", "Flow constants do not vary by candidate, campaign, or division. Real flows can differ by several pp from these averages, as the ON→ALP example illustrates (14.9% in 2022 vs 43.0% in 2025)."],
+                    ["Hardcoded teal seats", "Six seats are designated teal-contest seats: Warringah, Wentworth, Bradfield, Mackellar, Kooyong, Goldstein. Teal candidates in other seats are not automatically modelled."],
+                    ["Independent TCP overrides required", "Where the final count is ALP vs. an independent (not Coalition), the user must set the TCP percentage manually on the Model tab."],
+                    ["No redistribution modelling", "Baselines use 2025 electoral boundaries. Boundary changes between elections are not reflected."],
+                    ["No incumbency or candidate effects", "No adjustment for candidate quality, incumbent retirement, or local campaign factors."],
+                  ].map(([title, desc], i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                      <td style={{ ...tblCell, fontWeight: 600, whiteSpace: "nowrap", verticalAlign: "top", paddingRight: 16, width: "28%" }}>{title}</td>
+                      <td style={{ ...tblCell, color: "#6B7280" }}>{desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+
+            {/* Data sources */}
+            <div style={{ ...panel, marginBottom: 0 }}>
+              <div style={secHead}>Data sources</div>
+              <h2 style={secTitle}>Input data</h2>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <tbody>
+                  {[
+                    ["AEC election results", <><a href="https://results.aec.gov.au" target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>results.aec.gov.au</a> — booth-level and division-level CSV exports for 2022 and 2025 federal elections (first preferences, TCP, DOP).</>],
+                    ["Polling", "Newspoll, Resolve/SMH, RedBridge, DemosAU, Roy Morgan, Essential Research, YouGov — primary and 2PP figures as published."],
+                    ["Betting markets", "Sportsbet, Betfair Exchange — national government outcome odds and seat-level win markets."],
+                    ["Demographics", "ABS Census 2021 — SA1/SA2 level data mapped to electoral divisions."],
+                  ].map(([title, desc], i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                      <td style={{ ...tblCell, fontWeight: 600, whiteSpace: "nowrap", verticalAlign: "top", paddingRight: 16, width: "28%" }}>{title}</td>
+                      <td style={tblCell}>{desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
           </div>
-
-        </div>
-      )}
-
+        );
+      })()}
 
       {/* ══════════════════════ CHANGELOG TAB ══════════════════════════════════════ */}
       {activeTab === "changelog" && (
