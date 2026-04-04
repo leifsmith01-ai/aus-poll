@@ -3344,16 +3344,19 @@ export default function App() {
     [modelledSeats]);
 
   const implied2pp = useMemo(() => {
-    // Only include seats where ALP contests the final two. Exclude on_v_coal seats —
-    // ALP doesn't appear in the TCP count there, and their synthetic 2PP values
-    // (which treat ON's large primary as flowing 43% to ALP) inflate the national
-    // average in high-ON scenarios, causing the headline to rise even as ALP loses seats.
-    const relevant = modelledSeats.filter(s =>
-      s.modelled.projAlp2pp !== null && s.modelled.activeTcpMatchup !== "on_v_coal"
-    );
-    if (!relevant.length) return null;
-    return relevant.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / relevant.length;
-  }, [modelledSeats]);
+    // Compute national 2PP directly from primary slider values using standard
+    // ALP/Coalition preference flows. This matches how pollsters report 2PP and
+    // avoids the inflation caused by per-seat averaging of synthetic 2PP values
+    // in non-standard matchups (on_v_coal, on_v_alp) when ON surges.
+    const { alp, coal, grn, teal, on, undecided } = primaries;
+    const other = Math.max(0, 100 - alp - coal - grn - teal - on - undecided);
+    const a = alp + grn * prefFlows.grn_alp + teal * prefFlows.teal_alp
+      + on * prefFlows.on_alp + other * prefFlows.other_alp;
+    const c = coal + grn * (1 - prefFlows.grn_alp) + teal * (1 - prefFlows.teal_alp)
+      + on * (1 - prefFlows.on_alp) + other * (1 - prefFlows.other_alp);
+    if (a + c === 0) return null;
+    return a / (a + c) * 100;
+  }, [primaries, prefFlows]);
 
   // ── VIC modelling ──
   const vicModelledSeats = useMemo(() => {
