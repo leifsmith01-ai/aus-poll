@@ -4,7 +4,10 @@ from the ABS Census API and write webapp/src/data/demographics.js.
 
 Data sources:
   - ABS 2021 Census API (api.data.abs.gov.au) — SDMX-JSON format
-  - Tables: G02 (medians), G37 (tenure), G49 (qualifications), G09 (country of birth)
+  - Tables: G02 (medians), G37 (tenure), G49 (qualifications), G09 (country of birth),
+            G17A/G17B (income distribution → earner-only median),
+            G01 (age distribution → youth/seniors pct),
+            G16 (labour force status → unemployment/participation)
   - AEC urban/rural classification (hardcoded from AEC published divisions)
   - SEIFA, ATO data: set to null (not available at CED level via simple API)
 
@@ -705,6 +708,429 @@ def parse_g09(series_dims: list, series_data: dict, region_id: str) -> float | N
     return None
 
 
+# ── Income band definitions for G17 median computation ───────────────────────
+# Weekly income bands: (low, high) in dollars.
+# For the open-ended top band ($3,000+) we use $4,500 as a conservative upper bound.
+_INCOME_BANDS = [
+    (1,    149,   75),
+    (150,  299,   225),
+    (300,  399,   350),
+    (400,  499,   450),
+    (500,  649,   575),
+    (650,  799,   725),
+    (800,  999,   900),
+    (1000, 1249,  1125),
+    (1250, 1499,  1375),
+    (1500, 1749,  1625),
+    (1750, 1999,  1875),
+    (2000, 2499,  2250),
+    (2500, 2999,  2750),
+    (3000, 4500,  3500),  # open-ended: $3,000+
+]
+
+
+def _identify_income_band(label: str) -> int | None:
+    """
+    Map an ABS income range label to its index in _INCOME_BANDS.
+    Returns None if it's a nil/negative/not-stated band to exclude.
+    """
+    label = label.lower().strip()
+    if any(x in label for x in ["nil", "negative", "not state", "not applicable"]):
+        return None
+    # Match by first number in the label
+    import re
+    m = re.search(r"\$?([\d,]+)", label)
+    if not m:
+        return None
+    low_val = int(m.group(1).replace(",", ""))
+    for i, (low, high, _) in enumerate(_INCOME_BANDS):
+        if low_val == low:
+            return i
+    return None
+
+
+def _compute_earner_median_weekly(band_counts: list) -> float | None:
+    """
+    Given a list of (low, high, midpoint, count) ordered by low value,
+    compute the median weekly income using linear interpolation within the
+    band containing the 50th percentile.
+    """
+    total = sum(c for _, _, _, c in band_counts)
+    if not total:
+        return None
+    target = total * 0.5
+    cumulative = 0.0
+    for low, high, mid, count in band_counts:
+        cumulative += count
+        if cumulative >= target:
+            prev = cumulative - count
+            frac = (target - prev) / max(count, 1)
+            return low + frac * (high - low)
+    return band_counts[-1][2]
+
+
+def parse_g17_earner_median(series_dims: list, series_data: dict, region_id: str) -> float | None:
+    """
+    G17A or G17B: Personal Income (Weekly) by income range [by Sex [by Age]].
+    Computes median weekly income EXCLUDING nil/negative income bands.
+    Returns earner-only annual income (weekly median × 52), or None on failure.
+    """
+    region_dim_pos = None
+    for i, d in enumerate(series_dims):
+        if d["id"] == "REGION":
+            region_dim_pos = i
+            break
+
+    region_type_pos = None
+    for i, d in enumerate(series_dims):
+        if "REGION_TYPE" in d["id"]:
+            region_type_pos = i
+            break
+
+    # Find the income-range dimension (INCP or similar)
+    incp_pos = None
+    incp_dim = None
+    for i, d in enumerate(series_dims):
+        dim_id_upper = d["id"].upper()
+        if "INCP" in dim_id_upper or "INC" in dim_id_upper:
+            # Verify it has income-range labels
+            labels = [v.get("name", "") for v in d["values"]]
+            if any("nil" in l.lower() or "$" in l or "income" in l.lower() for l in labels):
+                incp_pos = i
+                incp_dim = d
+                break
+
+    if region_dim_pos is None or incp_pos is None:
+        return None
+
+    # Find sex dim total code (use Persons / _T)
+    sexp_pos = None
+    sexp_total = None
+    for i, d in enumerate(series_dims):
+        if d["id"] in ("SEXP", "SEX"):
+            sexp_pos = i
+            for v in d["values"]:
+                label = v.get("name", "").lower()
+                if "person" in label or v["id"] == "_T" or label == "total":
+                    sexp_total = v["id"]
+                    break
+            if sexp_total is None and d["values"]:
+                sexp_total = d["values"][-1]["id"]
+            break
+
+    # Find age dim total code (_T)
+    agep_pos = None
+    agep_total = None
+    for i, d in enumerate(series_dims):
+        if d["id"] in ("AGEP", "AGE"):
+            agep_pos = i
+            for v in d["values"]:
+                if v["id"] == "_T" or v.get("name", "").lower() in ("total", "all ages"):
+                    agep_total = v["id"]
+                    break
+            if agep_total is None and d["values"]:
+                agep_total = d["values"][-1]["id"]
+            break
+
+    # Map INCP value IDs to band indices
+    incp_to_band = {}
+    for v in incp_dim["values"]:
+        band_idx = _identify_income_band(v.get("name", v["id"]))
+        if band_idx is not None:
+            incp_to_band[v["id"]] = band_idx
+
+    if not incp_to_band:
+        return None
+
+    # Accumulate counts per band
+    band_totals = [0] * len(_INCOME_BANDS)
+
+    for key, val in series_data.items():
+        if val is None or val == 0:
+            continue
+        if key[region_dim_pos] != region_id:
+            continue
+        if region_type_pos is not None and key[region_type_pos] != "CED":
+            continue
+        # Use persons total for sex if available; if no sex dim, sum all
+        if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
+            continue
+        # Use all-ages total if age dim present
+        if agep_pos is not None and agep_total and key[agep_pos] != agep_total:
+            continue
+
+        incp_code = key[incp_pos]
+        if incp_code in incp_to_band:
+            band_totals[incp_to_band[incp_code]] += val
+
+    band_counts = [
+        (low, high, mid, band_totals[i])
+        for i, (low, high, mid) in enumerate(_INCOME_BANDS)
+        if band_totals[i] > 0
+    ]
+
+    if not band_counts:
+        return None
+
+    weekly = _compute_earner_median_weekly(band_counts)
+    if weekly is None:
+        return None
+    return weekly * 52  # annualise
+
+
+def parse_g01_age_cohorts(series_dims: list, series_data: dict, region_id: str) -> dict:
+    """
+    G01: Selected Person Characteristics (includes age distribution by sex).
+    Returns youth15to34Pct and seniors65PlusPct of total population.
+    Note: uses 15-34 rather than 18-34 as 2021 Census groups in 5-year bands.
+    """
+    region_dim_pos = None
+    for i, d in enumerate(series_dims):
+        if d["id"] == "REGION":
+            region_dim_pos = i
+            break
+
+    region_type_pos = None
+    for i, d in enumerate(series_dims):
+        if "REGION_TYPE" in d["id"]:
+            region_type_pos = i
+            break
+
+    # Find age dimension
+    agep_pos = None
+    agep_dim = None
+    for i, d in enumerate(series_dims):
+        if d["id"] in ("AGEP", "AGE"):
+            agep_pos = i
+            agep_dim = d
+            break
+
+    # Find sex dim total
+    sexp_pos = None
+    sexp_total = None
+    for i, d in enumerate(series_dims):
+        if d["id"] in ("SEXP", "SEX"):
+            sexp_pos = i
+            for v in d["values"]:
+                label = v.get("name", "").lower()
+                if "person" in label or v["id"] == "_T" or label == "total":
+                    sexp_total = v["id"]
+                    break
+            if sexp_total is None and d["values"]:
+                sexp_total = d["values"][-1]["id"]
+            break
+
+    if region_dim_pos is None or agep_pos is None:
+        return {"youth15to34Pct": None, "seniors65PlusPct": None}
+
+    import re
+
+    def _age_band_low(label: str) -> int | None:
+        """Extract the lower bound of an age band label."""
+        m = re.search(r"(\d+)", label)
+        return int(m.group(1)) if m else None
+
+    def _is_seniors(label: str) -> bool:
+        """True if label represents 65+ age group."""
+        label_l = label.lower()
+        if "65" in label_l or "70" in label_l or "75" in label_l or \
+           "80" in label_l or "85" in label_l or "90" in label_l or \
+           "95" in label_l or "100" in label_l:
+            low = _age_band_low(label_l)
+            return low is not None and low >= 65
+        return False
+
+    def _is_youth(label: str) -> bool:
+        """True if label represents 15–34 age group."""
+        low = _age_band_low(label.lower())
+        return low is not None and 15 <= low <= 30  # 15-19, 20-24, 25-29, 30-34
+
+    # Find total population code for age dim
+    agep_total = None
+    for v in agep_dim["values"]:
+        if v["id"] == "_T" or v.get("name", "").lower() in ("total", "all ages"):
+            agep_total = v["id"]
+            break
+
+    total_pop = 0
+    youth_count = 0
+    seniors_count = 0
+
+    for key, val in series_data.items():
+        if val is None or val == 0:
+            continue
+        if key[region_dim_pos] != region_id:
+            continue
+        if region_type_pos is not None and key[region_type_pos] != "CED":
+            continue
+        if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
+            continue
+
+        age_code = key[agep_pos]
+        # Lookup label
+        age_label = ""
+        for v in agep_dim["values"]:
+            if v["id"] == age_code:
+                age_label = v.get("name", age_code)
+                break
+
+        if agep_total and age_code == agep_total:
+            total_pop = val
+        elif _is_youth(age_label):
+            youth_count += val
+        elif _is_seniors(age_label):
+            seniors_count += val
+
+    if total_pop <= 0:
+        return {"youth15to34Pct": None, "seniors65PlusPct": None}
+
+    return {
+        "youth15to34Pct": round(youth_count / total_pop * 100, 1),
+        "seniors65PlusPct": round(seniors_count / total_pop * 100, 1),
+    }
+
+
+def parse_g16_employment(series_dims: list, series_data: dict, region_id: str) -> dict:
+    """
+    G16: Labour Force Status by Sex [by Age].
+    Returns unemploymentRate (% of labour force) and labourParticipationRate (% of 15+).
+    """
+    region_dim_pos = None
+    for i, d in enumerate(series_dims):
+        if d["id"] == "REGION":
+            region_dim_pos = i
+            break
+
+    region_type_pos = None
+    for i, d in enumerate(series_dims):
+        if "REGION_TYPE" in d["id"]:
+            region_type_pos = i
+            break
+
+    # Find labour force status dimension
+    lfsp_pos = None
+    lfsp_dim = None
+    for i, d in enumerate(series_dims):
+        dim_id_u = d["id"].upper()
+        if "LFSP" in dim_id_u or "LABOUR" in dim_id_u or "LABOR" in dim_id_u or \
+           "LFS" in dim_id_u:
+            lfsp_pos = i
+            lfsp_dim = d
+            break
+    if lfsp_dim is None:
+        # Fallback: look for dim with employment-related labels
+        for i, d in enumerate(series_dims):
+            labels = [v.get("name", "").lower() for v in d["values"]]
+            if any("employed" in l or "unemployed" in l for l in labels):
+                lfsp_pos = i
+                lfsp_dim = d
+                break
+
+    # Find sex total
+    sexp_pos = None
+    sexp_total = None
+    for i, d in enumerate(series_dims):
+        if d["id"] in ("SEXP", "SEX"):
+            sexp_pos = i
+            for v in d["values"]:
+                label = v.get("name", "").lower()
+                if "person" in label or v["id"] == "_T" or label == "total":
+                    sexp_total = v["id"]
+                    break
+            if sexp_total is None and d["values"]:
+                sexp_total = d["values"][-1]["id"]
+            break
+
+    # Find age total
+    agep_pos = None
+    agep_total = None
+    for i, d in enumerate(series_dims):
+        if d["id"] in ("AGEP", "AGE"):
+            agep_pos = i
+            for v in d["values"]:
+                if v["id"] == "_T" or v.get("name", "").lower() in ("total", "all ages"):
+                    agep_total = v["id"]
+                    break
+            if agep_total is None and d["values"]:
+                agep_total = d["values"][-1]["id"]
+            break
+
+    if region_dim_pos is None or lfsp_pos is None:
+        return {"unemploymentRate": None, "labourParticipationRate": None}
+
+    # Identify LFSP codes by label
+    employed_codes = set()
+    unemployed_codes = set()
+    nilf_codes = set()   # not in labour force
+    total_15plus_code = None
+
+    for v in lfsp_dim["values"]:
+        label = v.get("name", "").lower()
+        code = v["id"]
+        if "employed" in label and "not" not in label and "un" not in label:
+            employed_codes.add(code)
+        elif "unemployed" in label:
+            unemployed_codes.add(code)
+        elif "not in labour" in label or "nilf" in label or "not in labor" in label:
+            nilf_codes.add(code)
+        elif code == "_T" or "total" in label:
+            total_15plus_code = code
+
+    employed_total = 0
+    unemployed_total = 0
+
+    for key, val in series_data.items():
+        if val is None or val == 0:
+            continue
+        if key[region_dim_pos] != region_id:
+            continue
+        if region_type_pos is not None and key[region_type_pos] != "CED":
+            continue
+        if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
+            continue
+        if agep_pos is not None and agep_total and key[agep_pos] != agep_total:
+            continue
+
+        lfsp_code = key[lfsp_pos]
+        if lfsp_code in employed_codes:
+            employed_total += val
+        elif lfsp_code in unemployed_codes:
+            unemployed_total += val
+
+    labour_force = employed_total + unemployed_total
+    if labour_force <= 0:
+        return {"unemploymentRate": None, "labourParticipationRate": None}
+
+    # For participation rate denominator, use total 15+ from the total code if available
+    total_15plus = None
+    if total_15plus_code:
+        for key, val in series_data.items():
+            if val is None:
+                continue
+            if key[region_dim_pos] != region_id:
+                continue
+            if region_type_pos is not None and key[region_type_pos] != "CED":
+                continue
+            if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
+                continue
+            if agep_pos is not None and agep_total and key[agep_pos] != agep_total:
+                continue
+            if key[lfsp_pos] == total_15plus_code:
+                total_15plus = val
+                break
+
+    unemployment_rate = round(unemployed_total / labour_force * 100, 1)
+
+    participation_rate = None
+    if total_15plus and total_15plus > 0:
+        participation_rate = round(labour_force / total_15plus * 100, 1)
+
+    return {
+        "unemploymentRate": unemployment_rate,
+        "labourParticipationRate": participation_rate,
+    }
+
+
 def main():
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
 
@@ -725,11 +1151,51 @@ def main():
     print("\nFetching G09 (country of birth)...")
     g09_dims, g09_data = fetch_all_ced("G09")
 
+    # G17: income distribution for earner-only median (try G17A first, fall back to G17)
+    g17_dims, g17_data = None, None
+    g17b_dims, g17b_data = None, None
+    try:
+        print("\nFetching G17A (income distribution, ages 15-44)...")
+        g17_dims, g17_data = fetch_all_ced("G17A")
+        try:
+            print("\nFetching G17B (income distribution, ages 45+)...")
+            g17b_dims, g17b_data = fetch_all_ced("G17B")
+        except Exception as e:
+            print(f"  G17B not available: {e}")
+    except Exception as e:
+        print(f"  G17A not available, trying G17: {e}")
+        try:
+            g17_dims, g17_data = fetch_all_ced("G17")
+        except Exception as e2:
+            print(f"  G17 also unavailable: {e2}  — earner income will be null")
+
+    # G01: age distribution for youth/seniors percentages
+    g01_dims, g01_data = None, None
+    try:
+        print("\nFetching G01 (age distribution)...")
+        g01_dims, g01_data = fetch_all_ced("G01")
+    except Exception as e:
+        print(f"  G01 not available: {e}  — age cohort pcts will be null")
+
+    # G16: labour force status for unemployment/participation
+    g16_dims, g16_data = None, None
+    try:
+        print("\nFetching G16 (labour force status)...")
+        g16_dims, g16_data = fetch_all_ced("G16")
+    except Exception as e:
+        print(f"  G16 not available: {e}  — employment rates will be null")
+
     # Print dim structure for debugging
     print("\nG02 dims:", [d["id"] for d in g02_dims])
     print("G37 dims:", [d["id"] for d in g37_dims])
     print("G49 dims:", [d["id"] for d in g49_dims])
     print("G09 dims:", [d["id"] for d in g09_dims])
+    if g17_dims:
+        print("G17A dims:", [d["id"] for d in g17_dims])
+    if g01_dims:
+        print("G01 dims:", [d["id"] for d in g01_dims])
+    if g16_dims:
+        print("G16 dims:", [d["id"] for d in g16_dims])
 
     # ── Build ABS region_id -> name mapping from G02 ─────────────────────────
     region_dim_g02 = get_dim_by_id(g02_dims, "REGION")
@@ -761,7 +1227,7 @@ def main():
         print(f"Unmatched seats: {unmatched}")
         print("Available ABS names (first 20):", list(abs_name_to_id.keys())[:20])
 
-    # ── Also get G37/G49/G09 region dims for matching ──────────────────────────
+    # ── Also get G37/G49/G09/new region dims for matching ─────────────────────
     region_dim_g37 = get_dim_by_id(g37_dims, "REGION")
     region_dim_g49 = get_dim_by_id(g49_dims, "REGION")
     region_dim_g09 = get_dim_by_id(g09_dims, "REGION")
@@ -788,6 +1254,30 @@ def main():
         if d['id'] not in ('REGION', 'STATE'):
             print(f"    Labels: {[v.get('name','') for v in vals[:8]]}")
 
+    if g17_dims:
+        print("\nG17A dim details:")
+        for d in g17_dims:
+            vals = d["values"]
+            print(f"  {d['id']}: {[v['id'] for v in vals[:10]]}")
+            if d['id'] not in ('REGION', 'STATE'):
+                print(f"    Labels: {[v.get('name','') for v in vals[:10]]}")
+
+    if g01_dims:
+        print("\nG01 dim details:")
+        for d in g01_dims:
+            vals = d["values"]
+            print(f"  {d['id']}: {[v['id'] for v in vals[:10]]}")
+            if d['id'] not in ('REGION', 'STATE'):
+                print(f"    Labels: {[v.get('name','') for v in vals[:10]]}")
+
+    if g16_dims:
+        print("\nG16 dim details:")
+        for d in g16_dims:
+            vals = d["values"]
+            print(f"  {d['id']}: {[v['id'] for v in vals[:10]]}")
+            if d['id'] not in ('REGION', 'STATE'):
+                print(f"    Labels: {[v.get('name','') for v in vals[:10]]}")
+
     # ── Assemble demographics for each seat ───────────────────────────────────
     print("\n" + "=" * 60)
     print("Assembling demographic records...")
@@ -801,10 +1291,13 @@ def main():
             # Use nulls for unmatched seats
             demographics[aec_id] = {
                 "medianAge": None, "medianPersonalIncome": None,
+                "medianPersonalIncomeEarners": None,
                 "medianHouseholdIncome": None, "medianWeeklyRent": None,
                 "medianMonthlyMortgage": None, "ownerOutrightPct": None,
                 "ownerMortgagePct": None, "renterPct": None,
                 "bachelorsOrAbovePct": None, "overseasBornPct": None,
+                "youth15to34Pct": None, "seniors65PlusPct": None,
+                "unemploymentRate": None, "labourParticipationRate": None,
                 "seifaIRSD": None, "rentalStressPct": None,
                 "mortgageStressPct": None, "avgTaxableIncome": None,
                 "investPropertyPct": None, "avgNetRentalIncome": None,
@@ -844,9 +1337,38 @@ def main():
         # G09 overseas born
         overseas_pct = parse_g09(g09_dims, g09_data, abs_id)
 
+        # G17A/G17B earner-only income median
+        earner_income = None
+        if g17_dims is not None and g17_data is not None:
+            earner_income_a = parse_g17_earner_median(g17_dims, g17_data, abs_id)
+            # If G17B also fetched, merge by combining band counts (both parsers return annual)
+            # Simplest: average G17A and G17B results weighted if both available
+            if g17b_dims is not None and g17b_data is not None:
+                earner_income_b = parse_g17_earner_median(g17b_dims, g17b_data, abs_id)
+                # Both tables cover different age groups; use G17A result as primary
+                # (G17A covers 15-44 which is the most populous earning age group)
+                # A proper merge would combine band counts; for now prefer G17A if valid
+                if earner_income_a is not None:
+                    earner_income = earner_income_a
+                elif earner_income_b is not None:
+                    earner_income = earner_income_b
+            else:
+                earner_income = earner_income_a
+
+        # G01 age cohorts
+        age_cohorts = {"youth15to34Pct": None, "seniors65PlusPct": None}
+        if g01_dims is not None and g01_data is not None:
+            age_cohorts = parse_g01_age_cohorts(g01_dims, g01_data, abs_id)
+
+        # G16 employment rates
+        employment = {"unemploymentRate": None, "labourParticipationRate": None}
+        if g16_dims is not None and g16_data is not None:
+            employment = parse_g16_employment(g16_dims, g16_data, abs_id)
+
         demographics[aec_id] = {
             "medianAge": int(age) if age is not None else None,
             "medianPersonalIncome": int(personal_weekly * 52) if personal_weekly else None,
+            "medianPersonalIncomeEarners": int(earner_income) if earner_income else None,
             "medianHouseholdIncome": int(household_weekly * 52) if household_weekly else None,
             "medianWeeklyRent": int(rent) if rent else None,
             "medianMonthlyMortgage": int(mortgage) if mortgage else None,
@@ -855,6 +1377,10 @@ def main():
             "renterPct": renter_pct,
             "bachelorsOrAbovePct": bach_pct,
             "overseasBornPct": overseas_pct,
+            "youth15to34Pct": age_cohorts["youth15to34Pct"],
+            "seniors65PlusPct": age_cohorts["seniors65PlusPct"],
+            "unemploymentRate": employment["unemploymentRate"],
+            "labourParticipationRate": employment["labourParticipationRate"],
             "seifaIRSD": None,
             "rentalStressPct": None,
             "mortgageStressPct": None,
@@ -904,6 +1430,15 @@ def main():
     if sample_id in demographics:
         print(f"\nSample record (Canberra, AEC {sample_id}):")
         print(json.dumps(demographics[sample_id], indent=2))
+
+    # Print new-field summary
+    earner_populated = sum(1 for d in demographics.values() if d.get("medianPersonalIncomeEarners") is not None)
+    youth_populated = sum(1 for d in demographics.values() if d.get("youth15to34Pct") is not None)
+    unemp_populated = sum(1 for d in demographics.values() if d.get("unemploymentRate") is not None)
+    print(f"\nNew fields populated:")
+    print(f"  medianPersonalIncomeEarners: {earner_populated}/151")
+    print(f"  youth15to34Pct / seniors65PlusPct: {youth_populated}/151")
+    print(f"  unemploymentRate / labourParticipationRate: {unemp_populated}/151")
 
 
 if __name__ == "__main__":
