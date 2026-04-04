@@ -3115,6 +3115,7 @@ export default function App() {
   const [marginFilter, setMarginFilter] = useState(new Set(MARGINS));
   const [sortKey, setSortKey] = useState("margin");
   const [sortDir, setSortDir] = useState("asc");
+  const [seatsJurisdiction, setSeatsJurisdiction] = useState("federal_2025");
   const [activeTab, setActiveTab] = useState("model");
   const [selectedModelId, setSelectedModelId] = useState("federal_2025");
 
@@ -3245,13 +3246,17 @@ export default function App() {
   };
 
   // ── Seats filtered list ──
+  const seatsForTab = ELECTION_DATA[seatsJurisdiction]?.seats ?? SEATS;
+  const isFederalTab = seatsJurisdiction === "federal_2025";
+  const hasHareClark = seatsJurisdiction === "tas_2024" || seatsJurisdiction === "act_2024";
+
   const filtered = useMemo(() => {
-    let r = SEATS.filter(s => {
+    let r = seatsForTab.filter(s => {
       if (search) {
         const q = search.toLowerCase();
         if (!s.name.toLowerCase().includes(q) && !s.winner.name.toLowerCase().includes(q)) return false;
       }
-      if (!stateFilter.has(s.state)) return false;
+      if (isFederalTab && !stateFilter.has(s.state)) return false;
       if (!groupFilter.has(getSeatGroup(s))) return false;
       if (!marginFilter.has(getMarginCat(s.margin))) return false;
       return true;
@@ -3265,11 +3270,11 @@ export default function App() {
       if (sortKey === "swing") cmp = (a.swing ?? 0) - (b.swing ?? 0);
       return sortDir === "asc" ? cmp : -cmp;
     });
-  }, [search, stateFilter, groupFilter, marginFilter, sortKey, sortDir]);
+  }, [seatsForTab, isFederalTab, search, stateFilter, groupFilter, marginFilter, sortKey, sortDir]);
 
-  const stateCounts = useMemo(() => Object.fromEntries(STATES.map(s => [s, SEATS.filter(d => d.state === s).length])), []);
-  const groupCounts = useMemo(() => { const c = {}; SEATS.forEach(s => { const g = getSeatGroup(s); c[g] = (c[g] || 0) + 1; }); return c; }, []);
-  const marginCounts = useMemo(() => { const c = {}; SEATS.forEach(s => { const cat = getMarginCat(s.margin); c[cat] = (c[cat] || 0) + 1; }); return c; }, []);
+  const stateCounts = useMemo(() => Object.fromEntries(STATES.map(s => [s, seatsForTab.filter(d => d.state === s).length])), [seatsForTab]);
+  const groupCounts = useMemo(() => { const c = {}; seatsForTab.forEach(s => { const g = getSeatGroup(s); c[g] = (c[g] || 0) + 1; }); return c; }, [seatsForTab]);
+  const marginCounts = useMemo(() => { const c = {}; seatsForTab.forEach(s => { const cat = getMarginCat(s.margin); c[cat] = (c[cat] || 0) + 1; }); return c; }, [seatsForTab]);
 
   // ── Modelling ──
   // Allocate undecided voters using a blend of proportional allocation and an
@@ -4497,19 +4502,21 @@ export default function App() {
             <div style={{ ...STYLES.panel, padding: "14px 16px", position: isMobile ? "static" : "sticky", top: isMobile ? "auto" : 90, fontSize: 13, marginBottom: 0 }}>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Search seats…"
                 style={{ ...STYLES.input, width: "100%", boxSizing: "border-box", marginBottom: 14 }} />
-              <div style={sectionHead}>State / Territory</div>
-              <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-                <button onClick={() => setStateFilter(new Set(STATES))} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>All</button>
-                <button onClick={() => setStateFilter(new Set())} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>None</button>
-              </div>
-              {STATES.map(s => (
-                <label key={s} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4, cursor: "pointer" }}>
-                  <input type="checkbox" checked={stateFilter.has(s)} onChange={() => toggleSet(setStateFilter, s)} style={{ accentColor: "#2563EB" }} />
-                  <span style={{ flex: 1 }}>{s}</span>
-                  <span style={{ color: "#9CA3AF", fontSize: 11 }}>{stateCounts[s]}</span>
-                </label>
-              ))}
-              <div style={{ borderTop: "1px solid #F3F4F6", margin: "10px 0" }} />
+              {isFederalTab && (<>
+                <div style={sectionHead}>State / Territory</div>
+                <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+                  <button onClick={() => setStateFilter(new Set(STATES))} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>All</button>
+                  <button onClick={() => setStateFilter(new Set())} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>None</button>
+                </div>
+                {STATES.map(s => (
+                  <label key={s} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4, cursor: "pointer" }}>
+                    <input type="checkbox" checked={stateFilter.has(s)} onChange={() => toggleSet(setStateFilter, s)} style={{ accentColor: "#2563EB" }} />
+                    <span style={{ flex: 1 }}>{s}</span>
+                    <span style={{ color: "#9CA3AF", fontSize: 11 }}>{stateCounts[s]}</span>
+                  </label>
+                ))}
+                <div style={{ borderTop: "1px solid #F3F4F6", margin: "10px 0" }} />
+              </>)}
               <div style={sectionHead}>Party / Group</div>
               <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
                 <button onClick={() => setGroupFilter(new Set(GROUP_ORDER))} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>All</button>
@@ -4540,9 +4547,35 @@ export default function App() {
             </div>
           </aside>
           <div style={{ flex: 1, padding: 16, minWidth: 0 }}>
+            {/* ── Jurisdiction selector ── */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+              {ELECTION_OPTIONS.map(key => {
+                const ed = ELECTION_DATA[key];
+                return (
+                  <button key={key}
+                    title={`${ed.jurisdiction} · ${ed.chamber} · ${ed.date}`}
+                    onClick={() => { setSeatsJurisdiction(key); setExpandedSeatTabDemogId(null); }}
+                    style={{
+                      fontSize: 12, fontWeight: seatsJurisdiction === key ? 700 : 500,
+                      padding: "4px 11px", borderRadius: 20, border: "1px solid",
+                      borderColor: seatsJurisdiction === key ? "#2563EB" : "#D1D5DB",
+                      background: seatsJurisdiction === key ? "#EFF6FF" : "#fff",
+                      color: seatsJurisdiction === key ? "#2563EB" : "#374151",
+                      cursor: "pointer", whiteSpace: "nowrap",
+                    }}>
+                    {ed.label}
+                  </button>
+                );
+              })}
+            </div>
+            {/* ── Election subtitle ── */}
+            <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 10 }}>
+              {ELECTION_DATA[seatsJurisdiction].jurisdiction} · {ELECTION_DATA[seatsJurisdiction].chamber} · {ELECTION_DATA[seatsJurisdiction].date}
+              {hasHareClark && <span style={{ marginLeft: 8, color: "#F59E0B", fontWeight: 600 }}>· Hare-Clark (multi-member, approximated)</span>}
+            </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <span style={STYLES.sectionTitle}>All Seats</span>
-              <span style={{ fontSize: 13, color: "#6B7280" }}>{filtered.length} of {SEATS.length} seats</span>
+              <span style={{ fontSize: 13, color: "#6B7280" }}>{filtered.length} of {seatsForTab.length} seats</span>
             </div>
             <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, overflow: "hidden" }}>
               <div style={{ overflowX: "auto" }}>
@@ -4555,13 +4588,13 @@ export default function App() {
                       <th style={STYLES.tableHead}>Winner</th>
                       <th style={{ ...STYLES.tableHead, whiteSpace: "nowrap" }}>TCP %</th>
                       <SortTh k="margin">Margin</SortTh>
-                      <SortTh k="swing">Swing</SortTh>
+                      {isFederalTab && <SortTh k="swing">Swing</SortTh>}
                       <th style={STYLES.tableHead}>Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
-                      <tr><td colSpan={8} style={{ padding: 40, textAlign: "center", color: "#9CA3AF" }}>No seats match current filters.</td></tr>
+                      <tr><td colSpan={isFederalTab ? 8 : 7} style={{ padding: 40, textAlign: "center", color: "#9CA3AF" }}>No seats match current filters.</td></tr>
                     ) : filtered.map((s, i) => {
                       const p = getParty(s.winner.party);
                       const cat = getMarginCat(s.margin);
@@ -4590,7 +4623,7 @@ export default function App() {
                             <td style={{ padding: "9px 12px", color: "#374151" }}>{s.winner.name}</td>
                             <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}><TcpBar tcp={s.tcp} winnerParty={s.winner.party} /></td>
                             <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}><MarginDot margin={s.margin} /></td>
-                            <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}><SwingBadge swing={s.swing} /></td>
+                            {isFederalTab && <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}><SwingBadge swing={s.swing} /></td>}
                             <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}>
                               <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20, background: MARGIN_COLOR[cat] + "20", color: MARGIN_COLOR[cat] }}>
                                 {cat === "very_marginal" ? "Very marginal" : cat === "marginal" ? "Marginal" : cat === "fairly_safe" ? "Fairly safe" : "Safe"}
@@ -4599,9 +4632,10 @@ export default function App() {
                           </tr>
                           {isExpanded && (
                             <tr key={`${s.id}-demog`}>
-                              <td colSpan={8} style={{ background: "#F0F9FF", padding: "14px 20px", borderBottom: "2px solid #BFDBFE" }}>
-                                {/* Demographic bar helper: shows value relative to seat-range min/max */}
-                                {(() => {
+                              <td colSpan={isFederalTab ? 8 : 7} style={{ background: "#F0F9FF", padding: "14px 20px", borderBottom: "2px solid #BFDBFE" }}>
+                                {!isFederalTab ? (
+                                  <div style={{ color: "#6B7280", fontSize: 13 }}>Census demographic data is not yet available for state electorates.</div>
+                                ) : (() => {
                                   const DemogBar = ({ value, min, max, color = "#3B82F6", fmt }) => {
                                     if (value == null) return <span style={{ color: "#9CA3AF" }}>—</span>;
                                     const pct = Math.max(0, Math.min(100, (value - min) / (max - min) * 100));
@@ -4628,6 +4662,7 @@ export default function App() {
                                       <DemogBar value={d.medianHouseholdIncome} min={50000} max={180000} color="#DC2626" fmt={v => `$${(v/1000).toFixed(0)}k`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>ATO taxable income</div>
                                       <DemogBar value={d.avgTaxableIncome} min={30000} max={120000} color="#EF4444" fmt={v => `$${(v/1000).toFixed(0)}k`} />
+                                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 6, lineHeight: 1.4 }}>* ABS Census 2021 · median of all persons 15+, incl. those with nil income</div>
                                     </div>
                                   </div>
                                   <div>
@@ -7420,8 +7455,8 @@ export default function App() {
                       {/* National summary cards */}
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 20 }}>
                         {[
-                          { key: "medianPersonalIncome", label: "Median Personal Income", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
-                          { key: "medianHouseholdIncome", label: "Median Household Income", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
+                          { key: "medianPersonalIncome", label: "Median Personal Income *", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
+                          { key: "medianHouseholdIncome", label: "Median Household Income *", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
                           { key: "renterPct", label: "Renters", fmt: v => `${v.toFixed(1)}%` },
                           { key: "bachelorsOrAbovePct", label: "Bachelor's+", fmt: v => `${v.toFixed(1)}%` },
                           { key: "overseasBornPct", label: "Overseas Born", fmt: v => `${v.toFixed(1)}%` },
@@ -7438,6 +7473,7 @@ export default function App() {
                           );
                         })}
                       </div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 14 }}>* ABS Census 2021 · median of all persons 15+, including those with nil or negative income — figures are lower than employed-only benchmarks.</div>
 
                       {/* Filters row */}
                       <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 16px", marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
