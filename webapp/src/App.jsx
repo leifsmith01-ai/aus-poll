@@ -76,7 +76,10 @@ const NATIONAL_2PP_2022 = 52.13; // ALP 2PP at 2022 election
 
 // 2025 actual national primary vote % and 2PP (baseline for post-election tracking)
 const BASELINE_2025 = { alp: 34.6, coal: 31.8, grn: 12.2, teal: 4.5, on: 6.4 };
-const NATIONAL_2PP_2025 = 55.2; // ALP 2PP at 2025 election
+const NATIONAL_2PP_2025 = 55.2; // ALP 2PP at 2025 election (ALP vs Coalition)
+// ALP 2PP vs combined right bloc (Coalition + ON) using 2025 actual primaries and
+// default preference flows: a = 34.6 + 12.2×0.81 + 4.5×0.62 + 10.5×0.50 = 52.5
+const RIGHT_BLOC_2PP_2025 = 52.5;
 
 // Seat-level 2022 ON first-preference %, extracted from AEC results.
 // Seats omitted here use the national baseline (4.7%) + national ON swing.
@@ -3344,16 +3347,19 @@ export default function App() {
     [modelledSeats]);
 
   const implied2pp = useMemo(() => {
-    // Only include seats where ALP contests the final two. Exclude on_v_coal seats —
-    // ALP doesn't appear in the TCP count there, and their synthetic 2PP values
-    // (which treat ON's large primary as flowing 43% to ALP) inflate the national
-    // average in high-ON scenarios, causing the headline to rise even as ALP loses seats.
-    const relevant = modelledSeats.filter(s =>
-      s.modelled.projAlp2pp !== null && s.modelled.activeTcpMatchup !== "on_v_coal"
-    );
-    if (!relevant.length) return null;
-    return relevant.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / relevant.length;
-  }, [modelledSeats]);
+    // Treat Coalition + ON as a combined right bloc. ON voters are counted entirely
+    // on the right side so an ON surge correctly lowers the implied 2PP (rather than
+    // inflating it via the on_alp preference flow). The on_alp slider still governs
+    // per-seat ON vs ALP TCP races — it just no longer affects this headline figure.
+    const { alp, coal, grn, teal, on, undecided } = primaries;
+    const other = Math.max(0, 100 - alp - coal - grn - teal - on - undecided);
+    const a = alp + grn * prefFlows.grn_alp + teal * prefFlows.teal_alp
+      + other * prefFlows.other_alp;
+    const c = coal + on + grn * (1 - prefFlows.grn_alp) + teal * (1 - prefFlows.teal_alp)
+      + other * (1 - prefFlows.other_alp);
+    if (a + c === 0) return null;
+    return a / (a + c) * 100;
+  }, [primaries, prefFlows]);
 
   // ── VIC modelling ──
   const vicModelledSeats = useMemo(() => {
@@ -5632,12 +5638,12 @@ export default function App() {
                 {/* Implied 2PP + majority */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
                   <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>ALP vs Right Bloc 2PP</div>
                     {implied2pp !== null ? (
                       <>
                         <div style={{ fontSize: 30, fontWeight: 800, color: implied2pp >= 50 ? "#059669" : "#DC2626" }}>{implied2pp.toFixed(1)}%</div>
                         <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
-                          {implied2pp >= NATIONAL_2PP_2025 ? `▲ +${(implied2pp - NATIONAL_2PP_2025).toFixed(1)} vs 2025` : `▼ ${(implied2pp - NATIONAL_2PP_2025).toFixed(1)} vs 2025`}
+                          {implied2pp >= RIGHT_BLOC_2PP_2025 ? `▲ +${(implied2pp - RIGHT_BLOC_2PP_2025).toFixed(1)} vs 2025` : `▼ ${(implied2pp - RIGHT_BLOC_2PP_2025).toFixed(1)} vs 2025`}
                         </div>
                       </>
                     ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
