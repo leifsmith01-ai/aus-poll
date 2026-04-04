@@ -7,6 +7,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
   ScatterChart, Scatter, ZAxis,
+  ComposedChart, Area,
 } from "recharts";
 import { Analytics } from "@vercel/analytics/react";
 import DEMOGRAPHICS from "./data/demographics.js";
@@ -14,6 +15,7 @@ import STATE_DEMOGRAPHICS from "./data/state_demographics.js";
 import BETTING_ODDS from "./data/betting_odds.json";
 import ECONOMICS_DATA from "./data/economics.json";
 import LEADERS_DATA from "./data/leaders.json";
+import AGGREGATED_POLLS from "./data/aggregated.json";
 
 // VIC_SEATS_KNOWN removed — full 88-seat data is in _VS / VIC_SEATS below.
 
@@ -1740,8 +1742,9 @@ function normCDF(x) {
 //   2. Seat-level residual uncertainty (SEAT_RESIDUAL_STD pp) — independent per seat
 //   3. Preference flow uncertainty (PREF_FLOW_STD pp) — contributes to seat-level noise
 //
-// The combined per-seat uncertainty is: σ_seat = √(ε²·σ_nat² + σ_residual² + σ_prefflow²)
-// This produces wider, more realistic uncertainty bands than national-only σ.
+// The combined per-seat uncertainty is: σ_seat = √(ε²·σ_nat² + ε²·σ_pf_corr² + σ_residual² + σ_pf_ind²)
+// Preference flow uncertainty is split into correlated (national shift, enters the grid)
+// and independent (per-seat residual) components, producing realistic tail-risk estimates.
 //
 // Uses a 100-point grid over ±3σ of national swing to evaluate the seat-count CDF.
 // At each grid point, per-seat win probability uses Φ with the combined σ_seat.
@@ -1750,10 +1753,22 @@ function normCDF(x) {
 // have σ ≈ 1.0pp (2019→2022 RMSE residual after removing national component).
 const SEAT_RESIDUAL_STD = 1.0;
 
-// Preference flow uncertainty: historical flows vary ±3pp between elections
-// (e.g., ON→ALP ranged from 14.9% in 2022 to 43.0% in 2025). This adds ~0.8pp
-// effective 2PP uncertainty per seat, modelled as independent noise.
-const PREF_FLOW_STD = 0.8;
+// Preference flow uncertainty: historical flows vary ±3pp between elections.
+// Split into two components:
+//   PREF_FLOW_CORR_STD — correlated across all seats (national shift in flows,
+//     e.g. Greens prefs breaking uniformly lower). Enters the grid integration
+//     as a second correlated dimension alongside national swing uncertainty.
+//   PREF_FLOW_IND_STD — independent per-seat residual (seat-specific deviations
+//     from the national pref-flow shift).
+// Previously this was modelled as 0.8pp independent only, which understated tail
+// risk when pref flows shift uniformly (campaign-driven or demographic effects).
+const PREF_FLOW_CORR_STD = 0.6; // correlated across all seats
+const PREF_FLOW_IND_STD  = 0.5; // independent per-seat residual
+
+// Non-ALP/Coalition seat uncertainty: teal/Greens/independent seats are not
+// modelled via 2PP, so we apply a wider residual here based on historical margin
+// volatility. Calibrated from 2019→2022 teal surge and inner-city Greens variance.
+const NON_ALP_COAL_STD = 3.5;
 
 // Evidence-based late-decider split for Australian federal elections.
 // Post-election survey data (2019–2025) shows late deciders favour minor parties
@@ -1773,68 +1788,99 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
     const isAlpCoal = parties.includes("ALP") && parties.some(p => COALITION.has(p));
     return isAlpCoal && !(s.modelled?.isAutoMatchup === true);
   });
-  // All other seats (non-ALP/Coal and ON-detected) use their deterministic modelled outcome.
-  const nonAlpCoalAlp = seats.filter(s => {
+  // Non-ALP/Coal seats (teal, Greens, independents, ON-detected): apply probabilistic
+  // uncertainty using projWinnerPct and NON_ALP_COAL_STD, rather than treating them
+  // as deterministic (0 or 1). This reflects genuine uncertainty in these races.
+  const nonAlpCoalSeats = seats.filter(s => {
     const parties = s.tcp.map(t => t.party);
     const isAlpCoal = parties.includes("ALP") && parties.some(p => COALITION.has(p));
-    if (isAlpCoal && !(s.modelled?.isAutoMatchup === true)) return false;
-    return (s.modelled?.winnerGroup ?? getParty(s.winner.party).group) === "alp";
-  }).length;
-
-  // Per-seat win probabilities — non-Φ seats use deterministic modelled outcome (0 or 1)
-  const seatWinProbs = {};
-  seats.forEach(s => {
-    const g = s.modelled?.winnerGroup ?? getParty(s.winner.party).group;
-    seatWinProbs[s.id] = g === "alp" ? 1.0 : 0.0;
+    return !(isAlpCoal && !(s.modelled?.isAutoMatchup === true));
   });
-  let alpMeanSeats = nonAlpCoalAlp;
+
+  // Per-seat win probabilities
+  const seatWinProbs = {};
+  // ALP/Coal seats: use Φ with combined correlated + independent σ
   alpCoalSeats.forEach(seat => {
     const rawBase = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
     const base = seat.modelled?.projAlp2pp ?? rawBase;
     const eps = useElasticity ? seatElasticityMult(base) : 1.0;
-    // Combined per-seat σ: national (correlated, scaled by elasticity) + residual + pref-flow (independent)
-    const seatSigma = Math.sqrt(eps * eps * swingStd * swingStd + SEAT_RESIDUAL_STD ** 2 + PREF_FLOW_STD ** 2);
-    // Win probability with combined uncertainty
-    const p = normCDF((base - 50) / seatSigma);
+    // Combined σ: national-correlated (elasticity-scaled) + independent residual + independent pref-flow
+    const seatSigma = Math.sqrt(
+      eps * eps * swingStd * swingStd +
+      eps * eps * PREF_FLOW_CORR_STD * PREF_FLOW_CORR_STD +
+      SEAT_RESIDUAL_STD ** 2 +
+      PREF_FLOW_IND_STD ** 2
+    );
+    seatWinProbs[seat.id] = Math.round(normCDF((base - 50) / seatSigma) * 1000) / 1000;
+  });
+  // Non-ALP/Coal seats: use projWinnerPct with NON_ALP_COAL_STD
+  // projWinnerPct is the winner's TCP% (>50 always), so we check if ALP is the winner
+  nonAlpCoalSeats.forEach(seat => {
+    const wg = seat.modelled?.winnerGroup ?? getParty(seat.winner.party).group;
+    const wPct = seat.modelled?.winnerPct ?? 50;
+    // For ALP-won seats (ALP/GRN or ALP/Teal TCP): the ALP "2PP" is projAlp2pp or winnerPct
+    // For non-ALP won seats: ALP win prob = 1 - winnerPct probability
+    const isAlpWinner = wg === "alp";
+    const alpBase = isAlpWinner ? wPct : (100 - wPct);
+    const p = normCDF((alpBase - 50) / NON_ALP_COAL_STD);
     seatWinProbs[seat.id] = Math.round(p * 1000) / 1000;
-    alpMeanSeats += p;
   });
 
-  // Seat-count CDF via 100-point numerical integration over ±3σ of national swing.
-  // At each grid point, each seat's win is evaluated using the independent residual σ
-  // layered on top of the national perturbation — producing a realistic correlation
-  // structure: seats are partially correlated (via national swing) but not perfectly.
-  const N_GRID = 100;
+  let alpMeanSeats = 0;
+  seats.forEach(s => { alpMeanSeats += seatWinProbs[s.id] ?? 0; });
+
+  // Seat-count CDF via 2D numerical grid integration over:
+  //   dim 1: national 2PP swing (correlated across ALP/Coal seats)
+  //   dim 2: correlated preference-flow shift (correlated across all seats)
+  // At each grid point, per-seat independent residual σ is applied on top.
+  // This correctly models: (a) ALP/Coal seats all move with national swing,
+  // (b) pref-flow uncertainty is partially shared across seats, not independent.
+  const N_GRID = 50; // 50×50 = 2500 grid points for 2D integration
   const gridDeltas = Array.from({ length: N_GRID }, (_, i) =>
     nat2ppSwing + swingStd * (-3 + 6 * i / (N_GRID - 1))
   );
-  const gridPdfs = gridDeltas.map(d =>
+  const gridPfDeltas = Array.from({ length: N_GRID }, (_, i) =>
+    PREF_FLOW_CORR_STD * (-3 + 6 * i / (N_GRID - 1))
+  );
+  const swingPdfs = gridDeltas.map(d =>
     Math.exp(-0.5 * ((d - nat2ppSwing) / swingStd) ** 2)
   );
-  const totalPdf = gridPdfs.reduce((s, p) => s + p, 0);
+  const pfPdfs = gridPfDeltas.map(d =>
+    Math.exp(-0.5 * (d / PREF_FLOW_CORR_STD) ** 2)
+  );
+  const totalPdf = swingPdfs.reduce((s, p) => s + p, 0) * pfPdfs.reduce((s, p) => s + p, 0);
 
-  // Independent per-seat noise σ (combines residual + pref-flow uncertainty)
-  const indepSigma = Math.sqrt(SEAT_RESIDUAL_STD ** 2 + PREF_FLOW_STD ** 2);
+  // Independent per-seat noise σ (seat-level residual + independent pref-flow)
+  const indepSigma = Math.sqrt(SEAT_RESIDUAL_STD ** 2 + PREF_FLOW_IND_STD ** 2);
 
   const seatCountCdf = {};
   gridDeltas.forEach((delta, gi) => {
-    const w = gridPdfs[gi] / totalPdf;
-    // Expected seat count at this national swing level, using per-seat Φ with
-    // the independent residual σ. This is more accurate than the binary ≥50 check:
-    // it accounts for per-seat noise even within each national-swing scenario.
-    let expectedCount = nonAlpCoalAlp;
-    alpCoalSeats.forEach(seat => {
-      const rawBase = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
-      const base = seat.modelled?.projAlp2pp ?? rawBase;
-      const eps = useElasticity ? seatElasticityMult(base) : 1.0;
-      const seatBase = base + eps * (delta - nat2ppSwing);
-      // Win probability for this seat at this national swing, with independent noise
-      const pWin = indepSigma > 0 ? normCDF((seatBase - 50) / indepSigma) : (seatBase >= 50 ? 1 : 0);
-      expectedCount += pWin;
+    gridPfDeltas.forEach((pfDelta, pi) => {
+      const w = swingPdfs[gi] * pfPdfs[pi] / totalPdf;
+      let expectedCount = 0;
+      // ALP/Coal seats: shift by national swing + correlated pref-flow
+      alpCoalSeats.forEach(seat => {
+        const rawBase = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
+        const base = seat.modelled?.projAlp2pp ?? rawBase;
+        const eps = useElasticity ? seatElasticityMult(base) : 1.0;
+        const seatBase = base + eps * (delta - nat2ppSwing) + pfDelta;
+        const pWin = indepSigma > 0 ? normCDF((seatBase - 50) / indepSigma) : (seatBase >= 50 ? 1 : 0);
+        expectedCount += pWin;
+      });
+      // Non-ALP/Coal seats: apply correlated pref-flow shift, independent residual only
+      nonAlpCoalSeats.forEach(seat => {
+        const wg = seat.modelled?.winnerGroup ?? getParty(seat.winner.party).group;
+        const wPct = seat.modelled?.winnerPct ?? 50;
+        const isAlpWinner = wg === "alp";
+        const alpBase = isAlpWinner ? wPct : (100 - wPct);
+        // Pref-flow shift applies here too (correlated), independent residual is NON_ALP_COAL_STD
+        const seatBase = alpBase + pfDelta;
+        const pWin = normCDF((seatBase - 50) / NON_ALP_COAL_STD);
+        expectedCount += pWin;
+      });
+      const count = Math.round(expectedCount);
+      seatCountCdf[count] = (seatCountCdf[count] ?? 0) + w;
     });
-    // Round to nearest integer for seat-count bucketing
-    const count = Math.round(expectedCount);
-    seatCountCdf[count] = (seatCountCdf[count] ?? 0) + w;
   });
 
   const sorted = Object.keys(seatCountCdf).map(Number).sort((a, b) => a - b);
@@ -3078,11 +3124,26 @@ export default function App() {
   // ── Polls tab state ──
   const [polls, setPolls] = useState(INITIAL_POLLS);
   const [showAddPoll, setShowAddPoll] = useState(false);
+  const [showHouseEffects, setShowHouseEffects] = useState(false);
   const [nextPollId, setNextPollId] = useState(INITIAL_POLLS.length + 1);
   const [newPoll, setNewPoll] = useState({ pollster: "", date: "", alp: "", coal: "", grn: "", oth: "", tpp: "", n: "" });
 
   // ── Model tab state ──
-  const [primaries, setPrimaries] = useState({ alp: BASELINE_2025.alp, coal: BASELINE_2025.coal, grn: BASELINE_2025.grn, teal: BASELINE_2025.teal, on: BASELINE_2025.on, undecided: 0 });
+  // Initialise primaries from URL params if present (enables scenario sharing via link).
+  const [primaries, setPrimaries] = useState(() => {
+    const base = { alp: BASELINE_2025.alp, coal: BASELINE_2025.coal, grn: BASELINE_2025.grn, teal: BASELINE_2025.teal, on: BASELINE_2025.on, undecided: 0 };
+    if (typeof window === "undefined") return base;
+    const p = new URLSearchParams(window.location.search);
+    const num = (key) => { const v = p.get(key); return v !== null && !isNaN(+v) ? +v : null; };
+    return {
+      alp:      num("alp")      ?? base.alp,
+      coal:     num("coal")     ?? base.coal,
+      grn:      num("grn")      ?? base.grn,
+      teal:     num("teal")     ?? base.teal,
+      on:       num("on")       ?? base.on,
+      undecided: num("undecided") ?? base.undecided,
+    };
+  });
   const [prefFlows, setPrefFlows] = useState({
     // Standard flows (used in ALP vs Coalition finals)
     grn_alp: 0.81,
@@ -4102,6 +4163,25 @@ export default function App() {
     });
   }, [polls]);
 
+  // Pipeline trend chart data from AGGREGATED_POLLS.trend (weekly smoothed with 95% CI)
+  const pipelineTrendData = useMemo(() => {
+    const trend = AGGREGATED_POLLS?.trend;
+    if (!trend?.length) return [];
+    return trend.map(pt => ({
+      date: new Date(pt.date).toLocaleDateString("en-AU", { month: "short", day: "numeric" }),
+      "ALP mean": pt.alp?.mean ?? null,
+      "ALP CI": pt.alp ? [pt.alp.lo95, pt.alp.hi95] : null,
+      "Coal mean": pt.coal?.mean ?? null,
+      "Coal CI": pt.coal ? [pt.coal.lo95, pt.coal.hi95] : null,
+      "Grn mean": pt.grn?.mean ?? null,
+      "Grn CI": pt.grn ? [pt.grn.lo95, pt.grn.hi95] : null,
+      "ON mean": pt.on?.mean ?? null,
+      "ON CI": pt.on ? [pt.on.lo95, pt.on.hi95] : null,
+      "2PP mean": pt.tpp_eff?.mean ?? null,
+      "2PP CI": pt.tpp_eff ? [pt.tpp_eff.lo95, pt.tpp_eff.hi95] : null,
+    }));
+  }, []);
+
   const loadFromPoll = () => {
     if (!latestPoll) return;
     setPrimaries(p => ({
@@ -4115,14 +4195,26 @@ export default function App() {
   };
 
   const loadFromAvg = () => {
-    if (!pollAvg) return;
-    setPrimaries(p => ({
-      ...p,
-      alp:  pollAvg.alp,
-      coal: pollAvg.coal,
-      grn:  pollAvg.grn,
-      on:   pollAvg.on ?? p.on,      // teal not tracked in polls
-    }));
+    // Prefer the pipeline's house-effect-corrected aggregate (AGGREGATED_POLLS.current)
+    // over the simple frontend weighted average — it accounts for per-pollster bias.
+    const pipelineCurrent = AGGREGATED_POLLS?.current;
+    if (pipelineCurrent) {
+      setPrimaries(p => ({
+        ...p,
+        alp:  +(pipelineCurrent.alp?.mean ?? pollAvg?.alp ?? p.alp).toFixed(1),
+        coal: +(pipelineCurrent.coal?.mean ?? pollAvg?.coal ?? p.coal).toFixed(1),
+        grn:  +(pipelineCurrent.grn?.mean ?? pollAvg?.grn ?? p.grn).toFixed(1),
+        on:   +(pipelineCurrent.on?.mean ?? pollAvg?.on ?? p.on).toFixed(1),
+      }));
+    } else if (pollAvg) {
+      setPrimaries(p => ({
+        ...p,
+        alp:  pollAvg.alp,
+        coal: pollAvg.coal,
+        grn:  pollAvg.grn,
+        on:   pollAvg.on ?? p.on,
+      }));
+    }
     setActiveTab("model");
   };
 
@@ -4272,6 +4364,28 @@ export default function App() {
   useEffect(() => {
     try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
   }, []);
+
+  // ── Sync primary sliders to URL params for scenario sharing ─────────────────
+  useEffect(() => {
+    const base = BASELINE_2025;
+    const changed = (
+      Math.abs(primaries.alp - base.alp) > 0.05 ||
+      Math.abs(primaries.coal - base.coal) > 0.05 ||
+      Math.abs(primaries.grn - base.grn) > 0.05 ||
+      Math.abs(primaries.teal - base.teal) > 0.05 ||
+      Math.abs(primaries.on - base.on) > 0.05 ||
+      (primaries.undecided ?? 0) > 0.05
+    );
+    const url = new URL(window.location.href);
+    if (changed) {
+      ["alp", "coal", "grn", "teal", "on"].forEach(k => url.searchParams.set(k, primaries[k].toFixed(1)));
+      if ((primaries.undecided ?? 0) > 0) url.searchParams.set("undecided", (primaries.undecided).toFixed(1));
+      else url.searchParams.delete("undecided");
+    } else {
+      ["alp", "coal", "grn", "teal", "on", "undecided"].forEach(k => url.searchParams.delete(k));
+    }
+    window.history.replaceState({}, "", url.toString());
+  }, [primaries]);
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
@@ -4486,34 +4600,65 @@ export default function App() {
                           {isExpanded && (
                             <tr key={`${s.id}-demog`}>
                               <td colSpan={8} style={{ background: "#F0F9FF", padding: "14px 20px", borderBottom: "2px solid #BFDBFE" }}>
+                                {/* Demographic bar helper: shows value relative to seat-range min/max */}
+                                {(() => {
+                                  const DemogBar = ({ value, min, max, color = "#3B82F6", fmt }) => {
+                                    if (value == null) return <span style={{ color: "#9CA3AF" }}>—</span>;
+                                    const pct = Math.max(0, Math.min(100, (value - min) / (max - min) * 100));
+                                    return (
+                                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                        <span style={{ fontSize: 12, fontWeight: 600, minWidth: 56 }}>{fmt(value)}</span>
+                                        <div style={{ flex: 1, height: 5, background: "#E5E7EB", borderRadius: 3, position: "relative" }}>
+                                          <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${pct}%`, background: color, borderRadius: 3 }} />
+                                        </div>
+                                        <span style={{ fontSize: 10, color: "#9CA3AF", minWidth: 28, textAlign: "right" }}>
+                                          {pct < 33 ? "low" : pct < 66 ? "mid" : "high"}
+                                        </span>
+                                      </div>
+                                    );
+                                  };
+                                  return (
                                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
                                   <div>
-                                    <div style={{ ...STYLES.sectionHead, marginBottom: 6 }}>Income</div>
-                                    <div style={{ fontSize: 12, lineHeight: 1.8 }}>
-                                      <div><strong>Personal:</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome / 1000).toFixed(1)}k/yr` : "—"}</div>
-                                      <div><strong>Household:</strong> {d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome / 1000).toFixed(1)}k/yr` : "—"}</div>
-                                      <div><strong>ATO Taxable:</strong> {d.avgTaxableIncome ? `$${(d.avgTaxableIncome / 1000).toFixed(0)}k` : <span style={{ color: "#9CA3AF" }}>n/a</span>}</div>
+                                    <div style={{ ...STYLES.sectionHead, marginBottom: 8 }}>Income</div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                      <div style={{ fontSize: 11, color: "#6B7280" }}>Personal income/yr</div>
+                                      <DemogBar value={d.medianPersonalIncome} min={25000} max={100000} color="#DC2626" fmt={v => `$${(v/1000).toFixed(0)}k`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Household income/yr</div>
+                                      <DemogBar value={d.medianHouseholdIncome} min={50000} max={180000} color="#DC2626" fmt={v => `$${(v/1000).toFixed(0)}k`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>ATO taxable income</div>
+                                      <DemogBar value={d.avgTaxableIncome} min={30000} max={120000} color="#EF4444" fmt={v => `$${(v/1000).toFixed(0)}k`} />
                                     </div>
                                   </div>
                                   <div>
-                                    <div style={{ ...STYLES.sectionHead, marginBottom: 6 }}>Housing</div>
-                                    <div style={{ fontSize: 12, lineHeight: 1.8 }}>
-                                      <div><strong>Renters:</strong> {d.renterPct != null ? `${d.renterPct}%` : "—"}</div>
-                                      <div><strong>Weekly rent:</strong> {d.medianWeeklyRent ? `$${d.medianWeeklyRent}/wk` : "—"}</div>
-                                      <div><strong>Owner w/ mortgage:</strong> {d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</div>
-                                      <div><strong>Owner outright:</strong> {d.ownerOutrightPct != null ? `${d.ownerOutrightPct}%` : "—"}</div>
+                                    <div style={{ ...STYLES.sectionHead, marginBottom: 8 }}>Housing</div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                      <div style={{ fontSize: 11, color: "#6B7280" }}>Renters</div>
+                                      <DemogBar value={d.renterPct} min={5} max={65} color="#F59E0B" fmt={v => `${v}%`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Weekly rent</div>
+                                      <DemogBar value={d.medianWeeklyRent} min={150} max={700} color="#F59E0B" fmt={v => `$${v}`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Owner w/ mortgage</div>
+                                      <DemogBar value={d.ownerMortgagePct} min={10} max={50} color="#D97706" fmt={v => `${v}%`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Owner outright</div>
+                                      <DemogBar value={d.ownerOutrightPct} min={10} max={50} color="#B45309" fmt={v => `${v}%`} />
                                     </div>
                                   </div>
                                   <div>
-                                    <div style={{ ...STYLES.sectionHead, marginBottom: 6 }}>People</div>
-                                    <div style={{ fontSize: 12, lineHeight: 1.8 }}>
-                                      <div><strong>Median age:</strong> {d.medianAge ?? "—"}</div>
-                                      <div><strong>Bachelor's+:</strong> {d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</div>
-                                      <div><strong>Overseas born:</strong> {d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</div>
-                                      <div><strong>AEC class:</strong> {d.urbanClass ?? "—"}</div>
+                                    <div style={{ ...STYLES.sectionHead, marginBottom: 8 }}>People</div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                      <div style={{ fontSize: 11, color: "#6B7280" }}>Median age</div>
+                                      <DemogBar value={d.medianAge} min={28} max={55} color="#059669" fmt={v => `${v} yrs`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>University educated</div>
+                                      <DemogBar value={d.bachelorsOrAbovePct} min={5} max={60} color="#059669" fmt={v => `${v}%`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Overseas born</div>
+                                      <DemogBar value={d.overseasBornPct} min={3} max={60} color="#10B981" fmt={v => `${v}%`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>AEC classification</div>
+                                      <div style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{d.urbanClass ?? "—"}</div>
                                     </div>
                                   </div>
                                 </div>
+                                  );
+                                })()}
                               </td>
                             </tr>
                           )}
@@ -4622,17 +4767,63 @@ export default function App() {
             </div>
           )}
 
-          {/* 30-day weighted average tile */}
+          {/* Pipeline aggregate tile — house-effect-corrected estimate from aggregated.json */}
+          {AGGREGATED_POLLS?.current && (() => {
+            const cur = AGGREGATED_POLLS.current;
+            const pipelineCards = [
+              { label: "ALP primary", metric: "alp", color: "#DC2626", baseline: BASELINE_2025.alp },
+              { label: "Coalition primary", metric: "coal", color: "#1D4ED8", baseline: BASELINE_2025.coal },
+              { label: "Greens primary", metric: "grn", color: "#059669", baseline: BASELINE_2025.grn },
+              { label: "One Nation", metric: "on", color: "#B45309", baseline: BASELINE_2025.on },
+              { label: "2PP (ALP) est.", metric: "tpp_eff", color: "#991B1B", baseline: NATIONAL_2PP_2025 },
+            ];
+            return (
+              <div style={{ ...panelStyle, marginBottom: 14, borderColor: "#BFDBFE" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                  <div>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Pipeline Aggregate</span>
+                    <span style={{ fontSize: 12, color: "#6B7280", marginLeft: 8 }}>
+                      House-effect-corrected · {cur.alp?.n ?? "?"} polls · generated {AGGREGATED_POLLS.generated}
+                    </span>
+                  </div>
+                  <button onClick={loadFromAvg} style={STYLES.btnPrimary}>
+                    Load → Model
+                  </button>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12 }}>
+                  {pipelineCards.map(card => {
+                    const d = cur[card.metric];
+                    if (!d) return null;
+                    const delta = d.mean != null ? +(d.mean - card.baseline).toFixed(1) : null;
+                    return (
+                      <div key={card.label} style={STYLES.metricCard}>
+                        <div style={{ width: 20, height: 3, background: card.color, borderRadius: 2, marginBottom: 6 }} />
+                        <div style={{ fontSize: 22, fontWeight: 800, color: "#111827" }}>{d.mean?.toFixed(1)}%</div>
+                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 1 }}>
+                          [{d.lo95?.toFixed(1)}–{d.hi95?.toFixed(1)}] 95% CI
+                        </div>
+                        {delta != null && (
+                          <div style={{ fontSize: 11, fontWeight: 600, color: delta > 0 ? "#059669" : delta < 0 ? "#DC2626" : "#9CA3AF", marginTop: 2 }}>
+                            {delta > 0 ? "+" : ""}{delta} vs 2025
+                          </div>
+                        )}
+                        <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>{card.label}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 30-day weighted average tile (simple frontend calc, no house effects) */}
           {pollAvg && (
             <div style={{ ...panelStyle, marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div>
                   <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>30-Day Weighted Average</span>
-                  <span style={{ fontSize: 12, color: "#6B7280", marginLeft: 8 }}>{pollAvg.n} poll{pollAvg.n !== 1 ? "s" : ""} · exponential decay + sample-size weighted</span>
+                  <span style={{ fontSize: 12, color: "#6B7280", marginLeft: 8 }}>{pollAvg.n} poll{pollAvg.n !== 1 ? "s" : ""} · exponential decay + sample-size weighted · no house-effect correction</span>
                 </div>
-                <button onClick={loadFromAvg} style={STYLES.btnPrimary}>
-                  Load avg → Model
-                </button>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 12 }}>
                 {[
@@ -4659,6 +4850,64 @@ export default function App() {
               </div>
             </div>
           )}
+
+          {/* House effects panel — per-pollster bias from pipeline aggregation */}
+          {AGGREGATED_POLLS?.house_effects && (() => {
+            const he = AGGREGATED_POLLS.house_effects;
+            const pollsters = Object.keys(he.alp ?? {});
+            if (!pollsters.length) return null;
+            return (
+              <div style={{ ...panelStyle, marginBottom: 14 }}>
+                <button
+                  onClick={() => setShowHouseEffects(o => !o)}
+                  style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, padding: 0, width: "100%" }}
+                >
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "#374151" }}>
+                    {showHouseEffects ? "▾" : "▸"} House Effects
+                  </span>
+                  <span style={{ fontSize: 12, color: "#9CA3AF" }}>
+                    per-pollster bias corrections applied to pipeline aggregate
+                  </span>
+                </button>
+                {showHouseEffects && (
+                  <div style={{ marginTop: 12, overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                      <thead>
+                        <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                          {["Pollster", "ALP bias", "Coalition bias", "Greens bias", "ON bias", "2PP bias"].map(h => (
+                            <th key={h} style={{ ...STYLES.tableHead, textAlign: h === "Pollster" ? "left" : "center" }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pollsters.map((p, i) => {
+                          const fmt = (v) => v != null ? (
+                            <span style={{ fontWeight: 600, color: Math.abs(v) > 2 ? "#DC2626" : Math.abs(v) > 1 ? "#D97706" : "#059669" }}>
+                              {v > 0 ? "+" : ""}{v.toFixed(1)}pp
+                            </span>
+                          ) : <span style={{ color: "#9CA3AF" }}>—</span>;
+                          return (
+                            <tr key={p} style={{ background: i % 2 === 0 ? "#fff" : "#FAFAFA", borderBottom: "1px solid #F3F4F6" }}>
+                              <td style={{ padding: "7px 12px", fontWeight: 600 }}>{p}</td>
+                              <td style={{ padding: "7px 12px", textAlign: "center" }}>{fmt(he.alp?.[p])}</td>
+                              <td style={{ padding: "7px 12px", textAlign: "center" }}>{fmt(he.coal?.[p])}</td>
+                              <td style={{ padding: "7px 12px", textAlign: "center" }}>{fmt(he.grn?.[p])}</td>
+                              <td style={{ padding: "7px 12px", textAlign: "center" }}>{fmt(he.on?.[p])}</td>
+                              <td style={{ padding: "7px 12px", textAlign: "center" }}>{fmt(he.tpp_eff?.[p])}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8 }}>
+                      Positive = pollster reads this metric higher than average · Corrected by subtracting bias from each poll before aggregating.
+                      Generated {AGGREGATED_POLLS.generated}.
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Primary vote trend chart */}
           <div style={panelStyle}>
@@ -4716,6 +4965,42 @@ export default function App() {
             </ResponsiveContainer>
             <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>Open circles = polls reporting 2PP directly · Thick lines = weighted aggregate (includes imputed 2PP from primaries)</div>
           </div>
+
+          {/* Pipeline trend chart with 95% CI bands */}
+          {pipelineTrendData.length > 0 && (
+            <div style={panelStyle}>
+              <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Pipeline trend — primary votes with 95% CI</div>
+              <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>
+                Weekly smoothed trend with 95% confidence intervals · house-effect-corrected · generated {AGGREGATED_POLLS.generated}
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <ComposedChart data={pipelineTrendData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(pipelineTrendData.length / 8)} />
+                  <YAxis domain={[0, 50]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                  <Tooltip
+                    formatter={(v, name) => {
+                      if (Array.isArray(v)) return [`${v[0]}%–${v[1]}%`, name];
+                      return [v != null ? `${v}%` : "—", name];
+                    }}
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB" }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Area type="monotone" dataKey="ALP CI" stroke="none" fill="#DC2626" fillOpacity={0.12} legendType="none" name="ALP 95% CI" />
+                  <Area type="monotone" dataKey="Coal CI" stroke="none" fill="#1D4ED8" fillOpacity={0.12} legendType="none" name="Coal 95% CI" />
+                  <Area type="monotone" dataKey="Grn CI" stroke="none" fill="#059669" fillOpacity={0.12} legendType="none" name="Grn 95% CI" />
+                  <Area type="monotone" dataKey="ON CI" stroke="none" fill="#F97316" fillOpacity={0.12} legendType="none" name="ON 95% CI" />
+                  <Line type="monotone" dataKey="ALP mean" stroke="#DC2626" strokeWidth={2} dot={false} name="ALP" />
+                  <Line type="monotone" dataKey="Coal mean" stroke="#1D4ED8" strokeWidth={2} dot={false} name="Coalition" />
+                  <Line type="monotone" dataKey="Grn mean" stroke="#059669" strokeWidth={2} dot={false} name="Greens" />
+                  <Line type="monotone" dataKey="ON mean" stroke="#EA580C" strokeWidth={2} dot={false} name="One Nation" />
+                </ComposedChart>
+              </ResponsiveContainer>
+              <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>
+                Shaded bands = 95% confidence intervals · Lines = house-effect-corrected weekly aggregate
+              </div>
+            </div>
+          )}
 
           {/* Polls table */}
           <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, overflow: "hidden" }}>
@@ -5028,7 +5313,7 @@ export default function App() {
                 </p>
               </div>
               {el.modelEnabled && selectedModelId === "federal_2025" && (
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {hasChanges && (
                     <button onClick={resetModel} style={STYLES.btnDanger}>
                       Reset model
@@ -5037,6 +5322,19 @@ export default function App() {
                   {polls.length > 0 && (
                     <button onClick={loadFromPoll} style={STYLES.btnInfo}>
                       Load from latest poll
+                    </button>
+                  )}
+                  {hasChanges && (
+                    <button
+                      onClick={() => {
+                        navigator.clipboard?.writeText(window.location.href).then(() => {
+                          alert("Scenario link copied to clipboard!");
+                        });
+                      }}
+                      style={STYLES.btnSecondary}
+                      title="Copy a link to this scenario (primaries are encoded in the URL)"
+                    >
+                      Share scenario
                     </button>
                   )}
                 </div>
