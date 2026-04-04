@@ -4028,7 +4028,8 @@ export default function App() {
   const getStateDemog = (id) => STATE_DEMOGRAPHICS[id] ?? {};
 
   const DEMOG_METRICS = [
-    { key: "medianPersonalIncome", label: "Median Personal Income", fmt: v => `$${(v / 1000).toFixed(0)}k` },
+    { key: "medianPersonalIncomeEarners", label: "Personal Income (earners)", fmt: v => `$${(v / 1000).toFixed(0)}k` },
+    { key: "medianPersonalIncome", label: "Personal Income (all 15+)", fmt: v => `$${(v / 1000).toFixed(0)}k` },
     { key: "medianHouseholdIncome", label: "Median Household Income", fmt: v => `$${(v / 1000).toFixed(0)}k` },
     { key: "medianWeeklyRent", label: "Median Weekly Rent", fmt: v => `$${v}` },
     { key: "medianMonthlyMortgage", label: "Median Monthly Mortgage", fmt: v => `$${v}` },
@@ -4038,6 +4039,10 @@ export default function App() {
     { key: "bachelorsOrAbovePct", label: "Bachelor's+ %", fmt: v => `${v}%` },
     { key: "overseasBornPct", label: "Overseas Born %", fmt: v => `${v}%` },
     { key: "medianAge", label: "Median Age", fmt: v => `${v}` },
+    { key: "youth15to34Pct", label: "Youth (15–34) %", fmt: v => `${v}%` },
+    { key: "seniors65PlusPct", label: "Seniors (65+) %", fmt: v => `${v}%` },
+    { key: "unemploymentRate", label: "Unemployment Rate", fmt: v => `${v}%` },
+    { key: "labourParticipationRate", label: "Labour Participation", fmt: v => `${v}%` },
   ];
 
   const demogWithSeats = useMemo(() =>
@@ -4656,13 +4661,13 @@ export default function App() {
                                   <div>
                                     <div style={{ ...STYLES.sectionHead, marginBottom: 8 }}>Income</div>
                                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                      <div style={{ fontSize: 11, color: "#6B7280" }}>Personal income/yr</div>
-                                      <DemogBar value={d.medianPersonalIncome} min={25000} max={100000} color="#DC2626" fmt={v => `$${(v/1000).toFixed(0)}k`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280" }}>Personal income/yr (earners)</div>
+                                      <DemogBar value={d.medianPersonalIncomeEarners} min={35000} max={130000} color="#DC2626" fmt={v => `$${(v/1000).toFixed(0)}k`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Personal income/yr (all 15+)</div>
+                                      <DemogBar value={d.medianPersonalIncome} min={25000} max={100000} color="#F87171" fmt={v => `$${(v/1000).toFixed(0)}k`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Household income/yr</div>
                                       <DemogBar value={d.medianHouseholdIncome} min={50000} max={180000} color="#DC2626" fmt={v => `$${(v/1000).toFixed(0)}k`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>ATO taxable income</div>
-                                      <DemogBar value={d.avgTaxableIncome} min={30000} max={120000} color="#EF4444" fmt={v => `$${(v/1000).toFixed(0)}k`} />
-                                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 6, lineHeight: 1.4 }}>* ABS Census 2021 · median of all persons 15+, incl. those with nil income</div>
+                                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 6, lineHeight: 1.4 }}>Earners = median excl. nil/negative income · ABS Census 2021</div>
                                     </div>
                                   </div>
                                   <div>
@@ -4683,10 +4688,18 @@ export default function App() {
                                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                                       <div style={{ fontSize: 11, color: "#6B7280" }}>Median age</div>
                                       <DemogBar value={d.medianAge} min={28} max={55} color="#059669" fmt={v => `${v} yrs`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Youth (15–34)</div>
+                                      <DemogBar value={d.youth15to34Pct} min={15} max={45} color="#059669" fmt={v => `${v}%`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Seniors (65+)</div>
+                                      <DemogBar value={d.seniors65PlusPct} min={5} max={35} color="#10B981" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>University educated</div>
                                       <DemogBar value={d.bachelorsOrAbovePct} min={5} max={60} color="#059669" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Overseas born</div>
                                       <DemogBar value={d.overseasBornPct} min={3} max={60} color="#10B981" fmt={v => `${v}%`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Unemployment rate</div>
+                                      <DemogBar value={d.unemploymentRate} min={1} max={12} color="#6366F1" fmt={v => `${v}%`} />
+                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Labour participation</div>
+                                      <DemogBar value={d.labourParticipationRate} min={45} max={80} color="#6366F1" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>AEC classification</div>
                                       <div style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{d.urbanClass ?? "—"}</div>
                                     </div>
@@ -5868,7 +5881,7 @@ export default function App() {
                                     <div>
                                       <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>Income</div>
                                       <div style={{ fontSize: 12, lineHeight: 1.8 }}>
-                                        <div><strong>Personal:</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome / 1000).toFixed(1)}k/yr` : "—"}</div>
+                                        <div><strong>Personal (earners):</strong> {d.medianPersonalIncomeEarners ? `$${(d.medianPersonalIncomeEarners / 1000).toFixed(1)}k/yr` : "—"}</div>
                                         <div><strong>Household:</strong> {d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome / 1000).toFixed(1)}k/yr` : "—"}</div>
                                       </div>
                                     </div>
@@ -6546,7 +6559,7 @@ export default function App() {
                                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
                                         <div>
                                           <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Income</div>
-                                          {[{ k: "medianPersonalIncome", l: "Personal" }, { k: "medianHouseholdIncome", l: "Household" }].map(({ k, l }) => d[k] != null && (
+                                          {[{ k: "medianPersonalIncomeEarners", l: "Personal (earners)" }, { k: "medianHouseholdIncome", l: "Household" }].map(({ k, l }) => d[k] != null && (
                                             <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
                                               <span style={{ color: "#6B7280" }}>{l}</span>
                                               <span style={{ fontWeight: 600 }}>${(d[k] / 1000).toFixed(0)}k</span>
@@ -7021,7 +7034,7 @@ export default function App() {
                                         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
                                           <div>
                                             <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Income</div>
-                                            {[{ k: "medianPersonalIncome", l: "Personal" }, { k: "medianHouseholdIncome", l: "Household" }].map(({ k, l }) => d[k] != null && (
+                                            {[{ k: "medianPersonalIncomeEarners", l: "Personal (earners)" }, { k: "medianHouseholdIncome", l: "Household" }].map(({ k, l }) => d[k] != null && (
                                               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
                                                 <span style={{ color: "#6B7280" }}>{l}</span>
                                                 <span style={{ fontWeight: 600 }}>${(d[k] / 1000).toFixed(0)}k</span>
@@ -7453,13 +7466,15 @@ export default function App() {
                     <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderTopWidth: 0, borderRadius: "0 0 12px 12px", padding: "20px" }}>
 
                       {/* National summary cards */}
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 20 }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
                         {[
-                          { key: "medianPersonalIncome", label: "Median Personal Income *", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
-                          { key: "medianHouseholdIncome", label: "Median Household Income *", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
+                          { key: "medianPersonalIncomeEarners", label: "Personal Income (earners)", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
+                          { key: "medianHouseholdIncome", label: "Median Household Income", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
                           { key: "renterPct", label: "Renters", fmt: v => `${v.toFixed(1)}%` },
+                          { key: "unemploymentRate", label: "Unemployment Rate", fmt: v => `${v.toFixed(1)}%` },
                           { key: "bachelorsOrAbovePct", label: "Bachelor's+", fmt: v => `${v.toFixed(1)}%` },
                           { key: "overseasBornPct", label: "Overseas Born", fmt: v => `${v.toFixed(1)}%` },
+                          { key: "youth15to34Pct", label: "Youth (15–34)", fmt: v => `${v.toFixed(1)}%` },
                           { key: "medianAge", label: "Median Age", fmt: v => `${v}` },
                         ].map(({ key, label, fmt }) => {
                           const s = demogStats[key];
@@ -7473,7 +7488,7 @@ export default function App() {
                           );
                         })}
                       </div>
-                      <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 14 }}>* ABS Census 2021 · median of all persons 15+, including those with nil or negative income — figures are lower than employed-only benchmarks.</div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 14 }}>Personal income (earners) = median of persons with income &gt; $0, excl. nil/negative · All other income = all persons 15+ · ABS Census 2021</div>
 
                       {/* Filters row */}
                       <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 16px", marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
@@ -7519,13 +7534,15 @@ export default function App() {
                                   { k: "state", label: "State" },
                                   { k: "winner", label: "2022 Winner" },
                                   { k: "urbanClass", label: "Urban Class" },
+                                  { k: "medianPersonalIncomeEarners", label: "Inc. (earners)" },
                                   { k: "medianHouseholdIncome", label: "HH Income" },
-                                  { k: "medianPersonalIncome", label: "Personal Inc." },
                                   { k: "medianWeeklyRent", label: "Wkly Rent" },
                                   { k: "renterPct", label: "Renters %" },
                                   { k: "ownerMortgagePct", label: "Mortgage %" },
                                   { k: "bachelorsOrAbovePct", label: "Bach.+ %" },
                                   { k: "overseasBornPct", label: "O/seas Born" },
+                                  { k: "unemploymentRate", label: "Unemp. %" },
+                                  { k: "youth15to34Pct", label: "Youth 15-34" },
                                   { k: "medianAge", label: "Med. Age" },
                                 ].map(({ k, label }) => (
                                   <th key={k} onClick={() => {
@@ -7566,26 +7583,27 @@ export default function App() {
                                         <span style={{ background: pg.bg, color: pg.color, fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>{pg.short}</span>
                                       </td>
                                       <td style={{ padding: "9px 12px", color: "#6B7280", fontSize: 11 }}>{d.urbanClass ?? "—"}</td>
-                                      <td style={{ padding: "9px 12px", fontWeight: 600 }}>{d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome / 1000).toFixed(0)}k` : "—"}</td>
-                                      <td style={{ padding: "9px 12px" }}>{d.medianPersonalIncome ? `$${(d.medianPersonalIncome / 1000).toFixed(0)}k` : "—"}</td>
+                                      <td style={{ padding: "9px 12px", fontWeight: 600 }}>{d.medianPersonalIncomeEarners ? `$${(d.medianPersonalIncomeEarners / 1000).toFixed(0)}k` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome / 1000).toFixed(0)}k` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.medianWeeklyRent ? `$${d.medianWeeklyRent}` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.renterPct != null ? `${d.renterPct}%` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.unemploymentRate != null ? `${d.unemploymentRate}%` : "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.youth15to34Pct != null ? `${d.youth15to34Pct}%` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.medianAge ?? "—"}</td>
                                     </tr>
                                     {isExpanded && (
                                       <tr key={`${s.id}-exp`}>
-                                        <td colSpan={12} style={{ background: "#F9FAFB", padding: "16px 20px", borderBottom: "2px solid #E5E7EB" }}>
+                                        <td colSpan={14} style={{ background: "#F9FAFB", padding: "16px 20px", borderBottom: "2px solid #E5E7EB" }}>
                                           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
                                             <div>
                                               <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 8 }}>Income</div>
                                               <div style={{ fontSize: 12, lineHeight: 1.8 }}>
-                                                <div><strong>Personal:</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome / 1000).toFixed(1)}k/yr` : "—"}</div>
+                                                <div><strong>Personal (earners):</strong> {d.medianPersonalIncomeEarners ? `$${(d.medianPersonalIncomeEarners / 1000).toFixed(1)}k/yr` : "—"}</div>
+                                                <div><strong>Personal (all 15+):</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome / 1000).toFixed(1)}k/yr` : "—"}</div>
                                                 <div><strong>Household:</strong> {d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome / 1000).toFixed(1)}k/yr` : "—"}</div>
-                                                <div><strong>ATO Taxable Income:</strong> {d.avgTaxableIncome ? `$${(d.avgTaxableIncome / 1000).toFixed(0)}k` : <span style={{ color: "#9CA3AF" }}>n/a</span>}</div>
-                                                <div><strong>Investment Property:</strong> {d.investPropertyPct != null ? `${d.investPropertyPct}%` : <span style={{ color: "#9CA3AF" }}>n/a</span>}</div>
                                               </div>
                                             </div>
                                             <div>
@@ -7602,6 +7620,10 @@ export default function App() {
                                               <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 8 }}>People</div>
                                               <div style={{ fontSize: 12, lineHeight: 1.8 }}>
                                                 <div><strong>Median age:</strong> {d.medianAge ?? "—"}</div>
+                                                <div><strong>Youth (15–34):</strong> {d.youth15to34Pct != null ? `${d.youth15to34Pct}%` : "—"}</div>
+                                                <div><strong>Seniors (65+):</strong> {d.seniors65PlusPct != null ? `${d.seniors65PlusPct}%` : "—"}</div>
+                                                <div><strong>Unemployment:</strong> {d.unemploymentRate != null ? `${d.unemploymentRate}%` : "—"}</div>
+                                                <div><strong>Labour participation:</strong> {d.labourParticipationRate != null ? `${d.labourParticipationRate}%` : "—"}</div>
                                                 <div><strong>Bachelor's+:</strong> {d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</div>
                                                 <div><strong>Overseas born:</strong> {d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</div>
                                                 <div><strong>AEC class:</strong> {d.urbanClass ?? "—"}</div>
