@@ -3344,7 +3344,13 @@ export default function App() {
     [modelledSeats]);
 
   const implied2pp = useMemo(() => {
-    const relevant = modelledSeats.filter(s => s.modelled.projAlp2pp !== null);
+    // Only include seats where ALP contests the final two. Exclude on_v_coal seats —
+    // ALP doesn't appear in the TCP count there, and their synthetic 2PP values
+    // (which treat ON's large primary as flowing 43% to ALP) inflate the national
+    // average in high-ON scenarios, causing the headline to rise even as ALP loses seats.
+    const relevant = modelledSeats.filter(s =>
+      s.modelled.projAlp2pp !== null && s.modelled.activeTcpMatchup !== "on_v_coal"
+    );
     if (!relevant.length) return null;
     return relevant.reduce((sum, s) => sum + s.modelled.projAlp2pp, 0) / relevant.length;
   }, [modelledSeats]);
