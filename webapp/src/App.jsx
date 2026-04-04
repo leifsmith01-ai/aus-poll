@@ -4790,7 +4790,7 @@ export default function App() {
                     Load → Model
                   </button>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 12 }}>
                   {pipelineCards.map(card => {
                     const d = cur[card.metric];
                     if (!d) return null;
@@ -5313,7 +5313,7 @@ export default function App() {
                 </p>
               </div>
               {el.modelEnabled && selectedModelId === "federal_2025" && (
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: 8 }}>
                   {hasChanges && (
                     <button onClick={resetModel} style={STYLES.btnDanger}>
                       Reset model
@@ -5322,19 +5322,6 @@ export default function App() {
                   {polls.length > 0 && (
                     <button onClick={loadFromPoll} style={STYLES.btnInfo}>
                       Load from latest poll
-                    </button>
-                  )}
-                  {hasChanges && (
-                    <button
-                      onClick={() => {
-                        navigator.clipboard?.writeText(window.location.href).then(() => {
-                          alert("Scenario link copied to clipboard!");
-                        });
-                      }}
-                      style={STYLES.btnSecondary}
-                      title="Copy a link to this scenario (primaries are encoded in the URL)"
-                    >
-                      Share scenario
                     </button>
                   )}
                 </div>
@@ -5459,12 +5446,21 @@ export default function App() {
                       </div>
                     );
                   })()}
-                  <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6 }}>
-                    2025 result: ALP {BASELINE_2025.alp}% · Coal {BASELINE_2025.coal}% · Grn {BASELINE_2025.grn}% · Ind {BASELINE_2025.teal}% · ON {BASELINE_2025.on}%
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
+                    <div style={{ fontSize: 11, color: "#9CA3AF" }}>
+                      2025 result: ALP {BASELINE_2025.alp}% · Coal {BASELINE_2025.coal}% · Grn {BASELINE_2025.grn}% · Ind {BASELINE_2025.teal}% · ON {BASELINE_2025.on}%
+                    </div>
+                    {hasChanges && (
+                      <button
+                        onClick={() => navigator.clipboard?.writeText(window.location.href).then(() => alert("Scenario link copied to clipboard!"))}
+                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#6B7280", textDecoration: "underline", padding: 0 }}
+                        title="Copy a shareable link to this scenario (primaries are encoded in the URL)"
+                      >
+                        Share link
+                      </button>
+                    )}
                   </div>
                 </div>
-
-
 
                 {/* Flow consistency warning */}
                 {(() => {
