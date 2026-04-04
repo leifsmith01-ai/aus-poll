@@ -897,7 +897,8 @@ def parse_g17_earner_median(series_dims: list, series_data: dict, region_id: str
     return weekly * 52  # annualise
 
 
-def parse_g01_age_cohorts(series_dims: list, series_data: dict, region_id: str) -> dict:
+def parse_g01_age_cohorts(series_dims: list, series_data: dict, region_id: str,
+                          region_type: str = "CED") -> dict:
     """
     G01: Selected Person Characteristics (includes age distribution by sex).
     Returns youth15to34Pct and seniors65PlusPct of total population.
@@ -915,11 +916,11 @@ def parse_g01_age_cohorts(series_dims: list, series_data: dict, region_id: str) 
             region_type_pos = i
             break
 
-    # Find age dimension
+    # Find age dimension — G01 uses PCHAR, G05 uses AGEP
     agep_pos = None
     agep_dim = None
     for i, d in enumerate(series_dims):
-        if d["id"] in ("AGEP", "AGE"):
+        if d["id"] in ("AGEP", "AGE", "PCHAR"):
             agep_pos = i
             agep_dim = d
             break
@@ -965,9 +966,11 @@ def parse_g01_age_cohorts(series_dims: list, series_data: dict, region_id: str) 
         return low is not None and 15 <= low <= 30  # 15-19, 20-24, 25-29, 30-34
 
     # Find total population code for age dim
+    # G01 PCHAR has "Total persons"; AGEP has "_T" or "Total"
     agep_total = None
     for v in agep_dim["values"]:
-        if v["id"] == "_T" or v.get("name", "").lower() in ("total", "all ages"):
+        label = v.get("name", "").lower()
+        if v["id"] == "_T" or label in ("total", "all ages") or "total persons" in label:
             agep_total = v["id"]
             break
 
@@ -980,7 +983,7 @@ def parse_g01_age_cohorts(series_dims: list, series_data: dict, region_id: str) 
             continue
         if key[region_dim_pos] != region_id:
             continue
-        if region_type_pos is not None and key[region_type_pos] != "CED":
+        if region_type_pos is not None and key[region_type_pos] != region_type:
             continue
         if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
             continue
@@ -1009,7 +1012,8 @@ def parse_g01_age_cohorts(series_dims: list, series_data: dict, region_id: str) 
     }
 
 
-def parse_g16_employment(series_dims: list, series_data: dict, region_id: str) -> dict:
+def parse_g16_employment(series_dims: list, series_data: dict, region_id: str,
+                         region_type: str = "CED") -> dict:
     """
     G16: Labour Force Status by Sex [by Age].
     Returns unemploymentRate (% of labour force) and labourParticipationRate (% of 15+).
@@ -1027,12 +1031,13 @@ def parse_g16_employment(series_dims: list, series_data: dict, region_id: str) -
             break
 
     # Find labour force status dimension
+    # G43 uses LFEMP; G16 uses LFSP; fallback to label scan
     lfsp_pos = None
     lfsp_dim = None
     for i, d in enumerate(series_dims):
         dim_id_u = d["id"].upper()
-        if "LFSP" in dim_id_u or "LABOUR" in dim_id_u or "LABOR" in dim_id_u or \
-           "LFS" in dim_id_u:
+        if "LFEMP" in dim_id_u or "LFSP" in dim_id_u or "LABOUR" in dim_id_u or \
+           "LABOR" in dim_id_u or "LFS" in dim_id_u:
             lfsp_pos = i
             lfsp_dim = d
             break
@@ -1077,33 +1082,60 @@ def parse_g16_employment(series_dims: list, series_data: dict, region_id: str) -
     if region_dim_pos is None or lfsp_pos is None:
         return {"unemploymentRate": None, "labourParticipationRate": None}
 
-    # Identify LFSP codes by label
+    # Identify LFSP/LFEMP codes by label
     employed_codes = set()
     unemployed_codes = set()
     nilf_codes = set()   # not in labour force
     total_15plus_code = None
+    total_lf_code = None   # total labour force (LFS_5 in G43)
+    pct_participation_code = None  # direct % participation (LFS_P2 in G43)
+    pct_unemployment_code = None   # direct % unemployment (LFS_P1 in G43)
+    qual_codes = set()    # qualification codes (QL_* in G43)
 
     for v in lfsp_dim["values"]:
         label = v.get("name", "").lower()
         code = v["id"]
-        if "employed" in label and "not" not in label and "un" not in label:
+        # Total persons 15+ — only match specific "persons aged 15" patterns, not generic "total"
+        if (code == "GE15" or
+                ("aged 15" in label and "over" in label) or
+                ("persons aged" in label and "15" in label)):
+            total_15plus_code = code
+        # Total labour force
+        elif "total labour force" in label or "total labor force" in label:
+            total_lf_code = code
+        # Percentage codes (not counts — skip for summing)
+        elif label.startswith("%"):
+            if "participation" in label:
+                pct_participation_code = code
+            elif "unemployment" in label:
+                pct_unemployment_code = code
+        # Qualification codes (QL_* prefix in G43)
+        elif code.startswith("QL_") or "qualification" in label or "certificate" in label or \
+             "bachelor" in label or "diploma" in label or "postgrad" in label:
+            qual_codes.add(code)
+        # Labour force statuses
+        elif "employed" in label and "not" not in label and "un" not in label:
             employed_codes.add(code)
         elif "unemployed" in label:
             unemployed_codes.add(code)
         elif "not in labour" in label or "nilf" in label or "not in labor" in label:
             nilf_codes.add(code)
-        elif code == "_T" or "total" in label:
-            total_15plus_code = code
+        elif code == "_T":
+            # Generic total — only use as total_15plus fallback if nothing better found
+            if total_15plus_code is None:
+                total_15plus_code = code
 
     employed_total = 0
     unemployed_total = 0
+    total_15plus = None
+    total_qual = 0
 
     for key, val in series_data.items():
         if val is None or val == 0:
             continue
         if key[region_dim_pos] != region_id:
             continue
-        if region_type_pos is not None and key[region_type_pos] != "CED":
+        if region_type_pos is not None and key[region_type_pos] != region_type:
             continue
         if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
             continue
@@ -1115,28 +1147,19 @@ def parse_g16_employment(series_dims: list, series_data: dict, region_id: str) -
             employed_total += val
         elif lfsp_code in unemployed_codes:
             unemployed_total += val
+        elif lfsp_code == total_15plus_code:
+            total_15plus = val
+        elif lfsp_code in qual_codes:
+            # Only count top-level quals to avoid double-counting cert subtotals
+            # QL_1=Postgrad, QL_2=Grad Dip, QL_3=Bachelor, QL_4=Adv Dip, QL_5=Total Cert
+            # Skip QL_50/QL_51/QL_52 (cert subtotals — subsumed in QL_5)
+            if lfsp_code not in ("QL_50", "QL_51", "QL_52"):
+                total_qual += val
 
     labour_force = employed_total + unemployed_total
     if labour_force <= 0:
-        return {"unemploymentRate": None, "labourParticipationRate": None}
-
-    # For participation rate denominator, use total 15+ from the total code if available
-    total_15plus = None
-    if total_15plus_code:
-        for key, val in series_data.items():
-            if val is None:
-                continue
-            if key[region_dim_pos] != region_id:
-                continue
-            if region_type_pos is not None and key[region_type_pos] != "CED":
-                continue
-            if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
-                continue
-            if agep_pos is not None and agep_total and key[agep_pos] != agep_total:
-                continue
-            if key[lfsp_pos] == total_15plus_code:
-                total_15plus = val
-                break
+        return {"unemploymentRate": None, "labourParticipationRate": None,
+                "total15PlusCount": total_15plus, "total15PlusQual": total_qual if total_qual > 0 else None}
 
     unemployment_rate = round(unemployed_total / labour_force * 100, 1)
 
@@ -1147,6 +1170,8 @@ def parse_g16_employment(series_dims: list, series_data: dict, region_id: str) -
     return {
         "unemploymentRate": unemployment_rate,
         "labourParticipationRate": participation_rate,
+        "total15PlusCount": total_15plus,
+        "total15PlusQual": total_qual if total_qual > 0 else None,
     }
 
 
@@ -1172,7 +1197,7 @@ def parse_g15_language(series_dims: list, series_data: dict, region_id: str,
     lang_dim = None
     for i, d in enumerate(series_dims):
         did = d["id"].upper()
-        if "LANP" in did or "LANG" in did:
+        if "LANP" in did or "LANG" in did or "ENGLP" in did:
             lang_pos = i
             lang_dim = d
             break
@@ -1194,25 +1219,39 @@ def parse_g15_language(series_dims: list, series_data: dict, region_id: str,
     if region_dim_pos is None or lang_pos is None:
         return None
 
-    # Find "English only" and "Total" codes
+    # Find "English only" and "Total" codes in the language/proficiency dim
     english_only_code = None
     total_code = None
     for v in lang_dim["values"]:
         label = v.get("name", "").lower()
         code = v["id"]
-        if code == "_T" or label in ("total", "total - language spoken at home"):
+        if code == "_T" or label == "total" or label == "total - language spoken at home":
             total_code = code
         elif "english only" in label or label == "english":
             english_only_code = code
 
-    if not english_only_code or not total_code:
+    if not english_only_code:
         return None
 
-    total_val = None
-    english_val = None
+    # Find any additional cross-classification dimensions (e.g. ENGLP in G13)
+    # and get their total code to filter correctly.
+    extra_filters = {}  # dim_pos -> total_code
+    known_ids = {"REGION", "REGION_TYPE", "SEXP", "SEX", "STATE"}
+    for i, d in enumerate(series_dims):
+        if i == lang_pos or d["id"] in known_ids or "REGION" in d["id"]:
+            continue
+        # This is an additional cross-tab dim — find its total code
+        for v in d["values"]:
+            label_l = v.get("name", "").lower()
+            if v["id"] == "_T" or label_l == "total":
+                extra_filters[i] = v["id"]
+                break
+
+    english_val = 0
+    total_val = 0
 
     for key, val in series_data.items():
-        if val is None:
+        if val is None or val == 0:
             continue
         if key[region_dim_pos] != region_id:
             continue
@@ -1220,12 +1259,33 @@ def parse_g15_language(series_dims: list, series_data: dict, region_id: str,
             continue
         if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
             continue
+        # Filter extra dims (like ENGLP) to their total codes
+        if any(key[pos] != code for pos, code in extra_filters.items()):
+            continue
 
         lang_code = key[lang_pos]
-        if lang_code == total_code:
+        if total_code and lang_code == total_code:
+            # Direct total available (e.g. LANP has _T)
             total_val = val
         elif lang_code == english_only_code:
             english_val = val
+
+    # If no direct total_code, sum all lang codes (including english_only)
+    if total_code is None:
+        total_sum = 0
+        for key, val in series_data.items():
+            if val is None or val == 0:
+                continue
+            if key[region_dim_pos] != region_id:
+                continue
+            if region_type_pos is not None and key[region_type_pos] != region_type:
+                continue
+            if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
+                continue
+            if any(key[pos] != code for pos, code in extra_filters.items()):
+                continue
+            total_sum += val
+        total_val = total_sum
 
     if total_val and total_val > 0 and english_val is not None:
         return round((total_val - english_val) / total_val * 100, 1)
@@ -1260,7 +1320,7 @@ def parse_g04_families(series_dims: list, series_data: dict, region_id: str,
             fmcf_dim = d
             break
 
-    # Structure dim — want total (_T)
+    # Structure dim — want total (_T) [used in some tables, not G32]
     strd_pos = None
     strd_total_id = "_T"
     for i, d in enumerate(series_dims):
@@ -1268,6 +1328,23 @@ def parse_g04_families(series_dims: list, series_data: dict, region_id: str,
             strd_pos = i
             strd_codes = [v["id"] for v in d["values"]]
             strd_total_id = "_T" if "_T" in strd_codes else strd_codes[-1]
+            break
+
+    # Family income dim (FINF in G32) — filter to total to avoid double-counting
+    finf_pos = None
+    finf_total_id = None
+    for i, d in enumerate(series_dims):
+        did = d["id"].upper()
+        if "FINF" in did or ("INCOME" in did and i != fmcf_pos):
+            finf_pos = i
+            for v in d["values"]:
+                label = v.get("name", "").lower()
+                if v["id"] == "_T" or label in ("total", "all"):
+                    finf_total_id = v["id"]
+                    break
+            if finf_total_id is None and d["values"]:
+                # Use last code as total fallback
+                finf_total_id = d["values"][-1]["id"]
             break
 
     if region_dim_pos is None or fmcf_pos is None:
@@ -1279,6 +1356,8 @@ def parse_g04_families(series_dims: list, series_data: dict, region_id: str,
         label = v.get("name", "").lower()
         code = v["id"]
         if "lone" in label and "parent" in label:
+            lone_parent_codes.add(code)
+        elif "one parent" in label:
             lone_parent_codes.add(code)
         elif code == "_T" or label in ("total", "all families", "total families"):
             total_family_code = code
@@ -1297,6 +1376,8 @@ def parse_g04_families(series_dims: list, series_data: dict, region_id: str,
         if region_type_pos is not None and key[region_type_pos] != region_type:
             continue
         if strd_pos is not None and key[strd_pos] != strd_total_id:
+            continue
+        if finf_pos is not None and finf_total_id and key[finf_pos] != finf_total_id:
             continue
 
         fmcf_code = key[fmcf_pos]
@@ -1408,29 +1489,29 @@ def main():
     except Exception as e:
         print(f"  G01 not available: {e}  — age cohort pcts will be null")
 
-    # G16: labour force status for unemployment/participation
-    g16_dims, g16_data = None, None
+    # G43: labour force status for unemployment/participation (and total_15plus for noQualPct)
+    g43_dims, g43_data = None, None
     try:
-        print("\nFetching G16 (labour force status)...")
-        g16_dims, g16_data = fetch_all_ced("G16")
+        print("\nFetching G43 (labour force status)...")
+        g43_dims, g43_data = fetch_all_ced("G43")
     except Exception as e:
-        print(f"  G16 not available: {e}  — employment rates will be null")
+        print(f"  G43 not available: {e}  — employment rates will be null")
 
-    # G15: language spoken at home → non-English %
-    g15_dims, g15_data = None, None
+    # G13: language spoken at home by English proficiency → non-English %
+    g13_dims, g13_data = None, None
     try:
-        print("\nFetching G15 (language spoken at home)...")
-        g15_dims, g15_data = fetch_all_ced("G15")
+        print("\nFetching G13 (language spoken at home)...")
+        g13_dims, g13_data = fetch_all_ced("G13")
     except Exception as e:
-        print(f"  G15 not available: {e}  — nonEnglishAtHomePct will be null")
+        print(f"  G13 not available: {e}  — nonEnglishAtHomePct will be null")
 
-    # G04: dwelling structure × family composition → lone-parent %
-    g04_dims, g04_data = None, None
+    # G32: family composition × family income → lone-parent %
+    g32_dims, g32_data = None, None
     try:
-        print("\nFetching G04 (family composition)...")
-        g04_dims, g04_data = fetch_all_ced("G04")
+        print("\nFetching G32 (family composition)...")
+        g32_dims, g32_data = fetch_all_ced("G32")
     except Exception as e:
-        print(f"  G04 not available: {e}  — loneparentFamilyPct will be null")
+        print(f"  G32 not available: {e}  — loneparentFamilyPct will be null")
 
     # ── Build ABS region_id -> name mapping from G02 ─────────────────────────
     region_dim_g02 = get_dim_by_id(g02_dims, "REGION")
@@ -1493,14 +1574,10 @@ def main():
         # G49 qualifications
         g49 = parse_g49(g49_dims, g49_data, abs_id, region_type)
         bach_pct = None
-        no_qual_pct = None
+        no_qual_pct = None  # computed after G43 gives total_15plus
         total_with_qual = g49["total_qual"] or 0
-        no_qual_count = g49["no_qual"] or 0
         if total_with_qual > 0 and g49["bachelors_plus"]:
             bach_pct = round(g49["bachelors_plus"] / total_with_qual * 100, 1)
-        total_persons_qual = total_with_qual + no_qual_count
-        if total_persons_qual > 0 and no_qual_count > 0:
-            no_qual_pct = round(no_qual_count / total_persons_qual * 100, 1)
 
         # G09 overseas born
         overseas_pct = parse_g09(g09_dims, g09_data, abs_id, region_type)
@@ -1518,22 +1595,33 @@ def main():
         # G01 age cohorts
         age_cohorts = {"youth15to34Pct": None, "seniors65PlusPct": None}
         if g01_dims is not None and g01_data is not None:
-            age_cohorts = parse_g01_age_cohorts(g01_dims, g01_data, abs_id)
+            age_cohorts = parse_g01_age_cohorts(g01_dims, g01_data, abs_id, region_type)
 
-        # G16 employment rates
-        employment = {"unemploymentRate": None, "labourParticipationRate": None}
-        if g16_dims is not None and g16_data is not None:
-            employment = parse_g16_employment(g16_dims, g16_data, abs_id)
+        # G43 employment rates (also provides total_15plus for noQualPct)
+        employment = {"unemploymentRate": None, "labourParticipationRate": None, "total15PlusCount": None}
+        if g43_dims is not None and g43_data is not None:
+            employment = parse_g16_employment(g43_dims, g43_data, abs_id, region_type)
 
-        # G15 language at home
+        # noQualificationPct: derived as (total_15plus - total_with_qual) / total_15plus
+        # Use G43's qualification counts if available (more consistent universe), else G49
+        total_15plus = employment.get("total15PlusCount")
+        g43_total_qual = employment.get("total15PlusQual")
+        qual_count = g43_total_qual if g43_total_qual else total_with_qual
+        if total_15plus and total_15plus > 0 and qual_count and qual_count > 0:
+            pct = (total_15plus - qual_count) / total_15plus * 100
+            # Sanity check: noQual% should be between 0 and 80%
+            if 0 <= pct <= 80:
+                no_qual_pct = round(pct, 1)
+
+        # G13 language at home
         non_english_pct = None
-        if g15_dims is not None and g15_data is not None:
-            non_english_pct = parse_g15_language(g15_dims, g15_data, abs_id, region_type)
+        if g13_dims is not None and g13_data is not None:
+            non_english_pct = parse_g15_language(g13_dims, g13_data, abs_id, region_type)
 
-        # G04 family composition
+        # G32 family composition
         lone_parent_pct = None
-        if g04_dims is not None and g04_data is not None:
-            lone_parent_pct = parse_g04_families(g04_dims, g04_data, abs_id, region_type)
+        if g32_dims is not None and g32_data is not None:
+            lone_parent_pct = parse_g04_families(g32_dims, g32_data, abs_id, region_type)
 
         # Derive rental-to-income ratio
         annual_rent = int(rent * 52) if rent else None
@@ -1636,10 +1724,10 @@ def main():
     sed_g37_dims, sed_g37_data = None, None
     sed_g49_dims, sed_g49_data = None, None
     sed_g09_dims, sed_g09_data = None, None
-    sed_g15_dims, sed_g15_data = None, None
-    sed_g04_dims, sed_g04_data = None, None
+    sed_g13_dims, sed_g13_data = None, None
+    sed_g32_dims, sed_g32_data = None, None
     sed_g01_dims, sed_g01_data = None, None
-    sed_g16_dims, sed_g16_data = None, None
+    sed_g43_dims, sed_g43_data = None, None
 
     try:
         print("\nFetching SED G02 (medians)...")
@@ -1666,16 +1754,16 @@ def main():
         print(f"  SED G09 unavailable: {e}")
 
     try:
-        print("\nFetching SED G15 (language at home)...")
-        sed_g15_dims, sed_g15_data = fetch_all_sed("G15")
+        print("\nFetching SED G13 (language at home)...")
+        sed_g13_dims, sed_g13_data = fetch_all_sed("G13")
     except Exception as e:
-        print(f"  SED G15 unavailable: {e}")
+        print(f"  SED G13 unavailable: {e}")
 
     try:
-        print("\nFetching SED G04 (family composition)...")
-        sed_g04_dims, sed_g04_data = fetch_all_sed("G04")
+        print("\nFetching SED G32 (family composition)...")
+        sed_g32_dims, sed_g32_data = fetch_all_sed("G32")
     except Exception as e:
-        print(f"  SED G04 unavailable: {e}")
+        print(f"  SED G32 unavailable: {e}")
 
     try:
         print("\nFetching SED G01 (age distribution)...")
@@ -1684,10 +1772,10 @@ def main():
         print(f"  SED G01 unavailable: {e}")
 
     try:
-        print("\nFetching SED G16 (labour force)...")
-        sed_g16_dims, sed_g16_data = fetch_all_sed("G16")
+        print("\nFetching SED G43 (labour force)...")
+        sed_g43_dims, sed_g43_data = fetch_all_sed("G43")
     except Exception as e:
-        print(f"  SED G16 unavailable: {e}")
+        print(f"  SED G43 unavailable: {e}")
 
     if sed_g02_dims is None:
         print("\nNo SED data available — skipping state_demographics.js")
@@ -1699,20 +1787,20 @@ def main():
     g37_dims_bak, g37_data_bak = g37_dims, g37_data
     g49_dims_bak, g49_data_bak = g49_dims, g49_data
     g09_dims_bak, g09_data_bak = g09_dims, g09_data
-    g15_dims_bak, g15_data_bak = g15_dims, g15_data
-    g04_dims_bak, g04_data_bak = g04_dims, g04_data
+    g13_dims_bak, g13_data_bak = g13_dims, g13_data
+    g32_dims_bak, g32_data_bak = g32_dims, g32_data
     g01_dims_bak, g01_data_bak = g01_dims, g01_data
-    g16_dims_bak, g16_data_bak = g16_dims, g16_data
+    g43_dims_bak, g43_data_bak = g43_dims, g43_data
 
     # Rebind to SED tables for _assemble_record
     g02_dims, g02_data = sed_g02_dims, sed_g02_data
     g37_dims, g37_data = sed_g37_dims or g37_dims_bak, sed_g37_data or g37_data_bak
     g49_dims, g49_data = sed_g49_dims or g49_dims_bak, sed_g49_data or g49_data_bak
     g09_dims, g09_data = sed_g09_dims or g09_dims_bak, sed_g09_data or g09_data_bak
-    g15_dims, g15_data = sed_g15_dims, sed_g15_data
-    g04_dims, g04_data = sed_g04_dims, sed_g04_data
+    g13_dims, g13_data = sed_g13_dims, sed_g13_data
+    g32_dims, g32_data = sed_g32_dims, sed_g32_data
     g01_dims, g01_data = sed_g01_dims, sed_g01_data
-    g16_dims, g16_data = sed_g16_dims, sed_g16_data
+    g43_dims, g43_data = sed_g43_dims, sed_g43_data
 
     # Build SED name → region_id mapping
     region_dim_sed = get_dim_by_id(sed_g02_dims, "REGION")
@@ -1720,9 +1808,9 @@ def main():
     if region_dim_sed:
         for v in region_dim_sed["values"]:
             raw = v["name"]
-            # Strip state suffixes like " (Vic.)", " (NSW)", " (Qld.)", etc.
+            # Strip state/region suffixes like " (Vic.)", " (NSW)", " (eastern metropolitan)"
             import re as _re
-            clean = _re.sub(r"\s*\([A-Za-z]+\.?\)\s*$", "", raw).strip().lower()
+            clean = _re.sub(r"\s*\(.*?\)\s*$", "", raw).strip().lower()
             sed_name_to_id[clean] = v["id"]
             # Also index the raw name
             sed_name_to_id[raw.lower()] = v["id"]
@@ -1874,10 +1962,10 @@ def main():
     g37_dims, g37_data = g37_dims_bak, g37_data_bak
     g49_dims, g49_data = g49_dims_bak, g49_data_bak
     g09_dims, g09_data = g09_dims_bak, g09_data_bak
-    g15_dims, g15_data = g15_dims_bak, g15_data_bak
-    g04_dims, g04_data = g04_dims_bak, g04_data_bak
+    g13_dims, g13_data = g13_dims_bak, g13_data_bak
+    g32_dims, g32_data = g32_dims_bak, g32_data_bak
     g01_dims, g01_data = g01_dims_bak, g01_data_bak
-    g16_dims, g16_data = g16_dims_bak, g16_data_bak
+    g43_dims, g43_data = g43_dims_bak, g43_data_bak
 
     print(f"\nWriting {len(state_demographics)} state records to {STATE_OUTPUT_PATH}")
     _write_js_file(STATE_OUTPUT_PATH, "STATE_DEMOGRAPHICS", state_demographics,
