@@ -21,6 +21,7 @@ import requests
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_PATH = os.path.join(BASE_DIR, "webapp", "src", "data", "demographics.js")
+STATE_OUTPUT_PATH = os.path.join(BASE_DIR, "webapp", "src", "data", "state_demographics.js")
 
 ABS_BASE = "https://api.data.abs.gov.au/data"
 
@@ -308,9 +309,18 @@ def fetch_all_ced(table: str) -> tuple:
     return parse_sdmx(data)
 
 
+def fetch_all_sed(table: str) -> tuple:
+    """Fetch all SED (State Electoral Division) data for a given Census table."""
+    url = f"{ABS_BASE}/C21_{table}_SED/all?format=jsonstat2"
+    print(f"  Fetching {url}")
+    data = fetch_json(url)
+    return parse_sdmx(data)
+
+
 # ─── Table-specific parsers ───────────────────────────────────────────────────
 
-def parse_g02(series_dims: list, series_data: dict, region_id: str) -> dict:
+def parse_g02(series_dims: list, series_data: dict, region_id: str,
+              region_type: str = "CED") -> dict:
     """
     G02: Medians and Averages.
     Returns dict with medianAge, medianPersonalIncomeWeekly, medianHouseholdIncomeWeekly,
@@ -318,15 +328,11 @@ def parse_g02(series_dims: list, series_data: dict, region_id: str) -> dict:
     """
     # MEDAVG codes: 1=age, 2=personal income weekly, 3=family, 4=household, 5=mortgage monthly, 6=rent weekly
     result = {}
-    region_type_id = "CED"
-    state_id = None  # will match any state
 
     for key, val in series_data.items():
-        # key = (medavg_id, region_id, region_type_id, state_id, ...)
-        # We need to find entries matching our region
-        if len(key) < 2:
+        if len(key) < 3:
             continue
-        if key[1] == region_id and key[2] == "CED":
+        if key[1] == region_id and key[2] == region_type:
             medavg = key[0]
             result[medavg] = val
 
@@ -403,7 +409,8 @@ def parse_g37(series_dims: list, series_data: dict, region_id: str) -> dict:
     return result
 
 
-def parse_g37_generic(series_dims: list, series_data: dict, region_id: str) -> dict:
+def parse_g37_generic(series_dims: list, series_data: dict, region_id: str,
+                      region_type: str = "CED") -> dict:
     """
     Generic G37 parser — extracts owned outright, rented (total), total dwellings.
     Owned-with-mortgage is derived as: total - owned_outright - rented - other.
@@ -471,7 +478,7 @@ def parse_g37_generic(series_dims: list, series_data: dict, region_id: str) -> d
     for key, val in series_data.items():
         if key[region_dim_pos] != region_id:
             continue
-        if region_type_pos is not None and key[region_type_pos] != "CED":
+        if region_type_pos is not None and key[region_type_pos] != region_type:
             continue
         if strd_pos is not None and key[strd_pos] != strd_total_id:
             continue
@@ -496,10 +503,11 @@ def parse_g37_generic(series_dims: list, series_data: dict, region_id: str) -> d
     return result
 
 
-def parse_g49(series_dims: list, series_data: dict, region_id: str) -> dict:
+def parse_g49(series_dims: list, series_data: dict, region_id: str,
+              region_type: str = "CED") -> dict:
     """
     G49: Non-School Qualifications by Field of Study.
-    Find bachelor+ percentage.
+    Returns bachelors_plus, total_qual, no_qual (persons with no non-school qualification).
     """
     # Dims: SEXP (sex), QALLP (qual level), AGEP (age), REGION, REGION_TYPE, STATE
 
@@ -527,10 +535,11 @@ def parse_g49(series_dims: list, series_data: dict, region_id: str) -> dict:
                 break
 
     if region_dim_pos is None or qual_pos is None:
-        return {"bachelors_plus": None, "total_qual": None}
+        return {"bachelors_plus": None, "total_qual": None, "no_qual": None}
 
-    # Find codes for bachelor's and above
+    # Find codes for bachelor's and above, and "no non-school qualification"
     bach_codes = set()
+    no_qual_codes = set()
     total_code = None
     for v in qual_dim["values"]:
         label = v.get("name", "").lower()
@@ -539,6 +548,8 @@ def parse_g49(series_dims: list, series_data: dict, region_id: str) -> dict:
             bach_codes.add(code)
         elif code == "_T" or label in ("total", "all", "all non-school qualifications"):
             total_code = code
+        elif any(w in label for w in ["not applicable", "no non-school", "no qualification", "not applic"]):
+            no_qual_codes.add(code)
 
     # Find sex dim and get "Persons" total code
     sexp_pos = None
@@ -572,13 +583,14 @@ def parse_g49(series_dims: list, series_data: dict, region_id: str) -> dict:
 
     bach_total = 0
     total_qual = 0
+    no_qual_total = 0
 
     for key, val in series_data.items():
         if val is None:
             continue
         if key[region_dim_pos] != region_id:
             continue
-        if region_type_pos is not None and key[region_type_pos] != "CED":
+        if region_type_pos is not None and key[region_type_pos] != region_type:
             continue
         if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
             continue
@@ -591,8 +603,14 @@ def parse_g49(series_dims: list, series_data: dict, region_id: str) -> dict:
             bach_total += val
         elif qual_code == total_code:
             total_qual = val
+        elif qual_code in no_qual_codes:
+            no_qual_total += val
 
-    return {"bachelors_plus": bach_total, "total_qual": total_qual}
+    return {
+        "bachelors_plus": bach_total,
+        "total_qual": total_qual,
+        "no_qual": no_qual_total if no_qual_total > 0 else None,
+    }
 
 
 def find_agep_total(series_dims: list) -> tuple:
@@ -607,7 +625,8 @@ def find_agep_total(series_dims: list) -> tuple:
     return None, None
 
 
-def parse_g09(series_dims: list, series_data: dict, region_id: str) -> float | None:
+def parse_g09(series_dims: list, series_data: dict, region_id: str,
+              region_type: str = "CED") -> float | None:
     """
     G09: Country of Birth of Person by Sex.
     Returns overseas-born percentage.
@@ -689,7 +708,7 @@ def parse_g09(series_dims: list, series_data: dict, region_id: str) -> float | N
             continue
         if key[region_dim_pos] != region_id:
             continue
-        if region_type_pos is not None and key[region_type_pos] != "CED":
+        if region_type_pos is not None and key[region_type_pos] != region_type:
             continue
         if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
             continue
@@ -1131,6 +1150,218 @@ def parse_g16_employment(series_dims: list, series_data: dict, region_id: str) -
     }
 
 
+def parse_g15_language(series_dims: list, series_data: dict, region_id: str,
+                       region_type: str = "CED") -> float | None:
+    """
+    G15: Language Spoken at Home by Sex.
+    Returns non-English-at-home percentage.
+    """
+    region_dim_pos = None
+    for i, d in enumerate(series_dims):
+        if d["id"] == "REGION":
+            region_dim_pos = i
+            break
+
+    region_type_pos = None
+    for i, d in enumerate(series_dims):
+        if "REGION_TYPE" in d["id"]:
+            region_type_pos = i
+            break
+
+    lang_pos = None
+    lang_dim = None
+    for i, d in enumerate(series_dims):
+        did = d["id"].upper()
+        if "LANP" in did or "LANG" in did:
+            lang_pos = i
+            lang_dim = d
+            break
+
+    sexp_pos = None
+    sexp_total = None
+    for i, d in enumerate(series_dims):
+        if d["id"] in ("SEXP", "SEX"):
+            sexp_pos = i
+            for v in d["values"]:
+                label = v.get("name", "").lower()
+                if "person" in label or v["id"] == "_T" or label == "total":
+                    sexp_total = v["id"]
+                    break
+            if sexp_total is None and d["values"]:
+                sexp_total = d["values"][-1]["id"]
+            break
+
+    if region_dim_pos is None or lang_pos is None:
+        return None
+
+    # Find "English only" and "Total" codes
+    english_only_code = None
+    total_code = None
+    for v in lang_dim["values"]:
+        label = v.get("name", "").lower()
+        code = v["id"]
+        if code == "_T" or label in ("total", "total - language spoken at home"):
+            total_code = code
+        elif "english only" in label or label == "english":
+            english_only_code = code
+
+    if not english_only_code or not total_code:
+        return None
+
+    total_val = None
+    english_val = None
+
+    for key, val in series_data.items():
+        if val is None:
+            continue
+        if key[region_dim_pos] != region_id:
+            continue
+        if region_type_pos is not None and key[region_type_pos] != region_type:
+            continue
+        if sexp_pos is not None and sexp_total and key[sexp_pos] != sexp_total:
+            continue
+
+        lang_code = key[lang_pos]
+        if lang_code == total_code:
+            total_val = val
+        elif lang_code == english_only_code:
+            english_val = val
+
+    if total_val and total_val > 0 and english_val is not None:
+        return round((total_val - english_val) / total_val * 100, 1)
+    return None
+
+
+def parse_g04_families(series_dims: list, series_data: dict, region_id: str,
+                       region_type: str = "CED") -> float | None:
+    """
+    G04: Dwelling Structure by Family Composition.
+    Returns lone-parent family percentage of all families.
+    """
+    region_dim_pos = None
+    for i, d in enumerate(series_dims):
+        if d["id"] == "REGION":
+            region_dim_pos = i
+            break
+
+    region_type_pos = None
+    for i, d in enumerate(series_dims):
+        if "REGION_TYPE" in d["id"]:
+            region_type_pos = i
+            break
+
+    # Family composition dimension
+    fmcf_pos = None
+    fmcf_dim = None
+    for i, d in enumerate(series_dims):
+        did = d["id"].upper()
+        if "FMCF" in did or "FMLY" in did or "FAM" in did:
+            fmcf_pos = i
+            fmcf_dim = d
+            break
+
+    # Structure dim — want total (_T)
+    strd_pos = None
+    strd_total_id = "_T"
+    for i, d in enumerate(series_dims):
+        if d["id"] in ("STRD", "DWLST", "STRUCTURE"):
+            strd_pos = i
+            strd_codes = [v["id"] for v in d["values"]]
+            strd_total_id = "_T" if "_T" in strd_codes else strd_codes[-1]
+            break
+
+    if region_dim_pos is None or fmcf_pos is None:
+        return None
+
+    lone_parent_codes = set()
+    total_family_code = None
+    for v in fmcf_dim["values"]:
+        label = v.get("name", "").lower()
+        code = v["id"]
+        if "lone" in label and "parent" in label:
+            lone_parent_codes.add(code)
+        elif code == "_T" or label in ("total", "all families", "total families"):
+            total_family_code = code
+
+    if not lone_parent_codes or not total_family_code:
+        return None
+
+    lone_parent_total = 0
+    total_families = 0
+
+    for key, val in series_data.items():
+        if val is None or val == 0:
+            continue
+        if key[region_dim_pos] != region_id:
+            continue
+        if region_type_pos is not None and key[region_type_pos] != region_type:
+            continue
+        if strd_pos is not None and key[strd_pos] != strd_total_id:
+            continue
+
+        fmcf_code = key[fmcf_pos]
+        if fmcf_code in lone_parent_codes:
+            lone_parent_total += val
+        elif fmcf_code == total_family_code:
+            total_families = val
+
+    if total_families > 0 and lone_parent_total > 0:
+        return round(lone_parent_total / total_families * 100, 1)
+    return None
+
+
+# ─── Additional region_type-aware wrappers for G01/G16/G17 ────────────────────
+
+def parse_g17_earner_median_rt(series_dims: list, series_data: dict, region_id: str,
+                                region_type: str = "CED") -> float | None:
+    """
+    Wrapper for parse_g17_earner_median that supports arbitrary region_type.
+    """
+    # Temporarily patch the region_type check in parse_g17_earner_median
+    # by filtering series_data to matching region first
+    filtered = {k: v for k, v in series_data.items() if k[_find_region_pos(series_dims)] == region_id}
+    # Use original function with the pre-filtered data
+    return parse_g17_earner_median(series_dims, filtered, region_id)
+
+
+def _find_region_pos(series_dims: list) -> int:
+    for i, d in enumerate(series_dims):
+        if d["id"] == "REGION":
+            return i
+    return 1  # fallback
+
+
+def parse_g01_age_cohorts_rt(series_dims: list, series_data: dict, region_id: str,
+                              region_type: str = "CED") -> dict:
+    """Wrapper for parse_g01_age_cohorts supporting arbitrary region_type."""
+    rt_pos = None
+    for i, d in enumerate(series_dims):
+        if "REGION_TYPE" in d["id"]:
+            rt_pos = i
+            break
+    if rt_pos is None:
+        return parse_g01_age_cohorts(series_dims, series_data, region_id)
+    # Filter to the specific region_type
+    filtered = {k: v for k, v in series_data.items()
+                if k[rt_pos] == region_type}
+    return parse_g01_age_cohorts(series_dims, filtered, region_id)
+
+
+def parse_g16_employment_rt(series_dims: list, series_data: dict, region_id: str,
+                             region_type: str = "CED") -> dict:
+    """Wrapper for parse_g16_employment supporting arbitrary region_type."""
+    rt_pos = None
+    for i, d in enumerate(series_dims):
+        if "REGION_TYPE" in d["id"]:
+            rt_pos = i
+            break
+    if rt_pos is None:
+        return parse_g16_employment(series_dims, series_data, region_id)
+    filtered = {k: v for k, v in series_data.items()
+                if k[rt_pos] == region_type}
+    return parse_g16_employment(series_dims, filtered, region_id)
+
+
 def main():
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
 
@@ -1138,7 +1369,7 @@ def main():
     print("Fetching ABS 2021 Census demographic data for 151 CEDs")
     print("=" * 60)
 
-    # ── Fetch all tables ──────────────────────────────────────────────────────
+    # ── Fetch all CED tables ──────────────────────────────────────────────────
     print("\nFetching G02 (medians)...")
     g02_dims, g02_data = fetch_all_ced("G02")
 
@@ -1151,7 +1382,7 @@ def main():
     print("\nFetching G09 (country of birth)...")
     g09_dims, g09_data = fetch_all_ced("G09")
 
-    # G17: income distribution for earner-only median (try G17A first, fall back to G17)
+    # G17: income distribution for earner-only median
     g17_dims, g17_data = None, None
     g17b_dims, g17b_data = None, None
     try:
@@ -1185,17 +1416,21 @@ def main():
     except Exception as e:
         print(f"  G16 not available: {e}  — employment rates will be null")
 
-    # Print dim structure for debugging
-    print("\nG02 dims:", [d["id"] for d in g02_dims])
-    print("G37 dims:", [d["id"] for d in g37_dims])
-    print("G49 dims:", [d["id"] for d in g49_dims])
-    print("G09 dims:", [d["id"] for d in g09_dims])
-    if g17_dims:
-        print("G17A dims:", [d["id"] for d in g17_dims])
-    if g01_dims:
-        print("G01 dims:", [d["id"] for d in g01_dims])
-    if g16_dims:
-        print("G16 dims:", [d["id"] for d in g16_dims])
+    # G15: language spoken at home → non-English %
+    g15_dims, g15_data = None, None
+    try:
+        print("\nFetching G15 (language spoken at home)...")
+        g15_dims, g15_data = fetch_all_ced("G15")
+    except Exception as e:
+        print(f"  G15 not available: {e}  — nonEnglishAtHomePct will be null")
+
+    # G04: dwelling structure × family composition → lone-parent %
+    g04_dims, g04_data = None, None
+    try:
+        print("\nFetching G04 (family composition)...")
+        g04_dims, g04_data = fetch_all_ced("G04")
+    except Exception as e:
+        print(f"  G04 not available: {e}  — loneparentFamilyPct will be null")
 
     # ── Build ABS region_id -> name mapping from G02 ─────────────────────────
     region_dim_g02 = get_dim_by_id(g02_dims, "REGION")
@@ -1213,7 +1448,6 @@ def main():
         if abs_id:
             aec_to_abs[aec_id] = abs_id
         else:
-            # Try apostrophe variants
             for variant in [name_lower.replace("'", "'"), name_lower.replace("'", "")]:
                 abs_id = abs_name_to_id.get(variant)
                 if abs_id:
@@ -1225,88 +1459,16 @@ def main():
     print(f"\nMatched {len(aec_to_abs)}/151 seats to ABS region codes")
     if unmatched:
         print(f"Unmatched seats: {unmatched}")
-        print("Available ABS names (first 20):", list(abs_name_to_id.keys())[:20])
 
-    # ── Also get G37/G49/G09/new region dims for matching ─────────────────────
-    region_dim_g37 = get_dim_by_id(g37_dims, "REGION")
-    region_dim_g49 = get_dim_by_id(g49_dims, "REGION")
-    region_dim_g09 = get_dim_by_id(g09_dims, "REGION")
-
-    # Debug: print G37 dim structure
-    print("\nG37 dim details:")
-    for d in g37_dims:
-        vals = d["values"]
-        print(f"  {d['id']}: {[v['id'] for v in vals[:8]]}")
-        if d['id'] != 'REGION':
-            print(f"    Labels: {[v.get('name','') for v in vals[:8]]}")
-
-    print("\nG49 dim details:")
-    for d in g49_dims:
-        vals = d["values"]
-        print(f"  {d['id']}: {[v['id'] for v in vals[:8]]}")
-        if d['id'] not in ('REGION', 'STATE'):
-            print(f"    Labels: {[v.get('name','') for v in vals[:8]]}")
-
-    print("\nG09 dim details:")
-    for d in g09_dims:
-        vals = d["values"]
-        print(f"  {d['id']}: {[v['id'] for v in vals[:8]]}")
-        if d['id'] not in ('REGION', 'STATE'):
-            print(f"    Labels: {[v.get('name','') for v in vals[:8]]}")
-
-    if g17_dims:
-        print("\nG17A dim details:")
-        for d in g17_dims:
-            vals = d["values"]
-            print(f"  {d['id']}: {[v['id'] for v in vals[:10]]}")
-            if d['id'] not in ('REGION', 'STATE'):
-                print(f"    Labels: {[v.get('name','') for v in vals[:10]]}")
-
-    if g01_dims:
-        print("\nG01 dim details:")
-        for d in g01_dims:
-            vals = d["values"]
-            print(f"  {d['id']}: {[v['id'] for v in vals[:10]]}")
-            if d['id'] not in ('REGION', 'STATE'):
-                print(f"    Labels: {[v.get('name','') for v in vals[:10]]}")
-
-    if g16_dims:
-        print("\nG16 dim details:")
-        for d in g16_dims:
-            vals = d["values"]
-            print(f"  {d['id']}: {[v['id'] for v in vals[:10]]}")
-            if d['id'] not in ('REGION', 'STATE'):
-                print(f"    Labels: {[v.get('name','') for v in vals[:10]]}")
-
-    # ── Assemble demographics for each seat ───────────────────────────────────
+    # ── Assemble demographics for each CED seat ───────────────────────────────
     print("\n" + "=" * 60)
-    print("Assembling demographic records...")
+    print("Assembling CED demographic records...")
     print("=" * 60)
 
-    demographics = {}
-    for aec_id, name in SEATS:
-        abs_id = aec_to_abs.get(aec_id)
-
-        if not abs_id:
-            # Use nulls for unmatched seats
-            demographics[aec_id] = {
-                "medianAge": None, "medianPersonalIncome": None,
-                "medianPersonalIncomeEarners": None,
-                "medianHouseholdIncome": None, "medianWeeklyRent": None,
-                "medianMonthlyMortgage": None, "ownerOutrightPct": None,
-                "ownerMortgagePct": None, "renterPct": None,
-                "bachelorsOrAbovePct": None, "overseasBornPct": None,
-                "youth15to34Pct": None, "seniors65PlusPct": None,
-                "unemploymentRate": None, "labourParticipationRate": None,
-                "seifaIRSD": None, "rentalStressPct": None,
-                "mortgageStressPct": None, "avgTaxableIncome": None,
-                "investPropertyPct": None, "avgNetRentalIncome": None,
-                "urbanClass": URBAN_CLASS.get(aec_id, "Outer Metropolitan"),
-            }
-            continue
-
+    def _assemble_record(abs_id, region_type="CED", urban_class=None):
+        """Build a demographics dict for a given ABS region_id."""
         # G02 medians
-        g02 = parse_g02(g02_dims, g02_data, abs_id)
+        g02 = parse_g02(g02_dims, g02_data, abs_id, region_type)
         age = g02["medianAge"]
         personal_weekly = g02["medianPersonalIncomeWeekly"]
         household_weekly = g02["medianHouseholdIncomeWeekly"]
@@ -1314,7 +1476,7 @@ def main():
         rent = g02["medianWeeklyRent"]
 
         # G37 tenure
-        g37 = parse_g37_generic(g37_dims, g37_data, abs_id)
+        g37 = parse_g37_generic(g37_dims, g37_data, abs_id, region_type)
         total_dwellings = g37["total"]
         owned_outright = g37["owned_outright"]
         owned_mortgage = g37["owned_mortgage"]
@@ -1329,29 +1491,27 @@ def main():
             renter_pct = round(rented / total_dwellings * 100, 1) if rented else None
 
         # G49 qualifications
-        g49 = parse_g49(g49_dims, g49_data, abs_id)
+        g49 = parse_g49(g49_dims, g49_data, abs_id, region_type)
         bach_pct = None
-        if g49["total_qual"] and g49["total_qual"] > 0 and g49["bachelors_plus"]:
-            bach_pct = round(g49["bachelors_plus"] / g49["total_qual"] * 100, 1)
+        no_qual_pct = None
+        total_with_qual = g49["total_qual"] or 0
+        no_qual_count = g49["no_qual"] or 0
+        if total_with_qual > 0 and g49["bachelors_plus"]:
+            bach_pct = round(g49["bachelors_plus"] / total_with_qual * 100, 1)
+        total_persons_qual = total_with_qual + no_qual_count
+        if total_persons_qual > 0 and no_qual_count > 0:
+            no_qual_pct = round(no_qual_count / total_persons_qual * 100, 1)
 
         # G09 overseas born
-        overseas_pct = parse_g09(g09_dims, g09_data, abs_id)
+        overseas_pct = parse_g09(g09_dims, g09_data, abs_id, region_type)
 
         # G17A/G17B earner-only income median
         earner_income = None
         if g17_dims is not None and g17_data is not None:
             earner_income_a = parse_g17_earner_median(g17_dims, g17_data, abs_id)
-            # If G17B also fetched, merge by combining band counts (both parsers return annual)
-            # Simplest: average G17A and G17B results weighted if both available
             if g17b_dims is not None and g17b_data is not None:
                 earner_income_b = parse_g17_earner_median(g17b_dims, g17b_data, abs_id)
-                # Both tables cover different age groups; use G17A result as primary
-                # (G17A covers 15-44 which is the most populous earning age group)
-                # A proper merge would combine band counts; for now prefer G17A if valid
-                if earner_income_a is not None:
-                    earner_income = earner_income_a
-                elif earner_income_b is not None:
-                    earner_income = earner_income_b
+                earner_income = earner_income_a if earner_income_a is not None else earner_income_b
             else:
                 earner_income = earner_income_a
 
@@ -1365,65 +1525,101 @@ def main():
         if g16_dims is not None and g16_data is not None:
             employment = parse_g16_employment(g16_dims, g16_data, abs_id)
 
-        demographics[aec_id] = {
+        # G15 language at home
+        non_english_pct = None
+        if g15_dims is not None and g15_data is not None:
+            non_english_pct = parse_g15_language(g15_dims, g15_data, abs_id, region_type)
+
+        # G04 family composition
+        lone_parent_pct = None
+        if g04_dims is not None and g04_data is not None:
+            lone_parent_pct = parse_g04_families(g04_dims, g04_data, abs_id, region_type)
+
+        # Derive rental-to-income ratio
+        annual_rent = int(rent * 52) if rent else None
+        annual_hh_income = int(household_weekly * 52) if household_weekly else None
+        rental_to_income = None
+        if annual_rent and annual_hh_income and annual_hh_income > 0:
+            rental_to_income = round(annual_rent / annual_hh_income * 100, 1)
+
+        return {
             "medianAge": int(age) if age is not None else None,
             "medianPersonalIncome": int(personal_weekly * 52) if personal_weekly else None,
             "medianPersonalIncomeEarners": int(earner_income) if earner_income else None,
-            "medianHouseholdIncome": int(household_weekly * 52) if household_weekly else None,
+            "medianHouseholdIncome": annual_hh_income,
             "medianWeeklyRent": int(rent) if rent else None,
             "medianMonthlyMortgage": int(mortgage) if mortgage else None,
             "ownerOutrightPct": owner_outright_pct,
             "ownerMortgagePct": owner_mortgage_pct,
             "renterPct": renter_pct,
             "bachelorsOrAbovePct": bach_pct,
+            "noQualificationPct": no_qual_pct,
             "overseasBornPct": overseas_pct,
+            "nonEnglishAtHomePct": non_english_pct,
+            "loneparentFamilyPct": lone_parent_pct,
             "youth15to34Pct": age_cohorts["youth15to34Pct"],
             "seniors65PlusPct": age_cohorts["seniors65PlusPct"],
             "unemploymentRate": employment["unemploymentRate"],
             "labourParticipationRate": employment["labourParticipationRate"],
+            "rentalToIncomeRatio": rental_to_income,
             "seifaIRSD": None,
-            "rentalStressPct": None,
-            "mortgageStressPct": None,
             "avgTaxableIncome": None,
-            "investPropertyPct": None,
-            "avgNetRentalIncome": None,
-            "urbanClass": URBAN_CLASS.get(aec_id, "Outer Metropolitan"),
+            "urbanClass": urban_class,
         }
 
-    # ── Write output file ─────────────────────────────────────────────────────
-    print(f"\nWriting {len(demographics)} records to {OUTPUT_PATH}")
+    demographics = {}
+    for aec_id, name in SEATS:
+        abs_id = aec_to_abs.get(aec_id)
+        if not abs_id:
+            demographics[aec_id] = {k: None for k in [
+                "medianAge", "medianPersonalIncome", "medianPersonalIncomeEarners",
+                "medianHouseholdIncome", "medianWeeklyRent", "medianMonthlyMortgage",
+                "ownerOutrightPct", "ownerMortgagePct", "renterPct",
+                "bachelorsOrAbovePct", "noQualificationPct",
+                "overseasBornPct", "nonEnglishAtHomePct", "loneparentFamilyPct",
+                "youth15to34Pct", "seniors65PlusPct",
+                "unemploymentRate", "labourParticipationRate", "rentalToIncomeRatio",
+                "seifaIRSD", "avgTaxableIncome",
+            ]}
+            demographics[aec_id]["urbanClass"] = URBAN_CLASS.get(aec_id, "Outer Metropolitan")
+            continue
 
+        rec = _assemble_record(abs_id, "CED", URBAN_CLASS.get(aec_id, "Outer Metropolitan"))
+        demographics[aec_id] = rec
+
+    # ── Write CED output file ─────────────────────────────────────────────────
+    print(f"\nWriting {len(demographics)} records to {OUTPUT_PATH}")
     non_null = sum(1 for d in demographics.values() if d.get("medianAge") is not None)
     print(f"Records with medianAge populated: {non_null}/{len(demographics)}")
 
-    lines = [
-        "// Auto-generated by pipeline/fetch_demographics.py",
-        "// ABS 2021 Census data for all 151 Australian electorates (CEDs)",
-        "// null = data not available at CED level via ABS API",
-        "",
-        "const DEMOGRAPHICS = {",
-    ]
+    def _write_js_file(path, const_name, records, header_comment):
+        lines = [
+            f"// Auto-generated by pipeline/fetch_demographics.py",
+            f"// {header_comment}",
+            "// null = data not available via ABS API",
+            "",
+            f"const {const_name} = {{",
+        ]
+        for rec_id, d in sorted(records.items()):
+            lines.append(f"  {rec_id}: {{")
+            for k, v in d.items():
+                if v is None:
+                    lines.append(f"    {k}: null,")
+                elif isinstance(v, str):
+                    lines.append(f'    {k}: "{v}",')
+                else:
+                    lines.append(f"    {k}: {v},")
+            lines.append("  },")
+        lines.append("};")
+        lines.append("")
+        lines.append(f"export default {const_name};")
+        lines.append("")
+        with open(path, "w") as f:
+            f.write("\n".join(lines))
+        print(f"Written to {path}")
 
-    for aec_id, d in sorted(demographics.items()):
-        lines.append(f"  {aec_id}: {{")
-        for k, v in d.items():
-            if v is None:
-                lines.append(f"    {k}: null,")
-            elif isinstance(v, str):
-                lines.append(f'    {k}: "{v}",')
-            else:
-                lines.append(f"    {k}: {v},")
-        lines.append("  },")
-
-    lines.append("};")
-    lines.append("")
-    lines.append("export default DEMOGRAPHICS;")
-    lines.append("")
-
-    with open(OUTPUT_PATH, "w") as f:
-        f.write("\n".join(lines))
-
-    print(f"Done! Written to {OUTPUT_PATH}")
+    _write_js_file(OUTPUT_PATH, "DEMOGRAPHICS", demographics,
+                   "ABS 2021 Census data for all 151 Australian electorates (CEDs)")
 
     # Print sample
     sample_id = 101  # Canberra
@@ -1431,14 +1627,276 @@ def main():
         print(f"\nSample record (Canberra, AEC {sample_id}):")
         print(json.dumps(demographics[sample_id], indent=2))
 
-    # Print new-field summary
-    earner_populated = sum(1 for d in demographics.values() if d.get("medianPersonalIncomeEarners") is not None)
-    youth_populated = sum(1 for d in demographics.values() if d.get("youth15to34Pct") is not None)
-    unemp_populated = sum(1 for d in demographics.values() if d.get("unemploymentRate") is not None)
-    print(f"\nNew fields populated:")
-    print(f"  medianPersonalIncomeEarners: {earner_populated}/151")
-    print(f"  youth15to34Pct / seniors65PlusPct: {youth_populated}/151")
-    print(f"  unemploymentRate / labourParticipationRate: {unemp_populated}/151")
+    # ── Fetch SED tables and build state demographics ──────────────────────────
+    print("\n" + "=" * 60)
+    print("Fetching SED tables for state electoral divisions...")
+    print("=" * 60)
+
+    sed_g02_dims, sed_g02_data = None, None
+    sed_g37_dims, sed_g37_data = None, None
+    sed_g49_dims, sed_g49_data = None, None
+    sed_g09_dims, sed_g09_data = None, None
+    sed_g15_dims, sed_g15_data = None, None
+    sed_g04_dims, sed_g04_data = None, None
+    sed_g01_dims, sed_g01_data = None, None
+    sed_g16_dims, sed_g16_data = None, None
+
+    try:
+        print("\nFetching SED G02 (medians)...")
+        sed_g02_dims, sed_g02_data = fetch_all_sed("G02")
+    except Exception as e:
+        print(f"  SED G02 unavailable: {e}")
+
+    try:
+        print("\nFetching SED G37 (tenure)...")
+        sed_g37_dims, sed_g37_data = fetch_all_sed("G37")
+    except Exception as e:
+        print(f"  SED G37 unavailable: {e}")
+
+    try:
+        print("\nFetching SED G49 (qualifications)...")
+        sed_g49_dims, sed_g49_data = fetch_all_sed("G49")
+    except Exception as e:
+        print(f"  SED G49 unavailable: {e}")
+
+    try:
+        print("\nFetching SED G09 (country of birth)...")
+        sed_g09_dims, sed_g09_data = fetch_all_sed("G09")
+    except Exception as e:
+        print(f"  SED G09 unavailable: {e}")
+
+    try:
+        print("\nFetching SED G15 (language at home)...")
+        sed_g15_dims, sed_g15_data = fetch_all_sed("G15")
+    except Exception as e:
+        print(f"  SED G15 unavailable: {e}")
+
+    try:
+        print("\nFetching SED G04 (family composition)...")
+        sed_g04_dims, sed_g04_data = fetch_all_sed("G04")
+    except Exception as e:
+        print(f"  SED G04 unavailable: {e}")
+
+    try:
+        print("\nFetching SED G01 (age distribution)...")
+        sed_g01_dims, sed_g01_data = fetch_all_sed("G01")
+    except Exception as e:
+        print(f"  SED G01 unavailable: {e}")
+
+    try:
+        print("\nFetching SED G16 (labour force)...")
+        sed_g16_dims, sed_g16_data = fetch_all_sed("G16")
+    except Exception as e:
+        print(f"  SED G16 unavailable: {e}")
+
+    if sed_g02_dims is None:
+        print("\nNo SED data available — skipping state_demographics.js")
+        return
+
+    # Swap CED-level tables for SED in _assemble_record by temporarily rebinding module vars
+    # Instead, build a parallel assembler using SED dims/data
+    g02_dims_bak, g02_data_bak = g02_dims, g02_data
+    g37_dims_bak, g37_data_bak = g37_dims, g37_data
+    g49_dims_bak, g49_data_bak = g49_dims, g49_data
+    g09_dims_bak, g09_data_bak = g09_dims, g09_data
+    g15_dims_bak, g15_data_bak = g15_dims, g15_data
+    g04_dims_bak, g04_data_bak = g04_dims, g04_data
+    g01_dims_bak, g01_data_bak = g01_dims, g01_data
+    g16_dims_bak, g16_data_bak = g16_dims, g16_data
+
+    # Rebind to SED tables for _assemble_record
+    g02_dims, g02_data = sed_g02_dims, sed_g02_data
+    g37_dims, g37_data = sed_g37_dims or g37_dims_bak, sed_g37_data or g37_data_bak
+    g49_dims, g49_data = sed_g49_dims or g49_dims_bak, sed_g49_data or g49_data_bak
+    g09_dims, g09_data = sed_g09_dims or g09_dims_bak, sed_g09_data or g09_data_bak
+    g15_dims, g15_data = sed_g15_dims, sed_g15_data
+    g04_dims, g04_data = sed_g04_dims, sed_g04_data
+    g01_dims, g01_data = sed_g01_dims, sed_g01_data
+    g16_dims, g16_data = sed_g16_dims, sed_g16_data
+
+    # Build SED name → region_id mapping
+    region_dim_sed = get_dim_by_id(sed_g02_dims, "REGION")
+    sed_name_to_id = {}
+    if region_dim_sed:
+        for v in region_dim_sed["values"]:
+            raw = v["name"]
+            # Strip state suffixes like " (Vic.)", " (NSW)", " (Qld.)", etc.
+            import re as _re
+            clean = _re.sub(r"\s*\([A-Za-z]+\.?\)\s*$", "", raw).strip().lower()
+            sed_name_to_id[clean] = v["id"]
+            # Also index the raw name
+            sed_name_to_id[raw.lower()] = v["id"]
+
+    print(f"\nSED regions available: {len(sed_name_to_id)}")
+    print("Sample SED names:", list(sed_name_to_id.keys())[:10])
+
+    # State seat list: (app_id, seat_name, state_code)
+    # Only include named seats (not notional 93000+ ones)
+    STATE_SEATS = [
+        # VIC (9001–9088)
+        (9001,"Altona"),(9002,"Albert Park"),(9003,"Ashwood"),(9004,"Bass"),
+        (9005,"Bayswater"),(9006,"Bellarine"),(9007,"Benambra"),(9008,"Bendigo East"),
+        (9009,"Bendigo West"),(9010,"Bentleigh"),(9011,"Berwick"),(9012,"Box Hill"),
+        (9013,"Brighton"),(9014,"Broadmeadows"),(9015,"Brunswick"),(9016,"Bulleen"),
+        (9017,"Bundoora"),(9018,"Carrum"),(9019,"Caulfield"),(9020,"Clarinda"),
+        (9021,"Cranbourne"),(9022,"Croydon"),(9023,"Dandenong"),(9024,"Eildon"),
+        (9025,"Eltham"),(9026,"Essendon"),(9027,"Eureka"),(9028,"Euroa"),
+        (9029,"Evelyn"),(9030,"Footscray"),(9031,"Frankston"),(9032,"Geelong"),
+        (9033,"Gippsland East"),(9034,"Gippsland South"),(9035,"Glen Waverley"),
+        (9036,"Greenvale"),(9037,"Hastings"),(9038,"Hawthorn"),(9039,"Ivanhoe"),
+        (9040,"Kalkallo"),(9041,"Kew"),(9042,"Kororoit"),(9043,"Lara"),
+        (9044,"Laverton"),(9045,"Lowan"),(9046,"Macedon"),(9047,"Malvern"),
+        (9048,"Melbourne"),(9049,"Melton"),(9050,"Mildura"),(9051,"Mill Park"),
+        (9052,"Monbulk"),(9053,"Mordialloc"),(9054,"Mornington"),(9055,"Morwell"),
+        (9056,"Mulgrave"),(9057,"Murray Plains"),(9058,"Narre Warren North"),
+        (9059,"Narre Warren South"),(9060,"Nepean"),(9061,"Niddrie"),
+        (9062,"Northcote"),(9063,"Oakleigh"),(9064,"Ovens Valley"),
+        (9065,"Pakenham"),(9066,"Pascoe Vale"),(9067,"Point Cook"),
+        (9068,"Polwarth"),(9069,"Prahran"),(9070,"Preston"),(9071,"Richmond"),
+        (9072,"Ringwood"),(9073,"Ripon"),(9074,"Rowville"),(9075,"Sandringham"),
+        (9076,"Shepparton"),(9077,"South Barwon"),(9078,"South-West Coast"),
+        (9079,"St Albans"),(9080,"Sunbury"),(9081,"Sydenham"),(9082,"Tarneit"),
+        (9083,"Thomastown"),(9084,"Warrandyte"),(9085,"Wendouree"),
+        (9086,"Werribee"),(9087,"Williamstown"),(9088,"Yan Yean"),
+        # NSW (7001–7095)
+        (7001,"Penrith"),(7002,"East Hills"),(7003,"Ryde"),(7004,"Strathfield"),
+        (7005,"Coogee"),(7006,"Kiama"),(7007,"Keira"),
+        (7011,"Monaro"),(7012,"Heathcote"),(7013,"Gosford"),(7014,"Drummoyne"),
+        (7015,"Holsworthy"),(7016,"Terrigal"),
+        (7021,"Wakehurst"),
+        (7031,"Newtown"),(7032,"Balmain"),(7033,"Summer Hill"),
+        (7041,"Davidson"),(7042,"Pittwater"),(7043,"Epping"),(7044,"Lane Cove"),
+        (7045,"Willoughby"),(7046,"Manly"),(7047,"Castle Hill"),(7048,"Hornsby"),
+        (7061,"Oxley"),(7062,"Upper Hunter"),(7063,"Port Macquarie"),
+        (7064,"Tamworth"),(7065,"Orange"),(7066,"Dubbo"),(7067,"Murray"),
+        (7068,"Bathurst"),(7069,"Barwon"),
+        (7071,"Swansea"),(7072,"Lake Macquarie"),(7073,"Kotara"),
+        (7074,"Blue Mountains"),(7075,"Rockdale"),(7076,"Kogarah"),
+        (7081,"Cessnock"),(7082,"Charlestown"),(7083,"Wallsend"),
+        (7084,"Maitland"),(7085,"Newcastle"),(7086,"Wollongong"),
+        (7087,"Shellharbour"),(7088,"Liverpool"),(7089,"Campbelltown"),
+        (7090,"Bankstown"),(7091,"Lakemba"),(7092,"Auburn"),
+        (7093,"Maroubra"),(7094,"Heffron"),(7095,"Smithfield"),
+        # QLD (7201–7265)
+        (7201,"Mount Ommaney"),(7202,"Oodgeroo"),(7203,"Macalister"),
+        (7204,"Greenslopes"),(7205,"McConnel"),(7206,"Everton"),
+        (7207,"Currumbin"),(7208,"Burleigh"),(7209,"Mundingburra"),
+        (7211,"Inala"),(7212,"Toohey"),(7213,"Miller"),
+        (7221,"South Brisbane"),(7222,"Maiwar"),(7223,"Cooper"),
+        (7224,"Macgregor"),(7225,"Stretton"),(7226,"Waterford"),(7227,"Rochedale"),
+        (7231,"Nanango"),(7232,"Warrego"),(7233,"Gympie"),
+        (7234,"Buderim"),(7235,"Caloundra"),
+        (7241,"Bundaberg"),(7242,"Rockhampton"),(7243,"Mulgrave"),
+        (7261,"Mirani"),(7262,"Condamine"),(7263,"Callide"),
+        (7264,"Hinchinbrook"),(7265,"Southern Downs"),
+        # WA (7301–7357)
+        (7301,"Carine"),(7302,"Vasse"),(7303,"Kalamunda"),(7304,"Bateman"),
+        (7305,"Churchlands"),(7306,"Moore"),
+        (7311,"Roe"),
+        (7321,"Bicton"),(7322,"Dawesville"),
+        (7331,"Fremantle"),(7332,"Maylands"),
+        (7341,"Scarborough"),(7342,"Hillarys"),
+        (7351,"Joondalup"),(7352,"Balcatta"),(7353,"Midland"),
+        (7354,"Armadale"),(7355,"Mandurah"),(7356,"Rockingham"),(7357,"Kwinana"),
+        # SA (7401–7434)
+        (7401,"King"),(7402,"Gibson"),(7403,"Newland"),(7404,"Florey"),
+        (7405,"Adelaide"),(7406,"Kaurna"),(7407,"Playford"),
+        (7411,"Heysen"),(7412,"Colton"),(7413,"Morialta"),(7414,"Waite"),
+        (7415,"Flinders"),(7416,"Bragg"),(7417,"Unley"),(7418,"Hartley"),
+        (7419,"Morphett"),(7420,"Schubert"),
+        (7421,"Mount Gambier"),(7422,"Frome"),(7423,"Ngadjuri"),(7424,"Narungga"),
+        (7432,"Croydon"),(7433,"Ramsay"),(7434,"Lee"),
+        # NT (7501–7522)
+        (7501,"Blain"),(7502,"Casuarina"),(7503,"Arafura"),(7504,"Karama"),
+        (7505,"Fannie Bay"),(7506,"Johnston"),(7507,"Nhulunbuy"),
+        (7508,"Namatjira"),(7509,"Barkly"),(7510,"Brennan"),(7511,"Darwin"),
+        (7512,"Goyder"),(7521,"Wanguri"),(7522,"Drysdale"),
+        # TAS — 5 Hare-Clark electorates (multiple seats share the same SED)
+        # "Bass (1)" → "Bass", "Clark (2)" → "Clark", etc.
+        (8401,"Bass"),(8402,"Clark"),(8403,"Braddon"),
+        (8404,"Clark"),(8405,"Lyons"),(8406,"Franklin"),
+        (8407,"Bass"),(8408,"Braddon"),(8409,"Lyons"),
+        # ACT — 5 Hare-Clark electorates
+        (8501,"Ginninderra"),(8502,"Brindabella"),(8503,"Ginninderra"),
+        (8504,"Murrumbidgee"),(8505,"Kurrajong"),(8506,"Brindabella"),
+        (8507,"Kurrajong"),(8508,"Murrumbidgee"),
+    ]
+
+    # Build app_id → ABS SED region_id mapping
+    state_to_abs = {}
+    unmatched_state = []
+    for app_id, seat_name in STATE_SEATS:
+        name_lower = seat_name.lower()
+        abs_id = sed_name_to_id.get(name_lower)
+        if not abs_id:
+            # Try without hyphens, with variations
+            for variant in [
+                name_lower.replace("-", " "),
+                name_lower.replace(" ", "-"),
+                name_lower.replace("'", "'"),
+                name_lower.replace("'", ""),
+            ]:
+                abs_id = sed_name_to_id.get(variant)
+                if abs_id:
+                    break
+        if abs_id:
+            state_to_abs[app_id] = abs_id
+        else:
+            unmatched_state.append((app_id, seat_name))
+
+    print(f"\nMatched {len(state_to_abs)}/{len(STATE_SEATS)} state seats to ABS SED codes")
+    if unmatched_state:
+        print(f"Unmatched state seats: {unmatched_state[:20]}")
+
+    # ── Assemble state demographics ───────────────────────────────────────────
+    print("\nAssembling state seat demographic records...")
+    state_demographics = {}
+    for app_id, seat_name in STATE_SEATS:
+        abs_id = state_to_abs.get(app_id)
+        if not abs_id:
+            state_demographics[app_id] = {k: None for k in [
+                "medianAge", "medianPersonalIncome", "medianPersonalIncomeEarners",
+                "medianHouseholdIncome", "medianWeeklyRent", "medianMonthlyMortgage",
+                "ownerOutrightPct", "ownerMortgagePct", "renterPct",
+                "bachelorsOrAbovePct", "noQualificationPct",
+                "overseasBornPct", "nonEnglishAtHomePct", "loneparentFamilyPct",
+                "youth15to34Pct", "seniors65PlusPct",
+                "unemploymentRate", "labourParticipationRate", "rentalToIncomeRatio",
+                "seifaIRSD", "avgTaxableIncome", "urbanClass",
+            ]}
+            continue
+
+        rec = _assemble_record(abs_id, "SED", None)
+        state_demographics[app_id] = rec
+
+    # Restore CED tables
+    g02_dims, g02_data = g02_dims_bak, g02_data_bak
+    g37_dims, g37_data = g37_dims_bak, g37_data_bak
+    g49_dims, g49_data = g49_dims_bak, g49_data_bak
+    g09_dims, g09_data = g09_dims_bak, g09_data_bak
+    g15_dims, g15_data = g15_dims_bak, g15_data_bak
+    g04_dims, g04_data = g04_dims_bak, g04_data_bak
+    g01_dims, g01_data = g01_dims_bak, g01_data_bak
+    g16_dims, g16_data = g16_dims_bak, g16_data_bak
+
+    print(f"\nWriting {len(state_demographics)} state records to {STATE_OUTPUT_PATH}")
+    _write_js_file(STATE_OUTPUT_PATH, "STATE_DEMOGRAPHICS", state_demographics,
+                   "ABS 2021 Census data for state electoral divisions (SEDs)")
+
+    # Summary
+    print("\n" + "=" * 60)
+    print("Summary:")
+    print(f"  CED records: {len(demographics)}")
+    earner_pop = sum(1 for d in demographics.values() if d.get("medianPersonalIncomeEarners") is not None)
+    noq_pop = sum(1 for d in demographics.values() if d.get("noQualificationPct") is not None)
+    lang_pop = sum(1 for d in demographics.values() if d.get("nonEnglishAtHomePct") is not None)
+    lone_pop = sum(1 for d in demographics.values() if d.get("loneparentFamilyPct") is not None)
+    print(f"  medianPersonalIncomeEarners: {earner_pop}/151")
+    print(f"  noQualificationPct: {noq_pop}/151")
+    print(f"  nonEnglishAtHomePct: {lang_pop}/151")
+    print(f"  loneparentFamilyPct: {lone_pop}/151")
+    state_pop = sum(1 for d in state_demographics.values() if d.get("medianAge") is not None)
+    print(f"  SED records: {len(state_demographics)} ({state_pop} with medianAge)")
 
 
 if __name__ == "__main__":
