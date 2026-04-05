@@ -1,6 +1,5 @@
 {
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": "dist",
+  "outputDirectory": "webapp/dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
