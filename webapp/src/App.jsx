@@ -2334,7 +2334,6 @@ const VIC_DISTRICT_REGION = {
   "Lara": "outer_metro", "Bellarine": "outer_metro", "Wendouree": "outer_metro",
   "Macedon": "outer_metro", "McEwen": "outer_metro", "Seymour": "outer_metro",
   "Ripon": "outer_metro", "Polwarth": "outer_metro", "Point Cook": "outer_metro",
-  "Laverton": "outer_metro",
   // Regional — country Victoria, distinct swing patterns
   "Mildura": "regional", "Shepparton": "regional", "Euroa": "regional",
   "Eildon": "regional", "Benambra": "regional", "Ovens Valley": "regional",
