@@ -828,6 +828,61 @@
       "on": 27,
       "tpp": null,
       "n": 1511
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Essential Research",
+      "date": "2026-03-23",
+      "alp": 31,
+      "coal": 24,
+      "grn": 10,
+      "on": 24,
+      "tpp": null,
+      "n": 1008
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Fox & Hedgehog",
+      "date": "2026-03-26",
+      "alp": 30,
+      "coal": 23,
+      "grn": 13,
+      "on": 23,
+      "tpp": 51,
+      "n": 1810
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2026-03-26",
+      "alp": 31,
+      "coal": 21,
+      "grn": 12,
+      "on": 26,
+      "tpp": null,
+      "n": 1232
+    },
+    {
+      "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2026-03-27",
+      "alp": 32,
+      "coal": 17,
+      "grn": 13,
+      "on": 29,
+      "tpp": 55,
+      "n": 1003
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-03-29",
+      "alp": 30,
+      "coal": 22.5,
+      "grn": 13.5,
+      "on": 23.5,
+      "tpp": 56.5,
+      "n": 1562
     }
   ]
 }
