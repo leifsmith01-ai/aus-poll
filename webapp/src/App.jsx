@@ -4368,6 +4368,7 @@ export default function App() {
     { id: "polls",       label: "Polls" },
     { id: "markets",     label: "Markets" },
     { id: "methodology", label: "Methodology" },
+    { id: "about",       label: "About" },
   ];
 
   const panelStyle = isMobile ? { ...STYLES.panel, padding: "14px 14px" } : STYLES.panel;
@@ -5390,6 +5391,18 @@ export default function App() {
                 </div>
               )}
             </div>
+
+            {/* ── Model intro text (shown for federal 2025 scenario builder) ── */}
+            {el.modelEnabled && selectedModelId === "federal_2025" && (
+              <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, padding: "14px 16px", marginBottom: 16 }}>
+                <p style={{ margin: "0 0 8px", fontSize: 13, color: "#374151", lineHeight: 1.65 }}>
+                  <strong>aus-poll</strong> is an open-source, seat-by-seat election modelling tool for Australian federal elections. Adjust the primary vote sliders on the left to explore how shifts in national party support translate to seat outcomes across all 151 House of Representatives electorates.
+                </p>
+                <p style={{ margin: 0, fontSize: 13, color: "#6B7280", lineHeight: 1.65 }}>
+                  The model uses per-seat first-preference baselines from the 2022 and 2025 AEC results — not a uniform national swing — and applies preference flows at the division level to compute projected two-candidate preferred (2PP) outcomes with uncertainty bands. See the <button onClick={() => setActiveTab("methodology")} style={{ background: "none", border: "none", padding: 0, color: "#1D4ED8", cursor: "pointer", fontSize: 13, textDecoration: "underline" }}>Methodology tab</button> for full technical details, or the <button onClick={() => setActiveTab("about")} style={{ background: "none", border: "none", padding: 0, color: "#1D4ED8", cursor: "pointer", fontSize: 13, textDecoration: "underline" }}>About tab</button> for FAQs and data sources.
+                </p>
+              </div>
+            )}
 
             {/* ── State election results view ── */}
             {!el.modelEnabled && (() => {
@@ -8454,6 +8467,116 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                   ))}
                 </tbody>
               </table>
+            </div>
+
+          </div>
+        );
+      })()}
+
+      {/* ══════════════════════ ABOUT TAB ════════════════════════════════════════ */}
+      {activeTab === "about" && (() => {
+        const panel = { background: "#fff", border: "1px solid #E2E8F0", borderRadius: 10, padding: isMobile ? "16px 14px" : "20px 24px", marginBottom: 16 };
+        const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 };
+        const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "#0F172A", margin: "0 0 10px" };
+        const bodyText = { fontSize: 13, color: "#374151", lineHeight: 1.7, margin: "0 0 10px" };
+        const faqItems = [
+          {
+            q: "What is two-candidate preferred (2PP)?",
+            a: "Australia's preferential voting system counts votes until only two candidates remain in each seat. The two-candidate preferred (2PP) count represents the final tally between those two candidates after all lower-preference votes have been distributed. Nationally, this is usually reported as ALP vs. Coalition. A party needs more than 50% 2PP in a seat to win it.",
+          },
+          {
+            q: "How does the model project seat outcomes?",
+            a: "Rather than applying a single uniform national swing, aus-poll uses per-seat first-preference baselines from the 2022 and 2025 AEC results. It computes a swing at the primary vote level for each major party, then converts primary votes to 2PP using preference flow constants calibrated against historical distribution-of-preferences data. This approach captures the different starting points of individual seats.",
+          },
+          {
+            q: "Where does polling data come from?",
+            a: "The Polls tab aggregates published primary and 2PP figures from Newspoll, Resolve/SMH, RedBridge, DemosAU, Roy Morgan, Essential Research, and YouGov. House effects (systematic biases per pollster) are estimated and removed before smoothing. The aggregated trend is used as the default input to the scenario builder.",
+          },
+          {
+            q: "How accurate is the model?",
+            a: "Backtesting against the 2022 AEC results shows a mean absolute 2PP error of under 0.1 percentage points across ALP/Coalition seats — very close to the actual count. The model is less reliable in seats contested by independents or the Greens, where final two-candidate counts differ from the national ALP vs. Coalition frame.",
+          },
+          {
+            q: "What are teal independents?",
+            a: "\"Teal independents\" are community independents who won or contested seats in affluent, traditionally Liberal-held electorates. They align loosely on climate and integrity issues. aus-poll tracks six designated teal seats: Warringah, Wentworth, Bradfield, Mackellar, Kooyong, and Goldstein. These seats use teal-specific preference flows (approximately 73% flowing to ALP over Coalition).",
+          },
+          {
+            q: "What does the uncertainty band represent?",
+            a: "Each seat projection includes a ±1σ uncertainty band derived from historical polling error, seat-level volatility (elasticity), and any undecided vote allocation. Seats within this band of 50% are considered competitive. The band is centred on the modelled 2PP, not on the historical result.",
+          },
+          {
+            q: "Is this affiliated with the AEC or any political party?",
+            a: "No. aus-poll is an independent open-source project. It uses publicly available data from the Australian Electoral Commission (AEC) and published opinion polls. It has no affiliation with any electoral body, political party, or campaign.",
+          },
+          {
+            q: "How can I contribute or report a bug?",
+            a: "The source code is publicly available on GitHub. Open an issue or pull request to suggest improvements, report errors in the model, or contribute new data.",
+          },
+        ];
+        return (
+          <div style={{ padding: isMobile ? "14px 16px" : "20px 24px", maxWidth: 860, margin: "0 auto" }}>
+
+            {/* About section */}
+            <div style={panel}>
+              <div style={secHead}>About</div>
+              <h2 style={secTitle}>aus-poll — Australian Election Modelling Dashboard</h2>
+              <p style={bodyText}>
+                aus-poll is an open-source, seat-by-seat election modelling dashboard for Australian federal elections. It tracks opinion polls, aggregates them using a house-effects model, and projects two-candidate preferred (2PP) outcomes for all 151 House of Representatives seats based on primary vote shifts.
+              </p>
+              <p style={bodyText}>
+                The tool was built to provide a transparent, reproducible alternative to black-box election forecasts. All modelling logic is visible in the source code; all data comes from publicly available sources (AEC results, published polls, ABS Census). It is not a prediction — it is a scenario explorer. You set the primary votes, and the model shows you what the seat distribution would look like under those assumptions.
+              </p>
+              <p style={{ ...bodyText, margin: 0 }}>
+                The dashboard covers the 2025 and 2022 Australian federal elections, plus several state and territory elections (Victoria, NSW, Queensland, Western Australia, South Australia, Tasmania, ACT, Northern Territory). The federal 2025 scenario builder is the primary feature; state elections are shown as historical results with key marginal seat breakdowns.
+              </p>
+            </div>
+
+            {/* Data sources */}
+            <div style={panel}>
+              <div style={secHead}>Data Sources</div>
+              <h2 style={secTitle}>Where the data comes from</h2>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
+                {[
+                  { label: "AEC election results", desc: "Booth-level and division-level first preferences, two-candidate preferred counts, and distribution of preferences for 2022 and 2025 federal elections.", url: "https://results.aec.gov.au", urlLabel: "results.aec.gov.au" },
+                  { label: "Opinion polls", desc: "Published primary and 2PP figures from Newspoll, Resolve/SMH, RedBridge, DemosAU, Roy Morgan, Essential Research, and YouGov.", url: null, urlLabel: null },
+                  { label: "Betting markets", desc: "National government outcome odds and seat-level win markets from Sportsbet and Betfair Exchange, updated manually.", url: null, urlLabel: null },
+                  { label: "ABS Census 2021", desc: "SA1/SA2-level demographic data (income, education, occupation, age) mapped to electoral divisions for contextual overlays.", url: null, urlLabel: null },
+                ].map(({ label, desc, url, urlLabel }) => (
+                  <div key={label} style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, padding: "12px 14px" }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: "#0F172A", marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>{desc}</div>
+                    {url && <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#1D4ED8", display: "inline-block", marginTop: 4 }}>{urlLabel}</a>}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* FAQ */}
+            <div style={panel}>
+              <div style={secHead}>FAQ</div>
+              <h2 style={secTitle}>Frequently asked questions</h2>
+              {faqItems.map((item, i) => (
+                <div key={i} style={{ borderBottom: i < faqItems.length - 1 ? "1px solid #F1F5F9" : "none", paddingBottom: openFaq === i ? 12 : 0 }}>
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    style={{ background: "none", border: "none", width: "100%", textAlign: "left", padding: "12px 0", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}
+                  >
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#0F172A", lineHeight: 1.5 }}>{item.q}</span>
+                    <span style={{ color: "#94A3B8", fontSize: 16, flexShrink: 0 }}>{openFaq === i ? "▲" : "▼"}</span>
+                  </button>
+                  {openFaq === i && (
+                    <p style={{ margin: "0 0 12px", fontSize: 13, color: "#6B7280", lineHeight: 1.7 }}>{item.a}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Disclaimer */}
+            <div style={{ ...panel, background: "#FFFBEB", border: "1px solid #FCD34D", marginBottom: 0 }}>
+              <div style={secHead}>Disclaimer</div>
+              <p style={{ ...bodyText, margin: 0 }}>
+                aus-poll is an independent modelling tool and is not affiliated with the Australian Electoral Commission, any political party, or any government body. Projections are illustrative scenarios based on the inputs provided — they are not election predictions. Past model accuracy does not guarantee future performance. All polling data is sourced from publicly available figures as reported by pollsters and media outlets.
+              </p>
             </div>
 
           </div>
