@@ -4368,7 +4368,6 @@ export default function App() {
     { id: "polls",       label: "Polls" },
     { id: "markets",     label: "Markets" },
     { id: "methodology", label: "Methodology" },
-    { id: "changelog",   label: "Changelog" },
   ];
 
   const panelStyle = isMobile ? { ...STYLES.panel, padding: "14px 14px" } : STYLES.panel;
@@ -8460,34 +8459,6 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
           </div>
         );
       })()}
-
-      {/* ══════════════════════ CHANGELOG TAB ══════════════════════════════════════ */}
-      {activeTab === "changelog" && (
-        <div style={{ maxWidth: 960, margin: "0 auto", padding: isMobile ? "16px 14px" : "24px 24px" }}>
-          <div style={STYLES.panel}>
-            <div style={STYLES.sectionHead}>Changelog</div>
-            <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 20, marginTop: 0 }}>A record of significant model updates, data refreshes, and new features — newest first.</p>
-            {[
-              { date: "2026-03-27", tag: "Feature", color: "#3B82F6", text: "Added Methodology, About, FAQ, Glossary, and Changelog pages." },
-              { date: "2026-02-26", tag: "Data", color: "#059669", text: "Updated poll aggregation with Newspoll and RedBridge February 2026 polls." },
-              { date: "2025-05-03", tag: "Data", color: "#059669", text: "Election night: 2025 federal election results imported. Seat baselines updated to 2025 AEC actuals across all 151 divisions." },
-              { date: "2025-04-15", tag: "Model", color: "#7C3AED", text: "Improved teal seat preference flows — Teal→ALP updated to 73.5% based on 2025 DOP national totals." },
-              { date: "2025-03-01", tag: "Model", color: "#7C3AED", text: "Primary-vote-based seat model deployed, replacing the previous uniform national swing approach. Seat elasticity adjustment added." },
-              { date: "2024-11-20", tag: "Data", color: "#059669", text: "Queensland 2024 state election results added." },
-              { date: "2024-03-16", tag: "Data", color: "#059669", text: "Western Australia 2025 state election results added." },
-              { date: "2023-03-25", tag: "Data", color: "#059669", text: "NSW 2023 state election results added." },
-              { date: "2022-11-26", tag: "Data", color: "#059669", text: "Victorian 2022 state election results added (VEC data)." },
-              { date: "2022-05-21", tag: "Data", color: "#059669", text: "2022 federal election results imported. Model calibrated against 2022 actuals." },
-            ].map(({ date, tag, color, text }, i) => (
-              <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "12px 0", borderBottom: i < 9 ? "1px solid #F3F4F6" : "none" }}>
-                <div style={{ fontSize: 12, color: "#9CA3AF", whiteSpace: "nowrap", minWidth: 86, paddingTop: 2 }}>{date}</div>
-                <div style={{ background: color + "1A", color, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, whiteSpace: "nowrap", flexShrink: 0, marginTop: 1 }}>{tag}</div>
-                <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.65 }}>{text}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <Analytics />
     </div>
