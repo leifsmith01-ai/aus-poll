@@ -3115,7 +3115,7 @@ export default function App() {
   const [sortKey, setSortKey] = useState("margin");
   const [sortDir, setSortDir] = useState("asc");
   const [seatsJurisdiction, setSeatsJurisdiction] = useState("federal_2025");
-  const [activeTab, setActiveTab] = useState("model");
+  const [activeTab, setActiveTab] = useState("about");
   const [selectedModelId, setSelectedModelId] = useState("federal_2025");
 
   // ── Seats tab mobile state ──
