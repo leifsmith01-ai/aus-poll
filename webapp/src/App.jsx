@@ -4367,6 +4367,7 @@ export default function App() {
     { id: "seats",       label: "Seats" },
     { id: "polls",       label: "Polls" },
     { id: "markets",     label: "Markets" },
+    { id: "guide",       label: "User Guide" },
     { id: "methodology", label: "Methodology" },
     { id: "about",       label: "About" },
   ];
@@ -8463,6 +8464,434 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                     <tr key={i} style={{ borderBottom: "1px solid #F1F5F9" }}>
                       <td style={{ ...tblCell, fontWeight: 600, whiteSpace: "nowrap", verticalAlign: "top", paddingRight: 16, width: "28%" }}>{title}</td>
                       <td style={tblCell}>{desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        );
+      })()}
+
+      {/* ══════════════════════ USER GUIDE TAB ══════════════════════════════════ */}
+      {activeTab === "guide" && (() => {
+        const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 };
+        const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "#0F172A", margin: "0 0 10px" };
+        const prose = { fontSize: 13, color: "#374151", lineHeight: 1.75, margin: "0 0 12px" };
+        const panel = { ...STYLES.panel, marginBottom: 16 };
+        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "#374151", borderBottom: "1px solid #CBD5E1", background: "#F8FAFC" };
+        const tblCell = { padding: "8px 12px", fontSize: 13, color: "#374151", borderBottom: "1px solid #F1F5F9", verticalAlign: "top" };
+        const tblCellMono = { ...tblCell, fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace", fontSize: 12, color: "#2563EB" };
+        const divider = { borderTop: "1px solid #E2E8F0", margin: "18px 0" };
+        const tip = { background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#1E40AF", lineHeight: 1.65, marginBottom: 14 };
+        const warn = { background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#92400E", lineHeight: 1.65, marginBottom: 14 };
+        const inlineCode = { fontFamily: "monospace", background: "#F1F5F9", padding: "1px 5px", borderRadius: 3, fontSize: 12 };
+        const badge = (color, text) => (
+          <span style={{ display: "inline-block", background: color, color: "#fff", borderRadius: 4, fontSize: 11, fontWeight: 700, padding: "1px 7px", letterSpacing: "0.03em" }}>{text}</span>
+        );
+        return (
+          <div style={{ maxWidth: 800, margin: "0 auto", padding: isMobile ? "20px 14px" : "28px 24px" }}>
+
+            {/* Page title */}
+            <div style={{ marginBottom: 28 }}>
+              <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: "#0F172A", margin: "0 0 8px", letterSpacing: "-0.02em" }}>User Guide</h1>
+              <p style={{ ...prose, color: "#64748B", marginBottom: 0 }}>
+                A complete reference for every input, slider, and control in the aus-poll scenario builder.
+                aus-poll is a <strong>scenario modelling tool</strong> — it projects seat outcomes given the primary vote inputs
+                you specify. It is not a forward prediction and does not account for campaign dynamics or candidate-specific factors.
+              </p>
+            </div>
+
+            {/* Quick-start */}
+            <div style={panel}>
+              <div style={secHead}>Quick start</div>
+              <h2 style={secTitle}>Getting a result in three steps</h2>
+              <ol style={{ ...prose, paddingLeft: 20, margin: 0 }}>
+                <li style={{ marginBottom: 8 }}>Open the <strong>Model</strong> tab.</li>
+                <li style={{ marginBottom: 8 }}>Adjust the primary vote inputs under <strong>Primary votes</strong> to match the scenario you want to test (e.g. a new poll).</li>
+                <li style={{ marginBottom: 8 }}>Read the projected seat summary — seats are ranked by how likely they are to change hands based on your inputs.</li>
+              </ol>
+              <div style={tip}>
+                <strong>Tip:</strong> The URL updates automatically as you adjust primary votes. Copy it to share an exact scenario with someone else.
+              </div>
+            </div>
+
+            {/* §1 Primary votes */}
+            <div style={panel}>
+              <div style={secHead}>1 · Primary votes</div>
+              <h2 style={secTitle}>National first-preference inputs</h2>
+              <p style={prose}>
+                These six inputs set the <strong>national first-preference (primary) vote share</strong> for each party group.
+                Enter a decimal percentage, e.g. <span style={inlineCode}>34.6</span>.
+                Each input shows the delta from the 2025 AEC baseline in small text below it (green = higher, red = lower).
+              </p>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 14, fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Input</th>
+                    <th style={{ ...tblHead, textAlign: "right" }}>2025 baseline</th>
+                    <th style={tblHead}>What it controls</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["ALP", "34.6%", "Labor first-preference vote share nationally"],
+                    ["Coalition", "31.8%", "Liberal/National first-preference vote share nationally"],
+                    ["Greens", "12.2%", "Greens first-preference vote share nationally"],
+                    ["Independents", "4.5%", "Teal and other independent first-preference vote share nationally"],
+                    ["One Nation", "6.4%", "One Nation first-preference vote share nationally"],
+                    ["Undecided", "0%", "Uncommitted voters — distributed proportionally across parties before computing 2PP"],
+                  ].map(([label, base, desc]) => (
+                    <tr key={label}>
+                      <td style={tblCellMono}>{label}</td>
+                      <td style={{ ...tblCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{base}</td>
+                      <td style={tblCell}>{desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ ...prose, marginBottom: 0 }}>
+                Inputs should ideally sum to 100%. Any remainder after accounting for Undecided is treated as a rounding artefact
+                and does not affect seat projections materially.
+              </p>
+            </div>
+
+            {/* §2 Preference flows */}
+            <div style={panel}>
+              <div style={secHead}>2 · Preference flows</div>
+              <h2 style={secTitle}>Standard preference flow sliders</h2>
+              <p style={prose}>
+                These sliders control the percentage of each minor-party group's preferences that flow to <strong>ALP over Coalition</strong>
+                in a standard ALP vs. Coalition final count. They apply nationally (unless overridden at the individual seat level — see §5).
+              </p>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 14, fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Flow</th>
+                    <th style={{ ...tblHead, textAlign: "right" }}>Default (2025 AEC)</th>
+                    <th style={{ ...tblHead, textAlign: "right" }}>Historical range</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Greens → ALP", "81%", "73 – 86%"],
+                    ["Independents → ALP", "62%", "43 – 75%"],
+                    ["One Nation → ALP", "43%", "14 – 43%"],
+                    ["Other → ALP", "50%", "40 – 60%"],
+                  ].map(([flow, def, hist]) => (
+                    <tr key={flow}>
+                      <td style={tblCellMono}>{flow}</td>
+                      <td style={{ ...tblCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{def}</td>
+                      <td style={{ ...tblCell, textAlign: "right", color: "#64748B", fontVariantNumeric: "tabular-nums" }}>{hist}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ ...prose, marginBottom: 8 }}>
+                The <strong>↺ Reset to 2025</strong> button restores all four sliders to the 2025 AEC Distribution of Preferences values.
+              </p>
+              <div style={tip}>
+                <strong>Context:</strong> One Nation preferences swung significantly between 2019 (~15% to ALP) and 2025 (~43%). Adjusting this slider is the single biggest lever for testing One Nation preference scenarios.
+              </div>
+            </div>
+
+            {/* §3 Advanced ON race flows */}
+            <div style={panel}>
+              <div style={secHead}>3 · Advanced flows</div>
+              <h2 style={secTitle}>One Nation race preference flows</h2>
+              <p style={prose}>
+                Click <strong>Show advanced flows</strong> to reveal extra sliders that only apply when One Nation is strong enough
+                to reach the final two-candidate count in a seat (i.e. a three-way contest resolved to an ON-vs-ALP or ON-vs-Coalition final).
+                These are controlled separately because the preference patterns are very different from standard ALP–Coalition contests.
+              </p>
+              <p style={{ ...prose, fontWeight: 600, marginBottom: 4 }}>ON vs ALP final</p>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 12, fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Flow</th>
+                    <th style={{ ...tblHead, textAlign: "right" }}>Default</th>
+                    <th style={tblHead}>Meaning</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Greens → ALP (vs ON)", "90%", "Greens preferences flowing to ALP when ON is in the final count"],
+                    ["Independents → ALP (vs ON)", "75%", "Independent preferences flowing to ALP when ON is in the final count"],
+                    ["Other → ALP (vs ON)", "60%", "Other minor party preferences flowing to ALP when ON is in the final count"],
+                    ["Coalition → ALP (vs ON)", "10%", "Coalition preferences flowing to ALP when ON eliminates Coalition"],
+                  ].map(([flow, def, meaning]) => (
+                    <tr key={flow}>
+                      <td style={tblCellMono}>{flow}</td>
+                      <td style={{ ...tblCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{def}</td>
+                      <td style={tblCell}>{meaning}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ ...prose, fontWeight: 600, marginBottom: 4 }}>ON vs Coalition final</p>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 14, fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Flow</th>
+                    <th style={{ ...tblHead, textAlign: "right" }}>Default</th>
+                    <th style={tblHead}>Meaning</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["ALP → ON (vs Coal)", "20%", "ALP preferences flowing to ON when ALP is eliminated before the final"],
+                    ["Greens → ON (vs Coal)", "8%", "Greens preferences flowing to ON when Coalition is in the final count"],
+                    ["Independents → ON (vs Coal)", "12%", "Independent preferences flowing to ON in ON vs Coalition final"],
+                    ["Other → ON (vs Coal)", "25%", "Other minor party preferences flowing to ON in ON vs Coalition final"],
+                  ].map(([flow, def, meaning]) => (
+                    <tr key={flow}>
+                      <td style={tblCellMono}>{flow}</td>
+                      <td style={{ ...tblCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{def}</td>
+                      <td style={tblCell}>{meaning}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={warn}>
+                <strong>Note:</strong> These flows are only active in seats where the model auto-detects (or you manually select) an ON TCP matchup.
+                The One Nation auto-detect threshold (see §6) controls when this kicks in.
+              </div>
+            </div>
+
+            {/* §4 Individual seat overrides */}
+            <div style={panel}>
+              <div style={secHead}>4 · Seat overrides</div>
+              <h2 style={secTitle}>Individual seat controls</h2>
+              <p style={prose}>
+                Click any seat row in the ranked table on the <strong>Model</strong> tab to expand it and access per-seat controls.
+                These override the national inputs for that specific seat only — all other seats are unaffected.
+              </p>
+              <div style={divider} />
+              <p style={{ ...prose, fontWeight: 600, marginBottom: 6 }}>Primary vote overrides</p>
+              <p style={prose}>
+                Number inputs (step 0.5%) for ALP, Coalition, Greens, Independents, and One Nation primary votes in that seat.
+                Leave blank to inherit the national primary input. When set, the model uses the seat's local primary vote
+                instead of the national figure when computing that seat's 2PP swing.
+              </p>
+              <div style={divider} />
+              <p style={{ ...prose, fontWeight: 600, marginBottom: 6 }}>Preference flow overrides</p>
+              <p style={prose}>
+                Sliders for Greens→ALP, Independents→ALP, One Nation→ALP, and Other→ALP preference flows, specific to this seat.
+                Leave at the default position to inherit the national preference flow sliders (§2).
+              </p>
+              <div style={divider} />
+              <p style={{ ...prose, fontWeight: 600, marginBottom: 6 }}>TCP / Margin override</p>
+              <p style={prose}>
+                Directly set the two-candidate preferred percentage for this seat.
+                A value <strong>above 50</strong> means the 2025 winner holds; a value <strong>below 50</strong> means the challenger wins.
+                Setting this bypasses the primary-vote swing calculation entirely for this seat.
+              </p>
+              <div style={divider} />
+              <p style={{ ...prose, fontWeight: 600, marginBottom: 6 }}>TCP matchup selector</p>
+              <p style={prose}>
+                Choose <span style={inlineCode}>Auto</span>, <span style={inlineCode}>ON vs ALP</span>, or <span style={inlineCode}>ON vs Coalition</span> to manually
+                specify which two-candidate matchup applies to this seat. <span style={inlineCode}>Auto</span> lets the model decide based
+                on the ON auto-detect threshold.
+              </p>
+              <div style={divider} />
+              <p style={{ ...prose, fontWeight: 600, marginBottom: 6 }}>Force projected winner</p>
+              <p style={prose}>
+                Override all calculations and directly assign the winning party for this seat. Options: Labor, Coalition, Greens,
+                Teal Independent, Other Independent, One Nation, Other Crossbench.
+                Use this when you have strong independent information about a specific seat that the national model cannot capture.
+              </p>
+              <div style={divider} />
+              <p style={{ ...prose, marginBottom: 0 }}>
+                Use the <strong>Clear seat overrides</strong> button to remove all overrides for a seat and return it to the national model.
+                The search box at the top of the ranked table filters seats by name to help you find the one you want.
+              </p>
+            </div>
+
+            {/* §5 Model options */}
+            <div style={panel}>
+              <div style={secHead}>5 · Model options</div>
+              <h2 style={secTitle}>Uncertainty, elasticity, and ON detection</h2>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 14, fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Option</th>
+                    <th style={tblHead}>Default</th>
+                    <th style={tblHead}>What it does</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={tblCellMono}>Swing uncertainty (σ)</td>
+                    <td style={tblCell}>1.5 pp</td>
+                    <td style={tblCell}>
+                      Sets the standard deviation of the polling uncertainty band (range 0.5–4.0 pp).
+                      Seats within ±σ of the 50% 2PP threshold are shown as competitive.
+                      The typical Australian federal polling mean absolute error is ≈ 1–2 pp nationally,
+                      so the default of 1.5 pp is a reasonable central estimate.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={tblCellMono}>Seat elasticity</td>
+                    <td style={tblCell}>Off</td>
+                    <td style={tblCell}>
+                      When enabled, marginal seats swing more than safe seats.
+                      Multipliers: very marginal (&lt;5 pp) ×1.3 · semi-marginal (6–10 pp) ×1.15 · safe (&gt;20 pp) ×0.8.
+                      Reflects the empirical tendency for swings to be concentrated in competitive seats.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={tblCellMono}>ON auto-detect threshold</td>
+                    <td style={tblCell}>6.5%</td>
+                    <td style={tblCell}>
+                      The One Nation primary vote threshold above which the model checks whether ON could reach
+                      the final two-candidate count in a given seat. Below this threshold, ON is treated as minor-party
+                      preferences only. Raise it to make ON races harder to trigger; lower it to make them easier.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* §6 Seat filtering and display */}
+            <div style={panel}>
+              <div style={secHead}>6 · Seat filtering and display</div>
+              <h2 style={secTitle}>Filtering the ranked seat table</h2>
+              <p style={prose}>
+                The ranked table on the <strong>Model</strong> tab can be filtered two ways:
+              </p>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 14, fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Control</th>
+                    <th style={tblHead}>Options</th>
+                    <th style={tblHead}>Effect</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={tblCellMono}>Risk filter</td>
+                    <td style={tblCell}>All 151 · Changing · Marginal (&lt;5 pp)</td>
+                    <td style={tblCell}>Show all seats, only seats projected to change hands, or only seats within 5 pp of the 50% threshold</td>
+                  </tr>
+                  <tr>
+                    <td style={tblCellMono}>State filter</td>
+                    <td style={tblCell}>All States · NSW · VIC · QLD · WA · SA · TAS · ACT · NT</td>
+                    <td style={tblCell}>Restrict the table to seats in a specific state or territory</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p style={{ ...prose, marginBottom: 0 }}>
+                Click any seat row to expand it and reveal the per-seat override controls described in §4,
+                as well as demographic overlays where available.
+              </p>
+            </div>
+
+            {/* §7 State election models */}
+            <div style={panel}>
+              <div style={secHead}>7 · State election models</div>
+              <h2 style={secTitle}>Switching between federal and state models</h2>
+              <p style={prose}>
+                Use the <strong>model selector dropdown</strong> at the top of the Model tab to switch between
+                the federal model and available state/territory models. Each model is independent —
+                changing inputs in one model does not affect any other.
+              </p>
+              <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 14, fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Model</th>
+                    <th style={tblHead}>Election year</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Federal", "2025"],
+                    ["Victoria (VIC)", "2022"],
+                    ["New South Wales (NSW)", "2023"],
+                    ["Queensland (QLD)", "2024"],
+                    ["Western Australia (WA)", "2025"],
+                    ["South Australia (SA)", "2026"],
+                    ["Northern Territory (NT)", "2024"],
+                    ["Tasmania (TAS)", "2024"],
+                    ["Australian Capital Territory (ACT)", "2024"],
+                  ].map(([model, year]) => (
+                    <tr key={model}>
+                      <td style={tblCell}>{model}</td>
+                      <td style={{ ...tblCell, fontVariantNumeric: "tabular-nums" }}>{year}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={prose}>
+                Each state model has the same structure as the federal model: primary vote inputs, preference flow sliders,
+                per-seat overrides, and a <strong>Reset</strong> button that restores all state inputs to their defaults.
+              </p>
+              <p style={{ ...prose, fontWeight: 600, marginBottom: 6 }}>Regional swing differentiation</p>
+              <p style={{ ...prose, marginBottom: 0 }}>
+                Each state model includes a <strong>Regional swing differentiation</strong> toggle (on by default).
+                When enabled, the model applies different swing multipliers based on whether a seat is in the inner metro,
+                outer metro, or regional areas. For example, inner-metro seats may amplify a national swing by ×1.10
+                while regional seats dampen it to ×0.85. Disable this toggle to apply a uniform swing across all
+                seats in the state.
+              </p>
+            </div>
+
+            {/* §8 Scenario sharing */}
+            <div style={panel}>
+              <div style={secHead}>8 · Scenario sharing</div>
+              <h2 style={secTitle}>Sharing a scenario via URL</h2>
+              <p style={prose}>
+                Whenever you change the <strong>national primary vote inputs</strong>, aus-poll automatically
+                encodes your inputs as URL query parameters. For example:
+              </p>
+              <div style={{ fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace", fontSize: isMobile ? 11 : 12, background: "#0F172A", color: "#E2E8F0", borderRadius: 8, padding: "12px 16px", overflowX: "auto", whiteSpace: "pre", lineHeight: 1.7, marginBottom: 14 }}>
+                {"?alp=36.0&coal=30.5&grn=13.0&teal=5.0&on=6.5"}
+              </div>
+              <p style={{ ...prose, marginBottom: 0 }}>
+                Copy the full URL from your browser's address bar and paste it to share your exact scenario.
+                Note: per-seat overrides and preference flow adjustments are not currently encoded in the URL.
+              </p>
+            </div>
+
+            {/* §9 Quick reference */}
+            <div style={panel}>
+              <div style={secHead}>9 · Quick reference</div>
+              <h2 style={secTitle}>All inputs at a glance</h2>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    <th style={tblHead}>Input</th>
+                    <th style={tblHead}>Type</th>
+                    <th style={tblHead}>What it affects</th>
+                    <th style={tblHead}>Where</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["ALP / Coalition / Greens / Independents / One Nation primaries", "Number (%)", "National swing applied to every seat's per-seat baseline", "Model → Primary votes"],
+                    ["Undecided", "Number (%)", "Distributed across parties before computing 2PP", "Model → Primary votes"],
+                    ["Greens → ALP flow", "Slider 0–100%", "Greens preferences flowing to ALP nationally", "Model → Preference flows"],
+                    ["Independents → ALP flow", "Slider 0–100%", "Teal/independent preferences flowing to ALP nationally", "Model → Preference flows"],
+                    ["One Nation → ALP flow", "Slider 0–100%", "ON preferences flowing to ALP nationally", "Model → Preference flows"],
+                    ["Other → ALP flow", "Slider 0–100%", "Other minor party preferences flowing to ALP nationally", "Model → Preference flows"],
+                    ["Advanced ON race flows (8 sliders)", "Sliders 0–100%", "Preference patterns in ON vs ALP or ON vs Coalition finals", "Model → Show advanced flows"],
+                    ["Swing uncertainty (σ)", "Slider 0.5–4.0 pp", "Win-probability shading and competitive seat identification", "Model → Model options"],
+                    ["Seat elasticity", "Checkbox", "Amplifies swing in marginal seats, dampens in safe seats", "Model → Model options"],
+                    ["ON auto-detect threshold", "Number 0–30%", "Controls when ON is treated as a final-count contender", "Model → Model options"],
+                    ["Risk / State filter", "Buttons / Dropdown", "Filters the ranked seat table", "Model → seat table header"],
+                    ["Per-seat primary overrides", "Numbers (%)", "Replace national primary for a specific seat", "Model → expand a seat row"],
+                    ["Per-seat preference flow overrides", "Sliders 0–100%", "Replace national preference flows for a specific seat", "Model → expand a seat row"],
+                    ["TCP / Margin override", "Number 0–100%", "Directly set 2PP for a seat, bypassing swing calculation", "Model → expand a seat row"],
+                    ["TCP matchup selector", "Dropdown (Auto / ON vs ALP / ON vs Coal)", "Force the type of final-count matchup for a seat", "Model → expand a seat row"],
+                    ["Force projected winner", "Dropdown (party group)", "Override all calculations and assign a winner directly", "Model → expand a seat row"],
+                    ["Regional swing differentiation", "Checkbox (per state)", "Apply metro/regional swing multipliers in state models", "Model → each state model"],
+                    ["Model selector", "Dropdown", "Switch between Federal and state election models", "Model → top of page"],
+                  ].map(([input, type, effect, where]) => (
+                    <tr key={input}>
+                      <td style={{ ...tblCell, fontWeight: 500 }}>{input}</td>
+                      <td style={{ ...tblCell, color: "#64748B", whiteSpace: "nowrap" }}>{type}</td>
+                      <td style={tblCell}>{effect}</td>
+                      <td style={{ ...tblCell, color: "#2563EB", whiteSpace: isMobile ? "normal" : "nowrap" }}>{where}</td>
                     </tr>
                   ))}
                 </tbody>
