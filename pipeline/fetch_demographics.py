@@ -1631,7 +1631,7 @@ def main():
             rental_to_income = round(annual_rent / annual_hh_income * 100, 1)
 
         return {
-            "medianAge": int(age) if age is not None else None,
+            "medianAge": round(age) if age is not None else None,
             "medianPersonalIncome": int(personal_weekly * 52) if personal_weekly else None,
             "medianPersonalIncomeEarners": int(earner_income) if earner_income else None,
             "medianHouseholdIncome": annual_hh_income,

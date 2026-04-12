@@ -4041,7 +4041,7 @@ export default function App() {
     { key: "overseasBornPct", label: "Overseas Born %", fmt: v => `${v}%` },
     { key: "nonEnglishAtHomePct", label: "Non-English at Home %", fmt: v => `${v}%` },
     { key: "loneparentFamilyPct", label: "Lone-Parent Families %", fmt: v => `${v}%` },
-    { key: "medianAge", label: "Median Age", fmt: v => `${v}` },
+    { key: "medianAge", label: "Median Age", fmt: v => `${Math.round(v)}` },
     { key: "youth15to34Pct", label: "Youth (15–34) %", fmt: v => `${v}%` },
     { key: "seniors65PlusPct", label: "Seniors (65+) %", fmt: v => `${v}%` },
     { key: "unemploymentRate", label: "Unemployment Rate", fmt: v => `${v}%` },
@@ -4696,7 +4696,7 @@ export default function App() {
                                     <div style={{ ...STYLES.sectionHead, marginBottom: 8 }}>People</div>
                                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                                       <div style={{ fontSize: 11, color: "#6B7280" }}>Median age</div>
-                                      <DemogBar value={d.medianAge} min={28} max={55} color="#059669" fmt={v => `${v} yrs`} />
+                                      <DemogBar value={d.medianAge} min={28} max={55} color="#059669" fmt={v => `${Math.round(v)} yrs`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Youth (15–34)</div>
                                       <DemogBar value={d.youth15to34Pct} min={15} max={45} color="#059669" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Seniors (65+)</div>
@@ -5925,7 +5925,7 @@ export default function App() {
                                     <div>
                                       <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>People</div>
                                       <div style={{ fontSize: 12, lineHeight: 1.8 }}>
-                                        <div><strong>Median age:</strong> {d.medianAge ?? "—"}</div>
+                                        <div><strong>Median age:</strong> {d.medianAge != null ? Math.round(d.medianAge) : "—"}</div>
                                         <div><strong>Bachelor's+:</strong> {d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</div>
                                         <div><strong>Overseas born:</strong> {d.overseasBornPct != null ? `${d.overseasBornPct}%` : "—"}</div>
                                         <div><strong>AEC class:</strong> {d.urbanClass ?? "—"}</div>
@@ -6606,7 +6606,7 @@ export default function App() {
                                         </div>
                                         <div>
                                           <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>People</div>
-                                          {[{ k: "medianAge", l: "Median age", fmt: v => v }, { k: "bachelorsOrAbovePct", l: "Degree+", fmt: v => `${v}%` }, { k: "overseasBornPct", l: "Overseas born", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
+                                          {[{ k: "medianAge", l: "Median age", fmt: v => Math.round(v) }, { k: "bachelorsOrAbovePct", l: "Degree+", fmt: v => `${v}%` }, { k: "overseasBornPct", l: "Overseas born", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
                                             <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
                                               <span style={{ color: "#6B7280" }}>{l}</span>
                                               <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
@@ -7081,7 +7081,7 @@ export default function App() {
                                           </div>
                                           <div>
                                             <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>People</div>
-                                            {[{ k: "medianAge", l: "Median age", fmt: v => v }, { k: "bachelorsOrAbovePct", l: "Degree+", fmt: v => `${v}%` }, { k: "overseasBornPct", l: "Overseas born", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
+                                            {[{ k: "medianAge", l: "Median age", fmt: v => Math.round(v) }, { k: "bachelorsOrAbovePct", l: "Degree+", fmt: v => `${v}%` }, { k: "overseasBornPct", l: "Overseas born", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
                                               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
                                                 <span style={{ color: "#6B7280" }}>{l}</span>
                                                 <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
@@ -7506,7 +7506,7 @@ export default function App() {
                           { key: "nonEnglishAtHomePct", label: "Non-English at Home", fmt: v => `${v.toFixed(1)}%` },
                           { key: "overseasBornPct", label: "Overseas Born", fmt: v => `${v.toFixed(1)}%` },
                           { key: "youth15to34Pct", label: "Youth (15–34)", fmt: v => `${v.toFixed(1)}%` },
-                          { key: "medianAge", label: "Median Age", fmt: v => `${v}` },
+                          { key: "medianAge", label: "Median Age", fmt: v => `${Math.round(v)}` },
                         ].map(({ key, label, fmt }) => {
                           const s = demogStats[key];
                           if (!s) return null;
@@ -7629,7 +7629,7 @@ export default function App() {
                                       <td style={{ padding: "9px 12px" }}>{d.nonEnglishAtHomePct != null ? `${d.nonEnglishAtHomePct}%` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.unemploymentRate != null ? `${d.unemploymentRate}%` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.youth15to34Pct != null ? `${d.youth15to34Pct}%` : "—"}</td>
-                                      <td style={{ padding: "9px 12px" }}>{d.medianAge ?? "—"}</td>
+                                      <td style={{ padding: "9px 12px" }}>{d.medianAge != null ? Math.round(d.medianAge) : "—"}</td>
                                     </tr>
                                     {isExpanded && (
                                       <tr key={`${s.id}-exp`}>
@@ -7657,7 +7657,7 @@ export default function App() {
                                             <div>
                                               <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 8 }}>People</div>
                                               <div style={{ fontSize: 12, lineHeight: 1.8 }}>
-                                                <div><strong>Median age:</strong> {d.medianAge ?? "—"}</div>
+                                                <div><strong>Median age:</strong> {d.medianAge != null ? Math.round(d.medianAge) : "—"}</div>
                                                 <div><strong>Youth (15–34):</strong> {d.youth15to34Pct != null ? `${d.youth15to34Pct}%` : "—"}</div>
                                                 <div><strong>Seniors (65+):</strong> {d.seniors65PlusPct != null ? `${d.seniors65PlusPct}%` : "—"}</div>
                                                 <div><strong>Unemployment:</strong> {d.unemploymentRate != null ? `${d.unemploymentRate}%` : "—"}</div>
