@@ -15,7 +15,7 @@ name: Update Model Constants
 
 on:
   schedule:
-    - cron: '0 4 * * 1'   # Monday 04:00 UTC (runs after poll aggregation at 02:00)
+    - cron: '0 4 1 * *'   # 1st of each month, 04:00 UTC
   workflow_dispatch:        # allow manual trigger from GitHub Actions tab
 
 jobs:

@@ -16,6 +16,7 @@ import BETTING_ODDS from "./data/betting_odds.json";
 import ECONOMICS_DATA from "./data/economics.json";
 import LEADERS_DATA from "./data/leaders.json";
 import AGGREGATED_POLLS from "./data/aggregated.json";
+import * as STATE_SEAT_FP from "./data/state_seat_fp.js";
 
 // VIC_SEATS_KNOWN removed — full 88-seat data is in _VS / VIC_SEATS below.
 
