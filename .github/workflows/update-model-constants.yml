@@ -1,0 +1,77 @@
+name: Update Model Constants
+
+# Recomputes SEAT_RESIDUAL_MAP and SEAT_DEMO_MULT from historical AEC data
+# and injects them into webapp/src/App.jsx.
+#
+# How it works:
+#   1. Downloads and parses AEC results for 2016, 2019, 2022, 2025.
+#   2. Runs compute_seat_residuals.py  → data/seat_residuals.json
+#   3. Runs compute_demographic_regression.py → data/seat_demo_mult.json
+#   4. Runs inject_model_constants.py  → patches App.jsx constants in-place.
+#   5. Commits and pushes if any file changed.
+#
+# Only the lightweight pipeline dependencies are installed (requests, pandas,
+# openpyxl, tqdm) — geopandas/scipy are not required for this workflow.
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'   # Monday 04:00 UTC (runs after poll aggregation at 02:00)
+  workflow_dispatch:        # allow manual trigger from GitHub Actions tab
+
+jobs:
+  update-constants:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install pipeline dependencies
+        run: pip install requests pandas openpyxl tqdm
+
+      # Cache the SQLite DB between runs to avoid full re-download every week.
+      # Cache key includes requirements hash so it invalidates on dep updates.
+      - name: Cache elections database
+        uses: actions/cache@v4
+        id: db-cache
+        with:
+          path: data/elections.db
+          key: elections-db-${{ hashFiles('requirements.txt') }}-${{ github.sha }}
+          restore-keys: |
+            elections-db-${{ hashFiles('requirements.txt') }}-
+
+      - name: Run federal pipeline — 2016, 2019, 2022, 2025
+        run: python main.py --year 2016 2019 2022 2025
+
+      - name: Compute seat residual standard deviations
+        run: python scripts/compute_seat_residuals.py
+
+      - name: Compute demographic swing regression multipliers
+        run: python scripts/compute_demographic_regression.py
+
+      - name: Inject constants into App.jsx
+        run: python scripts/inject_model_constants.py
+
+      - name: Commit changes if any files were updated
+        run: |
+          git diff --quiet \
+            data/seat_residuals.json \
+            data/seat_demo_mult.json \
+            webapp/src/App.jsx \
+          && echo "Nothing changed — skipping commit." && exit 0
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/seat_residuals.json \
+            data/seat_demo_mult.json \
+            webapp/src/App.jsx
+          git commit -m "chore: auto-update SEAT_RESIDUAL_MAP and SEAT_DEMO_MULT constants [skip ci]"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "$GITHUB_REF_NAME"
