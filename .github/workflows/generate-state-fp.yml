@@ -1,0 +1,116 @@
+name: Generate State FP Constants
+
+# Extracts per-district first-preference baselines from the SQLite DB
+# for one or all state elections, and uploads the JS constants as an artifact.
+#
+# IMPORTANT: This workflow does NOT auto-commit to App.jsx.
+# State FP constants are large (hundreds of lines per state) and should be
+# reviewed before being incorporated. After the run completes:
+#   1. Download the "state-fp-constants" artifact from the Actions tab.
+#   2. Review the generated JS constant blocks.
+#   3. Add/replace the relevant *_SEAT_FP_* constant in App.jsx manually.
+#   4. Update computeModelledSeatsState() to accept the new per-seat baseline.
+#
+# Trigger: Actions tab → "Generate State FP Constants" → Run workflow
+#
+# Inputs:
+#   state — one of: vic, nsw, qld, wa, sa, nt, tas, act, all
+#   year  — election ID in YYYYMM format (e.g. 202303).
+#           Leave blank to use the most recently configured election per state.
+
+on:
+  workflow_dispatch:
+    inputs:
+      state:
+        description: 'State (vic / nsw / qld / wa / sa / nt / tas / act / all)'
+        required: true
+        default: 'all'
+        type: choice
+        options: [all, vic, nsw, qld, wa, sa, nt, tas, act]
+      year:
+        description: 'Election ID YYYYMM — leave blank for default per state'
+        required: false
+        default: ''
+
+jobs:
+  generate-fp:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read   # read-only — output is an artifact, not a commit
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install pipeline dependencies
+        run: pip install requests pandas openpyxl tqdm
+
+      # ── Run the state pipeline to populate the SQLite DB ──────────────────
+      # Maps each state to its default election ID (YYYYMM).
+      # When --state all is requested, all configured states are loaded.
+      - name: Run state pipeline
+        env:
+          INPUT_STATE: ${{ inputs.state }}
+          INPUT_YEAR:  ${{ inputs.year }}
+        run: |
+          declare -A DEFAULTS=(
+            [vic]=202211 [nsw]=202303 [qld]=202410
+            [wa]=202503  [sa]=202203  [nt]=202408
+            [tas]=202403 [act]=202410
+          )
+
+          run_state() {
+            local s=$1 y=$2
+            echo "=== Running pipeline: state=$s year=$y ==="
+            python main.py --state "$s" --year "$y"
+          }
+
+          if [ "$INPUT_STATE" = "all" ]; then
+            for s in vic nsw qld wa sa nt tas act; do
+              y="${INPUT_YEAR:-${DEFAULTS[$s]}}"
+              run_state "$s" "$y"
+            done
+          else
+            y="${INPUT_YEAR:-${DEFAULTS[$INPUT_STATE]}}"
+            run_state "$INPUT_STATE" "$y"
+          fi
+
+      # ── Generate JS constants ──────────────────────────────────────────────
+      - name: Generate state FP constant blocks
+        env:
+          INPUT_STATE: ${{ inputs.state }}
+          INPUT_YEAR:  ${{ inputs.year }}
+        run: |
+          ARGS="--state ${INPUT_STATE}"
+          if [ -n "$INPUT_YEAR" ]; then
+            ARGS="$ARGS --year $INPUT_YEAR"
+          fi
+          echo "Running: python scripts/generate_state_seat_fp.py $ARGS"
+          python scripts/generate_state_seat_fp.py $ARGS > state_fp_constants.js
+
+      # ── Upload artifact for developer review ──────────────────────────────
+      - name: Upload JS constants as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: state-fp-constants-${{ inputs.state }}-${{ github.run_id }}
+          path: state_fp_constants.js
+          retention-days: 30
+
+      - name: Print summary
+        run: |
+          LINES=$(wc -l < state_fp_constants.js)
+          echo "## State FP Constants Generated" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **State:** \`${{ inputs.state }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Year:** \`${{ inputs.year || 'default' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Output:** \`state_fp_constants.js\` (${LINES} lines)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Next steps" >> "$GITHUB_STEP_SUMMARY"
+          echo "1. Download the \`state-fp-constants-*\` artifact from this run." >> "$GITHUB_STEP_SUMMARY"
+          echo "2. Review the generated \`*_SEAT_FP_*\` constant blocks." >> "$GITHUB_STEP_SUMMARY"
+          echo "3. Add them to \`webapp/src/App.jsx\` alongside the existing federal \`SEAT_FP_2025\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "4. Update \`computeModelledSeatsState()\` to use per-seat FP lookups." >> "$GITHUB_STEP_SUMMARY"
