@@ -1431,12 +1431,14 @@ const _SA = [
   [7415, "Flinders", "SA", "LP", "Sam Telfer", "LP", "ALP", 6.5],
   [7419, "Morphett", "SA", "LP", "David Speirs", "LP", "ALP", 5.0],
   [7420, "Schubert", "SA", "LP", "Ashton Hurn", "LP", "ALP", 6.0],
-  // ── One Nation (1 seat shown — Ngadjuri won with LP preferences over ALP) ──
+  // ── One Nation (4 seats: Ngadjuri, Hammond, Mackillop, Narungga) ──
   [7423, "Ngadjuri", "SA", "ON", "David Paton", "ON", "ALP", 1.5],
-  // ── Independent/crossbench seats (3) ──
-  [7421, "Mount Gambier", "SA", "IND", "Troy Bell", "IND", "ALP", 5.0],
-  [7422, "Frome", "SA", "IND", "Geoff Brock", "IND", "ALP", 7.0],
-  [7424, "Narungga", "SA", "IND", "Tim Whetstone", "IND", "ALP", 4.5],
+  [7425, "Hammond", "SA", "ON", "Robert Roylance", "ON", "ALP", 4.9],
+  [7426, "Mackillop", "SA", "ON", "Jason Virgo", "ON", "ALP", 3.5],
+  [7424, "Narungga", "SA", "ON", "Chantelle Thomas", "ON", "LP", 0.2],
+  // ── Independent/crossbench seats (4) ──
+  [7421, "Mount Gambier", "SA", "IND", "Travis Fatchen", "IND", "ALP", 5.0],
+  [7422, "Stuart", "SA", "IND", "Geoff Brock", "IND", "ALP", 7.0],
   // ── Former LP marginals now held by ALP (LP primary collapsed 16pp) ──
   [7412, "Colton", "SA", "ALP", "Aria Bolkus", "ALP", "LP", 7.5],
   [7413, "Morialta", "SA", "ALP", "Matthew Marozzi", "ALP", "LP", 7.0],
@@ -1522,7 +1524,7 @@ const ACT_ELECTORATES = [
 // Source: VEC 2022 State Election — vec.vic.gov.au
 // Format: [id, name, state, winnerParty, winnerName, tcp1Party, tcp2Party, margin]
 const _VS = [
-  [9001, "Altona", "VIC", "ALP", "Juliana Addison", "ALP", "LP", 28.1],  // seat abolished 2022; Addison holds Wendouree
+  [9001, "Narracan", "VIC", "LP", "Wayne Farnham", "LP", "ALP", 1.69],  // deferred to Jan 2023 supplementary election; Farnham (LP) won
   [9002, "Albert Park", "VIC", "ALP", "Nina Taylor", "ALP", "LP", 11.15],
   [9003, "Ashwood", "VIC", "ALP", "Matt Fregon", "ALP", "LP", 6.15],
   [9004, "Bass", "VIC", "ALP", "Jordan Crugnale", "ALP", "LP", 0.24],
@@ -1549,8 +1551,8 @@ const _VS = [
   [9025, "Eltham", "VIC", "ALP", "Vicki Ward", "ALP", "LP", 9.0],
   [9026, "Essendon", "VIC", "ALP", "Danny Pearson", "ALP", "LP", 12.45],
   [9027, "Eureka", "VIC", "ALP", "Michaela Settle", "ALP", "LP", 7.17],
-  [9028, "Euroa", "VIC", "NP", "Steph Ryan", "NP", "ALP", 9.93],
-  [9029, "Evelyn", "VIC", "LP", "Nick McGowan", "LP", "ALP", 5.21],
+  [9028, "Euroa", "VIC", "NP", "Annabelle Cleeland", "NP", "ALP", 9.93],
+  [9029, "Evelyn", "VIC", "LP", "Bridget Vallence", "LP", "ALP", 5.21],
   [9030, "Footscray", "VIC", "ALP", "Katie Hall", "ALP", "LP", 25.66],
   [9031, "Frankston", "VIC", "ALP", "Paul Edbrooke", "ALP", "LP", 8.66],
   [9032, "Geelong", "VIC", "ALP", "Christine Couzens", "ALP", "LP", 14.71],
@@ -1562,7 +1564,7 @@ const _VS = [
   [9038, "Hawthorn", "VIC", "LP", "John Pesutto", "LP", "ALP", 1.74],
   [9039, "Ivanhoe", "VIC", "ALP", "Anthony Carbines", "ALP", "LP", 12.75],
   [9040, "Kalkallo", "VIC", "ALP", "Ros Spence", "ALP", "LP", 16.43],
-  [9041, "Kew", "VIC", "LP", "David Davis", "LP", "ALP", 3.98],
+  [9041, "Kew", "VIC", "LP", "Jess Wilson", "LP", "ALP", 3.98],
   [9042, "Kororoit", "VIC", "ALP", "Luba Grigorovitch", "ALP", "LP", 14.25],
   [9043, "Lara", "VIC", "ALP", "Ella George", "ALP", "LP", 16.15],
   [9044, "Laverton", "VIC", "ALP", "Sarah Connolly", "ALP", "LP", 18.01],
@@ -1571,7 +1573,7 @@ const _VS = [
   [9047, "Malvern", "VIC", "LP", "Michael O'Brien", "LP", "ALP", 8.28],
   [9048, "Melbourne", "VIC", "GRN", "Ellen Sandell", "GRN", "ALP", 10.19],
   [9049, "Melton", "VIC", "ALP", "Steve McGhie", "ALP", "LP", 4.59],
-  [9050, "Mildura", "VIC", "IND", "Ali Cupper", "IND", "NP", 8.5],
+  [9050, "Mildura", "VIC", "NP", "Jade Benham", "NP", "ALP", 8.5],
   [9051, "Mill Park", "VIC", "ALP", "Lily D'Ambrosio", "ALP", "LP", 11.43],
   [9052, "Monbulk", "VIC", "ALP", "Daniela De Martino", "ALP", "LP", 7.55],
   [9053, "Mordialloc", "VIC", "ALP", "Tim Richardson", "ALP", "LP", 8.19],
@@ -1583,7 +1585,7 @@ const _VS = [
   [9059, "Narre Warren South", "VIC", "ALP", "Gary Maas", "ALP", "LP", 8.5],
   [9060, "Nepean", "VIC", "LP", "Sam Groth", "LP", "ALP", 6.68],
   [9061, "Niddrie", "VIC", "ALP", "Ben Carroll", "ALP", "LP", 6.69],
-  [9062, "Northcote", "VIC", "GRN", "Kat Theophanous", "GRN", "ALP", 5.0],
+  [9062, "Northcote", "VIC", "ALP", "Kat Theophanous", "ALP", "LP", 5.0],
   [9063, "Oakleigh", "VIC", "ALP", "Steve Dimopoulos", "ALP", "LP", 13.48],
   [9064, "Ovens Valley", "VIC", "NP", "Tim McCurdy", "NP", "ALP", 17.97],
   [9065, "Pakenham", "VIC", "ALP", "Emma Vulin", "ALP", "LP", 0.39],
@@ -1596,8 +1598,8 @@ const _VS = [
   [9072, "Ringwood", "VIC", "ALP", "Will Fowles", "ALP", "LP", 7.53],
   [9073, "Ripon", "VIC", "ALP", "Martha Haylett", "ALP", "LP", 2.99],
   [9074, "Rowville", "VIC", "LP", "Kim Wells", "LP", "ALP", 3.67],
-  [9075, "Sandringham", "VIC", "LP", "Brad Battin", "LP", "ALP", 5.15],
-  [9076, "Shepparton", "VIC", "IND", "Kim O'Keeffe", "IND", "ALP", 4.8],
+  [9075, "Sandringham", "VIC", "LP", "Brad Rowswell", "LP", "ALP", 5.15],
+  [9076, "Shepparton", "VIC", "NP", "Kim O'Keeffe", "NP", "ALP", 4.8],
   [9077, "South Barwon", "VIC", "ALP", "Darren Cheeseman", "ALP", "LP", 9.8],
   [9078, "South-West Coast", "VIC", "LP", "Roma Britnell", "LP", "ALP", 8.05],
   [9079, "St Albans", "VIC", "ALP", "Natalie Suleyman", "ALP", "LP", 9.56],
