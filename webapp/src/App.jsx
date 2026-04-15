@@ -899,8 +899,8 @@ const _S25 = [
   [112, "Cook", "NSW", "LP", "Simon Kennedy", "LP", "ALP", 14.39],
   [113, "Cowper", "NSW", "NP", "Pat Conaghan", "NP", "IND", 5.09],
   [114, "Cunningham", "NSW", "ALP", "Alison Byrnes", "ALP", "LP", 35.04],
-  [115, "Dobell", "NSW", "ALP", "Emma Mcbride", "ALP", "LP", 18.86],
-  [117, "Eden-Monaro", "NSW", "ALP", "Kristy Mcbain", "ALP", "LP", 14.43],
+  [115, "Dobell", "NSW", "ALP", "Emma McBride", "ALP", "LP", 18.86],
+  [117, "Eden-Monaro", "NSW", "ALP", "Kristy McBain", "ALP", "LP", 14.43],
   [118, "Farrer", "NSW", "LP", "Vacant (by-election)", "LP", "IND", 12.39],
   [119, "Fowler", "NSW", "IND", "Dai Le", "IND", "ALP", 5.35],
   [120, "Gilmore", "NSW", "ALP", "Fiona Phillips", "ALP", "LP", 10.26],
@@ -910,7 +910,7 @@ const _S25 = [
   [125, "Hume", "NSW", "LP", "Angus Taylor", "LP", "ALP", 16.11],
   [126, "Hunter", "NSW", "ALP", "Dan Repacholi", "ALP", "ON", 18.07],
   [127, "Kingsford Smith", "NSW", "ALP", "Matt Thistlethwaite", "ALP", "LP", 34.37],
-  [128, "Lindsay", "NSW", "LP", "Melissa Mcintosh", "LP", "ALP", 5.57],
+  [128, "Lindsay", "NSW", "LP", "Melissa McIntosh", "LP", "ALP", 5.57],
   [130, "Lyne", "NSW", "NP", "Alison Penfold", "NP", "ALP", 19.56],
   [131, "Macarthur", "NSW", "ALP", "Mike Freelander", "ALP", "LP", 31.21],
   [132, "Mackellar", "NSW", "IND", "Sophie Scamps", "IND", "LP", 11.32],
@@ -925,7 +925,7 @@ const _S25 = [
   [249, "Paterson", "NSW", "ALP", "Meryl Swanson", "ALP", "LP", 13.78],
   [144, "Reid", "NSW", "ALP", "Sally Sitou", "ALP", "LP", 24.01],
   [145, "Richmond", "NSW", "ALP", "Justine Elliot", "ALP", "NP", 20.01],
-  [250, "Riverina", "NSW", "NP", "Michael Mccormack", "NP", "ALP", 25.24],
+  [250, "Riverina", "NSW", "NP", "Michael McCormack", "NP", "ALP", 25.24],
   [146, "Robertson", "NSW", "ALP", "Gordon Reid", "ALP", "LP", 18.73],
   [148, "Shortland", "NSW", "ALP", "Pat Conroy", "ALP", "LP", 23.01],
   [149, "Sydney", "NSW", "ALP", "Tanya Plibersek", "ALP", "GRN", 41.89],
@@ -944,7 +944,7 @@ const _S25 = [
   [158, "Dawson", "QLD", "LNP", "Andrew Willcox", "LNP", "ALP", 23.66],
   [252, "Dickson", "QLD", "ALP", "Ali France", "ALP", "LNP", 11.98],
   [159, "Fadden", "QLD", "LNP", "Cameron Caldwell", "LNP", "ALP", 13.76],
-  [160, "Fairfax", "QLD", "LNP", "Ted O'brien", "LNP", "ALP", 6.46],
+  [160, "Fairfax", "QLD", "LNP", "Ted O'Brien", "LNP", "ALP", 6.46],
   [161, "Fisher", "QLD", "LNP", "Andrew Wallace", "LNP", "ALP", 12.07],
   [311, "Flynn", "QLD", "LNP", "Colin Boyce", "LNP", "ALP", 20.48],
   [162, "Forde", "QLD", "ALP", "Rowan Holzberger", "ALP", "LNP", 3.53],
@@ -959,16 +959,16 @@ const _S25 = [
   [170, "Maranoa", "QLD", "LNP", "David Littleproud", "LNP", "ON", 40.19],
   [171, "McPherson", "QLD", "LNP", "Leon Rebello", "LNP", "ALP", 8.87],
   [172, "Moncrieff", "QLD", "LNP", "Angie Bell", "LNP", "ALP", 17.6],
-  [173, "Moreton", "QLD", "ALP", "Julie-ann Campbell", "ALP", "LNP", 32.18],
+  [173, "Moreton", "QLD", "ALP", "Julie-Ann Campbell", "ALP", "LNP", 32.18],
   [174, "Oxley", "QLD", "ALP", "Milton Dick", "ALP", "LNP", 38.38],
   [175, "Petrie", "QLD", "ALP", "Emma Comer", "ALP", "LNP", 2.34],
   [176, "Rankin", "QLD", "ALP", "Jim Chalmers", "ALP", "LNP", 31.11],
-  [177, "Ryan", "QLD", "GRN", "Elizabeth Watson-brown", "GRN", "LNP", 6.54],
-  [178, "Wide Bay", "QLD", "LNP", "Llew O'brien", "LNP", "ALP", 15.26],
+  [177, "Ryan", "QLD", "GRN", "Elizabeth Watson-Brown", "GRN", "LNP", 6.54],
+  [178, "Wide Bay", "QLD", "LNP", "Llew O'Brien", "LNP", "ALP", 15.26],
   [316, "Wright", "QLD", "LNP", "Scott Buchholz", "LNP", "ALP", 15.95],
   [179, "Adelaide", "SA", "ALP", "Steve Georganas", "ALP", "LP", 38.13],
   [180, "Barker", "SA", "LP", "Tony Pasin", "LP", "ALP", 25.95],
-  [182, "Boothby", "SA", "ALP", "Louise Miller-frost", "ALP", "LP", 22.21],
+  [182, "Boothby", "SA", "ALP", "Louise Miller-Frost", "ALP", "LP", 22.21],
   [183, "Grey", "SA", "LP", "Tom Venning", "LP", "ALP", 9.28],
   [185, "Hindmarsh", "SA", "ALP", "Mark Butler", "ALP", "LP", 32.7],
   [186, "Kingston", "SA", "ALP", "Amanda Rishworth", "ALP", "LP", 41.48],
@@ -993,15 +993,15 @@ const _S25 = [
   [208, "Corio", "VIC", "ALP", "Richard Marles", "ALP", "LP", 26.46],
   [209, "Deakin", "VIC", "ALP", "Matt Gregg", "ALP", "LP", 5.65],
   [210, "Dunkley", "VIC", "ALP", "Jodie Belyea", "ALP", "LP", 14.16],
-  [211, "Flinders", "VIC", "LP", "Zoe Mckenzie", "LP", "IND", 4.57],
+  [211, "Flinders", "VIC", "LP", "Zoe McKenzie", "LP", "IND", 4.57],
   [321, "Fraser", "VIC", "ALP", "Daniel Mulino", "ALP", "GRN", 18.45],
   [212, "Gellibrand", "VIC", "ALP", "Tim Watts", "ALP", "LP", 30.2],
   [213, "Gippsland", "VIC", "NP", "Darren Chester", "NP", "ALP", 38.71],
   [214, "Goldstein", "VIC", "LP", "Tim Wilson", "LP", "IND", 0.15],
-  [309, "Gorton", "VIC", "ALP", "Alice Jordan-baird", "ALP", "LP", 20.57],
+  [309, "Gorton", "VIC", "ALP", "Alice Jordan-Baird", "ALP", "LP", 20.57],
   [326, "Hawke", "VIC", "ALP", "Sam Rae", "ALP", "LP", 15.26],
   [216, "Holt", "VIC", "ALP", "Cassandra Fernando", "ALP", "LP", 28.06],
-  [217, "Hotham", "VIC", "ALP", "Clare O'neil", "ALP", "LP", 33.72],
+  [217, "Hotham", "VIC", "ALP", "Clare O'Neil", "ALP", "LP", 33.72],
   [218, "Indi", "VIC", "IND", "Helen Haines", "IND", "LP", 17.27],
   [219, "Isaacs", "VIC", "ALP", "Mark Dreyfus", "ALP", "LP", 28.68],
   [220, "Jagajaga", "VIC", "ALP", "Kate Thwaites", "ALP", "LP", 25.76],
@@ -1157,7 +1157,7 @@ const NSW_2023_SEATS = [
   [8004, "Monaro", "NSW", "LP", "Nichole Overall", 0.7],
   [8005, "Heathcote", "NSW", "LP", "Lee Evans", 1.1],
   [8006, "Strathfield", "NSW", "ALP", "Zac Poole", 1.2],
-  [8007, "Gosford", "NSW", "LP", "Adam Crouch", 2.3],
+  [8007, "Gosford", "NSW", "ALP", "Liesl Tesch", 2.3],
   [8008, "Keira", "NSW", "ALP", "Ryan Park", 3.0],
   [8009, "Newtown", "NSW", "GRN", "Jenny Leong", 8.1],
   [8010, "Balmain", "NSW", "GRN", "Kobi Shetty", 7.3],
@@ -1166,11 +1166,11 @@ const NSW_2023_SEATS = [
 // QLD 2024 — representative marginal seats
 const QLD_2024_SEATS = [
   [8101, "Mount Ommaney", "QLD", "LNP", "Jacob Madsen", 0.3],
-  [8102, "Inala", "QLD", "ALP", "Shayne Sutton", 0.4],
+  [8102, "Inala", "QLD", "ALP", "Margie Nightingale", 0.4],
   [8103, "Oodgeroo", "QLD", "LNP", "Mark Robinson", 0.5],
-  [8104, "Macalister", "QLD", "LNP", "Laura Gerber", 0.8],
-  [8105, "Greenslopes", "QLD", "LNP", "Brent Mickelberg", 1.1],
-  [8106, "South Brisbane", "QLD", "GRN", "Amy MacMahon", 1.3],
+  [8104, "Macalister", "QLD", "ALP", "Melissa McMahon", 0.8],
+  [8105, "Greenslopes", "QLD", "ALP", "Joe Kelly", 1.1],
+  [8106, "South Brisbane", "QLD", "ALP", "Barbara O'Shea", 1.3],
   [8107, "McConnel", "QLD", "LNP", "David Janetzki", 1.5],
   [8108, "Everton", "QLD", "LNP", "Tim Mander", 2.0],
   [8109, "Toohey", "QLD", "ALP", "Peter Russo", 2.5],
@@ -1181,8 +1181,8 @@ const QLD_2024_SEATS = [
 const WA_2025_SEATS = [
   [8201, "Carine", "WA", "LP", "David Honey", 0.4],
   [8202, "Vasse", "WA", "LP", "Libby Mettam", 0.8],
-  [8203, "Kalamunda", "WA", "LP", "Peter Rundle", 0.9],
-  [8204, "Bateman", "WA", "LP", "David Michael", 1.0],
+  [8203, "Kalamunda", "WA", "LP", "Adam Hort", 0.9],
+  [8204, "Bateman", "WA", "ALP", "Kim Giddens", 1.0],
   [8205, "Roe", "WA", "NP", "Peter Rundle", 1.2],
   [8206, "Moore", "WA", "LP", "Shane Love", 1.5],
   [8207, "Bicton", "WA", "ALP", "Lisa O'Malley", 2.5],
@@ -1230,14 +1230,14 @@ const ACT_2024_SEATS = [
 
 // NT 2024 — representative marginal seats
 const NT_2024_SEATS = [
-  [8601, "Blain", "NT", "CLP", "Bill Yan", 0.3],
-  [8602, "Casuarina", "NT", "ALP", "Selena Uibo", 0.4],
-  [8603, "Arafura", "NT", "CLP", "Chansey Paech", 0.6],
-  [8604, "Karama", "NT", "CLP", "Kate Worden", 0.5],
-  [8605, "Fannie Bay", "NT", "ALP", "Eva Lawler", 0.8],
-  [8606, "Johnston", "NT", "CLP", "Wayne Gyemore", 1.2],
-  [8607, "Nhulunbuy", "NT", "ALP", "Yingiya Guyula", 2.0],
-  [8608, "Namatjira", "NT", "CLP", "Mark Turner", 1.5],
+  [8601, "Blain", "NT", "CLP", "Matthew Kerle", 0.3],
+  [8602, "Casuarina", "NT", "CLP", "Khoda Patel", 0.4],
+  [8603, "Arafura", "NT", "ALP", "Manuel Brown", 0.6],
+  [8604, "Karama", "NT", "CLP", "Brian O'Gallagher", 0.5],
+  [8605, "Fannie Bay", "NT", "CLP", "Laurie Zio", 0.8],
+  [8606, "Johnston", "NT", "IND", "Justine Davis", 1.2],
+  [8607, "Nhulunbuy", "NT", "IND", "Yingiya Mark Guyula", 2.0],
+  [8608, "Namatjira", "NT", "CLP", "Bill Yan", 1.5],
 ].map(([id, nm, st, wp, wn, m]) => mkSeat(id, nm, st, wp, wn, m));
 
 // ── Full state seat data ──────────────────────────────────────────────────────
@@ -1283,21 +1283,22 @@ const _NSW = [
   [7003, "Ryde", "NSW", "ALP", "Jordan Lane", "ALP", "LP", 0.8],
   [7004, "Strathfield", "NSW", "ALP", "Zac Poole", "ALP", "LP", 1.2],
   [7005, "Coogee", "NSW", "ALP", "Marjorie O'Neill", "ALP", "LP", 2.3],
-  [7006, "Kiama", "NSW", "ALP", "Gareth Ward", "ALP", "LP", 1.8],
+  [7006, "Kiama", "NSW", "IND", "Gareth Ward", "IND", "ALP", 1.8],  // Ward expelled from Libs; retained as IND
   [7007, "Keira", "NSW", "ALP", "Ryan Park", "ALP", "LP", 3.0],
+  [7013, "Gosford", "NSW", "ALP", "Liesl Tesch", "ALP", "LP", 2.3],  // ALP; Tesch held since 2017; Crouch holds Terrigal
   // Marginal LP/ALP
   [7011, "Monaro", "NSW", "LP", "Nichole Overall", "LP", "ALP", 0.7],
   [7012, "Heathcote", "NSW", "LP", "Lee Evans", "LP", "ALP", 1.1],
-  [7013, "Gosford", "NSW", "LP", "Adam Crouch", "LP", "ALP", 2.3],
   [7014, "Drummoyne", "NSW", "LP", "Charles Cayford", "LP", "ALP", 2.5],
   [7015, "Holsworthy", "NSW", "LP", "Tina Ayyad", "LP", "ALP", 3.5],
   [7016, "Terrigal", "NSW", "LP", "Adam Crouch", "LP", "ALP", 4.5],
   // Independent seats
-  [7021, "Wakehurst", "NSW", "IND", "Karen Howard", "IND", "LP", 1.5],
+  [7021, "Wakehurst", "NSW", "IND", "Michael Regan", "IND", "LP", 1.5],  // Regan won after Hazzard retired
   // Greens seats
   [7031, "Newtown", "NSW", "GRN", "Jenny Leong", "GRN", "ALP", 8.1],
   [7032, "Balmain", "NSW", "GRN", "Kobi Shetty", "GRN", "ALP", 7.3],
-  [7033, "Summer Hill", "NSW", "GRN", "Jo Haylen", "GRN", "ALP", 3.8],
+  // ALP marginal (inner-city)
+  [7033, "Summer Hill", "NSW", "ALP", "Jo Haylen", "ALP", "LP", 3.8],  // ALP; Haylen is Labor not Greens
   // LP competitive (5–10pp)
   [7041, "Davidson", "NSW", "LP", "Matt Cross", "LP", "ALP", 5.0],
   [7042, "Pittwater", "NSW", "LP", "Rob Stokes", "LP", "ALP", 7.5],
@@ -1306,20 +1307,21 @@ const _NSW = [
   [7045, "Willoughby", "NSW", "LP", "Tim James", "LP", "ALP", 4.8],
   [7046, "Manly", "NSW", "LP", "James Griffin", "LP", "ALP", 5.5],
   [7047, "Castle Hill", "NSW", "LP", "Ray Williams", "LP", "ALP", 5.0],
-  [7048, "Hornsby", "NSW", "LP", "Matt Kean", "LP", "ALP", 6.0],
+  [7048, "Hornsby", "NSW", "LP", "James Wallace", "LP", "ALP", 6.0],  // Kean retired Jun 2024; Wallace won by-election
   // NP seats
-  [7061, "Oxley", "NSW", "NP", "Michael Johnsen", "NP", "ALP", 3.0],
+  [7061, "Oxley", "NSW", "NP", "Michael Kemp", "NP", "ALP", 3.0],  // Johnsen resigned 2021; Kemp won 2023
   [7062, "Upper Hunter", "NSW", "NP", "Dave Layzell", "NP", "ALP", 4.5],
   [7063, "Port Macquarie", "NSW", "NP", "Leslie Williams", "NP", "ALP", 4.0],
   [7064, "Tamworth", "NSW", "NP", "Kevin Anderson", "NP", "ALP", 8.0],
-  [7065, "Orange", "NSW", "NP", "Phil Donato", "NP", "ALP", 7.0],
   [7066, "Dubbo", "NSW", "NP", "Dugald Saunders", "NP", "ALP", 6.5],
-  [7067, "Murray", "NSW", "NP", "Helen Dalton", "NP", "ALP", 10.0],
   [7068, "Bathurst", "NSW", "NP", "Paul Toole", "NP", "ALP", 8.5],
-  [7069, "Barwon", "NSW", "NP", "Roy Butler", "NP", "ALP", 15.0],
+  // Independent seats (former SFF members re-elected as independents in 2023)
+  [7065, "Orange", "NSW", "IND", "Phil Donato", "IND", "NP", 7.0],   // left SFF Dec 2022
+  [7067, "Murray", "NSW", "IND", "Helen Dalton", "IND", "NP", 10.0], // left SFF Dec 2022
+  [7069, "Barwon", "NSW", "IND", "Roy Butler", "IND", "NP", 15.0],   // left SFF Dec 2022
   // ALP competitive (5–10pp)
   [7071, "Swansea", "NSW", "ALP", "Yasmin Catley", "ALP", "LP", 5.5],
-  [7072, "Lake Macquarie", "NSW", "ALP", "Greg Piper", "ALP", "LP", 5.0],
+  [7072, "Lake Macquarie", "NSW", "IND", "Greg Piper", "IND", "ALP", 5.0],  // IND since 2007; now Speaker
   [7073, "Kotara", "NSW", "ALP", "David Harris", "ALP", "LP", 4.0],
   [7074, "Blue Mountains", "NSW", "ALP", "Trish Doyle", "ALP", "LP", 7.5],
   [7075, "Rockdale", "NSW", "ALP", "Steve Kamper", "ALP", "LP", 3.5],
@@ -1344,31 +1346,30 @@ const _NSW = [
 const NSW_SEATS = fillStateSeats(_NSW.map(r => mkSS(...r)),
   { alp: 45, coalition: 44, greens: 3, teal: 1 }, "LP", "NSW", 0);
 
-// ── QLD 2024 (93 seats, LNP majority 51, ALP 27, GRN 7, crossbench 8) ─────────
+// ── QLD 2024 (93 seats, LNP majority 52, ALP 36, GRN 1, KAP 3, IND 1) ──────────
 // Primary: ALP 33.4  LNP 40.3  GRN 11.5  ON 8.2  other 6.6   ALP 2PP 46.3%
 const _QLD = [
   // Marginal LNP/ALP
   [7201, "Mount Ommaney", "QLD", "LNP", "Jacob Madsen", "LNP", "ALP", 0.3],
   [7202, "Oodgeroo", "QLD", "LNP", "Mark Robinson", "LNP", "ALP", 0.5],
-  [7203, "Macalister", "QLD", "LNP", "Laura Gerber", "LNP", "ALP", 0.8],
-  [7204, "Greenslopes", "QLD", "LNP", "Brent Mickelberg", "LNP", "ALP", 1.1],
   [7205, "McConnel", "QLD", "LNP", "David Janetzki", "LNP", "ALP", 1.5],
   [7206, "Everton", "QLD", "LNP", "Tim Mander", "LNP", "ALP", 2.0],
   [7207, "Currumbin", "QLD", "LNP", "Laura Gerber", "LNP", "ALP", 3.0],
   [7208, "Burleigh", "QLD", "LNP", "Michael Hart", "LNP", "ALP", 4.5],
-  [7209, "Mundingburra", "QLD", "LNP", "Coralee O'Rourke", "LNP", "ALP", 3.5],
+  [7209, "Mundingburra", "QLD", "LNP", "Dale Last", "LNP", "ALP", 3.5],  // O'Rourke was ALP incumbent who lost
   // Marginal ALP/LNP
-  [7211, "Inala", "QLD", "ALP", "Shayne Sutton", "ALP", "LNP", 0.4],
+  [7203, "Macalister", "QLD", "ALP", "Melissa McMahon", "ALP", "LNP", 0.8],  // ALP retained; Gerber holds Currumbin
+  [7204, "Greenslopes", "QLD", "ALP", "Joe Kelly", "ALP", "LNP", 1.1],       // safe ALP since 2015; Mickelberg holds Buderim
+  [7211, "Inala", "QLD", "ALP", "Margie Nightingale", "ALP", "LNP", 0.4],    // won 2024 by-election, re-elected
   [7212, "Toohey", "QLD", "ALP", "Peter Russo", "ALP", "LNP", 2.5],
   [7213, "Miller", "QLD", "ALP", "Jo-Ann Miller", "ALP", "LNP", 3.5],
-  // Greens seats (won 7 seats, mostly inner Brisbane)
-  [7221, "South Brisbane", "QLD", "GRN", "Amy MacMahon", "GRN", "ALP", 1.3],
+  // ALP seats — former Greens held (Greens won only Maiwar in 2024)
+  [7221, "South Brisbane", "QLD", "ALP", "Barbara O'Shea", "ALP", "LNP", 1.3],  // MacMahon (GRN) lost to O'Shea
+  [7223, "Cooper", "QLD", "ALP", "Jonty Bush", "ALP", "LNP", 3.5],              // Bush is ALP, not Greens
+  [7225, "Stretton", "QLD", "ALP", "James Martin", "ALP", "LNP", 2.2],          // Miles held Mulgrave, not Stretton
+  [7226, "Waterford", "QLD", "ALP", "Shannon Fentiman", "ALP", "LNP", 1.8],     // Fentiman retained for ALP
+  // Greens seat (only 1 seat won in 2024)
   [7222, "Maiwar", "QLD", "GRN", "Michael Berkman", "GRN", "LNP", 5.1],
-  [7223, "Cooper", "QLD", "GRN", "Jonty Bush", "GRN", "LNP", 3.5],
-  [7224, "Macgregor", "QLD", "GRN", "Catie Shailer", "GRN", "LNP", 2.8],
-  [7225, "Stretton", "QLD", "GRN", "Steven Miles", "GRN", "LNP", 2.2],
-  [7226, "Waterford", "QLD", "GRN", "Shannon Fentiman", "GRN", "ALP", 1.8],
-  [7227, "Rochedale", "QLD", "GRN", "David Crisafulli", "GRN", "LNP", 1.5],
   // LNP competitive (5–10pp)
   [7231, "Nanango", "QLD", "LNP", "Deb Frecklington", "LNP", "ALP", 6.0],
   [7232, "Warrego", "QLD", "LNP", "Ann Leahy", "LNP", "ALP", 7.5],
@@ -1376,7 +1377,7 @@ const _QLD = [
   [7234, "Buderim", "QLD", "LNP", "Brent Mickelberg", "LNP", "ALP", 7.0],
   [7235, "Caloundra", "QLD", "LNP", "Jason Hunt", "LNP", "ALP", 6.5],
   // LNP seats where One Nation is the TCP challenger (rural/regional QLD)
-  [7261, "Mirani", "QLD", "LNP", "Glenn Butcher", "LNP", "ON", 1.8],
+  [7261, "Mirani", "QLD", "LNP", "Glen Kelly", "LNP", "ON", 1.8],  // Butcher holds Gladstone
   [7262, "Condamine", "QLD", "LNP", "Pat Weir", "LNP", "ON", 2.6],
   [7263, "Callide", "QLD", "LNP", "Colin Boyce", "LNP", "ON", 3.5],
   [7264, "Hinchinbrook", "QLD", "LNP", "Nick Dametto", "LNP", "ON", 4.5],
@@ -1384,10 +1385,10 @@ const _QLD = [
   // ALP safe
   [7241, "Bundaberg", "QLD", "ALP", "Tom Smith", "ALP", "LNP", 10.0],
   [7242, "Rockhampton", "QLD", "ALP", "Barry O'Rourke", "ALP", "LNP", 12.0],
-  [7243, "Mulgrave", "QLD", "ALP", "Curtis Pitt", "ALP", "LNP", 15.0],
+  // Mulgrave flipped LNP in 2024 (14.9% swing; Pitt retired; seat no longer in ALP column)
 ];
 const QLD_SEATS = fillStateSeats(_QLD.map(r => mkSS(...r)),
-  { alp: 27, coalition: 51, greens: 7, crossbench: 8 }, "LNP", "QLD", 100);
+  { alp: 36, coalition: 52, greens: 1, crossbench: 4 }, "LNP", "QLD", 100);
 
 // ── WA 2025 (59 seats, ALP landslide 46, LP 10, GRN 2, IND 1) ────────────────
 // Primary: ALP 55.0  LP 18.5  NP 4.5  GRN 11.0  IND/other 11.0   ALP 2PP 63.1%
@@ -1395,28 +1396,28 @@ const _WA = [
   // Marginal LP/ALP (most LP seats were very tight after ALP landslide)
   [7301, "Carine", "WA", "LP", "David Honey", "LP", "ALP", 0.4],
   [7302, "Vasse", "WA", "LP", "Libby Mettam", "LP", "ALP", 0.8],
-  [7303, "Kalamunda", "WA", "LP", "Peter Rundle", "LP", "ALP", 0.9],
-  [7304, "Bateman", "WA", "LP", "David Michael", "LP", "ALP", 1.0],
+  [7303, "Kalamunda", "WA", "LP", "Adam Hort", "LP", "ALP", 0.9],   // Hort won by 88 votes; Rundle holds Roe (NP)
   [7305, "Churchlands", "WA", "LP", "Sean L'Estrange", "LP", "ALP", 2.2],
   [7306, "Moore", "WA", "LP", "Shane Love", "LP", "ALP", 1.5],
   // Marginal NP/ALP
   [7311, "Roe", "WA", "NP", "Peter Rundle", "NP", "ALP", 1.2],
   // Marginal ALP/LP
+  [7304, "Bateman", "WA", "ALP", "Kim Giddens", "ALP", "LP", 1.0],   // ALP retained; David Michael holds Balcatta
   [7321, "Bicton", "WA", "ALP", "Lisa O'Malley", "ALP", "LP", 2.5],
   [7322, "Dawesville", "WA", "ALP", "Matthew Hughes", "ALP", "LP", 3.1],
   // ALP marginal (Greens did not win any WA lower house seats in 2025)
   [7331, "Fremantle", "WA", "ALP", "Simone McGurk", "ALP", "LP", 2.5],
   [7332, "Maylands", "WA", "ALP", "Dan Bull", "ALP", "LP", 3.5],
-  // LP safe (remaining LP seats — all fairly marginal given ALP landslide)
-  [7341, "Scarborough", "WA", "LP", "Paul Papalia", "LP", "ALP", 3.5],
+  [7341, "Scarborough", "WA", "ALP", "Stuart Aubrey", "ALP", "LP", 3.5],  // ALP retained; Papalia is ALP in Secret Harbour
+  // LP safe
   [7342, "Hillarys", "WA", "LP", "Peter Katsambanis", "LP", "ALP", 4.0],
   // ALP safe
-  [7351, "Joondalup", "WA", "ALP", "David Templeman", "ALP", "LP", 10.0],
+  [7351, "Joondalup", "WA", "ALP", "Emily Hamilton", "ALP", "LP", 10.0],  // Templeman retired before 2025
   [7352, "Balcatta", "WA", "ALP", "David Michael", "ALP", "LP", 12.0],
   [7353, "Midland", "WA", "ALP", "Michelle Roberts", "ALP", "LP", 15.0],
   [7354, "Armadale", "WA", "ALP", "Tony Buti", "ALP", "LP", 18.0],
   [7355, "Mandurah", "WA", "ALP", "David Templeman", "ALP", "LP", 20.0],
-  [7356, "Rockingham", "WA", "ALP", "Mark McGowan", "ALP", "LP", 25.0],
+  [7356, "Rockingham", "WA", "ALP", "Magenta Marshall", "ALP", "LP", 25.0],  // McGowan resigned 2023; Marshall won by-election
   [7357, "Kwinana", "WA", "ALP", "Roger Cook", "ALP", "LP", 22.0],
 ];
 const WA_SEATS = fillStateSeats(_WA.map(r => mkSS(...r)),
@@ -1465,28 +1466,30 @@ const _SA = [
 const SA_SEATS = fillStateSeats(_SA.map(r => mkSS(...r)),
   { alp: 34, coalition: 5, greens: 0, teal: 0, one_nation: 4, crossbench: 4 }, "LP", "SA", 300);
 
-// ── NT 2024 (25 seats, CLP majority 17, ALP 8) ───────────────────────────────
+// ── NT 2024 (25 seats, CLP majority 17, ALP 4, GRN 1, IND 3) ────────────────
 // Primary: ALP 30.5  CLP 40.5  GRN 5.5  IND 12.5  other 11.0
 const _NT = [
-  // Marginal
-  [7501, "Blain", "NT", "CLP", "Bill Yan", "CLP", "ALP", 0.3],
-  [7502, "Casuarina", "NT", "ALP", "Selena Uibo", "ALP", "CLP", 0.4],
-  [7503, "Arafura", "NT", "CLP", "Chansey Paech", "CLP", "ALP", 0.6],
-  [7504, "Karama", "NT", "CLP", "Kate Worden", "CLP", "ALP", 0.5],
-  [7505, "Fannie Bay", "NT", "ALP", "Eva Lawler", "ALP", "CLP", 0.8],
-  [7506, "Johnston", "NT", "CLP", "Wayne Gyemore", "CLP", "ALP", 1.2],
-  [7507, "Nhulunbuy", "NT", "ALP", "Yingiya Guyula", "ALP", "CLP", 2.0],
-  [7508, "Namatjira", "NT", "CLP", "Mark Turner", "CLP", "ALP", 1.5],
+  // Marginal CLP
+  [7501, "Blain", "NT", "CLP", "Matthew Kerle", "CLP", "ALP", 0.3],    // Kerle won Blain; Yan holds Namatjira
+  [7502, "Casuarina", "NT", "CLP", "Khoda Patel", "CLP", "ALP", 0.4],  // 18% swing; Uibo holds Arnhem (ALP)
+  [7504, "Karama", "NT", "CLP", "Brian O'Gallagher", "CLP", "ALP", 0.5], // Ah Kit held Karama and lost
+  [7505, "Fannie Bay", "NT", "CLP", "Laurie Zio", "CLP", "ALP", 0.8],  // Zio won by 28 votes; Lawler held Drysdale
+  [7508, "Namatjira", "NT", "CLP", "Bill Yan", "CLP", "ALP", 1.5],     // Yan holds Namatjira; Turner was IND in Blain
   [7509, "Barkly", "NT", "CLP", "Steve Edgington", "CLP", "ALP", 3.5],
-  [7510, "Brennan", "NT", "CLP", "Lia Finocchiaro", "CLP", "ALP", 5.0],
-  [7511, "Darwin", "NT", "CLP", "Josh Burgoyne", "CLP", "ALP", 4.5],
-  [7512, "Goyder", "NT", "CLP", "Marie-Clare Boothby", "CLP", "ALP", 6.0],
-  // ALP safe
-  [7521, "Wanguri", "NT", "ALP", "Natasha Fyles", "ALP", "CLP", 10.0],
-  [7522, "Drysdale", "NT", "ALP", "Ngaree Ah Kit", "ALP", "CLP", 12.0],
+  [7510, "Brennan", "NT", "CLP", "Marie-Clare Boothby", "CLP", "ALP", 5.0],  // Boothby holds Brennan; Finocchiaro holds Spillett
+  [7511, "Darwin", "NT", "CLP", "Robyn Cahill", "CLP", "ALP", 4.5],    // Cahill won Port Darwin; Burgoyne holds Braitling
+  [7512, "Goyder", "NT", "CLP", "Andrew Mackay", "CLP", "ALP", 6.0],   // Mackay won Goyder; Boothby holds Brennan
+  // CLP won — Wanguri/Drysdale (former ALP safe seats flipped)
+  [7521, "Wanguri", "NT", "CLP", "Oly Carlson", "CLP", "ALP", 10.0],  // Fyles held Nightcliff (lost to GRN); CLP won Wanguri
+  [7522, "Drysdale", "NT", "CLP", "Clinton Howe", "CLP", "ALP", 12.0], // Lawler (former CM) held Drysdale and lost
+  // ALP retained
+  [7503, "Arafura", "NT", "ALP", "Manuel Brown", "ALP", "CLP", 0.6],   // ALP retained; Paech holds Gwoja (ALP)
+  // Independent
+  [7506, "Johnston", "NT", "IND", "Justine Davis", "IND", "ALP", 1.2], // Davis (IND) defeated Labor minister Bowden
+  [7507, "Nhulunbuy", "NT", "IND", "Yingiya Mark Guyula", "IND", "ALP", 2.0],  // Guyula IND since 2016
 ];
 const NT_SEATS = fillStateSeats(_NT.map(r => mkSS(...r)),
-  { alp: 8, coalition: 17 }, "CLP", "NT", 400);
+  { alp: 4, coalition: 17, crossbench: 4 }, "CLP", "NT", 400);
 
 // ── TAS 2024 ─ Hare-Clark (5 electorates × 7 seats = 35) ─────────────────────
 // Lib 14, ALP 10, GRN 5, JLN 3, IND 3  (source: Tasmanian Electoral Commission 2024)
