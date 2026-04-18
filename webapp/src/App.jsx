@@ -477,6 +477,18 @@ const SEAT_FP_2025 = {
 // Requires population for full primary-based backtesting of the 2019->2022 cycle.
 const SEAT_FP_2022 = {};
 
+// ── Per-seat FP baselines for state elections ─────────────────────────────────
+// Populated by scripts/compute_state_fp_constants.py after running the pipeline
+// for each state election. Format: { seatId: { alp, coal, grn, ind, on } }
+// When populated, computeModelledSeatsState/Vic use these to compute per-seat
+// 2PP swings rather than applying a uniform statewide swing to all seats.
+const NSW_SEAT_FP_2023 = {};
+const QLD_SEAT_FP_2024 = {};
+const VIC_SEAT_FP_2022 = {};
+const WA_SEAT_FP_2025  = {};
+const SA_SEAT_FP_2026  = {};
+const NT_SEAT_FP_2024  = {};
+
 // ── Advanced Modelling Scaffolding (Phase 7) ─────────────────────────────────
 
 // #9: Seat-level Regression Model (TODO)
@@ -2569,7 +2581,7 @@ function computeVic2pp(primaries, prefFlows, onTcpMatchup = null) {
 // Regional multipliers reflect the historically observed pattern that inner-metro seats
 // swing more than suburban seats, which in turn swing more than regional/rural seats.
 // The useRegionalSwing parameter enables/disables regional differentiation.
-function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing = true, onTcpMatchup = null, baseline2pp = VIC_2PP_2022, seatOverrides = null) {
+function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing = true, onTcpMatchup = null, baseline2pp = VIC_2PP_2022, seatOverrides = null, seatFpMap = null) {
   const newPrim = {
     alp: Math.max(0, VIC_BASELINE_2022.alp + swings.alp),
     coal: Math.max(0, VIC_BASELINE_2022.coal + (swings.coal ?? 0)),
@@ -2633,7 +2645,11 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
         on: ov.on != null ? ov.on : newPrim.on,
       };
       const ovNew2pp = computeVic2pp(ovPrim, prefFlows, onTcpMatchup);
-      const effectiveSwing = (ovNew2pp - baseline2pp) * regionMult;
+      // Use per-seat FP as baseline when available; fall back to statewide baseline2pp.
+      const ovBaseline2pp = seatFpMap?.[seat.id]
+        ? computeVic2pp(seatFpMap[seat.id], prefFlows, onTcpMatchup)
+        : baseline2pp;
+      const effectiveSwing = (ovNew2pp - ovBaseline2pp) * regionMult;
       let swingToT1 = 0;
       if (t1 === "ALP" && ["LP", "NP"].includes(t2)) swingToT1 = effectiveSwing;
       else if (["LP", "NP"].includes(t1) && t2 === "ALP") swingToT1 = -effectiveSwing;
@@ -2655,11 +2671,26 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
       };
     }
 
+    // Per-seat FP baseline: compute seat-specific 2PP swing from this seat's primary composition.
+    let effectiveVicSwing = vic2ppSwing;
+    if (seatFpMap?.[seat.id]) {
+      const sf = seatFpMap[seat.id];
+      const projSf = {
+        alp:  Math.max(0, sf.alp  + swings.alp),
+        coal: Math.max(0, sf.coal + (swings.coal ?? 0)),
+        grn:  Math.max(0, sf.grn  + swings.grn),
+        ind:  Math.max(0, sf.ind  + swings.ind),
+        on:   Math.max(0, (sf.on  ?? 0) + (swings.on  ?? 0)),
+      };
+      effectiveVicSwing = computeVic2pp(projSf, prefFlows, onTcpMatchup)
+                        - computeVic2pp(sf,     prefFlows, onTcpMatchup);
+    }
+
     let swingToT1 = 0;
     if (t1 === "ALP" && ["LP", "NP"].includes(t2)) {
-      swingToT1 = vic2ppSwing * regionMult;
+      swingToT1 = effectiveVicSwing * regionMult;
     } else if (["LP", "NP"].includes(t1) && t2 === "ALP") {
-      swingToT1 = -vic2ppSwing * regionMult;
+      swingToT1 = -effectiveVicSwing * regionMult;
     } else if (t1 === "GRN" && t2 === "ALP") {
       // GRN vs ALP: driven by GRN primary swing relative to ALP swing (Greens inner city)
       swingToT1 = (swings.grn - swings.alp) / 2 * regionMult;
@@ -2667,7 +2698,7 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
       swingToT1 = (swings.grn - (swings.coal ?? 0)) / 2 * regionMult;
     } else if (t1 === "IND") {
       // Independents: insulated from state swing (personal vote dominant); 30% sensitivity
-      swingToT1 = (t2 === "ALP" ? -1 : 1) * vic2ppSwing * 0.3;
+      swingToT1 = (t2 === "ALP" ? -1 : 1) * effectiveVicSwing * 0.3;
     }
     const newMargin = seat.margin + swingToT1;
     const holds = newMargin > 0;
@@ -2706,7 +2737,7 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
 //   For these seats, ON is estimated as baseline + swings.on and compared against
 //   statewide ALP/Coal to auto-detect on_v_alp / on_v_coal TCP matchups.
 // stateOverrides: { seatId: { tcpMatchup, tcpPct, on, alp, coal, grn, ind, forceGroup } } — seat-level overrides.
-function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, prefFlows, coalParties, swings, regionMap = null, regionSwingMult = null, onFpLookup = null, onThreshold = 6.5, stateOverrides = null, useElasticityFlag = false, seatPrefFlowsMap = null, baselinePrim = null) {
+function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, prefFlows, coalParties, swings, regionMap = null, regionSwingMult = null, onFpLookup = null, onThreshold = 6.5, stateOverrides = null, useElasticityFlag = false, seatPrefFlowsMap = null, baselinePrim = null, seatFpMap = null) {
   const new2pp = compute2ppFn(newPrim, prefFlows);
   const swing2pp = new2pp - baseline2pp;
 
@@ -2738,7 +2769,20 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
     // from the statewide average (e.g. inner-city Greens seats flow to ALP more strongly than rural).
     const seatFlowOverride = seatPrefFlowsMap?.[seat.id];
     let effectiveSwing2pp = swing2pp;
-    if (seatFlowOverride && baselinePrim) {
+    if (seatFpMap?.[seat.id]) {
+      // Per-seat FP baseline: compute seat-specific 2PP swing from this seat's primary composition.
+      // A GRN-heavy inner-city seat responds differently to a GRN surge than a regional coal seat.
+      const sf = seatFpMap[seat.id];
+      const projSf = {
+        alp:  Math.max(0, sf.alp  + swings.alp),
+        coal: Math.max(0, sf.coal + swings.coal),
+        grn:  Math.max(0, sf.grn  + swings.grn),
+        ind:  Math.max(0, (sf.ind ?? 0) + (swings.ind ?? 0)),
+        on:   Math.max(0, (sf.on  ?? 0) + (swings.on  ?? 0)),
+      };
+      const mergedFlows = seatFlowOverride ? { ...prefFlows, ...seatFlowOverride } : prefFlows;
+      effectiveSwing2pp = compute2ppFn(projSf, mergedFlows) - compute2ppFn(sf, mergedFlows);
+    } else if (seatFlowOverride && baselinePrim) {
       const mergedFlows = { ...prefFlows, ...seatFlowOverride };
       const seatNew2pp = compute2ppFn(newPrim, mergedFlows);
       const seatBl2pp = compute2ppFn(baselinePrim, mergedFlows);
@@ -3491,7 +3535,7 @@ export default function App() {
       on: +(vicPrimaries.on - VIC_BASELINE_2022.on).toFixed(2),
     };
     const baseline2pp = computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp);
-    return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing, vicOnTcp, baseline2pp, vicSeatOverrides);
+    return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing, vicOnTcp, baseline2pp, vicSeatOverrides, VIC_SEAT_FP_2022);
   }, [vicPrimaries, vicPrefFlows, useVicRegionalSwing, vicOnTcp, vicSeatOverrides]);
 
   const vicProjCounts = useMemo(() => {
@@ -3634,7 +3678,7 @@ export default function App() {
       useNswRegionalSwing ? NSW_DISTRICT_REGION : null,
       useNswRegionalSwing ? NSW_REGION_SWING_MULT : null,
       NSW_SEAT_ON_FP_2023, 6.5, nswSeatOverrides,
-      useElasticity, NSW_SEAT_PREF_FLOWS_2023, NSW_BL,
+      useElasticity, NSW_SEAT_PREF_FLOWS_2023, NSW_BL, NSW_SEAT_FP_2023,
     );
   }, [nswPrim, nswFlows, nswOnTcp, useNswRegionalSwing, nswSeatOverrides, useElasticity]);
   const nswProjCounts = useMemo(() => { const c = {}; nswModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [nswModelledSeats]);
@@ -3778,7 +3822,7 @@ export default function App() {
       useQldRegionalSwing ? QLD_DISTRICT_REGION : null,
       useQldRegionalSwing ? QLD_REGION_SWING_MULT : null,
       QLD_SEAT_ON_FP_2024, 6.5, qldSeatOverrides,
-      useElasticity, QLD_SEAT_PREF_FLOWS_2024, QLD_BL,
+      useElasticity, QLD_SEAT_PREF_FLOWS_2024, QLD_BL, QLD_SEAT_FP_2024,
     );
   }, [qldPrim, qldFlows, qldOnTcp, useQldRegionalSwing, qldSeatOverrides, useElasticity]);
   const qldProjCounts = useMemo(() => { const c = {}; qldModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [qldModelledSeats]);
@@ -3865,7 +3909,7 @@ export default function App() {
       useWaRegionalSwing ? WA_DISTRICT_REGION : null,
       useWaRegionalSwing ? WA_REGION_SWING_MULT : null,
       null, 6.5, waSeatOverrides,
-      useElasticity, null, WA_BL,
+      useElasticity, null, WA_BL, WA_SEAT_FP_2025,
     );
   }, [waPrim, waFlows, waOnTcp, useWaRegionalSwing, waSeatOverrides, useElasticity]);
   const waProjCounts = useMemo(() => { const c = {}; waModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [waModelledSeats]);
@@ -3979,7 +4023,7 @@ export default function App() {
       useSaRegionalSwing ? SA_DISTRICT_REGION : null,
       useSaRegionalSwing ? SA_REGION_SWING_MULT : null,
       SA_SEAT_ON_FP_2026, 6.5, saSeatOverrides,
-      useElasticity, null, SA_BL,
+      useElasticity, null, SA_BL, SA_SEAT_FP_2026,
     );
   }, [saPrim, saFlows, saOnTcp, useSaRegionalSwing, saSeatOverrides, useElasticity]);
   const saProjCounts = useMemo(() => { const c = {}; saModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [saModelledSeats]);
@@ -4077,7 +4121,7 @@ export default function App() {
       useNtRegionalSwing ? NT_DISTRICT_REGION : null,
       useNtRegionalSwing ? NT_REGION_SWING_MULT : null,
       null, 6.5, ntSeatOverrides,
-      useElasticity, null, NT_BL,
+      useElasticity, null, NT_BL, NT_SEAT_FP_2024,
     );
   }, [ntPrim, ntFlows, ntOnTcp, useNtRegionalSwing, ntSeatOverrides, useElasticity]);
   const ntProjCounts = useMemo(() => { const c = {}; ntModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [ntModelledSeats]);
