@@ -75,6 +75,7 @@ Usage examples:
 
 import argparse
 import logging
+import subprocess
 import sys
 from pathlib import Path
 
@@ -190,6 +191,29 @@ def run_pipeline(
     logger.info("All done.")
 
 
+# ── State FP module regeneration ──────────────────────────────────────────────
+
+def regenerate_state_seat_fp_module() -> None:
+    """Regenerate webapp/src/data/state_seat_fp.js after state DB changes.
+
+    Called at the end of run_vic_pipeline() and run_state_pipeline() so the
+    frontend's per-seat state FP constants always match the current DB. Failure
+    here is non-fatal: the state pipeline already succeeded, and the webapp
+    will keep using whatever module was last generated.
+    """
+    logger = logging.getLogger(__name__)
+    script = Path(__file__).parent / "scripts" / "generate_state_seat_fp.py"
+    out_path = Path(__file__).parent / "webapp" / "src" / "data" / "state_seat_fp.js"
+    try:
+        subprocess.run(
+            [sys.executable, str(script), "--state", "all",
+             "--output-module", str(out_path)],
+            check=True,
+        )
+    except Exception as exc:
+        logger.warning("Could not regenerate %s: %s", out_path, exc)
+
+
 # ── VIC state pipeline ────────────────────────────────────────────────────────
 
 def run_vic_pipeline(
@@ -289,6 +313,15 @@ def run_vic_pipeline(
         if parsed["tcp"]:
             db.load_vic_2cp(parsed["tcp"])
 
+        # Booth-level data (Tally Room CSVs). Only populated when the user
+        # supplies booth-level files via tally_room_booth_fp / _booth_tcp.
+        if parsed.get("polling_places"):
+            db.load_vic_polling_places(parsed["polling_places"])
+        if parsed.get("booth_fp"):
+            db.load_vic_booth_fp(parsed["booth_fp"])
+        if parsed.get("booth_2cp"):
+            db.load_vic_booth_2cp(parsed["booth_2cp"])
+
         logger.info("Database load complete for election %d.", election_id)
 
         # ── Step 4: Export to JSON ────────────────────────────────────────────
@@ -296,6 +329,9 @@ def run_vic_pipeline(
         ex.export_vic_election(election_id)
 
         logger.info("VIC pipeline complete for election %d ✓", election_id)
+
+    logger.info("Regenerating webapp/src/data/state_seat_fp.js ...")
+    regenerate_state_seat_fp_module()
 
     logger.info("")
     logger.info("All done.")
@@ -453,6 +489,11 @@ def run_state_pipeline(
 
         logger.info("%s pipeline complete for election %d ✓",
                     state_ab.upper(), election_id)
+
+    # Regenerate the per-seat state FP JS module so App.jsx picks up any
+    # newly-loaded data without a manual rerun of the generator script.
+    logger.info("Regenerating webapp/src/data/state_seat_fp.js ...")
+    regenerate_state_seat_fp_module()
 
     logger.info("")
     logger.info("All done.")

@@ -5,4 +5,12 @@
 // Import in App.jsx:  import * as STATE_SEAT_FP from './data/state_seat_fp.js';
 // Usage:  STATE_SEAT_FP.VIC_SEAT_FP_2022?.[seatId]
 
-// No state FP data available yet. Run the state pipeline first.
+// Placeholders — state DB has no data yet for these elections.
+export const VIC_SEAT_FP_2022 = {};
+export const NSW_SEAT_FP_2023 = {};
+export const QLD_SEAT_FP_2024 = {};
+export const WA_SEAT_FP_2025 = {};
+export const SA_SEAT_FP_2022 = {};
+export const NT_SEAT_FP_2024 = {};
+export const TAS_SEAT_FP_2024 = {};
+export const ACT_SEAT_FP_2024 = {};

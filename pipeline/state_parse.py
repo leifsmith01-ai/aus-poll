@@ -534,8 +534,12 @@ def _parse_generic_preferential(file_paths: dict[str, str], election_id: int,
     # ── TCP ──────────────────────────────────────────────────────────────────
     tcp_path = file_paths.get("tcp")
     if tcp_path:
+        # NT uses optional preferential voting — capture district-level
+        # exhausted totals when the source file exposes them.
+        include_exhausted = (label or "").upper() == "NT"
         result["tcp"] = _parse_tcp_csv(tcp_path, election_id, result["candidates"],
-                                        result["districts"])
+                                        result["districts"],
+                                        include_exhausted=include_exhausted)
 
     return result
 
@@ -646,9 +650,9 @@ def _parse_hare_clark(file_paths: dict[str, str], election_id: int,
             result["fp"] = _parse_fp_csv(fp_path, election_id,
                                           result["candidates"], result["districts"])
 
-    # Derive party_seats from candidates
+    # Derive party_seats from candidates (with FP totals enrichment)
     result["party_seats"] = _derive_party_seats(
-        election_id, result["candidates"], result["districts"]
+        election_id, result["candidates"], result["districts"], result["fp"]
     )
 
     return result
@@ -690,8 +694,16 @@ def _parse_fp_csv(path: str, election_id: int,
 
 
 def _parse_tcp_csv(path: str, election_id: int,
-                    candidates: list[dict], districts: list[dict]) -> list[dict]:
-    """Parse a TCP CSV and match to known candidates/districts."""
+                    candidates: list[dict], districts: list[dict],
+                    include_exhausted: bool = False) -> list[dict]:
+    """Parse a TCP CSV and match to known candidates/districts.
+
+    When ``include_exhausted`` is True, the parser also reads an
+    "exhausted" (or "informal") column when present and attaches the
+    district-level exhausted vote total to every candidate row for
+    that district — matching the booth-level convention in
+    ``_parse_booth_tcp_csv``.
+    """
     cand_lookup = {
         (c["district_id"], c["surname"].upper()): c["candidate_id"]
         for c in candidates
@@ -699,6 +711,22 @@ def _parse_tcp_csv(path: str, election_id: int,
     dist_lookup = {d["district_name"].upper(): d["district_id"] for d in districts}
 
     rows = _read_csv(path)
+    # First pass: collect per-district exhausted totals when requested.
+    exhausted_by_district: dict[int, int] = {}
+    if include_exhausted:
+        for row in rows:
+            dcol = _find_col(row, "district", "electorate", "division")
+            ecol = _find_col(row, "exhaust", "informal")
+            if not (dcol and ecol):
+                continue
+            dname = row.get(dcol, "").strip().upper()
+            did   = dist_lookup.get(dname)
+            if did is None:
+                continue
+            value = _safe_int(row.get(ecol)) or 0
+            if value > exhausted_by_district.get(did, 0):
+                exhausted_by_district[did] = value
+
     tcp = []
     for row in rows:
         dcol  = _find_col(row, "district", "electorate", "division")
@@ -718,45 +746,62 @@ def _parse_tcp_csv(path: str, election_id: int,
         elected_raw = row.get(ecol, "0") if ecol else "0"
         elected = 1 if elected_raw.strip().lower() in ("1", "y", "yes", "true", "elected") else 0
 
-        tcp.append({
+        rec = {
             "election_id":  election_id,
             "district_id":  did,
             "candidate_id": cid,
             "total_votes":  _safe_int(row.get(vcol)) or 0 if vcol else 0,
             "vote_pct":     _safe_float(row.get(pcol)) if pcol else None,
             "elected":      elected,
-        })
+        }
+        if include_exhausted:
+            rec["exhausted_votes"] = exhausted_by_district.get(did, 0)
+        tcp.append(rec)
     return tcp
 
 
 def _derive_party_seats(election_id: int,
                           candidates: list[dict],
-                          districts: list[dict]) -> list[dict]:
-    """
-    Derive party seat totals per district from the elected column.
-    Used for Hare-Clark states where individual candidates can be
-    elected multiple times (up to seats_in_district).
+                          districts: list[dict],
+                          fp: list[dict] | None = None) -> list[dict]:
+    """Derive party seat totals per district from the elected column.
+
+    Used for Hare-Clark states (TAS, ACT) where individual candidates can be
+    elected multiple times up to seats_in_district. Writes into the
+    identically-named `tas_district_party_seats` / `act_district_party_seats`
+    tables defined in tas_schema.sql and act_schema.sql.
+
+    When `fp` rows are supplied, aggregates FP totals per (district, party)
+    to populate `total_fp_votes`. Otherwise that column is left NULL.
     """
     from collections import defaultdict
     # {(district_id, party_ab): seats_won}
     tally: dict[tuple, int] = defaultdict(int)
-    fp_total: dict[tuple, int] = defaultdict(int)
+    cand_party: dict[int, str] = {}
 
     for c in candidates:
+        party = c.get("party_ab") or "IND"
+        cand_party[c["candidate_id"]] = party
         if c["elected"] > 0:
-            key = (c["district_id"], c.get("party_ab") or "IND")
-            tally[key] += 1
+            tally[(c["district_id"], party)] += 1
 
-    # fp totals per (district, party) are not readily available here
-    # without the fp list; leave as None — callers can enrich if needed.
+    fp_total: dict[tuple, int] = defaultdict(int)
+    if fp:
+        for r in fp:
+            party = cand_party.get(r["candidate_id"], "IND")
+            fp_total[(r["district_id"], party)] += r.get("total_votes") or 0
+
+    # Emit one row per (district, party) that had either a win or any FP votes,
+    # so non-winning parties still get a row with seats_won=0 and their FP total.
+    keys = set(tally.keys()) | set(fp_total.keys())
     result = []
-    for (did, pab), seats in tally.items():
+    for (did, pab) in keys:
         result.append({
-            "election_id":   election_id,
-            "district_id":   did,
-            "party_ab":      pab,
-            "seats_won":     seats,
-            "total_fp_votes": None,
+            "election_id":    election_id,
+            "district_id":    did,
+            "party_ab":       pab,
+            "seats_won":      tally.get((did, pab), 0),
+            "total_fp_votes": fp_total.get((did, pab)) if fp else None,
         })
     return result
 

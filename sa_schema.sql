@@ -56,6 +56,11 @@ CREATE TABLE IF NOT EXISTS sa_district_fp (
     candidate_id INTEGER NOT NULL,
     total_votes  INTEGER NOT NULL DEFAULT 0,
     vote_pct     REAL,
+    -- Turnout and informal-vote tracking (populated when the source files
+    -- expose an enrolment column; left NULL otherwise).
+    informal_votes INTEGER DEFAULT 0,
+    total_enrolled INTEGER,
+    turnout_pct    REAL,
     UNIQUE (election_id, district_id, candidate_id),
     FOREIGN KEY (election_id) REFERENCES sa_elections(election_id)
 );

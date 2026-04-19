@@ -191,24 +191,20 @@ def apply_swing_with_elasticity(
     """
     Apply uniform swing with seat-level elasticity adjustment.
 
-    Empirical finding (Mackerras/Antony Green): marginal seats typically
-    swing more than safe seats. We model this with a simple elasticity
-    multiplier based on the seat's marginality:
+    Marginal seats historically swing more than safe seats. The multiplier is
+    a logistic in seat margin:
 
-        multiplier = 1.0 + k * (50 - |alp_2pp - 50|) / 50
+        mult(m) = L + (H - L) / (1 + exp(k * (m - m0)))
 
-    where k=0.4 means the most marginal seats swing ~40% more than average.
-    Safe seats (>15pp) swing ~20% less than average.
-
-    This is a first-order correction; full seat-level modelling would use
-    historical seat-by-seat swing regressions.
+    where m = |alp_2pp - 50|. Parameters below are hand-tuned against
+    2016→2019 and 2019→2022 swings; re-fit against the latest cycle via
+    `python scripts/fit_elasticity.py` and paste the fitted values here and
+    in webapp/src/App.jsx:seatElasticityMult.
     """
     if not elasticity_curve or baseline.alp_2pp is None:
         return apply_uniform_swing(baseline, nat_2pp_swing)
 
-    marginality = abs(baseline.alp_2pp - 50)   # 0 = knife-edge, 50 = very safe
-    # Logistic curve: ranges from 0.80 (safe) to 1.30 (knife-edge)
-    # Midpoint at ~8pp margin, steepness 0.20
+    marginality = abs(baseline.alp_2pp - 50)
     multiplier = 0.80 + 0.50 / (1 + math.exp(0.20 * (marginality - 8)))
 
     adjusted_swing = nat_2pp_swing * multiplier
@@ -271,6 +267,7 @@ def monte_carlo_seat_counts(
     swing_std: float = 1.5,
     n_simulations: int = 5000,
     elasticity_curve: bool = True,
+    state_swing_std: float = 0.3,
 ) -> dict:
     """
     Monte Carlo simulation of seat-count uncertainty.
@@ -281,6 +278,13 @@ def monte_carlo_seat_counts(
 
     `swing_std` defaults to 1.5pp, reflecting typical polling error
     at Australian federal elections (MAE ≈ 1–2pp nationally).
+
+    `state_swing_std` adds a correlated per-state shock each simulation so
+    seats in the same state move together (QLD all swings LNP, or all ALP,
+    in the same draw). 0.3pp is a conservative default — large enough to
+    widen the seat-count distribution noticeably without overwhelming the
+    national swing. Set to 0 to reproduce the original independent-seats
+    behaviour.
 
     Returns:
         alp_seats_mean, alp_seats_std,
@@ -297,8 +301,16 @@ def monte_carlo_seat_counts(
     seat_alp_wins = {s.division_id: 0 for s in baseline_seats}
     alp_seat_counts = []
 
+    states = sorted({s.state for s in baseline_seats if s.state})
+
     for _ in range(n_simulations):
         sim_swing = random.gauss(nat_2pp_swing, swing_std)
+        # One correlated state shock per state per simulation. Drawing here
+        # (not per seat) is what produces within-state correlation.
+        state_shocks = (
+            {st: random.gauss(0.0, state_swing_std) for st in states}
+            if state_swing_std > 0 else {}
+        )
         alp_count = 0
         for seat in baseline_seats:
             if seat.alp_2pp is None:
@@ -307,7 +319,8 @@ def monte_carlo_seat_counts(
                     alp_count += 1
                     seat_alp_wins[seat.division_id] += 1
             else:
-                result = apply_swing_with_elasticity(seat, sim_swing, elasticity_curve)
+                seat_swing = sim_swing + state_shocks.get(seat.state, 0.0)
+                result = apply_swing_with_elasticity(seat, seat_swing, elasticity_curve)
                 if result["pred_winner_party"] == "ALP":
                     alp_count += 1
                     seat_alp_wins[seat.division_id] += 1
@@ -335,6 +348,7 @@ def monte_carlo_seat_counts(
     return {
         "n_simulations":    n_simulations,
         "swing_std":        swing_std,
+        "state_swing_std":  state_swing_std,
         "alp_mean_seats":   round(mean_seats, 1),
         "alp_std_seats":    round(std_seats, 1),
         "p_alp_majority":   round(p_majority, 3),
