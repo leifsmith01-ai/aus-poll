@@ -1754,21 +1754,19 @@ function getFpGroups(seat) {
 }
 
 // ── Seat elasticity model ────────────────────────────────────────────────────
-// Marginal seats historically swing more than safe seats. Based on 2016→2019
-// and 2019→2022 federal elections, a smooth logistic multiplier is applied to
-// the national 2PP swing before adding it to each seat's baseline.
+// Marginal seats historically swing more than safe seats. A smooth logistic
+// multiplier is applied to the national 2PP swing before adding it to each
+// seat's baseline:
 //
-// The logistic curve provides a continuous transition:
-//   ~0pp margin  (knife-edge):  ~1.30×
-//   ~8pp margin  (marginal):    ~1.05×
-//   ~15pp margin (competitive): ~0.90×
-//   ~25pp+       (safe):        ~0.80×
+//     mult(m) = L + (H - L) / (1 + exp(k * (m - m0)))
 //
-// This avoids discontinuities where a seat at 5.0pp = 1.30× but 5.1pp = 1.15×.
+// where m = |alp_2pp - 50|. L is the safe-seat asymptote, H the knife-edge
+// asymptote, m0 the midpoint, k the steepness. Defaults below are hand-tuned
+// references against 2016→2019 and 2019→2022 swings; re-fit against 2022→2025
+// (or later) actuals via `python scripts/fit_elasticity.py` and paste the
+// reported values here and in pipeline/backtest.py:apply_swing_with_elasticity.
 function seatElasticityMult(alp2pp) {
   const m = Math.abs(alp2pp - 50);
-  // Logistic curve: ranges from 0.80 (safe) to 1.30 (knife-edge)
-  // Midpoint at ~8pp margin, steepness 0.20
   return 0.80 + 0.50 / (1 + Math.exp(0.20 * (m - 8)));
 }
 

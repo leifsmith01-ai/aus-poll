@@ -191,24 +191,20 @@ def apply_swing_with_elasticity(
     """
     Apply uniform swing with seat-level elasticity adjustment.
 
-    Empirical finding (Mackerras/Antony Green): marginal seats typically
-    swing more than safe seats. We model this with a simple elasticity
-    multiplier based on the seat's marginality:
+    Marginal seats historically swing more than safe seats. The multiplier is
+    a logistic in seat margin:
 
-        multiplier = 1.0 + k * (50 - |alp_2pp - 50|) / 50
+        mult(m) = L + (H - L) / (1 + exp(k * (m - m0)))
 
-    where k=0.4 means the most marginal seats swing ~40% more than average.
-    Safe seats (>15pp) swing ~20% less than average.
-
-    This is a first-order correction; full seat-level modelling would use
-    historical seat-by-seat swing regressions.
+    where m = |alp_2pp - 50|. Parameters below are hand-tuned against
+    2016→2019 and 2019→2022 swings; re-fit against the latest cycle via
+    `python scripts/fit_elasticity.py` and paste the fitted values here and
+    in webapp/src/App.jsx:seatElasticityMult.
     """
     if not elasticity_curve or baseline.alp_2pp is None:
         return apply_uniform_swing(baseline, nat_2pp_swing)
 
-    marginality = abs(baseline.alp_2pp - 50)   # 0 = knife-edge, 50 = very safe
-    # Logistic curve: ranges from 0.80 (safe) to 1.30 (knife-edge)
-    # Midpoint at ~8pp margin, steepness 0.20
+    marginality = abs(baseline.alp_2pp - 50)
     multiplier = 0.80 + 0.50 / (1 + math.exp(0.20 * (marginality - 8)))
 
     adjusted_swing = nat_2pp_swing * multiplier
