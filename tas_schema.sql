@@ -80,7 +80,10 @@ CREATE TABLE IF NOT EXISTS tas_district_fp (
 
 -- ── TAS District Summary (party seats per district) ────────
 -- Aggregate seats won by party per district — convenient for Hare-Clark
--- analysis where TCP is not applicable.
+-- analysis where TCP is not applicable. Column naming is intentionally
+-- identical to act_district_party_seats so the shared _derive_party_seats()
+-- helper in pipeline/state_parse.py can populate both tables with the
+-- same dict schema.
 CREATE TABLE IF NOT EXISTS tas_district_party_seats (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     election_id  INTEGER NOT NULL,

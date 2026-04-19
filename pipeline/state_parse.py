@@ -646,9 +646,9 @@ def _parse_hare_clark(file_paths: dict[str, str], election_id: int,
             result["fp"] = _parse_fp_csv(fp_path, election_id,
                                           result["candidates"], result["districts"])
 
-    # Derive party_seats from candidates
+    # Derive party_seats from candidates (with FP totals enrichment)
     result["party_seats"] = _derive_party_seats(
-        election_id, result["candidates"], result["districts"]
+        election_id, result["candidates"], result["districts"], result["fp"]
     )
 
     return result
@@ -731,32 +731,46 @@ def _parse_tcp_csv(path: str, election_id: int,
 
 def _derive_party_seats(election_id: int,
                           candidates: list[dict],
-                          districts: list[dict]) -> list[dict]:
-    """
-    Derive party seat totals per district from the elected column.
-    Used for Hare-Clark states where individual candidates can be
-    elected multiple times (up to seats_in_district).
+                          districts: list[dict],
+                          fp: list[dict] | None = None) -> list[dict]:
+    """Derive party seat totals per district from the elected column.
+
+    Used for Hare-Clark states (TAS, ACT) where individual candidates can be
+    elected multiple times up to seats_in_district. Writes into the
+    identically-named `tas_district_party_seats` / `act_district_party_seats`
+    tables defined in tas_schema.sql and act_schema.sql.
+
+    When `fp` rows are supplied, aggregates FP totals per (district, party)
+    to populate `total_fp_votes`. Otherwise that column is left NULL.
     """
     from collections import defaultdict
     # {(district_id, party_ab): seats_won}
     tally: dict[tuple, int] = defaultdict(int)
-    fp_total: dict[tuple, int] = defaultdict(int)
+    cand_party: dict[int, str] = {}
 
     for c in candidates:
+        party = c.get("party_ab") or "IND"
+        cand_party[c["candidate_id"]] = party
         if c["elected"] > 0:
-            key = (c["district_id"], c.get("party_ab") or "IND")
-            tally[key] += 1
+            tally[(c["district_id"], party)] += 1
 
-    # fp totals per (district, party) are not readily available here
-    # without the fp list; leave as None — callers can enrich if needed.
+    fp_total: dict[tuple, int] = defaultdict(int)
+    if fp:
+        for r in fp:
+            party = cand_party.get(r["candidate_id"], "IND")
+            fp_total[(r["district_id"], party)] += r.get("total_votes") or 0
+
+    # Emit one row per (district, party) that had either a win or any FP votes,
+    # so non-winning parties still get a row with seats_won=0 and their FP total.
+    keys = set(tally.keys()) | set(fp_total.keys())
     result = []
-    for (did, pab), seats in tally.items():
+    for (did, pab) in keys:
         result.append({
-            "election_id":   election_id,
-            "district_id":   did,
-            "party_ab":      pab,
-            "seats_won":     seats,
-            "total_fp_votes": None,
+            "election_id":    election_id,
+            "district_id":    did,
+            "party_ab":       pab,
+            "seats_won":      tally.get((did, pab), 0),
+            "total_fp_votes": fp_total.get((did, pab)) if fp else None,
         })
     return result
 
