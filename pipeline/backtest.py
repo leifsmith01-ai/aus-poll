@@ -267,6 +267,7 @@ def monte_carlo_seat_counts(
     swing_std: float = 1.5,
     n_simulations: int = 5000,
     elasticity_curve: bool = True,
+    state_swing_std: float = 0.3,
 ) -> dict:
     """
     Monte Carlo simulation of seat-count uncertainty.
@@ -277,6 +278,13 @@ def monte_carlo_seat_counts(
 
     `swing_std` defaults to 1.5pp, reflecting typical polling error
     at Australian federal elections (MAE ≈ 1–2pp nationally).
+
+    `state_swing_std` adds a correlated per-state shock each simulation so
+    seats in the same state move together (QLD all swings LNP, or all ALP,
+    in the same draw). 0.3pp is a conservative default — large enough to
+    widen the seat-count distribution noticeably without overwhelming the
+    national swing. Set to 0 to reproduce the original independent-seats
+    behaviour.
 
     Returns:
         alp_seats_mean, alp_seats_std,
@@ -293,8 +301,16 @@ def monte_carlo_seat_counts(
     seat_alp_wins = {s.division_id: 0 for s in baseline_seats}
     alp_seat_counts = []
 
+    states = sorted({s.state for s in baseline_seats if s.state})
+
     for _ in range(n_simulations):
         sim_swing = random.gauss(nat_2pp_swing, swing_std)
+        # One correlated state shock per state per simulation. Drawing here
+        # (not per seat) is what produces within-state correlation.
+        state_shocks = (
+            {st: random.gauss(0.0, state_swing_std) for st in states}
+            if state_swing_std > 0 else {}
+        )
         alp_count = 0
         for seat in baseline_seats:
             if seat.alp_2pp is None:
@@ -303,7 +319,8 @@ def monte_carlo_seat_counts(
                     alp_count += 1
                     seat_alp_wins[seat.division_id] += 1
             else:
-                result = apply_swing_with_elasticity(seat, sim_swing, elasticity_curve)
+                seat_swing = sim_swing + state_shocks.get(seat.state, 0.0)
+                result = apply_swing_with_elasticity(seat, seat_swing, elasticity_curve)
                 if result["pred_winner_party"] == "ALP":
                     alp_count += 1
                     seat_alp_wins[seat.division_id] += 1
@@ -331,6 +348,7 @@ def monte_carlo_seat_counts(
     return {
         "n_simulations":    n_simulations,
         "swing_std":        swing_std,
+        "state_swing_std":  state_swing_std,
         "alp_mean_seats":   round(mean_seats, 1),
         "alp_std_seats":    round(std_seats, 1),
         "p_alp_majority":   round(p_majority, 3),
