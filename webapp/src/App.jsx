@@ -2984,30 +2984,41 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
     }
 
     // ── Standard 2PP-swing calculation ───────────────────────────────────────
+    // Default undefined state swing components to 0 so NaN doesn't propagate
+    // when the caller omits a party's swing.
+    const sAlp  = swings.alp  ?? 0;
+    const sCoal = swings.coal ?? 0;
+    const sGrn  = swings.grn  ?? 0;
+    const sOn   = swings.on   ?? 0;
     let swingToT1 = 0;
     if (isAlp1 && isCoal2) swingToT1 = effectiveSwing2pp * regionMult * elastMult;
     else if (isCoal1 && isAlp2) swingToT1 = -effectiveSwing2pp * regionMult * elastMult;
-    else if (isGrn1 && isAlp2) swingToT1 = (swings.grn - swings.alp) / 2 * regionMult;
-    else if (isGrn1 && isCoal2) swingToT1 = (swings.grn - (swings.coal ?? 0)) / 2 * regionMult;
-    else if (isAlp1 && isGrn2) swingToT1 = (swings.alp - swings.grn) / 2 * regionMult;
-    else if (isCoal1 && isGrn2) swingToT1 = -(swings.grn - (swings.coal ?? 0)) / 2 * regionMult;
+    else if (isGrn1 && isAlp2) swingToT1 = (sGrn - sAlp) / 2 * regionMult;
+    else if (isGrn1 && isCoal2) swingToT1 = (sGrn - sCoal) / 2 * regionMult;
+    else if (isAlp1 && isGrn2) swingToT1 = (sAlp - sGrn) / 2 * regionMult;
+    else if (isCoal1 && isGrn2) swingToT1 = -(sGrn - sCoal) / 2 * regionMult;
     // ON is a named-party challenger in a Coal-held seat: use primary swing differential.
     // When LNP primary drops and ON primary rises (typical right-side fragmentation), the
     // LNP vs ON margin responds strongly to that differential rather than the ALP 2PP swing.
     // Factor 0.6: ~60% of the raw primary differential translates to TCP margin shift after
     // preferences flow (ALP/GRN voters all preference LNP over ON, reducing net ON gain).
-    else if (isCoal1 && isOn2) swingToT1 = (swings.coal - (swings.on ?? 0)) * 0.6 * regionMult;
-    else if (isOn1 && isCoal2) swingToT1 = ((swings.on ?? 0) - swings.coal) * 0.6 * regionMult;
+    else if (isCoal1 && isOn2) swingToT1 = (sCoal - sOn) * 0.6 * regionMult;
+    else if (isOn1 && isCoal2) swingToT1 = (sOn - sCoal) * 0.6 * regionMult;
     else if (isCoal1 && isInd2) swingToT1 = -swing2pp * 0.3;  // IND challenger (not ON) — no regionMult
     else if (isInd1) swingToT1 = (isAlp2 ? -1 : 1) * swing2pp * 0.3;  // IND seats — no regionMult
+
+    // Final NaN guard: if either effectiveSwing2pp or a party swing produced
+    // NaN (e.g. empty statewide primary input), fall back to no swing.
+    if (!Number.isFinite(swingToT1)) swingToT1 = 0;
 
     const newMargin = seat.margin + swingToT1;
     const holds = newMargin > 0;
     const projWinnerParty = holds ? t1 : t2;
     const projWinnerGroup = getParty(projWinnerParty).group;
-    const projAlp2pp = (isAlp1 || isAlp2)
+    const projAlp2ppRaw = (isAlp1 || isAlp2)
       ? (isAlp1 ? 50 + newMargin : 50 - newMargin)
       : null;
+    const projAlp2pp = Number.isFinite(projAlp2ppRaw) ? projAlp2ppRaw : null;
     return {
       ...seat,
       modelled: {
