@@ -2146,6 +2146,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
           winnerParty: wParty, winnerGroup: wGroup, winnerPct: wPct,
           projAlp2pp: synthAlp2pp,
           isSynthetic2pp: true,
+          isOnRace: true,
           changed: wGroup !== getParty(seat.winner.party).group,
           isOverride: !isAutoMatchup,
           isAutoMatchup,
@@ -2191,6 +2192,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
           winnerParty: wParty, winnerGroup: wGroup, winnerPct: wPct,
           projAlp2pp: synthAlp2pp,
           isSynthetic2pp: true,
+          isOnRace: true,
           changed: wGroup !== getParty(seat.winner.party).group,
           isOverride: !isAutoMatchup,
           isAutoMatchup,
@@ -3517,13 +3519,27 @@ export default function App() {
   // non-null. One seat = one vote, so this is geographically distributed and correlates
   // directly with the seat count (unlike implied2pp which is a national vote-share aggregate
   // that can fall below 50% while ALP still wins a majority of seats).
+  //
+  // ON-race seats (ON in the final 2CP) carry a synthetic ALP-vs-Coalition 2PP number
+  // computed with standard flows. That number does not describe the actual race, so it
+  // is excluded here — otherwise the national tracker moves based on flows that nobody
+  // is actually voting through in those seats.
   const seatAvg2pp = useMemo(() => {
     const vals = modelledSeats
+      .filter(s => !s.modelled.isOnRace)
       .map(s => s.modelled.projAlp2pp)
       .filter(v => v !== null && v !== undefined && isFinite(v));
     if (vals.length === 0) return null;
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   }, [modelledSeats]);
+
+  // ON-race seats: the model has flagged these as ON-vs-ALP or ON-vs-Coalition in the
+  // final 2CP. Surface them so the UI can render them separately rather than mixing
+  // their (synthetic) ALP-2PP values into national aggregates.
+  const onRaceSeats = useMemo(
+    () => modelledSeats.filter(s => s.modelled.isOnRace),
+    [modelledSeats],
+  );
 
   // ── VIC modelling ──
   const vicModelledSeats = useMemo(() => {
