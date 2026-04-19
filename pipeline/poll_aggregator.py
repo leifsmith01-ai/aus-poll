@@ -302,10 +302,14 @@ def run_vic(
         result = aggregate_at_date(polls, ref_date, he, metric, window_days=current_window)
         current[metric] = result
 
-    he_summary = {
-        metric: {k: v for k, v in sorted(he.items(), key=lambda x: -abs(x[1]))}
-        for metric, he in house_effects.items()
-    }
+    he_summary: dict[str, dict] = {}
+    he_converged: dict[str, bool] = {}
+    for metric, he in house_effects.items():
+        pollsters_only = {k: v for k, v in he.items() if not k.startswith("__")}
+        he_converged[metric] = bool(he.get("__converged", False))
+        he_summary[metric] = {
+            k: v for k, v in sorted(pollsters_only.items(), key=lambda x: -abs(x[1]))
+        }
 
     output = {
         "generated":   ref_date.isoformat(),
@@ -321,7 +325,8 @@ def run_vic(
                     "Party key 'lp' = Liberal (not 'coal'). "
                     "'ind' = all independents tracked as a group.",
         },
-        "house_effects": he_summary,
+        "house_effects":          he_summary,
+        "house_effect_converged": he_converged,
         "current":       current,
         "trend":         trend,
         "polls":         polls,
@@ -458,10 +463,14 @@ def run_state(
         result = aggregate_at_date(polls, ref_date, he, metric, window_days=current_window)
         current[metric] = result
 
-    he_summary = {
-        metric: {k: v for k, v in sorted(he.items(), key=lambda x: -abs(x[1]))}
-        for metric, he in house_effects.items()
-    }
+    he_summary: dict[str, dict] = {}
+    he_converged: dict[str, bool] = {}
+    for metric, he in house_effects.items():
+        pollsters_only = {k: v for k, v in he.items() if not k.startswith("__")}
+        he_converged[metric] = bool(he.get("__converged", False))
+        he_summary[metric] = {
+            k: v for k, v in sorted(pollsters_only.items(), key=lambda x: -abs(x[1]))
+        }
 
     output = {
         "generated":   ref_date.isoformat(),
@@ -475,7 +484,8 @@ def run_state(
             "tpp_pref_flows":        pref_flows,
             "coalition_key":         coal_key,
         },
-        "house_effects": he_summary,
+        "house_effects":          he_summary,
+        "house_effect_converged": he_converged,
         "current":       current,
         "trend":         trend,
         "polls":         polls,
@@ -606,15 +616,19 @@ def compute_house_effects(
     Weights combine exponential time-decay with sqrt(n/median_n) sample-size scaling.
 
     Returns a dict of {pollster: bias} where a positive bias means the pollster
-    shows higher values for `metric` than the consensus.
+    shows higher values for `metric` than the consensus. The returned dict also
+    carries a `__converged` key (True/False) so callers can flag non-convergence
+    in their output. (Ordinary pollster names never start with `__`.)
     """
     valid = [p for p in polls if p.get(metric) is not None]
     if not valid:
         return {}
 
     house_effects: dict[str, float] = {}
+    converged = False
+    last_max_change = float("inf")
 
-    for _ in range(iterations):
+    for iteration in range(iterations):
         # Compute decay+size-weighted mean after subtracting current house effects
         values, weights = [], []
         for p in valid:
@@ -650,10 +664,25 @@ def compute_house_effects(
             house_effects[pollster] = house_effects.get(pollster, 0.0) + delta
             max_change = max(max_change, abs(delta))
 
+        last_max_change = max_change
         if max_change < tolerance:
+            converged = True
             break
 
-    return {k: round(v, 3) for k, v in house_effects.items()}
+    if not converged:
+        logger.warning(
+            "House-effect correction did not converge for metric %s after %d "
+            "iterations (last max change = %.4g, tolerance = %.4g). Consider "
+            "raising HOUSE_EFFECT_ITERATIONS or widening MIN_POLLS_FOR_HE.",
+            metric, iterations, last_max_change, tolerance,
+        )
+
+    result: dict[str, float] = {k: round(v, 3) for k, v in house_effects.items()}
+    # Carry a non-numeric convergence flag alongside the pollster entries so
+    # callers can surface it in the aggregated output. Pollster names in
+    # practice never start with `__`, so this namespace collision is safe.
+    result["__converged"] = converged
+    return result
 
 
 def aggregate_at_date(
@@ -882,11 +911,16 @@ def run(
                 current.get("tpp_eff", {}).get("lo95", float("nan")),
                 current.get("tpp_eff", {}).get("hi95", float("nan")))
 
-    # Step 5: Summarise house effects for output
+    # Step 5: Summarise house effects for output. Pop the __converged sentinel
+    # out of each metric's dict into a parallel convergence map so consumers
+    # can see per-metric convergence status without numeric sentinel pollution.
     he_summary: dict[str, dict] = {}
+    he_converged: dict[str, bool] = {}
     for metric, he in house_effects.items():
+        pollsters_only = {k: v for k, v in he.items() if not k.startswith("__")}
+        he_converged[metric] = bool(he.get("__converged", False))
         he_summary[metric] = {
-            k: v for k, v in sorted(he.items(), key=lambda x: -abs(x[1]))
+            k: v for k, v in sorted(pollsters_only.items(), key=lambda x: -abs(x[1]))
         }
 
     # Step 5b: State-level swing deviations (populated when state polls are present)
@@ -912,6 +946,7 @@ def run(
             "tpp_pref_flows":            DEFAULT_PREF_FLOWS,
         },
         "house_effects": he_summary,
+        "house_effect_converged": he_converged,
         "current": current,
         "trend": trend,
         "state_swings": state_swings,
