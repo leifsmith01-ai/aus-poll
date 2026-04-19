@@ -2711,6 +2711,9 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
                         - computeVic2pp(sf,     prefFlows, onTcpMatchup);
     }
 
+    const sAlpV = swings.alp ?? 0;
+    const sCoalV = swings.coal ?? 0;
+    const sGrnV = swings.grn ?? 0;
     let swingToT1 = 0;
     if (t1 === "ALP" && ["LP", "NP"].includes(t2)) {
       swingToT1 = effectiveVicSwing * regionMult;
@@ -2718,20 +2721,22 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
       swingToT1 = -effectiveVicSwing * regionMult;
     } else if (t1 === "GRN" && t2 === "ALP") {
       // GRN vs ALP: driven by GRN primary swing relative to ALP swing (Greens inner city)
-      swingToT1 = (swings.grn - swings.alp) / 2 * regionMult;
+      swingToT1 = (sGrnV - sAlpV) / 2 * regionMult;
     } else if (t1 === "GRN" && ["LP", "NP"].includes(t2)) {
-      swingToT1 = (swings.grn - (swings.coal ?? 0)) / 2 * regionMult;
+      swingToT1 = (sGrnV - sCoalV) / 2 * regionMult;
     } else if (t1 === "IND") {
       // Independents: insulated from state swing (personal vote dominant); 30% sensitivity
       swingToT1 = (t2 === "ALP" ? -1 : 1) * effectiveVicSwing * 0.3;
     }
+    if (!Number.isFinite(swingToT1)) swingToT1 = 0;
     const newMargin = seat.margin + swingToT1;
     const holds = newMargin > 0;
     const projWinnerParty = holds ? t1 : t2;
     const projWinnerGroup = getParty(projWinnerParty).group;
-    const projAlp2pp = (t1 === "ALP" || t2 === "ALP")
+    const projAlp2ppRaw = (t1 === "ALP" || t2 === "ALP")
       ? (t1 === "ALP" ? 50 + newMargin : 50 - newMargin)
       : null;
+    const projAlp2pp = Number.isFinite(projAlp2ppRaw) ? projAlp2ppRaw : null;
     return {
       ...seat,
       modelled: {
