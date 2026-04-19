@@ -1977,15 +1977,39 @@ function computeNat2pp(prim, flows) {
   return a / (a + c) * 100;
 }
 
+// ── Named model parameters ───────────────────────────────────────────────────
+// Collected so the previously scattered magic numbers have one documented home.
+// Touch these rather than the raw literals, unless you're changing the logic
+// and want to leave the default behaviour unchanged.
+const MODEL_PARAMS = {
+  // ON auto-detection threshold: if a seat's projected One Nation first
+  // preference exceeds this %, and neither ALP nor Coalition is comfortably
+  // above it, the model auto-selects the ON-vs-Coal or ON-vs-ALP TCP matchup
+  // rather than ALP-vs-Coalition. 6.5% was chosen because below it, ON is
+  // essentially never in the final 2CP even in their strongest regional seats
+  // (cf. 2022/2025 actuals). Sensitivity: lower → more seats flagged as ON
+  // races; higher → misses genuinely ON-contested regional seats.
+  onThresholdDefault: 6.5,
+
+  // Calibration fade half-width (in pp of national 2PP swing). SEAT_CALIB_2025
+  // is fitted to the 2025 actual outcome. At larger national swings the fitted
+  // offset is increasingly unreliable (pref flows and FP shares move in ways
+  // the offset cannot anticipate), so the offset is linearly blended to zero
+  // over this window. 5pp is roughly the largest single-cycle national swing
+  // observed since the mid-90s — beyond that, we trust the primary model.
+  calibFadeHalfWidth: 5,
+
+  // State-swing blending weight α: seatSwing = α·stateSwing + (1−α)·nationalSwing.
+  // 0.6 reflects moderate trust in state polling when available. When state
+  // polling is denser, individual state swings can override this via `ss.alpha`.
+  stateSwingAlpha: 0.6,
+};
+
 // ── State-level swing overlay ────────────────────────────────────────────────
 // When state-specific polling data is available, blends state swings with
 // national swings for seats in that state. This captures regional variation
 // (e.g., QLD and WA regularly deviate from national swing by 2–4pp).
-//
-// Blending: seatSwing = α × stateSwing + (1−α) × nationalSwing
-// α reflects state poll reliability (more state polls → higher α).
-// Default α = 0.6 (moderate trust in state polling).
-const STATE_SWING_ALPHA = 0.6;
+const STATE_SWING_ALPHA = MODEL_PARAMS.stateSwingAlpha;
 
 function blendSwings(nationalSwings, stateSwings, state) {
   const ss = stateSwings?.[state];
@@ -2226,7 +2250,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         // average flows; subtracting it re-bases the calibration to the actual DOP flows.
         // Not applied when the user has set a per-seat pref flow override.
         if (!override.prefFlows) {
-          const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / 5);
+          const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / MODEL_PARAMS.calibFadeHalfWidth);
           const calib = (SEAT_CALIB_2025[seat.id] ?? 0) - dopCalibDelta(seat.id);
           projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + calib * calibBlend));
         }
@@ -2254,7 +2278,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
           // Apply calibration offset (Phase 1): blends to zero at ±5pp national swing.
           // dopCalibDelta corrects for SEAT_CALIB_2025 having been computed against national
           // average flows; subtracting it re-bases the calibration to the actual DOP flows.
-          const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / 5);
+          const calibBlend = Math.max(0, 1 - Math.abs(nat2ppSwing) / MODEL_PARAMS.calibFadeHalfWidth);
           const calib = (SEAT_CALIB_2025[seat.id] ?? 0) - dopCalibDelta(seat.id);
           projAlp2pp = Math.min(100, Math.max(0, projAlp2pp + calib * calibBlend));
         } else {
@@ -3327,7 +3351,7 @@ export default function App() {
   const [stateOverrideSearch, setStateOverrideSearch] = useState("");
 
   // ── Modifiable ON/Elasticity/Uncertainty settings ──
-  const [onThreshold, setOnThreshold] = useState(6.5);   // % ON primary to auto-detect TCP
+  const [onThreshold, setOnThreshold] = useState(MODEL_PARAMS.onThresholdDefault);   // % ON primary to auto-detect TCP
   const [useElasticity, setUseElasticity] = useState(false); // apply seat-level swing elasticity
   const [useEconomicAdj, setUseEconomicAdj] = useState(false); // apply Cameron & Crosby economic structural adjustment
   const [swingStd, setSwingStd] = useState(1.5);   // polling uncertainty (pp std dev)
@@ -4244,7 +4268,7 @@ export default function App() {
     prefFlows.teal_alp_v_on !== 0.75 || prefFlows.other_alp_v_on !== 0.60 ||
     prefFlows.alp_on_v_coal !== 0.20 || prefFlows.grn_on_v_coal !== 0.08 ||
     prefFlows.teal_on_v_coal !== 0.12 || prefFlows.other_on_v_coal !== 0.25 ||
-    onThreshold !== 6.5 ||
+    onThreshold !== MODEL_PARAMS.onThresholdDefault ||
     Object.keys(seatOverrides).length > 0;
 
   const getModelledMargin = (s) => {
@@ -4493,7 +4517,7 @@ export default function App() {
   const resetModel = () => {
     setPrimaries({ alp: BASELINE_2025.alp, coal: BASELINE_2025.coal, grn: BASELINE_2025.grn, teal: BASELINE_2025.teal, on: BASELINE_2025.on, undecided: 0 });
     setPrefFlows(PREF_FLOWS_2025);
-    setOnThreshold(6.5);
+    setOnThreshold(MODEL_PARAMS.onThresholdDefault);
     setSeatOverrides({});
   };
 
