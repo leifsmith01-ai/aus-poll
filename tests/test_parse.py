@@ -247,5 +247,54 @@ def test_parse_tcp_basic():
         os.unlink(path)
 
 
+# ── parse_vec_booths (VIC Tally Room booth-level CSV) ────────────────────────
+
+def test_parse_vec_booths_basic():
+    """Synthetic Tally Room booth CSV with one district-total row + two booths."""
+    from pipeline.vec_parse import parse_vec_booths
+
+    content = (
+        "DistrictID,PollingPlaceID,CandidateID,PollingPlaceName,"
+        "PremisesName,Address,Suburb,Postcode,Latitude,Longitude,"
+        "Ordinary,PrePoll,Total\n"
+        # District total row (PollingPlaceID=0) — must be skipped
+        "10,0,101,,,,,,, ,5000,1200,6200\n"
+        # Two real booths with two candidates each
+        "10,501,101,Melbourne Town Hall,Town Hall,100 Swanston St,Melbourne,3000,-37.815,144.966,1500,300,1800\n"
+        "10,501,102,Melbourne Town Hall,Town Hall,100 Swanston St,Melbourne,3000,-37.815,144.966,1000,200,1200\n"
+        "10,502,101,Fitzroy Library,Library,200 Napier St,Fitzroy,3065,-37.797,144.978,800,150,950\n"
+        "10,502,102,Fitzroy Library,Library,200 Napier St,Fitzroy,3065,-37.797,144.978,1200,250,1450\n"
+    )
+    path = _write_temp_csv(content)
+    try:
+        places, votes = parse_vec_booths(path, election_id=202211, result_type="fp")
+        assert len(places) == 2
+        assert {p["polling_place_id"] for p in places} == {501, 502}
+        assert places[0]["latitude"] == pytest.approx(-37.815)
+        assert len(votes) == 4
+        assert sum(v["total_votes"] for v in votes) == 1800 + 1200 + 950 + 1450
+        # PollingPlaceID=0 district-total row is excluded
+        assert all(v["polling_place_id"] != 0 for v in votes)
+    finally:
+        os.unlink(path)
+
+
+def test_parse_vec_booths_missing_total_derives_from_ordinary_prepoll():
+    """When Total is 0/blank, Ordinary + PrePoll should fill it in."""
+    from pipeline.vec_parse import parse_vec_booths
+
+    content = (
+        "DistrictID,PollingPlaceID,CandidateID,PollingPlaceName,"
+        "Ordinary,PrePoll,Total\n"
+        "10,501,101,Booth A,400,100,0\n"
+    )
+    path = _write_temp_csv(content)
+    try:
+        _places, votes = parse_vec_booths(path, election_id=202211)
+        assert votes[0]["total_votes"] == 500
+    finally:
+        os.unlink(path)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

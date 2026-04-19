@@ -313,6 +313,15 @@ def run_vic_pipeline(
         if parsed["tcp"]:
             db.load_vic_2cp(parsed["tcp"])
 
+        # Booth-level data (Tally Room CSVs). Only populated when the user
+        # supplies booth-level files via tally_room_booth_fp / _booth_tcp.
+        if parsed.get("polling_places"):
+            db.load_vic_polling_places(parsed["polling_places"])
+        if parsed.get("booth_fp"):
+            db.load_vic_booth_fp(parsed["booth_fp"])
+        if parsed.get("booth_2cp"):
+            db.load_vic_booth_2cp(parsed["booth_2cp"])
+
         logger.info("Database load complete for election %d.", election_id)
 
         # ── Step 4: Export to JSON ────────────────────────────────────────────

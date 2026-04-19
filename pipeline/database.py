@@ -555,6 +555,48 @@ def load_vic_2cp(records: list[dict], db_path: str = None) -> None:
         logger.info("Loaded %d VIC 2CP rows", n)
 
 
+def load_vic_polling_places(records: list[dict], db_path: str = None) -> None:
+    """Load VIC polling place (booth) metadata into vic_polling_places."""
+    if not records:
+        return
+    allowed = {
+        "polling_place_id", "election_id", "district_id", "polling_place_name",
+        "premises_name", "address", "suburb", "postcode", "latitude", "longitude",
+    }
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_polling_places", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC polling places", n)
+
+
+def load_vic_booth_fp(records: list[dict], db_path: str = None) -> None:
+    """Load VIC booth-level first-preference votes into vic_booth_fp."""
+    if not records:
+        return
+    allowed = {
+        "election_id", "district_id", "polling_place_id", "candidate_id",
+        "ordinary_votes", "prepoll_votes", "total_votes",
+    }
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_booth_fp", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC booth FP rows", n)
+
+
+def load_vic_booth_2cp(records: list[dict], db_path: str = None) -> None:
+    """Load VIC booth-level TCP votes into vic_booth_2cp."""
+    if not records:
+        return
+    allowed = {
+        "election_id", "district_id", "polling_place_id", "candidate_id",
+        "ordinary_votes", "prepoll_votes", "total_votes",
+    }
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_booth_2cp", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC booth 2CP rows", n)
+
+
 def get_vic_districts(election_id: int, db_path: str = None) -> list[dict]:
     """Return all VIC districts for an election with winner info."""
     conn = get_connection(db_path)
