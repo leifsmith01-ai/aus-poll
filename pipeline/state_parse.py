@@ -534,8 +534,12 @@ def _parse_generic_preferential(file_paths: dict[str, str], election_id: int,
     # ── TCP ──────────────────────────────────────────────────────────────────
     tcp_path = file_paths.get("tcp")
     if tcp_path:
+        # NT uses optional preferential voting — capture district-level
+        # exhausted totals when the source file exposes them.
+        include_exhausted = (label or "").upper() == "NT"
         result["tcp"] = _parse_tcp_csv(tcp_path, election_id, result["candidates"],
-                                        result["districts"])
+                                        result["districts"],
+                                        include_exhausted=include_exhausted)
 
     return result
 
@@ -690,8 +694,16 @@ def _parse_fp_csv(path: str, election_id: int,
 
 
 def _parse_tcp_csv(path: str, election_id: int,
-                    candidates: list[dict], districts: list[dict]) -> list[dict]:
-    """Parse a TCP CSV and match to known candidates/districts."""
+                    candidates: list[dict], districts: list[dict],
+                    include_exhausted: bool = False) -> list[dict]:
+    """Parse a TCP CSV and match to known candidates/districts.
+
+    When ``include_exhausted`` is True, the parser also reads an
+    "exhausted" (or "informal") column when present and attaches the
+    district-level exhausted vote total to every candidate row for
+    that district — matching the booth-level convention in
+    ``_parse_booth_tcp_csv``.
+    """
     cand_lookup = {
         (c["district_id"], c["surname"].upper()): c["candidate_id"]
         for c in candidates
@@ -699,6 +711,22 @@ def _parse_tcp_csv(path: str, election_id: int,
     dist_lookup = {d["district_name"].upper(): d["district_id"] for d in districts}
 
     rows = _read_csv(path)
+    # First pass: collect per-district exhausted totals when requested.
+    exhausted_by_district: dict[int, int] = {}
+    if include_exhausted:
+        for row in rows:
+            dcol = _find_col(row, "district", "electorate", "division")
+            ecol = _find_col(row, "exhaust", "informal")
+            if not (dcol and ecol):
+                continue
+            dname = row.get(dcol, "").strip().upper()
+            did   = dist_lookup.get(dname)
+            if did is None:
+                continue
+            value = _safe_int(row.get(ecol)) or 0
+            if value > exhausted_by_district.get(did, 0):
+                exhausted_by_district[did] = value
+
     tcp = []
     for row in rows:
         dcol  = _find_col(row, "district", "electorate", "division")
@@ -718,14 +746,17 @@ def _parse_tcp_csv(path: str, election_id: int,
         elected_raw = row.get(ecol, "0") if ecol else "0"
         elected = 1 if elected_raw.strip().lower() in ("1", "y", "yes", "true", "elected") else 0
 
-        tcp.append({
+        rec = {
             "election_id":  election_id,
             "district_id":  did,
             "candidate_id": cid,
             "total_votes":  _safe_int(row.get(vcol)) or 0 if vcol else 0,
             "vote_pct":     _safe_float(row.get(pcol)) if pcol else None,
             "elected":      elected,
-        })
+        }
+        if include_exhausted:
+            rec["exhausted_votes"] = exhausted_by_district.get(did, 0)
+        tcp.append(rec)
     return tcp
 
 

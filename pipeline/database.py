@@ -856,9 +856,13 @@ def load_state_2cp(state_ab: str, records: list[dict],
     if not records:
         return
     table = f"{state_ab.lower()}_district_2cp"
-    rows = [{k: v for k, v in r.items()
-             if k in ("election_id", "district_id", "candidate_id",
-                      "total_votes", "vote_pct", "elected")}
+    # nt_district_2cp carries an exhausted_votes column for optional
+    # preferential voting — other states' tables don't have it.
+    allowed = ["election_id", "district_id", "candidate_id",
+               "total_votes", "vote_pct", "elected"]
+    if state_ab.lower() == "nt":
+        allowed.append("exhausted_votes")
+    rows = [{k: v for k, v in r.items() if k in allowed}
             for r in records]
     with transaction(db_path) as conn:
         n = _bulk_insert(conn, table, rows, "OR REPLACE")

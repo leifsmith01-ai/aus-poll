@@ -71,16 +71,20 @@ CREATE TABLE IF NOT EXISTS nt_district_fp (
 
 -- ── NT Two-Candidate Preferred (district-level) ────────────
 -- Note: because NT uses optional preferential voting, 2CP counts
--- may include exhausted ballots; this is tracked separately via
--- the total_formal_votes column in nt_districts if needed.
+-- may exclude exhausted ballots (preferences stopped before reaching
+-- either final candidate). The exhausted_votes column records the
+-- district-level exhausted total when NTEC publishes it; otherwise
+-- it is left at the default 0. Booth-level exhausted totals live in
+-- nt_booth_2cp.exhausted_votes.
 CREATE TABLE IF NOT EXISTS nt_district_2cp (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    election_id  INTEGER NOT NULL,
-    district_id  INTEGER NOT NULL,
-    candidate_id INTEGER NOT NULL,
-    total_votes  INTEGER NOT NULL DEFAULT 0,
-    vote_pct     REAL,
-    elected      INTEGER DEFAULT 0,
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id     INTEGER NOT NULL,
+    district_id     INTEGER NOT NULL,
+    candidate_id    INTEGER NOT NULL,
+    total_votes     INTEGER NOT NULL DEFAULT 0,
+    vote_pct        REAL,
+    elected         INTEGER DEFAULT 0,
+    exhausted_votes INTEGER NOT NULL DEFAULT 0,
     UNIQUE (election_id, district_id, candidate_id),
     FOREIGN KEY (election_id) REFERENCES nt_elections(election_id)
 );
