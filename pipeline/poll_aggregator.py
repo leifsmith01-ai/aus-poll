@@ -42,6 +42,12 @@ SMOOTHING_WINDOW_DAYS = 14   # Rolling window for trend output points (days eith
 TREND_STEP_DAYS = 7          # Generate one trend point per week
 MEDIAN_SAMPLE_SIZE = 1500    # Normalisation base for sample-size weighting
 
+# Effective-sample-size / inverse-variance weighting. When True, a poll's weight
+# scales linearly with n (variance of a proportion ∝ 1/n, so inverse-variance ∝ n).
+# When False, uses sqrt(n) — a gentler scaling that historically avoids letting
+# one very large poll dominate. A/B flag so callers can compare aggregate MAE.
+USE_INVERSE_VARIANCE_WEIGHTING = False
+
 # ── Adaptive decay ────────────────────────────────────────────────────────────
 # Half-life shortens as election day approaches. 365+ days out → full 90-day
 # half-life; on election day → 14-day half-life. This makes the polling average
@@ -568,10 +574,16 @@ def _weighted_variance(values: list[float], weights: list[float], mean: float) -
 
 
 def _sample_weight(poll: dict, median_n: float = MEDIAN_SAMPLE_SIZE) -> float:
-    """Return a sample-size scaling factor: sqrt(n / median_n), or 1.0 if n is unknown."""
+    """Return a sample-size scaling factor.
+
+    With USE_INVERSE_VARIANCE_WEIGHTING=True, returns n / median_n (linear in
+    effective sample size — inverse-variance for a binomial proportion).
+    Otherwise returns sqrt(n / median_n). Returns 1.0 if n is unknown.
+    """
     n = poll.get("n")
     if n and n > 0:
-        return math.sqrt(n / median_n)
+        ratio = n / median_n
+        return ratio if USE_INVERSE_VARIANCE_WEIGHTING else math.sqrt(ratio)
     return 1.0
 
 
@@ -585,7 +597,7 @@ def _combined_weight(
 
     Combines three factors:
       1. Exponential time-decay (adaptive if days_to_election given)
-      2. Sample-size scaling: sqrt(n / median_n)
+      2. Sample-size scaling (sqrt(n/median_n) or n/median_n — see USE_INVERSE_VARIANCE_WEIGHTING)
       3. Methodology quality tier: live_phone > mixed > online_panel
 
     Returns the product of all three weights.
