@@ -1,0 +1,30 @@
+{
+  "source": "WA state-level polls (manual collection)",
+  "jurisdiction": "wa_state",
+  "election_date": "2029-03-10",
+  "note": "WA state polls. Schema mirrors data/polls/vic_polls.json. Populate with Newspoll WA state breakdowns, YouGov/Essential WA sub-national estimates, and dedicated WA state polls as they are collected. tpp = ALP 2-party-preferred vs Liberals/Nationals. n = sample size. Last election result (2025-03-08) used as baseline.",
+  "party_keys": {
+    "alp":  "Australian Labor Party (WA Branch)",
+    "lp":   "Liberal Party of Australia (WA Division)",
+    "nat":  "The Nationals WA",
+    "grn":  "The Greens (WA)",
+    "ind":  "Independents and other minor parties",
+    "on":   "Pauline Hanson's One Nation"
+  },
+  "polls": [
+    {
+      "scope": "WA",
+      "pollster": "2025 Election Result",
+      "date": "2025-03-08",
+      "alp": null,
+      "lp": null,
+      "nat": null,
+      "grn": null,
+      "ind": null,
+      "on": null,
+      "tpp": null,
+      "n": null,
+      "note": "WAEC 2025 baseline placeholder — fill in primary votes and tpp from the official declaration when available."
+    }
+  ]
+}
