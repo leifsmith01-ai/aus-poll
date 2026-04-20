@@ -3609,6 +3609,14 @@ export default function App() {
     vicModelledSeats.filter(s => s.modelled.changed),
     [vicModelledSeats]);
 
+  const vicSeatAvg2pp = useMemo(() => {
+    const vals = vicModelledSeats
+      .filter(s => s.modelled.projAlp2pp !== null && s.modelled.projAlp2pp !== undefined && isFinite(s.modelled.projAlp2pp))
+      .map(s => s.modelled.projAlp2pp);
+    if (vals.length === 0) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  }, [vicModelledSeats]);
+
   const vicImplied2pp = useMemo(() => {
     const onV = vicPrimaries.on ?? 0;
     const other = Math.max(0, 100 - vicPrimaries.alp - vicPrimaries.coal - vicPrimaries.grn - vicPrimaries.ind - onV - (vicPrimaries.undecided || 0));
@@ -6688,7 +6696,7 @@ export default function App() {
               {/* ── VIC Results panel ── */}
               <div>
                 {/* Summary stat cards */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                     {vicImplied2pp !== null ? (
@@ -6697,6 +6705,15 @@ export default function App() {
                         <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
                           {vicImplied2pp >= 50 ? `▲ +${(vicImplied2pp - VIC_RIGHT_BLOC_2PP_2022).toFixed(1)} vs 2022` : `▼ ${(vicImplied2pp - VIC_RIGHT_BLOC_2PP_2022).toFixed(1)} vs 2022`}
                         </div>
+                      </>
+                    ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
+                  </div>
+                  <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
+                    {vicSeatAvg2pp !== null ? (
+                      <>
+                        <div style={{ fontSize: 30, fontWeight: 800, color: vicSeatAvg2pp >= 50 ? "#059669" : "#DC2626" }}>{vicSeatAvg2pp.toFixed(1)}%</div>
+                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across 88 seats</div>
                       </>
                     ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
                   </div>
@@ -7080,6 +7097,12 @@ export default function App() {
               const grnProj = proj.greens || 0;
               const projMaj = alpProj >= majority ? "ALP majority" : (coalProj >= majority ? `${coalLabel} majority` : "Hung parliament");
               const majColor = alpProj >= majority ? "#DC2626" : (coalProj >= majority ? "#1D4ED8" : "#F59E0B");
+              const seatAvg2ppVal = (() => {
+                const vals = modelled
+                  .filter(s => s.modelled.projAlp2pp !== null && s.modelled.projAlp2pp !== undefined && isFinite(s.modelled.projAlp2pp))
+                  .map(s => s.modelled.projAlp2pp);
+                return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+              })();
 
               return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "320px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
                 {/* Controls */}
@@ -7177,7 +7200,7 @@ export default function App() {
 
                 {/* Results */}
                 <div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                       {implied2pp !== null ? (
@@ -7188,6 +7211,15 @@ export default function App() {
                           </div>
                         </>
                       ) : <div style={{ fontSize: 14, color: "#9CA3AF", marginTop: 8 }}>—</div>}
+                    </div>
+                    <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
+                      {seatAvg2ppVal !== null ? (
+                        <>
+                          <div style={{ fontSize: 30, fontWeight: 800, color: seatAvg2ppVal >= 50 ? "#059669" : "#DC2626" }}>{seatAvg2ppVal.toFixed(1)}%</div>
+                          <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across {totalSeats} seats</div>
+                        </>
+                      ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
                     </div>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
