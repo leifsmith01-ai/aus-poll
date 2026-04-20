@@ -69,6 +69,14 @@
       "Roy Morgan": 0.238
     }
   },
+  "house_effect_converged": {
+    "alp": false,
+    "coal": false,
+    "grn": false,
+    "on": false,
+    "teal": false,
+    "tpp_eff": false
+  },
   "current": {
     "alp": {
       "mean": 31.56,
