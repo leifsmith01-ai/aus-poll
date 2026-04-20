@@ -555,6 +555,48 @@ def load_vic_2cp(records: list[dict], db_path: str = None) -> None:
         logger.info("Loaded %d VIC 2CP rows", n)
 
 
+def load_vic_polling_places(records: list[dict], db_path: str = None) -> None:
+    """Load VIC polling place (booth) metadata into vic_polling_places."""
+    if not records:
+        return
+    allowed = {
+        "polling_place_id", "election_id", "district_id", "polling_place_name",
+        "premises_name", "address", "suburb", "postcode", "latitude", "longitude",
+    }
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_polling_places", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC polling places", n)
+
+
+def load_vic_booth_fp(records: list[dict], db_path: str = None) -> None:
+    """Load VIC booth-level first-preference votes into vic_booth_fp."""
+    if not records:
+        return
+    allowed = {
+        "election_id", "district_id", "polling_place_id", "candidate_id",
+        "ordinary_votes", "prepoll_votes", "total_votes",
+    }
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_booth_fp", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC booth FP rows", n)
+
+
+def load_vic_booth_2cp(records: list[dict], db_path: str = None) -> None:
+    """Load VIC booth-level TCP votes into vic_booth_2cp."""
+    if not records:
+        return
+    allowed = {
+        "election_id", "district_id", "polling_place_id", "candidate_id",
+        "ordinary_votes", "prepoll_votes", "total_votes",
+    }
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, "vic_booth_2cp", rows, "OR REPLACE")
+        logger.info("Loaded %d VIC booth 2CP rows", n)
+
+
 def get_vic_districts(election_id: int, db_path: str = None) -> list[dict]:
     """Return all VIC districts for an election with winner info."""
     conn = get_connection(db_path)
@@ -786,10 +828,13 @@ def load_state_fp(state_ab: str, records: list[dict],
     if not records:
         return
     table = f"{state_ab.lower()}_district_fp"
-    rows = [{k: v for k, v in r.items()
-             if k in ("election_id", "district_id", "candidate_id",
-                      "total_votes", "vote_pct")}
-            for r in records]
+    allowed = {
+        "election_id", "district_id", "candidate_id", "total_votes", "vote_pct",
+        # Turnout / enrolment columns — populated when the parser sourced them
+        # from an enrolment file; NULL when no enrolment data was available.
+        "informal_votes", "total_enrolled", "turnout_pct",
+    }
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
     with transaction(db_path) as conn:
         n = _bulk_insert(conn, table, rows, "OR REPLACE")
         logger.info("Loaded %d %s FP rows", n, state_ab.upper())
@@ -811,9 +856,13 @@ def load_state_2cp(state_ab: str, records: list[dict],
     if not records:
         return
     table = f"{state_ab.lower()}_district_2cp"
-    rows = [{k: v for k, v in r.items()
-             if k in ("election_id", "district_id", "candidate_id",
-                      "total_votes", "vote_pct", "elected")}
+    # nt_district_2cp carries an exhausted_votes column for optional
+    # preferential voting — other states' tables don't have it.
+    allowed = ["election_id", "district_id", "candidate_id",
+               "total_votes", "vote_pct", "elected"]
+    if state_ab.lower() == "nt":
+        allowed.append("exhausted_votes")
+    rows = [{k: v for k, v in r.items() if k in allowed}
             for r in records]
     with transaction(db_path) as conn:
         n = _bulk_insert(conn, table, rows, "OR REPLACE")

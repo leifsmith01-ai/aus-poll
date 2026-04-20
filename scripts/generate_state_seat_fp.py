@@ -268,10 +268,13 @@ def generate(state: str, election_id: int, db_path: Path) -> str | None:
     export-formatted constant block as a string (or None if no data).
     """
     if not db_path.exists():
-        print(f"ERROR: DB not found at {db_path}", file=sys.stderr)
-        print("Run the pipeline first: python main.py --state "
-              f"{state} --year {election_id}", file=sys.stderr)
-        sys.exit(1)
+        # Don't abort — callers in module mode want a placeholder module
+        # emitted even when the state DB hasn't been built locally yet.
+        print(
+            f"[INFO] DB not found at {db_path}; no {state.upper()} data available.",
+            file=sys.stderr,
+        )
+        return None
 
     conn = sqlite3.connect(db_path)
     try:
@@ -377,7 +380,32 @@ def main() -> None:
         if blocks:
             module_lines.append("\n\n".join(blocks))
             module_lines.append("")
-        else:
+
+        # Ensure every expected constant is exported even when a state's DB
+        # tables are empty — lets App.jsx do named imports without Vite warnings.
+        # Guarded by `typeof === 'undefined'` via placeholder const declarations:
+        # only emitted for states that DIDN'T produce a populated block above.
+        populated = {s.upper() for s, _ in pairs if any(
+            f"{s.upper()}_SEAT_FP_{str(eid)[:4]}" in b for b in blocks for _, eid in [(s, None)]
+        )}
+        # Re-check populated set against the blocks' actual names (simpler).
+        populated_names: set[str] = set()
+        for b in blocks:
+            for line in b.splitlines():
+                if line.startswith("export const "):
+                    populated_names.add(line.split()[2])
+        placeholder_lines: list[str] = []
+        for state, election_id in pairs:
+            year = str(election_id)[:4]
+            const_name = f"{state.upper()}_SEAT_FP_{year}"
+            if const_name not in populated_names:
+                placeholder_lines.append(f"export const {const_name} = {{}};")
+        if placeholder_lines:
+            module_lines.append("// Placeholders — state DB has no data yet for these elections.")
+            module_lines.extend(placeholder_lines)
+            module_lines.append("")
+
+        if not blocks and not placeholder_lines:
             module_lines.append("// No state FP data available yet. Run the state pipeline first.")
             module_lines.append("")
 

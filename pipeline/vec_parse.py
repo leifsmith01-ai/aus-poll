@@ -475,6 +475,106 @@ def parse_tally_room_results(
     return records
 
 
+# ── Tally Room booth-level parser ─────────────────────────────────────────────
+
+def parse_vec_booths(
+    path: Path,
+    election_id: int,
+    candidates: list[dict] | None = None,
+    result_type: str = "fp",   # "fp" or "tcp"
+) -> tuple[list[dict], list[dict]]:
+    """Parse a VEC Tally Room booth-level results CSV.
+
+    Expected columns (case-insensitive): DistrictID, PollingPlaceID, CandidateID,
+    PollingPlaceName / PremisesName / Address / Suburb / Postcode / Latitude /
+    Longitude, and at least one of: Ordinary, PrePoll, Total.
+
+    Rows with PollingPlaceID == 0 are district-level totals and are skipped —
+    this function extracts only real booth rows.
+
+    Returns:
+        (polling_places, votes) where
+            polling_places: [{polling_place_id, election_id, district_id,
+                              polling_place_name, premises_name, address,
+                              suburb, postcode, latitude, longitude}]
+            votes:          [{election_id, district_id, polling_place_id,
+                              candidate_id, ordinary_votes, prepoll_votes,
+                              total_votes}]
+    """
+    path = Path(path)
+    logger.info("Parsing Tally Room booth %s CSV: %s", result_type.upper(), path.name)
+    try:
+        df = pd.read_csv(path, encoding="utf-8-sig")
+    except Exception as exc:
+        logger.error("Failed to read %s: %s", path, exc)
+        return [], []
+
+    # Normalise column access: case/underscore insensitive lookup.
+    def col(row, *names, default=None):
+        for n in names:
+            if n in df.columns:
+                v = row.get(n)
+                if pd.notna(v):
+                    return v
+        return default
+
+    pp_col = next(
+        (c for c in df.columns if c.lower().replace("_", "") == "pollingplaceid"),
+        None,
+    )
+    if pp_col:
+        df = df[df[pp_col].fillna(0).astype(int) != 0].copy()
+
+    seen_places: dict[tuple[int, int], dict] = {}
+    votes: list[dict] = []
+    for _, row in df.iterrows():
+        district_id      = _safe_int(col(row, "DistrictID", "district_id"))
+        polling_place_id = _safe_int(col(row, "PollingPlaceID", "polling_place_id"))
+        candidate_id     = _safe_int(col(row, "CandidateID", "candidate_id"))
+        if not (district_id and polling_place_id and candidate_id):
+            continue
+
+        ordinary = _safe_int(col(row, "Ordinary", "ordinary"))
+        prepoll  = _safe_int(col(row, "PrePoll", "Prepoll", "pre_poll", "prepoll"))
+        total    = _safe_int(col(row, "Total", "total"))
+        if total == 0 and (ordinary or prepoll):
+            total = ordinary + prepoll
+
+        key = (district_id, polling_place_id)
+        if key not in seen_places:
+            seen_places[key] = {
+                "polling_place_id":   polling_place_id,
+                "election_id":        election_id,
+                "district_id":        district_id,
+                "polling_place_name": str(col(row, "PollingPlaceName",
+                                               "polling_place_name", default="") or ""),
+                "premises_name":      str(col(row, "PremisesName",
+                                               "premises_name", default="") or ""),
+                "address":            str(col(row, "Address", "address", default="") or ""),
+                "suburb":             str(col(row, "Suburb", "suburb", default="") or ""),
+                "postcode":           str(col(row, "Postcode", "postcode", default="") or ""),
+                "latitude":           _safe_float(col(row, "Latitude", "latitude")),
+                "longitude":          _safe_float(col(row, "Longitude", "longitude")),
+            }
+
+        votes.append({
+            "election_id":      election_id,
+            "district_id":      district_id,
+            "polling_place_id": polling_place_id,
+            "candidate_id":     candidate_id,
+            "ordinary_votes":   ordinary,
+            "prepoll_votes":    prepoll,
+            "total_votes":      total,
+        })
+
+    polling_places = list(seen_places.values())
+    logger.info(
+        "  Parsed %d booths, %d %s vote rows",
+        len(polling_places), len(votes), result_type.upper(),
+    )
+    return polling_places, votes
+
+
 # ── Enrolment parser ──────────────────────────────────────────────────────────
 
 def parse_vec_enrolment(path: Path, election_id: int) -> dict[str, int]:
@@ -518,7 +618,10 @@ def parse_all_vec(file_paths: dict[str, Path], election_id: int) -> dict[str, li
     Returns dict with keys "fp", "tcp", "candidates", "enrolment" containing
     parsed records. "enrolment" is a dict of {district_name: enrolled_count}.
     """
-    result: dict[str, list[dict]] = {"fp": [], "tcp": [], "candidates": []}
+    result: dict[str, list[dict]] = {
+        "fp": [], "tcp": [], "candidates": [],
+        "polling_places": [], "booth_fp": [], "booth_2cp": [],
+    }
 
     # Tally Room candidates CSV takes priority (better structured)
     tally_cands_path = file_paths.get("tally_room_candidates")
@@ -536,6 +639,27 @@ def parse_all_vec(file_paths: dict[str, Path], election_id: int) -> dict[str, li
         result["tcp"] = parse_tally_room_results(
             tally_tcp_path, election_id, result["candidates"], result_type="tcp"
         )
+
+    # Tally Room booth-level CSVs (optional — only if user has downloaded them)
+    booth_fp_path  = file_paths.get("tally_room_booth_fp")
+    booth_tcp_path = file_paths.get("tally_room_booth_tcp")
+    if booth_fp_path:
+        pps, votes = parse_vec_booths(
+            booth_fp_path, election_id, result["candidates"], result_type="fp",
+        )
+        result["polling_places"] = pps
+        result["booth_fp"] = votes
+    if booth_tcp_path:
+        pps2, votes2 = parse_vec_booths(
+            booth_tcp_path, election_id, result["candidates"], result_type="tcp",
+        )
+        # Merge any new polling places from the TCP file; votes go into booth_2cp
+        known = {(p["polling_place_id"], p["district_id"])
+                 for p in result["polling_places"]}
+        for p in pps2:
+            if (p["polling_place_id"], p["district_id"]) not in known:
+                result["polling_places"].append(p)
+        result["booth_2cp"] = votes2
 
     # VEC Excel files
     fp_path  = file_paths.get("fp_xlsx")

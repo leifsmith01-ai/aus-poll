@@ -23,6 +23,14 @@
     "on": {},
     "tpp_eff": {}
   },
+  "house_effect_converged": {
+    "alp": true,
+    "lp": true,
+    "grn": true,
+    "ind": true,
+    "on": true,
+    "tpp_eff": true
+  },
   "current": {
     "alp": {
       "mean": 38.1,

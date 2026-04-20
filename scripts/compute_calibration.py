@@ -267,9 +267,63 @@ def main() -> None:
         mae_before = total_abs_error_before / n_alp_coal
         mae_after = total_abs_error_after / n_alp_coal
         report_lines.append(
-            f"MAE before calibration: {mae_before:.3f}pp  |  "
-            f"MAE after calibration (rounding only): {mae_after:.4f}pp"
+            f"Fitted MAE (calibration applied, rounding residual only): {mae_after:.4f}pp"
         )
+        report_lines.append(
+            f"Leave-one-out MAE (generalisation estimate): {mae_before:.3f}pp"
+        )
+        report_lines.append(
+            "Note: SEAT_CALIB_2025 has one offset per seat fitted to that seat's actual,"
+        )
+        report_lines.append(
+            "so holding out a seat's offset collapses the model to its uncalibrated"
+        )
+        report_lines.append(
+            "primary-based prediction. The LOO MAE above is therefore the honest"
+        )
+        report_lines.append(
+            "out-of-sample error of the primary model before per-seat calibration."
+        )
+
+        # Per-state breakdown of the pre-calibration (LOO) error.
+        state_errors: dict[str, list[float]] = {}
+        # Per-margin-bucket breakdown: <2pp, 2-5pp, 5-10pp, 10pp+.
+        margin_buckets = [
+            ("<2pp (marginal)", 0.0, 2.0, []),
+            ("2-5pp (fairly safe)", 2.0, 5.0, []),
+            ("5-10pp (safe)", 5.0, 10.0, []),
+            ("10pp+ (very safe)", 10.0, 1e9, []),
+        ]
+        for sid, off in offsets.items():
+            seat = s25_map.get(sid)
+            if not seat:
+                continue
+            state_errors.setdefault(seat["state"], []).append(abs(off))
+            for _, lo, hi, bucket in margin_buckets:
+                if lo <= seat["margin"] < hi:
+                    bucket.append(abs(off))
+                    break
+
+        report_lines.append("")
+        report_lines.append("Per-state LOO MAE (pre-calibration residual):")
+        for state in sorted(state_errors):
+            errs = state_errors[state]
+            mae = sum(errs) / len(errs)
+            mx = max(errs)
+            report_lines.append(
+                f"  {state:>4}  n={len(errs):>3}  MAE={mae:>6.3f}pp  max={mx:>5.2f}pp"
+            )
+
+        report_lines.append("")
+        report_lines.append("Per-margin LOO MAE (pre-calibration residual):")
+        for label, _, _, errs in margin_buckets:
+            if not errs:
+                continue
+            mae = sum(errs) / len(errs)
+            mx = max(errs)
+            report_lines.append(
+                f"  {label:<22} n={len(errs):>3}  MAE={mae:>6.3f}pp  max={mx:>5.2f}pp"
+            )
 
     # Write report
     report_path = Path(__file__).parent.parent / "data" / "calibration_report.txt"

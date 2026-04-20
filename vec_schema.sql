@@ -53,9 +53,10 @@ CREATE TABLE IF NOT EXISTS vic_candidates (
 );
 
 -- ── VIC First Preferences (district-level) ────────────────
--- One row per candidate × district.  No booth breakdown
--- because the VEC does not publish booth-level data publicly
--- (use Tally Room if booth-level data is needed).
+-- One row per candidate × district.  Booth-level data lives in
+-- the vic_booth_fp / vic_booth_2cp tables below and is sourced
+-- from the VEC Tally Room booth-level exports (see
+-- parse_vec_booths() in pipeline/vec_parse.py).
 CREATE TABLE IF NOT EXISTS vic_district_fp (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     election_id    INTEGER NOT NULL,
@@ -103,6 +104,64 @@ CREATE TABLE IF NOT EXISTS vic_district_dop (
     FOREIGN KEY (election_id) REFERENCES vic_elections(election_id)
 );
 
+-- ── VIC Polling Places (booths) ───────────────────────────
+-- One row per booth per election. Booth IDs are assigned
+-- synthetically by the parser (deterministic hash of booth name
+-- + district so the same booth across elections shares an ID
+-- when possible). lat/lon may be NULL for prepoll / postal.
+CREATE TABLE IF NOT EXISTS vic_polling_places (
+    polling_place_id   INTEGER NOT NULL,
+    election_id        INTEGER NOT NULL,
+    district_id        INTEGER NOT NULL,
+    polling_place_name TEXT    NOT NULL,
+    premises_name      TEXT,
+    address            TEXT,
+    suburb             TEXT,
+    postcode           TEXT,
+    latitude           REAL,
+    longitude          REAL,
+    PRIMARY KEY (polling_place_id, election_id),
+    FOREIGN KEY (election_id) REFERENCES vic_elections(election_id),
+    FOREIGN KEY (district_id, election_id)
+        REFERENCES vic_districts(district_id, election_id)
+);
+
+-- ── VIC Booth First Preferences ───────────────────────────
+-- Booth-level FP votes per candidate, sourced from the VEC
+-- Tally Room booth-level exports. ordinary_votes is in-person
+-- election-day votes; prepoll_votes is early votes attributed
+-- to the booth; total_votes is the all-vote-types total.
+CREATE TABLE IF NOT EXISTS vic_booth_fp (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id      INTEGER NOT NULL,
+    district_id      INTEGER NOT NULL,
+    polling_place_id INTEGER NOT NULL,
+    candidate_id     INTEGER NOT NULL,
+    ordinary_votes   INTEGER NOT NULL DEFAULT 0,
+    prepoll_votes    INTEGER NOT NULL DEFAULT 0,
+    total_votes      INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (election_id, district_id, polling_place_id, candidate_id),
+    FOREIGN KEY (election_id) REFERENCES vic_elections(election_id),
+    FOREIGN KEY (polling_place_id, election_id)
+        REFERENCES vic_polling_places(polling_place_id, election_id)
+);
+
+-- ── VIC Booth Two-Candidate Preferred ─────────────────────
+CREATE TABLE IF NOT EXISTS vic_booth_2cp (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id      INTEGER NOT NULL,
+    district_id      INTEGER NOT NULL,
+    polling_place_id INTEGER NOT NULL,
+    candidate_id     INTEGER NOT NULL,
+    ordinary_votes   INTEGER NOT NULL DEFAULT 0,
+    prepoll_votes    INTEGER NOT NULL DEFAULT 0,
+    total_votes      INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (election_id, district_id, polling_place_id, candidate_id),
+    FOREIGN KEY (election_id) REFERENCES vic_elections(election_id),
+    FOREIGN KEY (polling_place_id, election_id)
+        REFERENCES vic_polling_places(polling_place_id, election_id)
+);
+
 -- ── Indexes ───────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_vic_fp_election_district
     ON vic_district_fp(election_id, district_id);
@@ -112,6 +171,12 @@ CREATE INDEX IF NOT EXISTS idx_vic_candidates_election_district
     ON vic_candidates(election_id, district_id);
 CREATE INDEX IF NOT EXISTS idx_vic_dop_election_district
     ON vic_district_dop(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_vic_booth_fp_election_district
+    ON vic_booth_fp(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_vic_booth_2cp_election_district
+    ON vic_booth_2cp(election_id, district_id);
+CREATE INDEX IF NOT EXISTS idx_vic_polling_places_election_district
+    ON vic_polling_places(election_id, district_id);
 
 -- ── vic_district_margins view ─────────────────────────────
 -- Convenience view: one row per elected district per election,
