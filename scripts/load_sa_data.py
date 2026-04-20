@@ -20,7 +20,7 @@ import sqlite3
 import sys
 from pathlib import Path
 
-ROOT = Path("/sessions/compassionate-eager-planck/mnt/aus-poll")
+ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT))
 from pipeline.config import DB_PATH
 

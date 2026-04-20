@@ -486,9 +486,9 @@ const NSW_SEAT_FP_2023 = STATE_SEAT_FP.NSW_SEAT_FP_2023 ?? {};
 const QLD_SEAT_FP_2024 = STATE_SEAT_FP.QLD_SEAT_FP_2024 ?? {};
 const VIC_SEAT_FP_2022 = STATE_SEAT_FP.VIC_SEAT_FP_2022 ?? {};
 const WA_SEAT_FP_2025  = STATE_SEAT_FP.WA_SEAT_FP_2025  ?? {};
-// SA 2026 hasn't been added to config yet; fall back to the most recent SA baseline (2022).
-const SA_SEAT_FP_2026  = STATE_SEAT_FP.SA_SEAT_FP_2022 ?? {};
+const SA_SEAT_FP_2026  = STATE_SEAT_FP.SA_SEAT_FP_2026  ?? {};
 const NT_SEAT_FP_2024  = STATE_SEAT_FP.NT_SEAT_FP_2024  ?? {};
+
 
 // ── Advanced Modelling Scaffolding (Phase 7) ─────────────────────────────────
 

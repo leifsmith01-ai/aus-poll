@@ -5,12 +5,228 @@
 // Import in App.jsx:  import * as STATE_SEAT_FP from './data/state_seat_fp.js';
 // Usage:  STATE_SEAT_FP.VIC_SEAT_FP_2022?.[seatId]
 
-// Placeholders — state DB has no data yet for these elections.
-export const VIC_SEAT_FP_2022 = {};
-export const NSW_SEAT_FP_2023 = {};
-export const QLD_SEAT_FP_2024 = {};
-export const WA_SEAT_FP_2025 = {};
-export const SA_SEAT_FP_2022 = {};
+export const NSW_SEAT_FP_2023 = {
+  7001: { alp:  38.3, coal:  38.3, grn:   5.2, on:   8.2, ind:  10.0 },  // penrith
+  7002: { alp:  43.9, coal:  43.6, grn:   7.1, on:   0.0, ind:   5.3 },  // east hills
+  7003: { alp:  39.0, coal:  45.3, grn:  10.7, on:   0.0, ind:   5.0 },  // ryde
+  7004: { alp:  51.9, coal:  33.1, grn:   9.4, on:   0.0, ind:   5.6 },  // strathfield
+  7005: { alp:  45.2, coal:  32.9, grn:  16.2, on:   0.0, ind:   5.7 },  // coogee
+  7006: { alp:  34.4, coal:  12.0, grn:  11.1, on:   0.0, ind:  42.4 },  // kiama
+  7007: { alp:  57.8, coal:  21.8, grn:  14.6, on:   0.0, ind:   5.7 },  // keira
+  7011: { alp:  38.1, coal:  39.1, grn:   7.7, on:   0.0, ind:  15.0 },  // monaro
+  7012: { alp:  44.2, coal:  34.4, grn:  12.5, on:   0.0, ind:   9.0 },  // heathcote
+  7013: { alp:  50.4, coal:  28.3, grn:   9.3, on:   0.0, ind:  12.0 },  // gosford
+  7014: { alp:  39.1, coal:  47.5, grn:  10.0, on:   0.0, ind:   3.5 },  // drummoyne
+  7015: { alp:  39.5, coal:  41.9, grn:   5.6, on:   8.5, ind:   4.5 },  // holsworthy
+  7016: { alp:  39.0, coal:  46.6, grn:   9.6, on:   0.0, ind:   4.7 },  // terrigal
+  7021: { alp:  14.8, coal:  36.9, grn:   7.8, on:   0.0, ind:  40.5 },  // wakehurst
+  7031: { alp:  30.5, coal:  12.9, grn:  54.1, on:   0.0, ind:   2.6 },  // newtown
+  7032: { alp:  37.1, coal:  19.1, grn:  40.5, on:   0.0, ind:   3.3 },  // balmain
+  7033: { alp:  52.1, coal:  16.8, grn:  25.3, on:   0.0, ind:   5.8 },  // summer hill
+  7041: { alp:  20.5, coal:  54.1, grn:  11.4, on:   0.0, ind:  14.0 },  // davidson
+  7042: { alp:  10.2, coal:  44.7, grn:   6.8, on:   0.0, ind:  38.3 },  // pittwater
+  7043: { alp:  33.9, coal:  48.9, grn:  10.6, on:   0.0, ind:   6.7 },  // epping
+  7044: { alp:  24.0, coal:  45.1, grn:   8.3, on:   0.0, ind:  22.7 },  // lane cove
+  7045: { alp:  20.0, coal:  43.6, grn:   7.9, on:   0.0, ind:  28.5 },  // willoughby
+  7046: { alp:  12.9, coal:  45.0, grn:   9.0, on:   0.0, ind:  33.2 },  // manly
+  7047: { alp:  28.4, coal:  50.7, grn:   9.0, on:   0.0, ind:  12.0 },  // castle hill
+  7048: { alp:  24.8, coal:  43.3, grn:  14.3, on:   7.9, ind:   9.7 },  // hornsby
+  7061: { alp:  18.8, coal:  47.5, grn:  14.1, on:   0.0, ind:  19.6 },  // oxley
+  7062: { alp:  28.9, coal:  37.0, grn:   6.0, on:   0.0, ind:  28.1 },  // upper hunter
+  7063: { alp:  19.2, coal:  65.1, grn:   6.5, on:   0.0, ind:   9.1 },  // port macquarie
+  7064: { alp:  13.0, coal:  51.7, grn:   3.4, on:   0.0, ind:  31.9 },  // tamworth
+  7065: { alp:   9.8, coal:  22.0, grn:   4.3, on:   0.0, ind:  64.0 },  // orange
+  7066: { alp:  21.9, coal:  54.3, grn:   3.6, on:   0.0, ind:  20.2 },  // dubbo
+  7067: { alp:   8.3, coal:  26.3, grn:   1.8, on:   0.0, ind:  63.6 },  // murray
+  7068: { alp:  16.1, coal:  57.0, grn:   6.9, on:   0.0, ind:  20.0 },  // bathurst
+  7069: { alp:  15.5, coal:  25.5, grn:   2.0, on:   0.0, ind:  57.0 },  // barwon
+  7071: { alp:  53.6, coal:  28.0, grn:   8.6, on:   0.0, ind:   9.9 },  // swansea
+  7072: { alp:  19.8, coal:  10.1, grn:   4.8, on:   0.0, ind:  65.3 },  // lake macquarie
+  7074: { alp:  53.9, coal:  23.8, grn:  12.6, on:   0.0, ind:   9.7 },  // blue mountains
+  7075: { alp:  52.9, coal:  29.6, grn:  10.9, on:   0.0, ind:   6.6 },  // rockdale
+  7076: { alp:  60.6, coal:  28.2, grn:   6.9, on:   0.0, ind:   4.3 },  // kogarah
+  7081: { alp:  48.7, coal:  11.1, grn:   6.6, on:  15.3, ind:  18.3 },  // cessnock
+  7082: { alp:  57.4, coal:  24.9, grn:  12.8, on:   0.0, ind:   4.9 },  // charlestown
+  7083: { alp:  63.9, coal:  13.5, grn:  10.7, on:   6.8, ind:   5.0 },  // wallsend
+  7084: { alp:  51.9, coal:  22.7, grn:   7.2, on:   8.5, ind:   9.6 },  // maitland
+  7085: { alp:  49.4, coal:  22.4, grn:  18.7, on:   0.0, ind:   9.5 },  // newcastle
+  7086: { alp:  56.5, coal:  22.0, grn:  16.7, on:   0.0, ind:   4.8 },  // wollongong
+  7087: { alp:  50.4, coal:  13.4, grn:   6.1, on:   0.0, ind:  30.1 },  // shellharbour
+  7088: { alp:  47.2, coal:  34.1, grn:   6.3, on:   0.0, ind:  12.3 },  // liverpool
+  7089: { alp:  53.7, coal:  17.0, grn:   6.0, on:  11.5, ind:  11.8 },  // campbelltown
+  7090: { alp:  59.4, coal:  24.8, grn:   5.3, on:   0.0, ind:  10.5 },  // bankstown
+  7092: { alp:  60.1, coal:  19.9, grn:   6.9, on:   0.0, ind:  13.1 },  // auburn
+  7093: { alp:  54.4, coal:  26.9, grn:  11.7, on:   0.0, ind:   7.0 },  // maroubra
+  7094: { alp:  49.7, coal:  21.2, grn:  18.9, on:   0.0, ind:  10.1 },  // heffron
+};
+export const QLD_SEAT_FP_2024 = {
+  7201: { alp:  45.5, coal:  38.0, grn:  11.6, on:   3.4, ind:   1.5 },  // mount ommaney
+  7202: { alp:  28.9, coal:  55.7, grn:   9.7, on:   5.8, ind:   0.0 },  // oodgeroo
+  7203: { alp:  40.8, coal:  36.1, grn:   7.1, on:   7.0, ind:   9.1 },  // macalister
+  7204: { alp:  35.5, coal:  34.1, grn:  26.4, on:   2.7, ind:   1.3 },  // greenslopes
+  7205: { alp:  35.5, coal:  34.9, grn:  25.2, on:   3.3, ind:   1.1 },  // mcconnel
+  7206: { alp:  33.8, coal:  49.4, grn:  12.2, on:   4.6, ind:   0.0 },  // everton
+  7207: { alp:  23.9, coal:  47.9, grn:   9.5, on:   5.3, ind:  13.3 },  // currumbin
+  7208: { alp:  24.5, coal:  49.8, grn:   8.3, on:   4.4, ind:  13.0 },  // burleigh
+  7209: { alp:  30.2, coal:  44.4, grn:   7.7, on:   4.8, ind:  13.0 },  // mundingburra
+  7211: { alp:  47.1, coal:  28.2, grn:  12.1, on:   4.3, ind:   8.2 },  // inala
+  7212: { alp:  41.8, coal:  34.8, grn:  18.5, on:   4.9, ind:   0.0 },  // toohey
+  7213: { alp:  37.8, coal:  34.0, grn:  23.6, on:   3.0, ind:   1.6 },  // miller
+  7221: { alp:  32.0, coal:  29.9, grn:  34.7, on:   3.4, ind:   0.0 },  // south brisbane
+  7222: { alp:  25.3, coal:  37.7, grn:  34.0, on:   3.1, ind:   0.0 },  // maiwar
+  7223: { alp:  37.2, coal:  34.1, grn:  25.5, on:   2.1, ind:   1.0 },  // cooper
+  7225: { alp:  45.6, coal:  34.0, grn:  14.2, on:   3.7, ind:   2.5 },  // stretton
+  7226: { alp:  47.1, coal:  28.2, grn:   9.0, on:   6.8, ind:   9.0 },  // waterford
+  7231: { alp:  17.4, coal:  55.3, grn:   3.2, on:  12.0, ind:  12.1 },  // nanango
+  7232: { alp:  13.7, coal:  61.1, grn:   2.2, on:   9.2, ind:  13.7 },  // warrego
+  7233: { alp:  23.4, coal:  46.4, grn:   8.0, on:  22.1, ind:   0.0 },  // gympie
+  7234: { alp:  27.0, coal:  48.9, grn:  11.6, on:   6.9, ind:   5.6 },  // buderim
+  7235: { alp:  35.9, coal:  43.1, grn:   8.3, on:   6.1, ind:   6.5 },  // caloundra
+  7241: { alp:  41.5, coal:  38.4, grn:   3.4, on:   7.7, ind:   9.1 },  // bundaberg
+  7242: { alp:  30.2, coal:  28.6, grn:   3.8, on:  13.5, ind:  23.9 },  // rockhampton
+  7261: { alp:  20.3, coal:  36.7, grn:   3.3, on:  11.9, ind:  27.9 },  // mirani
+  7262: { alp:  17.8, coal:  60.1, grn:   5.5, on:  11.0, ind:   5.6 },  // condamine
+  7263: { alp:  17.8, coal:  56.9, grn:   4.1, on:  15.8, ind:   5.4 },  // callide
+  7264: { alp:  14.0, coal:  28.2, grn:   3.2, on:   4.6, ind:  50.0 },  // hinchinbrook
+  7265: { alp:  18.1, coal:  53.9, grn:   5.6, on:  18.3, ind:   4.0 },  // southern downs
+};
+export const VIC_SEAT_FP_2022 = {
+  9002: { alp:  36.4, coal:  29.8, grn:  20.9, on:   0.0, ind:  12.8 },  // albert park
+  9003: { alp:  40.3, coal:  37.2, grn:  14.8, on:   0.0, ind:   7.8 },  // ashwood
+  9004: { alp:  32.6, coal:  43.4, grn:   8.1, on:   0.0, ind:  15.9 },  // bass
+  9005: { alp:  41.3, coal:  35.6, grn:   7.4, on:   0.0, ind:  15.6 },  // bayswater
+  9006: { alp:  42.6, coal:  33.1, grn:  11.7, on:   0.0, ind:  12.5 },  // bellarine
+  9007: { alp:  13.1, coal:  42.9, grn:   3.9, on:   0.0, ind:  40.1 },  // benambra
+  9008: { alp:  48.3, coal:  27.4, grn:   8.7, on:   5.7, ind:  10.0 },  // bendigo east
+  9009: { alp:  46.5, coal:  25.0, grn:  11.5, on:   0.0, ind:  17.0 },  // bendigo west
+  9010: { alp:  45.8, coal:  36.3, grn:  10.7, on:   0.0, ind:   7.1 },  // bentleigh
+  9011: { alp:  35.8, coal:  45.2, grn:   9.7, on:   0.0, ind:   9.2 },  // berwick
+  9012: { alp:  41.3, coal:  35.2, grn:  14.1, on:   0.0, ind:   9.4 },  // box hill
+  9013: { alp:  24.7, coal:  45.6, grn:  13.8, on:   0.0, ind:  15.9 },  // brighton
+  9014: { alp:  45.7, coal:  23.1, grn:   8.4, on:   0.0, ind:  22.8 },  // broadmeadows
+  9015: { alp:  28.5, coal:  10.9, grn:  43.6, on:   0.0, ind:  17.0 },  // brunswick
+  9016: { alp:  32.7, coal:  48.1, grn:  10.7, on:   0.0, ind:   8.6 },  // bulleen
+  9017: { alp:  47.8, coal:  27.7, grn:  13.2, on:   0.0, ind:  11.3 },  // bundoora
+  9018: { alp:  49.9, coal:  30.3, grn:   7.6, on:   0.0, ind:  12.2 },  // carrum
+  9019: { alp:  27.8, coal:  44.5, grn:  15.8, on:   0.0, ind:  11.9 },  // caulfield
+  9020: { alp:  45.5, coal:  28.6, grn:   8.0, on:   0.0, ind:  18.0 },  // clarinda
+  9021: { alp:  46.2, coal:  27.5, grn:   5.6, on:   0.0, ind:  20.7 },  // cranbourne
+  9022: { alp:  34.1, coal:  43.0, grn:  10.8, on:   0.0, ind:  12.1 },  // croydon
+  9023: { alp:  54.9, coal:  21.5, grn:   8.1, on:   0.0, ind:  15.5 },  // dandenong
+  9024: { alp:  29.0, coal:  47.5, grn:  11.2, on:   0.0, ind:  12.4 },  // eildon
+  9025: { alp:  44.5, coal:  35.6, grn:  13.4, on:   0.0, ind:   6.4 },  // eltham
+  9026: { alp:  41.1, coal:  29.5, grn:  15.2, on:   0.0, ind:  14.3 },  // essendon
+  9027: { alp:  41.0, coal:  31.6, grn:  10.8, on:   0.0, ind:  16.6 },  // eureka
+  9028: { alp:  30.4, coal:  53.8, grn:   5.3, on:   0.0, ind:  10.5 },  // euroa
+  9029: { alp:  32.7, coal:  46.7, grn:   9.3, on:   0.0, ind:  11.3 },  // evelyn
+  9030: { alp:  43.1, coal:  17.9, grn:  22.4, on:   0.0, ind:  16.6 },  // footscray
+  9031: { alp:  41.5, coal:  29.4, grn:  12.7, on:   0.0, ind:  16.3 },  // frankston
+  9032: { alp:  46.4, coal:  27.2, grn:  15.3, on:   0.0, ind:  11.1 },  // geelong
+  9033: { alp:  17.0, coal:  63.3, grn:   6.4, on:   0.0, ind:  13.2 },  // gippsland east
+  9034: { alp:  23.4, coal:  53.3, grn:   8.4, on:   0.0, ind:  15.0 },  // gippsland south
+  9035: { alp:  40.6, coal:  40.2, grn:   9.6, on:   0.0, ind:   9.6 },  // glen waverley
+  9036: { alp:  41.5, coal:  25.4, grn:   5.8, on:   0.0, ind:  27.3 },  // greenvale
+  9037: { alp:  37.3, coal:  39.8, grn:  10.0, on:   0.0, ind:  12.9 },  // hastings
+  9038: { alp:  22.1, coal:  42.3, grn:  11.1, on:   0.0, ind:  24.5 },  // hawthorn
+  9039: { alp:  42.7, coal:  31.0, grn:  19.2, on:   0.0, ind:   7.1 },  // ivanhoe
+  9040: { alp:  53.9, coal:  22.9, grn:   5.3, on:   0.0, ind:  18.0 },  // kalkallo
+  9041: { alp:  22.7, coal:  44.3, grn:   8.3, on:   0.0, ind:  24.7 },  // kew
+  9042: { alp:  43.3, coal:  24.3, grn:   6.6, on:   0.0, ind:  25.9 },  // kororoit
+  9043: { alp:  49.7, coal:  21.4, grn:  11.3, on:   0.0, ind:  17.6 },  // lara
+  9044: { alp:  45.8, coal:  22.2, grn:   9.4, on:   0.0, ind:  22.6 },  // laverton
+  9045: { alp:  19.8, coal:  58.9, grn:   5.9, on:   0.0, ind:  15.4 },  // lowan
+  9046: { alp:  41.4, coal:  30.0, grn:  12.5, on:   3.6, ind:  12.4 },  // macedon
+  9047: { alp:  26.2, coal:  52.5, grn:  15.7, on:   0.0, ind:   5.6 },  // malvern
+  9048: { alp:  30.7, coal:  17.7, grn:  37.3, on:   0.0, ind:  14.4 },  // melbourne
+  9049: { alp:  37.7, coal:  24.3, grn:   4.5, on:   0.0, ind:  33.4 },  // melton
+  9050: { alp:   6.5, coal:  45.0, grn:   2.3, on:   0.0, ind:  46.2 },  // mildura
+  9051: { alp:  49.9, coal:  25.9, grn:   7.3, on:   0.0, ind:  16.9 },  // mill park
+  9052: { alp:  36.1, coal:  29.5, grn:  15.0, on:   0.0, ind:  19.5 },  // monbulk
+  9053: { alp:  44.0, coal:  31.4, grn:  10.3, on:   0.0, ind:  14.3 },  // mordialloc
+  9054: { alp:  22.0, coal:  42.6, grn:   6.4, on:   0.0, ind:  29.1 },  // mornington
+  9055: { alp:  31.4, coal:  38.4, grn:   4.2, on:   6.1, ind:  19.8 },  // morwell
+  9056: { alp:  51.0, coal:  17.2, grn:   5.1, on:   0.0, ind:  26.7 },  // mulgrave
+  9057: { alp:  18.8, coal:  61.8, grn:   3.9, on:   0.0, ind:  15.6 },  // murray plains
+  9058: { alp:  46.8, coal:  27.3, grn:   6.8, on:   0.0, ind:  19.1 },  // narre warren north
+  9059: { alp:  48.0, coal:  28.7, grn:   6.6, on:   0.0, ind:  16.8 },  // narre warren south
+  9060: { alp:  32.6, coal:  48.1, grn:   8.8, on:   0.0, ind:  10.5 },  // nepean
+  9061: { alp:  44.0, coal:  34.0, grn:   7.4, on:   0.0, ind:  14.7 },  // niddrie
+  9062: { alp:  40.6, coal:  12.2, grn:  30.0, on:   0.0, ind:  17.2 },  // northcote
+  9063: { alp:  45.0, coal:  29.3, grn:  16.6, on:   0.0, ind:   9.1 },  // oakleigh
+  9064: { alp:  20.7, coal:  52.1, grn:   9.0, on:   0.0, ind:  18.2 },  // ovens valley
+  9065: { alp:  33.8, coal:  32.4, grn:   6.6, on:   3.4, ind:  23.7 },  // pakenham
+  9066: { alp:  38.8, coal:  21.0, grn:  22.4, on:   0.0, ind:  17.8 },  // pascoe vale
+  9067: { alp:  40.0, coal:  24.7, grn:   6.8, on:   0.0, ind:  28.5 },  // point cook
+  9068: { alp:  29.3, coal:  42.5, grn:  16.7, on:   0.0, ind:  11.6 },  // polwarth
+  9069: { alp:  26.6, coal:  31.1, grn:  36.4, on:   0.0, ind:   6.0 },  // prahran
+  9070: { alp:  37.6, coal:  17.3, grn:  15.1, on:   0.0, ind:  30.0 },  // preston
+  9071: { alp:  32.8, coal:  18.8, grn:  34.7, on:   0.0, ind:  13.8 },  // richmond
+  9072: { alp:  39.0, coal:  33.8, grn:  15.5, on:   0.0, ind:  11.6 },  // ringwood
+  9073: { alp:  38.5, coal:  36.1, grn:   6.0, on:   0.0, ind:  19.3 },  // ripon
+  9074: { alp:  32.9, coal:  40.6, grn:   7.0, on:   0.0, ind:  19.4 },  // rowville
+  9075: { alp:  25.7, coal:  46.4, grn:  14.7, on:   0.0, ind:  13.2 },  // sandringham
+  9076: { alp:   8.0, coal:  52.6, grn:   2.6, on:   0.0, ind:  36.9 },  // shepparton
+  9077: { alp:  44.2, coal:  32.1, grn:  12.7, on:   0.0, ind:  11.0 },  // south barwon
+  9079: { alp:  42.3, coal:  25.4, grn:   6.8, on:   0.0, ind:  25.6 },  // st albans
+  9080: { alp:  43.1, coal:  31.5, grn:   6.5, on:   0.0, ind:  18.8 },  // sunbury
+  9081: { alp:  43.5, coal:  29.0, grn:   5.8, on:   0.0, ind:  21.7 },  // sydenham
+  9082: { alp:  46.6, coal:  26.8, grn:   7.4, on:   0.0, ind:  19.2 },  // tarneit
+  9083: { alp:  51.8, coal:  24.0, grn:   6.8, on:   0.0, ind:  17.4 },  // thomastown
+  9084: { alp:  33.2, coal:  47.4, grn:  11.7, on:   0.0, ind:   7.8 },  // warrandyte
+  9085: { alp:  47.6, coal:  29.8, grn:  10.4, on:   0.0, ind:  12.3 },  // wendouree
+  9086: { alp:  45.4, coal:  25.3, grn:   6.8, on:   0.0, ind:  22.5 },  // werribee
+  9087: { alp:  41.5, coal:  28.0, grn:  15.4, on:   0.0, ind:  15.0 },  // williamstown
+  9088: { alp:  41.4, coal:  33.9, grn:   6.4, on:   0.0, ind:  18.2 },  // yan yean
+};
+export const WA_SEAT_FP_2025 = {
+  7301: { alp:  31.5, coal:  52.1, grn:  13.2, on:   0.0, ind:   3.2 },  // carine
+  7302: { alp:  23.3, coal:  52.0, grn:  13.7, on:   4.8, ind:   6.2 },  // vasse
+  7303: { alp:  32.2, coal:  31.4, grn:  14.8, on:   4.9, ind:  16.7 },  // kalamunda
+  7304: { alp:  40.2, coal:  34.3, grn:  10.5, on:   1.7, ind:  13.2 },  // bateman
+  7305: { alp:  28.8, coal:  43.7, grn:  10.2, on:   0.0, ind:  17.3 },  // churchlands
+  7311: { alp:  12.9, coal:  17.3, grn:   5.6, on:   8.5, ind:  55.9 },  // roe
+  7321: { alp:  45.1, coal:  34.7, grn:  14.5, on:   3.2, ind:   2.6 },  // bicton
+  7322: { alp:  41.6, coal:  38.7, grn:   6.5, on:   7.0, ind:   6.2 },  // dawesville
+  7331: { alp:  33.6, coal:  18.8, grn:  15.9, on:   0.0, ind:  31.8 },  // fremantle
+  7332: { alp:  50.8, coal:  21.7, grn:  22.8, on:   0.0, ind:   4.7 },  // maylands
+  7341: { alp:  41.6, coal:  38.5, grn:  12.4, on:   0.0, ind:   7.5 },  // scarborough
+  7342: { alp:  52.5, coal:  34.3, grn:   9.6, on:   0.0, ind:   3.6 },  // hillarys
+  7351: { alp:  44.0, coal:  35.1, grn:   8.0, on:   0.0, ind:  12.9 },  // joondalup
+  7352: { alp:  49.4, coal:  25.9, grn:  12.4, on:   4.2, ind:   8.1 },  // balcatta
+  7353: { alp:  40.4, coal:  26.7, grn:  10.1, on:   5.9, ind:  16.9 },  // midland
+  7354: { alp:  52.5, coal:  17.5, grn:  12.1, on:   8.2, ind:   9.7 },  // armadale
+  7355: { alp:  46.9, coal:  29.5, grn:   8.6, on:   8.8, ind:   6.2 },  // mandurah
+  7356: { alp:  46.5, coal:  26.8, grn:   8.0, on:   6.2, ind:  12.5 },  // rockingham
+  7357: { alp:  58.7, coal:  12.3, grn:   9.8, on:   5.6, ind:  13.5 },  // kwinana
+};
+export const SA_SEAT_FP_2026 = {
+  7401: { alp:  44.5, coal:  12.5, grn:   9.1, on:  29.7, ind:   4.2 },  // king
+  7402: { alp:  47.1, coal:  23.3, grn:  12.4, on:  14.2, ind:   3.0 },  // gibson
+  7403: { alp:  48.1, coal:  14.9, grn:   8.5, on:  23.5, ind:   4.9 },  // newland
+  7404: { alp:  48.4, coal:   9.3, grn:  10.7, on:  22.0, ind:   9.7 },  // florey
+  7405: { alp:  43.1, coal:  20.6, grn:  15.5, on:  10.1, ind:  10.7 },  // adelaide
+  7406: { alp:  46.1, coal:   7.9, grn:  11.8, on:  26.5, ind:   7.8 },  // kaurna
+  7407: { alp:  52.5, coal:   7.8, grn:   9.0, on:  23.1, ind:   7.6 },  // playford
+  7411: { alp:  24.2, coal:  33.4, grn:  23.2, on:  14.4, ind:   4.7 },  // heysen
+  7412: { alp:  45.2, coal:  24.3, grn:   8.8, on:  16.7, ind:   5.0 },  // colton
+  7413: { alp:  41.9, coal:  25.3, grn:  11.4, on:  17.4, ind:   4.0 },  // morialta
+  7414: { alp:  51.0, coal:  17.0, grn:  17.0, on:  11.0, ind:   3.9 },  // waite
+  7415: { alp:   8.7, coal:  35.4, grn:   3.4, on:  28.2, ind:  24.3 },  // flinders
+  7416: { alp:  28.4, coal:  48.9, grn:  13.4, on:   8.3, ind:   0.9 },  // bragg
+  7417: { alp:  39.1, coal:  31.4, grn:  13.9, on:   8.9, ind:   6.8 },  // unley
+  7418: { alp:  37.2, coal:  30.4, grn:  12.8, on:  15.0, ind:   4.6 },  // hartley
+  7419: { alp:  35.9, coal:  36.1, grn:  10.4, on:  14.5, ind:   3.2 },  // morphett
+  7420: { alp:  19.6, coal:  49.2, grn:   6.8, on:  21.5, ind:   2.9 },  // schubert
+  7421: { alp:  15.0, coal:  12.4, grn:   4.5, on:  26.8, ind:  41.3 },  // mount gambier
+  7422: { alp:   8.2, coal:  15.6, grn:   3.6, on:  27.0, ind:  45.6 },  // stuart
+  7423: { alp:  29.0, coal:  26.2, grn:   4.6, on:  34.8, ind:   5.5 },  // ngadjuri
+  7424: { alp:  15.1, coal:  21.8, grn:   2.6, on:  38.4, ind:  22.1 },  // narungga
+  7425: { alp:  27.3, coal:  22.3, grn:   4.5, on:  27.1, ind:  18.8 },  // hammond
+  7426: { alp:  15.6, coal:  26.1, grn:   3.4, on:  35.6, ind:  19.2 },  // mackillop
+  7432: { alp:  56.0, coal:   7.6, grn:  11.2, on:  11.6, ind:  13.6 },  // croydon
+  7433: { alp:  50.8, coal:   5.9, grn:   8.2, on:  27.0, ind:   8.2 },  // ramsay
+  7434: { alp:  44.7, coal:  16.4, grn:  10.0, on:  24.3, ind:   4.6 },  // lee
+};
 export const NT_SEAT_FP_2024 = {};
 export const TAS_SEAT_FP_2024 = {};
 export const ACT_SEAT_FP_2024 = {};
