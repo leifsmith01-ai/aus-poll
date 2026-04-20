@@ -3569,7 +3569,7 @@ export default function App() {
       .map(s => s.modelled.projAlp2pp)
       .filter(v => v !== null && v !== undefined && isFinite(v));
     if (vals.length === 0) return null;
-    return vals.reduce((a, b) => a + b, 0) / vals.length;
+    return { avg: vals.reduce((a, b) => a + b, 0) / vals.length, count: vals.length };
   }, [modelledSeats]);
 
   // ON-race seats: the model has flagged these as ON-vs-ALP or ON-vs-Coalition in the
@@ -3614,7 +3614,7 @@ export default function App() {
       .filter(s => s.modelled.projAlp2pp !== null && s.modelled.projAlp2pp !== undefined && isFinite(s.modelled.projAlp2pp))
       .map(s => s.modelled.projAlp2pp);
     if (vals.length === 0) return null;
-    return vals.reduce((a, b) => a + b, 0) / vals.length;
+    return { avg: vals.reduce((a, b) => a + b, 0) / vals.length, count: vals.length };
   }, [vicModelledSeats]);
 
   const vicImplied2pp = useMemo(() => {
@@ -5923,7 +5923,7 @@ export default function App() {
               {/* ── Results panel ── */}
               <div>
                 {/* Implied 2PP + majority */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
                   <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                     {implied2pp !== null ? (
@@ -5940,8 +5940,8 @@ export default function App() {
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
                     {seatAvg2pp !== null ? (
                       <>
-                        <div style={{ fontSize: 30, fontWeight: 800, color: seatAvg2pp >= 50 ? "#059669" : "#DC2626" }}>{seatAvg2pp.toFixed(1)}%</div>
-                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across 151 seats</div>
+                        <div style={{ fontSize: 30, fontWeight: 800, color: seatAvg2pp.avg >= 50 ? "#059669" : "#DC2626" }}>{seatAvg2pp.avg.toFixed(1)}%</div>
+                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across {seatAvg2pp.count} seats</div>
                       </>
                     ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
                   </div>
@@ -6696,7 +6696,7 @@ export default function App() {
               {/* ── VIC Results panel ── */}
               <div>
                 {/* Summary stat cards */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                     {vicImplied2pp !== null ? (
@@ -6712,8 +6712,8 @@ export default function App() {
                     <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
                     {vicSeatAvg2pp !== null ? (
                       <>
-                        <div style={{ fontSize: 30, fontWeight: 800, color: vicSeatAvg2pp >= 50 ? "#059669" : "#DC2626" }}>{vicSeatAvg2pp.toFixed(1)}%</div>
-                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across 88 seats</div>
+                        <div style={{ fontSize: 30, fontWeight: 800, color: vicSeatAvg2pp.avg >= 50 ? "#059669" : "#DC2626" }}>{vicSeatAvg2pp.avg.toFixed(1)}%</div>
+                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across {vicSeatAvg2pp.count} seats</div>
                       </>
                     ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
                   </div>
@@ -7101,7 +7101,7 @@ export default function App() {
                 const vals = modelled
                   .filter(s => s.modelled.projAlp2pp !== null && s.modelled.projAlp2pp !== undefined && isFinite(s.modelled.projAlp2pp))
                   .map(s => s.modelled.projAlp2pp);
-                return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+                return vals.length ? { avg: vals.reduce((a, b) => a + b, 0) / vals.length, count: vals.length } : null;
               })();
 
               return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "320px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
@@ -7200,7 +7200,7 @@ export default function App() {
 
                 {/* Results */}
                 <div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                       {implied2pp !== null ? (
@@ -7216,8 +7216,8 @@ export default function App() {
                       <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
                       {seatAvg2ppVal !== null ? (
                         <>
-                          <div style={{ fontSize: 30, fontWeight: 800, color: seatAvg2ppVal >= 50 ? "#059669" : "#DC2626" }}>{seatAvg2ppVal.toFixed(1)}%</div>
-                          <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across {totalSeats} seats</div>
+                          <div style={{ fontSize: 30, fontWeight: 800, color: seatAvg2ppVal.avg >= 50 ? "#059669" : "#DC2626" }}>{seatAvg2ppVal.avg.toFixed(1)}%</div>
+                          <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across {seatAvg2ppVal.count} seats</div>
                         </>
                       ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
                     </div>
