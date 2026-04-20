@@ -19,8 +19,8 @@ data/raw/
 data/processed/
 
 # Database (generated – don't commit)
-# aec_elections.db is committed (state election 2CP data for calibration)
 data/elections.db
+data/aec_elections.db
 
 # Export JSONs (generated – can be committed for small elections,
 # but are large for national booth-level data)
