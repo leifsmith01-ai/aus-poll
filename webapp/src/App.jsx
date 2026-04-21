@@ -3165,19 +3165,19 @@ function useIsMobile(breakpoint = 768) {
 }
 
 const STYLES = {
-  panel:        { background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: "18px 22px", marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)" },
-  sectionHead:  { fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: "#9CA3AF", marginBottom: 10 },
+  panel:        { background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "18px 22px", marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)" },
+  sectionHead:  { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3AF", marginBottom: 10 },
   panelTitle:   { fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 },
   sectionTitle: { fontSize: 21, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" },
-  statCard:     { background: "#fff",    border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" },
+  statCard:     { background: "#fff",    border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)" },
   metricCard:   { background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" },
   tableHead:    { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#6B7280", background: "#F9FAFB", padding: "10px 12px", textAlign: "left" },
-  tableCell:    { padding: "9px 12px" },
-  input:        { border: "1px solid #D1D5DB", borderRadius: 7, padding: "6px 10px", fontSize: 13, outline: "none", background: "#fff" },
-  btnPrimary:   { padding: "7px 16px", background: "#1D4ED8", color: "#fff",    borderRadius: 7, fontSize: 13, fontWeight: 600, border: "none",                  cursor: "pointer", letterSpacing: "0.01em" },
-  btnSecondary: { padding: "7px 16px", background: "#F8FAFC", color: "#374151", borderRadius: 7, fontSize: 13, fontWeight: 600, border: "1px solid #D1D5DB",    cursor: "pointer", letterSpacing: "0.01em" },
-  btnDanger:    { padding: "7px 16px", background: "#FEF2F2", color: "#DC2626", borderRadius: 7, fontSize: 13, fontWeight: 600, border: "1px solid #FECACA",    cursor: "pointer", letterSpacing: "0.01em" },
-  btnInfo:      { padding: "7px 16px", background: "#F0F9FF", color: "#0369A1", borderRadius: 7, fontSize: 13, fontWeight: 600, border: "1px solid #BAE6FD",    cursor: "pointer", letterSpacing: "0.01em" },
+  tableCell:    { padding: "11px 14px" },
+  input:        { border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, outline: "none", background: "#fff" },
+  btnPrimary:   { padding: "7px 16px", background: "#1D4ED8", color: "#fff",    borderRadius: 6, fontSize: 13, fontWeight: 600, border: "none",                  cursor: "pointer", letterSpacing: "0.01em" },
+  btnSecondary: { padding: "7px 16px", background: "#F8FAFC", color: "#374151", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #D1D5DB",    cursor: "pointer", letterSpacing: "0.01em" },
+  btnDanger:    { padding: "7px 16px", background: "#FEF2F2", color: "#DC2626", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #FECACA",    cursor: "pointer", letterSpacing: "0.01em" },
+  btnInfo:      { padding: "7px 16px", background: "#F0F9FF", color: "#0369A1", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #BAE6FD",    cursor: "pointer", letterSpacing: "0.01em" },
 };
 
 function TallyBar({ seats, useModelled = false }) {
@@ -3187,19 +3187,28 @@ function TallyBar({ seats, useModelled = false }) {
     counts[g] = (counts[g] || 0) + 1;
   });
   const total = seats.length;
+  const majorityAt = 76;
+  const majorityPct = total > 0 ? (majorityAt / total) * 100 : 50;
   return (
     <div style={{ ...STYLES.panel, marginBottom: 14 }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>
         {useModelled ? "Projected" : "2025 result"} — {total} seats shown
       </div>
-      <div style={{ display: "flex", height: 26, borderRadius: 6, overflow: "hidden", gap: 2 }}>
-        {GROUP_ORDER.filter(g => counts[g]).map(g => (
-          <div key={g} style={{ flex: counts[g], background: GROUP_CONFIG[g].color, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>
-            {counts[g] >= 3 ? counts[g] : ""}
-          </div>
-        ))}
+      <div style={{ position: "relative" }}>
+        <div style={{ display: "flex", height: 36, borderRadius: 6, overflow: "hidden", gap: 2 }}>
+          {GROUP_ORDER.filter(g => counts[g]).map(g => (
+            <div key={g} style={{ flex: counts[g], background: GROUP_CONFIG[g].color, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>
+              {counts[g] >= 2 ? counts[g] : ""}
+            </div>
+          ))}
+        </div>
+        {/* 76-seat majority marker */}
+        <div style={{ position: "absolute", top: 0, bottom: 0, left: `${majorityPct}%`, width: 2, background: "rgba(0,0,0,0.35)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: -18, left: `${majorityPct}%`, transform: "translateX(-50%)", fontSize: 10, fontWeight: 700, color: "#6B7280", whiteSpace: "nowrap" }}>
+          76 needed
+        </div>
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", marginTop: 8 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", marginTop: 10 }}>
         {GROUP_ORDER.filter(g => counts[g]).map(g => (
           <span key={g} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#374151" }}>
             <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
@@ -4719,13 +4728,19 @@ export default function App() {
               {t.label}
             </button>
           ))}
+          {/* Data freshness label */}
+          {!isMobile && (
+            <span style={{ marginLeft: "auto", fontSize: 11, color: "#64748B", marginRight: 12, whiteSpace: "nowrap", flexShrink: 0 }}>
+              Data: 3 May 2025 final
+            </span>
+          )}
           {/* Buy Me a Coffee */}
           <a
             href="https://buymeacoffee.com/auspoll"
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              marginLeft: "auto",
+              marginLeft: isMobile ? "auto" : 0,
               display: "flex",
               alignItems: "center",
               gap: 6,
@@ -4786,14 +4801,22 @@ export default function App() {
       {/* ══════════════════════ SEATS TAB ═════════════════════════════════════ */}
       {activeTab === "seats" && (
         <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", maxWidth: 1400, margin: "0 auto" }}>
-          {isMobile && (
-            <div style={{ padding: "12px 16px 0" }}>
-              <button onClick={() => setShowMobileFilters(v => !v)}
-                style={{ ...STYLES.btnSecondary, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                <span>⚙</span> {showMobileFilters ? "Hide filters" : "Show filters"}
-              </button>
-            </div>
-          )}
+          {isMobile && (() => {
+            const activeFilterCount = (search ? 1 : 0) + (stateFilter.size < STATES.length ? 1 : 0) + (groupFilter.size < GROUP_ORDER.length ? 1 : 0) + (marginFilter.size < MARGINS.length ? 1 : 0);
+            return (
+              <div style={{ padding: "12px 16px 0" }}>
+                <button onClick={() => setShowMobileFilters(v => !v)}
+                  style={{ ...STYLES.btnSecondary, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                  <span>⚙</span> {showMobileFilters ? "Hide filters" : "Show filters"}
+                  {activeFilterCount > 0 && (
+                    <span style={{ background: "#2563EB", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: 10, padding: "1px 7px", marginLeft: 2 }}>
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            );
+          })()}
           <aside style={{ width: isMobile ? "100%" : 215, flexShrink: 0, padding: isMobile ? "8px 16px" : "16px 0 16px 16px", display: isMobile && !showMobileFilters ? "none" : "block" }}>
             <div style={{ ...STYLES.panel, padding: "14px 16px", position: isMobile ? "static" : "sticky", top: isMobile ? "auto" : 90, fontSize: 13, marginBottom: 0 }}>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Search seats…"
@@ -4900,27 +4923,27 @@ export default function App() {
                         <>
                           <tr key={s.id}
                             onClick={() => setExpandedSeatTabDemogId(prev => prev === s.id ? null : s.id)}
-                            style={{ background: isExpanded ? "#EFF6FF" : i % 2 === 0 ? "#fff" : "#FAFAFA", borderBottom: isExpanded ? "none" : "1px solid #F3F4F6", cursor: "pointer" }}
+                            style={{ background: isExpanded ? "#EFF6FF" : i % 2 === 0 ? "#fff" : "#F5F7FA", borderBottom: isExpanded ? "none" : "1px solid #F3F4F6", cursor: "pointer" }}
                             onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = "#EFF6FF"; }}
-                            onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = i % 2 === 0 ? "#fff" : "#FAFAFA"; }}>
-                            <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}>
+                            onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = i % 2 === 0 ? "#fff" : "#F5F7FA"; }}>
+                            <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                                <div style={{ width: 3, height: 30, background: p.color, borderRadius: 2, flexShrink: 0 }} />
+                                <div style={{ width: 4, height: 32, background: p.color, borderRadius: 2, flexShrink: 0 }} />
                                 <div>
                                   <div style={{ fontWeight: 700, color: "#111827" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</div>
                                   <div style={{ fontSize: 11, color: "#9CA3AF" }}>ID {s.id}</div>
                                 </div>
                               </div>
                             </td>
-                            <td style={{ padding: "9px 12px" }}>
+                            <td style={{ padding: "11px 14px" }}>
                               <span style={{ background: "#F3F4F6", color: "#374151", fontWeight: 600, fontSize: 12, padding: "2px 7px", borderRadius: 4 }}>{s.state}</span>
                             </td>
-                            <td style={{ padding: "9px 12px" }}><PartyBadge party={s.winner.party} /></td>
-                            <td style={{ padding: "9px 12px", color: "#374151" }}>{s.winner.name}</td>
-                            <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}><TcpBar tcp={s.tcp} winnerParty={s.winner.party} /></td>
-                            <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}><MarginDot margin={s.margin} /></td>
-                            {isFederalTab && <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}><SwingBadge swing={s.swing} /></td>}
-                            <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}>
+                            <td style={{ padding: "11px 14px" }}><PartyBadge party={s.winner.party} /></td>
+                            <td style={{ padding: "11px 14px", color: "#374151" }}>{s.winner.name}</td>
+                            <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}><TcpBar tcp={s.tcp} winnerParty={s.winner.party} /></td>
+                            <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}><MarginDot margin={s.margin} /></td>
+                            {isFederalTab && <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}><SwingBadge swing={s.swing} /></td>}
+                            <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}>
                               <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20, background: MARGIN_COLOR[cat] + "20", color: MARGIN_COLOR[cat] }}>
                                 {cat === "very_marginal" ? "Very marginal" : cat === "marginal" ? "Marginal" : cat === "fairly_safe" ? "Fairly safe" : "Safe"}
                               </span>
@@ -5265,12 +5288,12 @@ export default function App() {
           <div style={panelStyle}>
             <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Primary vote trends</div>
             <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>Thick lines = weighted aggregate (30-day window, decay + sample-size weighted) · Dots = individual polls</div>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={340}>
               <LineChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis domain={[0, 50]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v, name) => [v != null ? `${v}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB" }} />
+                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB", boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 {/* Raw poll scatter (strokeWidth=0 = dots only, no connecting line) */}
                 <Line type="linear" dataKey="ALP" stroke="#DC2626" strokeWidth={0} dot={{ r: 3, fill: "#DC2626" }} activeDot={{ r: 4 }} legendType="circle" />
@@ -5291,12 +5314,12 @@ export default function App() {
           <div style={panelStyle}>
             <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Estimated aggregate 2PP</div>
             <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>Thick lines = weighted aggregate trend (30-day window, decay + sample-size weighted) · Open circles = polls reporting 2PP directly · Polls reporting only primaries are imputed using 2022 AEC preference flows</div>
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={260}>
               <LineChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis domain={[38, 62]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v, name) => [v != null ? `${v}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB" }} />
+                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB", boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <ReferenceLine y={50} stroke="#9CA3AF" strokeDasharray="5 5" label={{ value: "50%", fontSize: 10, fill: "#9CA3AF", position: "insideRight" }} />
                 {BETTING_ODDS?.national?.alp_majority?.implied_2pp != null && (
@@ -5950,21 +5973,23 @@ export default function App() {
                     <div style={{ fontSize: 30, fontWeight: 800, color: changedSeats.length > 0 ? "#F59E0B" : "#6B7280" }}>{changedSeats.length}</div>
                     <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>of {SEATS.length} modelled</div>
                   </div>
-                  <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
-                    {(() => {
-                      const alpProj = projCounts.alp || 0;
-                      const needsMaj = 76;
-                      const projMaj = alpProj >= needsMaj ? "ALP majority" : (((projCounts.coalition || 0) >= needsMaj) ? "Coalition majority" : "Hung parliament");
-                      const majColor = alpProj >= needsMaj ? "#059669" : (((projCounts.coalition || 0) >= needsMaj) ? "#1D4ED8" : "#F59E0B");
-                      return (
-                        <>
-                          <div style={{ fontSize: 16, fontWeight: 800, color: majColor, marginTop: 4 }}>{projMaj}</div>
-                          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>76 seats needed</div>
-                        </>
-                      );
-                    })()}
-                  </div>
+                  {(() => {
+                    const alpProj = projCounts.alp || 0;
+                    const needsMaj = 76;
+                    const isAlpMaj = alpProj >= needsMaj;
+                    const isCoalMaj = (projCounts.coalition || 0) >= needsMaj;
+                    const projMaj = isAlpMaj ? "ALP majority" : (isCoalMaj ? "Coalition majority" : "Hung parliament");
+                    const majColor = isAlpMaj ? "#DC2626" : (isCoalMaj ? "#1D4ED8" : "#B45309");
+                    const majBg = isAlpMaj ? "#FEF2F2" : (isCoalMaj ? "#EFF6FF" : "#FFFBEB");
+                    const majBorder = isAlpMaj ? "#FECACA" : (isCoalMaj ? "#BFDBFE" : "#FDE68A");
+                    return (
+                      <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center", background: majBg, borderColor: majBorder }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: majColor, marginTop: 4 }}>{projMaj}</div>
+                        <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>76 seats needed</div>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Tally comparison: 2022 vs projected */}
