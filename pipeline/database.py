@@ -1009,7 +1009,9 @@ def get_state_previous_election_id(state_ab: str, election_id: int,
             (election_id,),
         ).fetchone()
         return row["election_id"] if row else None
-    except Exception:
+    except sqlite3.OperationalError as exc:
+        # State tables may not exist yet for jurisdictions that haven't been loaded.
+        logger.info("No %s_elections table available (%s); returning None", ab, exc)
         return None
     finally:
         conn.close()
@@ -1049,8 +1051,9 @@ def get_state_district_tcp_pcts(state_ab: str, election_id: int,
                 result[did]["alp_pct"] = row["vote_pct"]
             if row["elected"]:
                 result[did]["winner_party"] = row["party_ab"]
-    except Exception:
-        pass
+    except sqlite3.OperationalError as exc:
+        # State 2CP table may not exist yet for unloaded jurisdictions.
+        logger.info("Could not read %s_district_2cp (%s); returning empty result", ab, exc)
     finally:
         conn.close()
     return result

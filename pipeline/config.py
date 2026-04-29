@@ -95,19 +95,6 @@ STATES = {
     "NT":  "Northern Territory",
 }
 
-# ─── Major party abbreviations (for preference modelling) ────────────────────
-MAJOR_PARTIES = {
-    "ALP": "Australian Labor Party",
-    "LP":  "Liberal Party of Australia",
-    "NP":  "The Nationals",
-    "LNP": "Liberal National Party of Queensland",
-    "GRN": "The Greens",
-    "UAP": "United Australia Party",
-    "ON":  "Pauline Hanson's One Nation",
-    "CA":  "Centre Alliance",
-    "IND": "Independent",
-}
-
 # Coalition partners - treated as a single grouping in 2PP
 COALITION_PARTIES = {"LP", "NP", "LNP", "CLP"}
 

@@ -15,6 +15,7 @@ All monetary/vote figures are integers. Percentages are 2dp floats.
 
 import json
 import logging
+import sqlite3
 from pathlib import Path
 
 from .config import (
@@ -940,7 +941,9 @@ def export_state_elections_index(state_ab: str, db_path: str = None,
         rows = conn.execute(
             f"SELECT election_id, name, election_date FROM {table} ORDER BY election_id DESC"
         ).fetchall()
-    except Exception:
+    except sqlite3.OperationalError as exc:
+        # Table likely missing for jurisdictions that haven't been loaded yet.
+        logger.info("No %s table loaded yet (%s); reporting all elections as not-loaded", table, exc)
         rows = []
     finally:
         conn.close()
