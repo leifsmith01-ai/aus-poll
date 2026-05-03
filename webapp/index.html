@@ -10,84 +10,48 @@
     <meta property="og:title" content="aus-poll – Australian Election Modelling Dashboard" />
     <meta property="og:description" content="Interactive seat-by-seat election modelling for the 2025 Australian federal election. Explore polls, swings, and scenarios." />
     <meta property="og:type" content="website" />
-    <meta name="google-adsense-account" content="ca-pub-8230549400439546">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8230549400439546"
-         crossorigin="anonymous"></script>
+    <style>
+      :root {
+        --page-bg: #F1F5F9;
+        --panel-bg: #ffffff;
+        --metric-bg: #F8FAFC;
+        --subtle-bg: #F3F4F6;
+        --table-head-bg: #F9FAFB;
+        --table-row-alt: #F5F7FA;
+        --row-highlight: #EFF6FF;
+        --text-1: #111827;
+        --text-2: #374151;
+        --text-3: #6B7280;
+        --text-4: #9CA3AF;
+        --text-dark: #0F172A;
+        --border-1: #E5E7EB;
+        --border-2: #D1D5DB;
+        --border-3: #F3F4F6;
+        color-scheme: light;
+      }
+      [data-theme="dark"] {
+        --page-bg: #0D1117;
+        --panel-bg: #161B22;
+        --metric-bg: #1C2128;
+        --subtle-bg: #21262D;
+        --table-head-bg: #21262D;
+        --table-row-alt: #1A1F28;
+        --row-highlight: #1C2D4A;
+        --text-1: #E6EDF3;
+        --text-2: #C9D1D9;
+        --text-3: #8B949E;
+        --text-4: #6E7681;
+        --text-dark: #E6EDF3;
+        --border-1: #30363D;
+        --border-2: #30363D;
+        --border-3: #21262D;
+        color-scheme: dark;
+      }
+      html { background: var(--page-bg); }
+      *, *::before, *::after { box-sizing: border-box; }
+    </style>
   </head>
   <body>
-    <!-- Static content for AdSense review and no-JS crawlers.
-         Hidden immediately by the inline script below once JavaScript executes.
-         This ensures Google's AdSense crawler sees publisher content regardless
-         of whether it renders JavaScript. -->
-    <div id="static-content" style="max-width:860px;margin:0 auto;padding:24px 20px;font-family:system-ui,sans-serif;color:#1a1a2e;line-height:1.7;">
-      <h1 style="font-size:24px;font-weight:800;margin:0 0 8px;">aus-poll — Australian Election Modelling Dashboard</h1>
-      <p style="font-size:14px;color:#555;margin:0 0 24px;">Open-source, seat-by-seat election modelling for the 2025 Australian federal election</p>
-
-      <p>aus-poll is an independent, open-source election modelling tool that tracks opinion polls and projects seat-by-seat outcomes for Australian federal elections. It uses per-seat first-preference baselines from the 2022 and 2025 AEC results — not a uniform national swing — to compute two-candidate preferred (2PP) outcomes for all 151 House of Representatives electorates.</p>
-      <p>Users can adjust primary vote shares for the ALP, Coalition, Greens, independents, and One Nation to explore how shifts in national party support translate to individual seat results. Preference flows are applied at the division level using historical distribution-of-preferences data. Each seat projection includes an uncertainty band derived from polling error and seat-level volatility.</p>
-      <p>The dashboard covers the 2025 and 2022 Australian federal elections, plus historical state and territory elections (Victoria, New South Wales, Queensland, Western Australia, South Australia, Tasmania, ACT, and the Northern Territory). All data comes from publicly available sources: AEC election results, published opinion polls, and ABS Census demographics.</p>
-
-      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;">About</h2>
-      <p>aus-poll was built to provide a transparent, reproducible alternative to black-box election forecasts. All modelling logic is open-source; there are no hidden inputs or undisclosed assumptions. The tool is not a prediction — it is a scenario explorer. You set the primary votes, and the model shows you what the seat distribution would look like under those assumptions.</p>
-      <p>The project is not affiliated with the Australian Electoral Commission (AEC), any political party, or any government body. It is maintained independently and updated as new polling and results data become available.</p>
-
-      <h2 style="font-size:18px;font-weight:700;margin:28px 0 12px;">Frequently Asked Questions</h2>
-
-      <details style="margin-bottom:12px;border:1px solid #ddd;border-radius:6px;padding:12px 14px;">
-        <summary style="font-weight:600;cursor:pointer;font-size:14px;">What is two-candidate preferred (2PP)?</summary>
-        <p style="margin:10px 0 0;font-size:13px;color:#444;">Australia uses a preferential voting system. In each electorate, votes are counted and lower-preference candidates are eliminated one by one until only two remain. The two-candidate preferred (2PP) count represents the final tally between those two candidates. Nationally, this is reported as ALP vs. Coalition. A party needs more than 50% 2PP in a seat to win it.</p>
-      </details>
-
-      <details style="margin-bottom:12px;border:1px solid #ddd;border-radius:6px;padding:12px 14px;">
-        <summary style="font-weight:600;cursor:pointer;font-size:14px;">How does the model project seat outcomes?</summary>
-        <p style="margin:10px 0 0;font-size:13px;color:#444;">Rather than applying a single uniform national swing, aus-poll uses per-seat first-preference baselines from the 2022 and 2025 AEC results. It computes a primary vote shift for each party, then converts those primaries to 2PP using preference flow constants calibrated against historical distribution-of-preferences data. This captures the different starting points of individual seats.</p>
-      </details>
-
-      <details style="margin-bottom:12px;border:1px solid #ddd;border-radius:6px;padding:12px 14px;">
-        <summary style="font-weight:600;cursor:pointer;font-size:14px;">Where does polling data come from?</summary>
-        <p style="margin:10px 0 0;font-size:13px;color:#444;">The Polls tab aggregates published primary and 2PP figures from Newspoll, Resolve/SMH, RedBridge, DemosAU, Roy Morgan, Essential Research, and YouGov. House effects (systematic biases per pollster) are estimated and removed before smoothing to produce a single aggregated trend line.</p>
-      </details>
-
-      <details style="margin-bottom:12px;border:1px solid #ddd;border-radius:6px;padding:12px 14px;">
-        <summary style="font-weight:600;cursor:pointer;font-size:14px;">How accurate is the model?</summary>
-        <p style="margin:10px 0 0;font-size:13px;color:#444;">Backtesting against the 2022 AEC results shows a mean absolute 2PP error of under 0.1 percentage points across ALP vs. Coalition seats — very close to the actual count. The model is less reliable in seats contested by independents or the Greens, where the final two-candidate count differs from the standard ALP vs. Coalition frame.</p>
-      </details>
-
-      <details style="margin-bottom:12px;border:1px solid #ddd;border-radius:6px;padding:12px 14px;">
-        <summary style="font-weight:600;cursor:pointer;font-size:14px;">What are teal independents?</summary>
-        <p style="margin:10px 0 0;font-size:13px;color:#444;">Teal independents are community candidates who won or contested seats in affluent, traditionally Liberal-held electorates, broadly aligned on climate and integrity policy. aus-poll tracks six designated teal seats: Warringah, Wentworth, Bradfield, Mackellar, Kooyong, and Goldstein. These seats use teal-specific preference flows (approximately 73% flowing to ALP over Coalition).</p>
-      </details>
-
-      <details style="margin-bottom:12px;border:1px solid #ddd;border-radius:6px;padding:12px 14px;">
-        <summary style="font-weight:600;cursor:pointer;font-size:14px;">What does the uncertainty band represent?</summary>
-        <p style="margin:10px 0 0;font-size:13px;color:#444;">Each seat projection includes a ±1σ uncertainty band derived from historical polling error, seat-level volatility (elasticity), and any undecided vote allocation. Seats within the band of the 50% threshold are considered competitive. The band is centred on the modelled 2PP, not on the historical result.</p>
-      </details>
-
-      <details style="margin-bottom:12px;border:1px solid #ddd;border-radius:6px;padding:12px 14px;">
-        <summary style="font-weight:600;cursor:pointer;font-size:14px;">Is this affiliated with the AEC or any political party?</summary>
-        <p style="margin:10px 0 0;font-size:13px;color:#444;">No. aus-poll is an independent open-source project. It uses publicly available data from the Australian Electoral Commission and published opinion polls. It has no affiliation with any electoral body, political party, or campaign.</p>
-      </details>
-
-      <details style="margin-bottom:24px;border:1px solid #ddd;border-radius:6px;padding:12px 14px;">
-        <summary style="font-weight:600;cursor:pointer;font-size:14px;">How can I contribute or report a bug?</summary>
-        <p style="margin:10px 0 0;font-size:13px;color:#444;">The source code is publicly available on GitHub. Open an issue or pull request to suggest improvements, report errors in the model, or contribute new data. The codebase includes a Python pipeline for downloading and processing AEC results, a poll aggregator with house-effects modelling, and a React frontend dashboard.</p>
-      </details>
-
-      <h2 style="font-size:18px;font-weight:700;margin:0 0 12px;">Data Sources</h2>
-      <ul style="font-size:13px;color:#444;padding-left:20px;margin:0 0 24px;">
-        <li style="margin-bottom:6px;"><strong>AEC election results</strong> — Booth-level and division-level first preferences, two-candidate preferred counts, and distribution of preferences for the 2022 and 2025 federal elections. Published at <a href="https://results.aec.gov.au" style="color:#1D4ED8;">results.aec.gov.au</a>.</li>
-        <li style="margin-bottom:6px;"><strong>Opinion polls</strong> — Published primary and 2PP figures from Newspoll, Resolve/SMH, RedBridge, DemosAU, Roy Morgan, Essential Research, and YouGov.</li>
-        <li style="margin-bottom:6px;"><strong>Betting markets</strong> — National government outcome odds and seat-level win markets from Sportsbet and Betfair Exchange.</li>
-        <li style="margin-bottom:6px;"><strong>ABS Census 2021</strong> — SA1/SA2-level demographic data (income, education, occupation, age) mapped to electoral divisions for contextual overlays.</li>
-      </ul>
-
-      <p style="font-size:12px;color:#888;border-top:1px solid #eee;padding-top:16px;margin:0;">
-        <strong>Disclaimer:</strong> aus-poll is an independent modelling tool, not affiliated with the Australian Electoral Commission, any political party, or any government body. Projections are illustrative scenarios based on the inputs provided — they are not election predictions. All polling data is sourced from publicly available figures as reported by pollsters and media outlets.
-      </p>
-    </div>
-    <!-- Hide static content once JavaScript is available; React app takes over -->
-    <script>document.getElementById('static-content').style.display='none';</script>
-
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
