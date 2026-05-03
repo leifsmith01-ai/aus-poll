@@ -4915,7 +4915,7 @@ export default function App() {
             </span>
             {seatAvg2pp != null && (
               <span style={{ fontSize: 11, color: "#64748B" }}>
-                2PP <span style={{ color: seatAvg2pp >= 50 ? "#DC2626" : "#3B82F6", fontWeight: 700 }}>{seatAvg2pp.toFixed(1)}%</span> ALP
+                2PP <span style={{ color: seatAvg2pp.avg >= 50 ? "#DC2626" : "#3B82F6", fontWeight: 700 }}>{seatAvg2pp.avg.toFixed(1)}%</span> ALP
               </span>
             )}
           </div>
