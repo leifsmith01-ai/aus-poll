@@ -4365,7 +4365,7 @@ export default function App() {
   const demogStats = useMemo(() => {
     const stats = {};
     DEMOG_METRICS.forEach(({ key }) => {
-      const vals = demogWithSeats.map(s => s.demog[key]).filter(v => v != null);
+      const vals = demogFiltered.map(s => s.demog[key]).filter(v => v != null);
       if (!vals.length) { stats[key] = null; return; }
       stats[key] = {
         min: Math.min(...vals),
@@ -4374,7 +4374,7 @@ export default function App() {
       };
     });
     return stats;
-  }, [demogWithSeats]);
+  }, [demogFiltered]);
 
   const scatterData = useMemo(() => {
     const mKey = demogXMetric;
@@ -5008,7 +5008,7 @@ export default function App() {
                                       <div style={{ fontSize: 11, color: "#6B7280" }}>Median age</div>
                                       <DemogBar value={d.medianAge} min={28} max={55} color="#059669" fmt={v => `${Math.round(v)} yrs`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Youth (15–34)</div>
-                                      <DemogBar value={d.youth15to34Pct} min={15} max={45} color="#059669" fmt={v => `${v}%`} />
+                                      <DemogBar value={d.youth15to34Pct} min={15} max={80} color="#059669" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Seniors (65+)</div>
                                       <DemogBar value={d.seniors65PlusPct} min={5} max={35} color="#10B981" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>University educated</div>
@@ -5024,7 +5024,7 @@ export default function App() {
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Unemployment rate</div>
                                       <DemogBar value={d.unemploymentRate} min={1} max={12} color="#6366F1" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Labour participation</div>
-                                      <DemogBar value={d.labourParticipationRate} min={45} max={80} color="#6366F1" fmt={v => `${v}%`} />
+                                      <DemogBar value={d.labourParticipationRate} min={40} max={80} color="#6366F1" fmt={v => `${v}%`} />
                                       {isFederalTab && d.urbanClass && <>
                                         <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>AEC classification</div>
                                         <div style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{d.urbanClass}</div>
@@ -7849,33 +7849,6 @@ export default function App() {
                   {demogSectionOpen && (
                     <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderTopWidth: 0, borderRadius: "0 0 12px 12px", padding: "20px" }}>
 
-                      {/* National summary cards */}
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
-                        {[
-                          { key: "medianPersonalIncomeEarners", label: "Personal Income (earners)", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
-                          { key: "medianHouseholdIncome", label: "Median Household Income", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
-                          { key: "renterPct", label: "Renters", fmt: v => `${v.toFixed(1)}%` },
-                          { key: "rentalToIncomeRatio", label: "Rent-to-Income", fmt: v => `${v.toFixed(1)}%` },
-                          { key: "unemploymentRate", label: "Unemployment Rate", fmt: v => `${v.toFixed(1)}%` },
-                          { key: "bachelorsOrAbovePct", label: "Bachelor's+", fmt: v => `${v.toFixed(1)}%` },
-                          { key: "nonEnglishAtHomePct", label: "Non-English at Home", fmt: v => `${v.toFixed(1)}%` },
-                          { key: "overseasBornPct", label: "Overseas Born", fmt: v => `${v.toFixed(1)}%` },
-                          { key: "youth15to34Pct", label: "Youth (15–34)", fmt: v => `${v.toFixed(1)}%` },
-                          { key: "medianAge", label: "Median Age", fmt: v => `${Math.round(v)}` },
-                        ].map(({ key, label, fmt }) => {
-                          const s = demogStats[key];
-                          if (!s) return null;
-                          return (
-                            <div key={key} style={STYLES.metricCard}>
-                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>{label}</div>
-                              <div style={{ fontSize: 24, fontWeight: 800, color: "#111827", marginBottom: 4 }}>{fmt(s.avg)}</div>
-                              <div style={{ fontSize: 11, color: "#9CA3AF" }}>Range: {fmt(s.min)} – {fmt(s.max)}</div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 14 }}>Personal income (earners) = median of persons with income &gt; $0, excl. nil/negative · All other income = all persons 15+ · ABS Census 2021</div>
-
                       {/* Filters row */}
                       <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 16px", marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
                         <span style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase" }}>Filter:</span>
@@ -7908,6 +7881,33 @@ export default function App() {
                         </div>
                         <span style={{ marginLeft: "auto", fontSize: 12, color: "#9CA3AF" }}>{demogFiltered.length} seats</span>
                       </div>
+
+                      {/* Summary cards — averages for filtered seats */}
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
+                        {[
+                          { key: "medianPersonalIncomeEarners", label: "Personal Income (earners)", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
+                          { key: "medianHouseholdIncome", label: "Median Household Income", fmt: v => `$${(v / 1000).toFixed(0)}k/yr` },
+                          { key: "renterPct", label: "Renters", fmt: v => `${v.toFixed(1)}%` },
+                          { key: "rentalToIncomeRatio", label: "Rent-to-Income", fmt: v => `${v.toFixed(1)}%` },
+                          { key: "unemploymentRate", label: "Unemployment Rate", fmt: v => `${v.toFixed(1)}%` },
+                          { key: "bachelorsOrAbovePct", label: "Bachelor's+", fmt: v => `${v.toFixed(1)}%` },
+                          { key: "nonEnglishAtHomePct", label: "Non-English at Home", fmt: v => `${v.toFixed(1)}%` },
+                          { key: "overseasBornPct", label: "Overseas Born", fmt: v => `${v.toFixed(1)}%` },
+                          { key: "youth15to34Pct", label: "Youth (15–34)", fmt: v => `${v.toFixed(1)}%` },
+                          { key: "medianAge", label: "Median Age", fmt: v => `${Math.round(v)}` },
+                        ].map(({ key, label, fmt }) => {
+                          const s = demogStats[key];
+                          if (!s) return null;
+                          return (
+                            <div key={key} style={STYLES.metricCard}>
+                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>{label}</div>
+                              <div style={{ fontSize: 24, fontWeight: 800, color: "#111827", marginBottom: 4 }}>{fmt(s.avg)}</div>
+                              <div style={{ fontSize: 11, color: "#9CA3AF" }}>Range: {fmt(s.min)} – {fmt(s.max)}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 14 }}>Averages are for filtered seats above · Personal income (earners) = median of persons with income &gt; $0, excl. nil/negative · All other income = all persons 15+ · ABS Census 2021</div>
 
                       {/* Demographic table */}
                       <div style={{ border: "1px solid #E5E7EB", borderRadius: 10, marginBottom: 20, overflow: "hidden" }}>
