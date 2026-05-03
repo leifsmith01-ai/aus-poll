@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aus Poll – Election Modelling Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/aus-poll/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <meta name="description" content="aus-poll is an open-source Australian federal election modelling dashboard. Track polls, model seat-by-seat outcomes, and explore swing scenarios for the 2025 Australian federal election." />
     <meta name="keywords" content="Australian election, election modelling, 2025 federal election, two-party preferred, seat projections, polling, ALP, Coalition, AEC, swing model" />
     <meta property="og:title" content="aus-poll – Australian Election Modelling Dashboard" />
@@ -47,8 +50,13 @@
         --border-3: #21262D;
         color-scheme: dark;
       }
-      html { background: var(--page-bg); }
+      html { background: var(--page-bg); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
       *, *::before, *::after { box-sizing: border-box; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
     </style>
   </head>
   <body>

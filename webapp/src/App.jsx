@@ -3136,7 +3136,7 @@ function computeHareClarkUncertainty(electorates, basePcts, swingStd, majority, 
 // ─── Small reusable components ────────────────────────────────────────────────
 function PartyBadge({ party }) {
   const p = getParty(party);
-  return <span style={{ background: p.color, color: "#fff", fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>{p.short}</span>;
+  return <span style={{ background: p.color + "28", color: p.color, fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, border: "1px solid " + p.color + "40" }}>{p.short}</span>;
 }
 
 function MarginDot({ margin }) {
@@ -3225,11 +3225,11 @@ function TallyBar({ seats, useModelled = false }) {
           76 needed
         </div>
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", marginTop: 10 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "7px 16px", marginTop: 12 }}>
         {GROUP_ORDER.filter(g => counts[g]).map(g => (
-          <span key={g} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--text-2)" }}>
-            <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
-            {GROUP_CONFIG[g].label} <strong>{counts[g]}</strong>
+          <span key={g} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-2)" }}>
+            <span style={{ width: 11, height: 11, borderRadius: 3, background: GROUP_CONFIG[g].color, display: "inline-block", flexShrink: 0 }} />
+            {GROUP_CONFIG[g].label} <strong style={{ fontWeight: 700, color: "var(--text-1)" }}>{counts[g]}</strong>
           </span>
         ))}
       </div>
@@ -3321,7 +3321,7 @@ export default function App() {
   const [sortKey, setSortKey] = useState("margin");
   const [sortDir, setSortDir] = useState("asc");
   const [seatsJurisdiction, setSeatsJurisdiction] = useState("federal_2025");
-  const [activeTab, setActiveTab] = useState("about");
+  const [activeTab, setActiveTab] = useState("seats");
   const [selectedModelId, setSelectedModelId] = useState("federal_2025");
 
   // ── Seats tab mobile state ──
@@ -4698,6 +4698,7 @@ export default function App() {
 
   const panelStyle = isMobile ? { ...STYLES.panel, padding: "14px 14px" } : STYLES.panel;
   const sectionHead = STYLES.sectionHead;
+  const chartTickColor = darkMode ? "#8B949E" : "#6B7280";
 
   // Shared filter controls used in both desktop sidebar and mobile bottom sheet
   const seatFilterPanel = (
@@ -4782,29 +4783,35 @@ export default function App() {
           <span style={{ fontSize: isMobile ? 13 : 15, fontWeight: 800, letterSpacing: "-0.02em", marginRight: isMobile ? 0 : 16, whiteSpace: "nowrap", color: "#F8FAFC", flex: isMobile ? 1 : "none" }}>
             🇦🇺 aus poll
           </span>
-          {/* Desktop: tabs in title row */}
-          {!isMobile && tabs.map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)}
-              style={{
-                background: "transparent",
-                color: activeTab === t.id ? "#fff" : "#94A3B8",
-                border: "none",
-                borderBottom: activeTab === t.id ? "2px solid #3B82F6" : "2px solid transparent",
-                padding: "0 14px",
-                height: 56,
-                cursor: "pointer",
-                fontSize: 13,
-                fontWeight: activeTab === t.id ? 600 : 500,
-                transition: "color 0.15s, border-color 0.15s",
-                borderRadius: 0,
-                letterSpacing: "0.01em",
-              }}>
-              {t.label}
-            </button>
-          ))}
+          {/* Desktop: tabs in title row — scrollable to handle many tabs */}
+          {!isMobile && (
+            <div style={{ display: "flex", flex: 1, overflowX: "auto", scrollbarWidth: "none", msOverflowStyle: "none", alignItems: "stretch" }}>
+              {tabs.map(t => (
+                <button key={t.id} onClick={() => setActiveTab(t.id)}
+                  style={{
+                    background: activeTab === t.id ? "rgba(59,130,246,0.10)" : "transparent",
+                    color: activeTab === t.id ? "#fff" : "#94A3B8",
+                    border: "none",
+                    borderBottom: activeTab === t.id ? "3px solid #3B82F6" : "3px solid transparent",
+                    padding: "0 14px",
+                    height: 56,
+                    cursor: "pointer",
+                    fontSize: 13,
+                    fontWeight: activeTab === t.id ? 600 : 500,
+                    transition: "color 0.15s, border-color 0.15s, background 0.15s",
+                    borderRadius: 0,
+                    letterSpacing: "0.01em",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                  }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
           {/* Data freshness label */}
           {!isMobile && (
-            <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-3)", marginRight: 12, whiteSpace: "nowrap", flexShrink: 0 }}>
+            <span style={{ fontSize: 11, color: "var(--text-3)", marginRight: 12, whiteSpace: "nowrap", flexShrink: 0 }}>
               Data: 3 May 2025 final
             </span>
           )}
@@ -4816,7 +4823,7 @@ export default function App() {
               background: "rgba(255,255,255,0.08)",
               border: "1px solid rgba(255,255,255,0.12)",
               borderRadius: 6,
-              color: "#94A3B8",
+              color: "var(--text-4)",
               cursor: "pointer",
               fontSize: isMobile ? 14 : 15,
               padding: isMobile ? "4px 7px" : "5px 9px",
@@ -4876,6 +4883,43 @@ export default function App() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* ── Projection headline strip ── */}
+      <div style={{ background: "#0F172A", borderBottom: "1px solid rgba(255,255,255,0.06)", padding: isMobile ? "6px 16px" : "7px 24px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 20, maxWidth: 1400, margin: "0 auto", flexWrap: "wrap" }}>
+          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#475569", whiteSpace: "nowrap" }}>
+            2025 Federal projection
+          </span>
+          <div style={{ display: "flex", gap: isMobile ? 10 : 18, alignItems: "center" }}>
+            <span style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: "#DC2626", lineHeight: 1 }}>{projCounts.alp ?? 0}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#DC262680", textTransform: "uppercase" }}>ALP</span>
+            </span>
+            <span style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: "#3B82F6", lineHeight: 1 }}>{(projCounts.coalition ?? 0) + (projCounts.lnp ?? 0)}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#3B82F680", textTransform: "uppercase" }}>Coal</span>
+            </span>
+            <span style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: "#059669", lineHeight: 1 }}>{projCounts.greens ?? 0}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#05966980", textTransform: "uppercase" }}>GRN</span>
+            </span>
+            <span style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: "#94A3B8", lineHeight: 1 }}>{(projCounts.teal ?? 0) + (projCounts.independent ?? 0) + (projCounts.crossbench ?? 0)}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#94A3B840", textTransform: "uppercase" }}>Xbench</span>
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: isMobile ? 8 : 14, alignItems: "center", marginLeft: isMobile ? 0 : "auto" }}>
+            <span style={{ fontSize: 11, color: "#64748B" }}>
+              Majority <span style={{ color: "#94A3B8", fontWeight: 600 }}>76</span>
+            </span>
+            {seatAvg2pp != null && (
+              <span style={{ fontSize: 11, color: "#64748B" }}>
+                2PP <span style={{ color: seatAvg2pp >= 50 ? "#DC2626" : "#3B82F6", fontWeight: 700 }}>{seatAvg2pp.toFixed(1)}%</span> ALP
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ══════════════════════ SEATS TAB ═════════════════════════════════════ */}
@@ -4987,7 +5031,15 @@ export default function App() {
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
-                      <tr><td colSpan={isFederalTab ? 8 : 7} style={{ padding: 40, textAlign: "center", color: "var(--text-4)" }}>No seats match current filters.</td></tr>
+                      <tr><td colSpan={isFederalTab ? 8 : 7} style={{ padding: "48px 24px", textAlign: "center" }}>
+                        <div style={{ fontSize: 28, marginBottom: 10, opacity: 0.4 }}>🔍</div>
+                        <div style={{ fontWeight: 600, fontSize: 14, color: "var(--text-2)", marginBottom: 6 }}>No seats match current filters</div>
+                        <div style={{ fontSize: 12, color: "var(--text-4)", marginBottom: 16 }}>Try broadening your filter criteria</div>
+                        <button onClick={() => { setSearch(""); setStateFilter(new Set(STATES)); setGroupFilter(new Set(GROUP_ORDER)); setMarginFilter(new Set(MARGINS)); }}
+                          style={{ ...STYLES.btnSecondary, fontSize: 12, padding: "6px 14px" }}>
+                          Clear all filters
+                        </button>
+                      </td></tr>
                     ) : filtered.map((s, i) => {
                       const p = getParty(s.winner.party);
                       const cat = getMarginCat(s.margin);
@@ -5025,7 +5077,7 @@ export default function App() {
                           </tr>
                           {isExpanded && (
                             <tr key={`${s.id}-demog`}>
-                              <td colSpan={isFederalTab ? 8 : 7} style={{ background: "#F0F9FF", padding: "14px 20px", borderBottom: "2px solid #BFDBFE" }}>
+                              <td colSpan={isFederalTab ? 8 : 7} style={{ background: "#F0F9FF", padding: "14px 20px", borderBottom: "2px solid #BFDBFE", animation: "fadeIn 0.15s ease" }}>
                                 {(() => {
                                   const d = isFederalTab ? getDemog(s.id) : getStateDemog(s.id);
                                   const hasData = d && (d.medianAge != null || d.medianPersonalIncome != null);
@@ -5367,7 +5419,7 @@ export default function App() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis domain={[0, 50]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }} />
+                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 {/* Raw poll scatter (strokeWidth=0 = dots only, no connecting line) */}
                 <Line type="linear" dataKey="ALP" stroke="#DC2626" strokeWidth={0} dot={{ r: 3, fill: "#DC2626" }} activeDot={{ r: 4 }} legendType="circle" />
@@ -5393,7 +5445,7 @@ export default function App() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis domain={[38, 62]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }} />
+                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <ReferenceLine y={50} stroke="#9CA3AF" strokeDasharray="5 5" label={{ value: "50%", fontSize: 10, fill: "#9CA3AF", position: "insideRight" }} />
                 {BETTING_ODDS?.national?.alp_majority?.implied_2pp != null && (
@@ -5432,7 +5484,7 @@ export default function App() {
                       if (Array.isArray(v)) return [`${v[0]}%–${v[1]}%`, name];
                       return [v != null ? `${v}%` : "—", name];
                     }}
-                    contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)" }}
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)", background: "var(--panel-bg)", color: "var(--text-1)" }}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Area type="monotone" dataKey="ALP CI" stroke="none" fill="#DC2626" fillOpacity={0.12} legendType="none" name="ALP 95% CI" />
@@ -5582,13 +5634,13 @@ export default function App() {
                 <div style={{ height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
                       <XAxis dataKey="date" type="category" allowDuplicatedCategory={false}
-                        tick={{ fontSize: 11, fill: "#6B7280" }}
+                        tick={{ fontSize: 11, fill: chartTickColor }}
                         tickFormatter={d => new Date(d).toLocaleDateString("en-AU", { month: "short", year: "2-digit" })} />
-                      <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} domain={[-20, 40]}
+                      <YAxis tick={{ fontSize: 11, fill: chartTickColor }} domain={[-20, 40]}
                         tickFormatter={v => `${v > 0 ? "+" : ""}${v}`} />
-                      <Tooltip formatter={(v, name) => [`${v > 0 ? "+" : ""}${v}pp net`, name]} />
+                      <Tooltip formatter={(v, name) => [`${v > 0 ? "+" : ""}${v}pp net`, name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
                       <ReferenceLine y={0} stroke="#9CA3AF" strokeDasharray="4 2" />
                       <Legend />
                       {leaders.map(leader => (
@@ -5690,10 +5742,10 @@ export default function App() {
                     <div style={{ height: 160 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={cpiData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                          <XAxis dataKey="period" tick={{ fontSize: 10, fill: "#6B7280" }} />
-                          <YAxis tick={{ fontSize: 10, fill: "#6B7280" }} domain={[0, "auto"]} tickFormatter={v => `${v}%`} />
-                          <Tooltip formatter={(v) => [`${v}%`, "CPI YoY"]} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+                          <XAxis dataKey="period" tick={{ fontSize: 10, fill: chartTickColor }} />
+                          <YAxis tick={{ fontSize: 10, fill: chartTickColor }} domain={[0, "auto"]} tickFormatter={v => `${v}%`} />
+                          <Tooltip formatter={(v) => [`${v}%`, "CPI YoY"]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
                           <ReferenceLine y={elecCpi} stroke="#DC2626" strokeDasharray="4 2" label={{ value: "Election", fill: "#DC2626", fontSize: 10 }} />
                           <ReferenceLine y={2.5} stroke="#059669" strokeDasharray="4 2" label={{ value: "RBA target", fill: "#059669", fontSize: 10 }} />
                           <Line type="monotone" dataKey="value" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} name="CPI YoY %" />
@@ -5709,11 +5761,11 @@ export default function App() {
                     <div style={{ height: 140 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={unempData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                          <XAxis dataKey="period" tick={{ fontSize: 10, fill: "#6B7280" }}
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+                          <XAxis dataKey="period" tick={{ fontSize: 10, fill: chartTickColor }}
                             tickFormatter={p => p.replace(/^(\d{4})-(\d{2})$/, (_, y, m) => `${["", "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m]} ${y.slice(2)}`)} />
-                          <YAxis tick={{ fontSize: 10, fill: "#6B7280" }} domain={[3, 6]} tickFormatter={v => `${v}%`} />
-                          <Tooltip formatter={(v) => [`${v}%`, "Unemployment"]} />
+                          <YAxis tick={{ fontSize: 10, fill: chartTickColor }} domain={[3, 6]} tickFormatter={v => `${v}%`} />
+                          <Tooltip formatter={(v) => [`${v}%`, "Unemployment"]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
                           <ReferenceLine y={elecUnemp} stroke="#DC2626" strokeDasharray="4 2" label={{ value: "Election", fill: "#DC2626", fontSize: 10 }} />
                           <Line type="monotone" dataKey="value" stroke="#7C3AED" strokeWidth={2} dot={{ r: 2 }} name="Unemployment %" />
                         </LineChart>
@@ -5779,7 +5831,7 @@ export default function App() {
 
             {/* ── Model intro text (shown for federal 2025 scenario builder) ── */}
             {el.modelEnabled && selectedModelId === "federal_2025" && (
-              <div style={{ background: "var(--metric-bg)", border: "1px solid #E2E8F0", borderRadius: 8, padding: "14px 16px", marginBottom: 16 }}>
+              <div style={{ background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 8, padding: "14px 16px", marginBottom: 16 }}>
                 <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--text-2)", lineHeight: 1.65 }}>
                   <strong>aus-poll</strong> is an open-source, seat-by-seat election modelling tool for Australian federal elections. Adjust the primary vote sliders on the left to explore how shifts in national party support translate to seat outcomes across all 151 House of Representatives electorates.
                 </p>
@@ -8134,7 +8186,7 @@ export default function App() {
                               tick={{ fontSize: 11 }} />
                             <YAxis dataKey="y" name="Margin" tickFormatter={v => `${v > 0 ? "+" : ""}${v.toFixed(1)}`}
                               tick={{ fontSize: 11 }} />
-                            <ReferenceLine y={0} stroke="#6B7280" strokeDasharray="4 2" label={{ value: "50%", position: "right", fontSize: 10, fill: "#6B7280" }} />
+                            <ReferenceLine y={0} stroke={chartTickColor} strokeDasharray="4 2" label={{ value: "50%", position: "right", fontSize: 10, fill: chartTickColor }} />
                             <Tooltip cursor={{ strokeDasharray: "3 3" }}
                               content={({ active, payload }) => {
                                 if (!active || !payload?.length) return null;
@@ -8596,7 +8648,7 @@ export default function App() {
 
       {/* ══════════════════════ METHODOLOGY TAB ══════════════════════════════════ */}
       {activeTab === "methodology" && (() => {
-        const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 };
+        const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-4)", marginBottom: 6 };
         const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "var(--text-dark)", margin: "0 0 10px" };
         const prose = { fontSize: 13, color: "var(--text-2)", lineHeight: 1.75, margin: "0 0 12px" };
         const codeBlock = {
@@ -8611,10 +8663,10 @@ export default function App() {
           lineHeight: 1.7,
           margin: "0 0 16px",
         };
-        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "var(--text-2)", borderBottom: "1px solid #CBD5E1", background: "var(--metric-bg)" };
-        const tblCell = { padding: "8px 12px", fontSize: 13, color: "var(--text-2)", borderBottom: "1px solid #F1F5F9" };
+        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "var(--text-2)", borderBottom: "1px solid var(--border-1)", background: "var(--metric-bg)" };
+        const tblCell = { padding: "8px 12px", fontSize: 13, color: "var(--text-2)", borderBottom: "1px solid var(--border-3)" };
         const tblCellR = { ...tblCell, textAlign: "right", fontVariantNumeric: "tabular-nums" };
-        const divider = { borderTop: "1px solid #E2E8F0", margin: "20px 0" };
+        const divider = { borderTop: "1px solid var(--border-1)", margin: "20px 0" };
         const panel = { ...STYLES.panel, marginBottom: 16 };
         return (
           <div style={{ maxWidth: 800, margin: "0 auto", padding: isMobile ? "20px 14px" : "28px 24px" }}>
@@ -8684,7 +8736,7 @@ export default function App() {
                       <td style={tblCell}>{group}</td>
                       <td style={{ ...tblCellR, color: "#DC2626", fontWeight: 600 }}>{alp}</td>
                       <td style={{ ...tblCellR, color: "#1D4ED8", fontWeight: 600 }}>{coal}</td>
-                      <td style={{ ...tblCellR, color: "#94A3B8", fontSize: 12 }}>{src}</td>
+                      <td style={{ ...tblCellR, color: "var(--text-4)", fontSize: 12 }}>{src}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -8869,7 +8921,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                     ["No redistribution modelling", "Baselines use 2025 electoral boundaries. Boundary changes between elections are not reflected."],
                     ["No incumbency or candidate effects", "No adjustment for candidate quality, incumbent retirement, or local campaign factors."],
                   ].map(([title, desc], i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                    <tr key={i} style={{ borderBottom: "1px solid var(--border-3)" }}>
                       <td style={{ ...tblCell, fontWeight: 600, whiteSpace: "nowrap", verticalAlign: "top", paddingRight: 16, width: "28%" }}>{title}</td>
                       <td style={{ ...tblCell, color: "var(--text-3)" }}>{desc}</td>
                     </tr>
@@ -8890,7 +8942,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                     ["Betting markets", "Sportsbet, Betfair Exchange — national government outcome odds and seat-level win markets."],
                     ["Demographics", "ABS Census 2021 — SA1/SA2 level data mapped to electoral divisions."],
                   ].map(([title, desc], i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                    <tr key={i} style={{ borderBottom: "1px solid var(--border-3)" }}>
                       <td style={{ ...tblCell, fontWeight: 600, whiteSpace: "nowrap", verticalAlign: "top", paddingRight: 16, width: "28%" }}>{title}</td>
                       <td style={tblCell}>{desc}</td>
                     </tr>
@@ -8905,14 +8957,14 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
 
       {/* ══════════════════════ USER GUIDE TAB ══════════════════════════════════ */}
       {activeTab === "guide" && (() => {
-        const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 };
+        const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-4)", marginBottom: 6 };
         const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "var(--text-dark)", margin: "0 0 10px" };
         const prose = { fontSize: 13, color: "var(--text-2)", lineHeight: 1.75, margin: "0 0 12px" };
         const panel = { ...STYLES.panel, marginBottom: 16 };
-        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "var(--text-2)", borderBottom: "1px solid #CBD5E1", background: "var(--metric-bg)" };
-        const tblCell = { padding: "8px 12px", fontSize: 13, color: "var(--text-2)", borderBottom: "1px solid #F1F5F9", verticalAlign: "top" };
+        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "var(--text-2)", borderBottom: "1px solid var(--border-1)", background: "var(--metric-bg)" };
+        const tblCell = { padding: "8px 12px", fontSize: 13, color: "var(--text-2)", borderBottom: "1px solid var(--border-3)", verticalAlign: "top" };
         const tblCellMono = { ...tblCell, fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace", fontSize: 12, color: "#2563EB" };
-        const divider = { borderTop: "1px solid #E2E8F0", margin: "18px 0" };
+        const divider = { borderTop: "1px solid var(--border-1)", margin: "18px 0" };
         const tip = { background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#1E40AF", lineHeight: 1.65, marginBottom: 14 };
         const warn = { background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#92400E", lineHeight: 1.65, marginBottom: 14 };
         const inlineCode = { fontFamily: "monospace", background: "var(--page-bg)", padding: "1px 5px", borderRadius: 3, fontSize: 12 };
@@ -9333,8 +9385,8 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
 
       {/* ══════════════════════ ABOUT TAB ════════════════════════════════════════ */}
       {activeTab === "about" && (() => {
-        const panel = { background: "var(--panel-bg)", border: "1px solid #E2E8F0", borderRadius: 10, padding: isMobile ? "16px 14px" : "20px 24px", marginBottom: 16 };
-        const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 };
+        const panel = { background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: isMobile ? "16px 14px" : "20px 24px", marginBottom: 16 };
+        const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-4)", marginBottom: 6 };
         const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "var(--text-dark)", margin: "0 0 10px" };
         const bodyText = { fontSize: 13, color: "var(--text-2)", lineHeight: 1.7, margin: "0 0 10px" };
         const faqItems = [
@@ -9400,7 +9452,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                   { label: "Betting markets", desc: "National government outcome odds and seat-level win markets from Sportsbet and Betfair Exchange, updated manually.", url: null, urlLabel: null },
                   { label: "ABS Census 2021", desc: "SA1/SA2-level demographic data (income, education, occupation, age) mapped to electoral divisions for contextual overlays.", url: null, urlLabel: null },
                 ].map(({ label, desc, url, urlLabel }) => (
-                  <div key={label} style={{ background: "var(--metric-bg)", border: "1px solid #E2E8F0", borderRadius: 8, padding: "12px 14px" }}>
+                  <div key={label} style={{ background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 8, padding: "12px 14px" }}>
                     <div style={{ fontWeight: 700, fontSize: 13, color: "var(--text-dark)", marginBottom: 4 }}>{label}</div>
                     <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.6 }}>{desc}</div>
                     {url && <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#1D4ED8", display: "inline-block", marginTop: 4 }}>{urlLabel}</a>}
@@ -9414,13 +9466,13 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
               <div style={secHead}>FAQ</div>
               <h2 style={secTitle}>Frequently asked questions</h2>
               {faqItems.map((item, i) => (
-                <div key={i} style={{ borderBottom: i < faqItems.length - 1 ? "1px solid #F1F5F9" : "none", paddingBottom: openFaq === i ? 12 : 0 }}>
+                <div key={i} style={{ borderBottom: i < faqItems.length - 1 ? "1px solid var(--border-3)" : "none", paddingBottom: openFaq === i ? 12 : 0 }}>
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                     style={{ background: "none", border: "none", width: "100%", textAlign: "left", padding: "12px 0", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}
                   >
                     <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-dark)", lineHeight: 1.5 }}>{item.q}</span>
-                    <span style={{ color: "#94A3B8", fontSize: 16, flexShrink: 0 }}>{openFaq === i ? "▲" : "▼"}</span>
+                    <span style={{ color: "var(--text-4)", fontSize: 16, flexShrink: 0 }}>{openFaq === i ? "▲" : "▼"}</span>
                   </button>
                   {openFaq === i && (
                     <p style={{ margin: "0 0 12px", fontSize: 13, color: "var(--text-3)", lineHeight: 1.7 }}>{item.a}</p>
@@ -9440,6 +9492,26 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
           </div>
         );
       })()}
+
+      {/* ── Mobile floating seat count badge ── */}
+      {isMobile && activeTab === "seats" && filtered.length < seatsForTab.length && (
+        <div style={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 200, pointerEvents: "none" }}>
+          <div style={{ background: "#1E293B", color: "#E2E8F0", fontSize: 12, fontWeight: 600, padding: "7px 16px", borderRadius: 20, boxShadow: "0 4px 14px rgba(0,0,0,0.35)", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
+            {filtered.length} of {seatsForTab.length} seats
+          </div>
+        </div>
+      )}
+
+      {/* ── Footer ── */}
+      <footer style={{ background: "#0F172A", borderTop: "1px solid rgba(255,255,255,0.06)", padding: isMobile ? "18px 16px" : "20px 24px", marginTop: 8 }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+          <span style={{ fontSize: 12, color: "#475569" }}>
+            aus-poll · open-source Australian election modelling ·{" "}
+            <a href="https://github.com/leifsmith01-ai/aus-poll" target="_blank" rel="noopener noreferrer" style={{ color: "#64748B", textDecoration: "none" }}>GitHub</a>
+          </span>
+          <span style={{ fontSize: 11, color: "#334155" }}>Not affiliated with the AEC · For informational purposes only</span>
+        </div>
+      </footer>
 
       <Analytics />
     </div>
