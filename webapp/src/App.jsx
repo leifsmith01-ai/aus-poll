@@ -40,7 +40,7 @@ const PARTY = {
   CA: { short: "Centre All.", color: "#7C3AED", bg: "#EDE9FE", group: "teal" },
   ON: { short: "One Nation", color: "#B45309", bg: "#FEF3C7", group: "one_nation" },
 };
-const getParty = (ab) => PARTY[ab] ?? { short: ab || "?", color: "#6B7280", bg: "#F3F4F6", group: "crossbench" };
+const getParty = (ab) => PARTY[ab] ?? { short: ab || "?", color: "var(--text-3)", bg: "#F3F4F6", group: "crossbench" };
 
 // Named "teal" independent seats (climate-focused progressive independents).
 // All other IND/CA seats are classified as "ind" (Other Independent).
@@ -3144,13 +3144,13 @@ function MarginDot({ margin }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
       <span style={{ width: 8, height: 8, borderRadius: "50%", background: c, display: "inline-block" }} />
-      <span style={{ fontWeight: 600, color: "#111827" }}>{margin?.toFixed(1)}%</span>
+      <span style={{ fontWeight: 600, color: "var(--text-1)" }}>{margin?.toFixed(1)}%</span>
     </span>
   );
 }
 
 function SwingBadge({ swing }) {
-  if (swing == null) return <span style={{ color: "#9CA3AF" }}>—</span>;
+  if (swing == null) return <span style={{ color: "var(--text-4)" }}>—</span>;
   const pos = swing > 0;
   return <span style={{ color: pos ? "#059669" : "#DC2626", fontWeight: 600 }}>{pos ? "+" : ""}{swing.toFixed(1)}%</span>;
 }
@@ -3182,17 +3182,17 @@ function useIsMobile(breakpoint = 768) {
 }
 
 const STYLES = {
-  panel:        { background: "#fff", border: "1px solid #E5E7EB", borderRadius: 10, padding: "18px 22px", marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)" },
-  sectionHead:  { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3AF", marginBottom: 10 },
-  panelTitle:   { fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 },
-  sectionTitle: { fontSize: 21, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" },
-  statCard:     { background: "#fff",    border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)" },
-  metricCard:   { background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" },
-  tableHead:    { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#6B7280", background: "#F9FAFB", padding: "10px 12px", textAlign: "left" },
+  panel:        { background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "18px 22px", marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)" },
+  sectionHead:  { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-4)", marginBottom: 10 },
+  panelTitle:   { fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 12 },
+  sectionTitle: { fontSize: 21, fontWeight: 800, color: "var(--text-dark)", margin: 0, letterSpacing: "-0.02em" },
+  statCard:     { background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)" },
+  metricCard:   { background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" },
+  tableHead:    { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--text-3)", background: "var(--table-head-bg)", padding: "10px 12px", textAlign: "left" },
   tableCell:    { padding: "11px 14px" },
-  input:        { border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, outline: "none", background: "#fff" },
-  btnPrimary:   { padding: "7px 16px", background: "#1D4ED8", color: "#fff",    borderRadius: 6, fontSize: 13, fontWeight: 600, border: "none",                  cursor: "pointer", letterSpacing: "0.01em" },
-  btnSecondary: { padding: "7px 16px", background: "#F8FAFC", color: "#374151", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #D1D5DB",    cursor: "pointer", letterSpacing: "0.01em" },
+  input:        { border: "1px solid var(--border-2)", borderRadius: 6, padding: "6px 10px", fontSize: 13, outline: "none", background: "var(--panel-bg)", color: "var(--text-1)" },
+  btnPrimary:   { padding: "7px 16px", background: "#1D4ED8", color: "#fff",    borderRadius: 6, fontSize: 13, fontWeight: 600, border: "none",                             cursor: "pointer", letterSpacing: "0.01em" },
+  btnSecondary: { padding: "7px 16px", background: "var(--metric-bg)", color: "var(--text-2)", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid var(--border-2)", cursor: "pointer", letterSpacing: "0.01em" },
   btnDanger:    { padding: "7px 16px", background: "#FEF2F2", color: "#DC2626", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #FECACA",    cursor: "pointer", letterSpacing: "0.01em" },
   btnInfo:      { padding: "7px 16px", background: "#F0F9FF", color: "#0369A1", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #BAE6FD",    cursor: "pointer", letterSpacing: "0.01em" },
 };
@@ -3208,7 +3208,7 @@ function TallyBar({ seats, useModelled = false }) {
   const majorityPct = total > 0 ? (majorityAt / total) * 100 : 50;
   return (
     <div style={{ ...STYLES.panel, marginBottom: 14 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-3)", marginBottom: 8 }}>
         {useModelled ? "Projected" : "2025 result"} — {total} seats shown
       </div>
       <div style={{ position: "relative" }}>
@@ -3221,13 +3221,13 @@ function TallyBar({ seats, useModelled = false }) {
         </div>
         {/* 76-seat majority marker */}
         <div style={{ position: "absolute", top: 0, bottom: 0, left: `${majorityPct}%`, width: 2, background: "rgba(0,0,0,0.35)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", top: -18, left: `${majorityPct}%`, transform: "translateX(-50%)", fontSize: 10, fontWeight: 700, color: "#6B7280", whiteSpace: "nowrap" }}>
+        <div style={{ position: "absolute", top: -18, left: `${majorityPct}%`, transform: "translateX(-50%)", fontSize: 10, fontWeight: 700, color: "var(--text-3)", whiteSpace: "nowrap" }}>
           76 needed
         </div>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", marginTop: 10 }}>
         {GROUP_ORDER.filter(g => counts[g]).map(g => (
-          <span key={g} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#374151" }}>
+          <span key={g} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--text-2)" }}>
             <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
             {GROUP_CONFIG[g].label} <strong>{counts[g]}</strong>
           </span>
@@ -3263,7 +3263,7 @@ function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
       <div style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
-      <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", minWidth: 112 }}>{label}</label>
+      <label style={{ fontSize: 13, fontWeight: 600, color: "var(--text-2)", minWidth: 112 }}>{label}</label>
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
         <input
           type="text"
@@ -3272,12 +3272,12 @@ function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
           onChange={e => setRaw(e.target.value)}
           onBlur={handleBlur}
           style={{
-            width: 68, border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 9px",
+            width: 68, border: "1px solid var(--border-2)", borderRadius: 6, padding: "6px 9px",
             fontSize: 14, fontWeight: 700, textAlign: "right", outline: "none",
             borderColor: delta !== 0 ? color : "#D1D5DB"
           }}
         />
-        <span style={{ fontSize: 13, color: "#6B7280" }}>%</span>
+        <span style={{ fontSize: 13, color: "var(--text-3)" }}>%</span>
       </div>
       <span style={{
         fontSize: 12, fontWeight: 600, width: 58, flexShrink: 0,
@@ -3295,14 +3295,14 @@ function PrefInput({ label, value, onChange, color = "#6B7280", historicalRange 
   return (
     <div style={{ marginBottom: 12 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-        <label style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{label}</label>
-        <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>{pct.toFixed(1)}%</span>
+        <label style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)" }}>{label}</label>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>{pct.toFixed(1)}%</span>
       </div>
       <input type="range" min={0} max={100} step={0.5} value={pct}
         onChange={e => onChange(parseFloat(e.target.value) / 100)}
         style={{ width: "100%", accentColor: color, cursor: "pointer" }} />
       {historicalRange && (
-        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>
+        <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 2 }}>
           Historical (2019–2025): {(historicalRange[0] * 100).toFixed(0)}–{(historicalRange[1] * 100).toFixed(0)}%
         </div>
       )}
@@ -3326,6 +3326,17 @@ export default function App() {
 
   // ── Seats tab mobile state ──
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // ── Dark mode ──
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+  });
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   // ── Polls tab state ──
   const [polls, setPolls] = useState(INITIAL_POLLS);
@@ -4670,7 +4681,7 @@ export default function App() {
   };
 
   const SortTh = ({ k, children }) => (
-    <th onClick={() => handleSort(k)} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280", background: "#F9FAFB", cursor: "pointer", userSelect: "none", whiteSpace: "nowrap" }}>
+    <th onClick={() => handleSort(k)} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-3)", background: "var(--table-head-bg)", cursor: "pointer", userSelect: "none", whiteSpace: "nowrap" }}>
       {children}{" "}<span style={{ color: sortKey === k ? "#374151" : "#D1D5DB" }}>{sortKey === k ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
     </th>
   );
@@ -4687,6 +4698,56 @@ export default function App() {
 
   const panelStyle = isMobile ? { ...STYLES.panel, padding: "14px 14px" } : STYLES.panel;
   const sectionHead = STYLES.sectionHead;
+
+  // Shared filter controls used in both desktop sidebar and mobile bottom sheet
+  const seatFilterPanel = (
+    <>
+      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Search seats…"
+        style={{ ...STYLES.input, width: "100%", boxSizing: "border-box", marginBottom: 14 }} />
+      {isFederalTab && (<>
+        <div style={sectionHead}>State / Territory</div>
+        <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+          <button onClick={() => setStateFilter(new Set(STATES))} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>All</button>
+          <button onClick={() => setStateFilter(new Set())} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>None</button>
+        </div>
+        {STATES.map(s => (
+          <label key={s} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4, cursor: "pointer" }}>
+            <input type="checkbox" checked={stateFilter.has(s)} onChange={() => toggleSet(setStateFilter, s)} style={{ accentColor: "#2563EB" }} />
+            <span style={{ flex: 1 }}>{s}</span>
+            <span style={{ color: "var(--text-4)", fontSize: 11 }}>{stateCounts[s]}</span>
+          </label>
+        ))}
+        <div style={{ borderTop: "1px solid var(--border-3)", margin: "10px 0" }} />
+      </>)}
+      <div style={sectionHead}>Party / Group</div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+        <button onClick={() => setGroupFilter(new Set(GROUP_ORDER))} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>All</button>
+        <button onClick={() => setGroupFilter(new Set())} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>None</button>
+      </div>
+      {GROUP_ORDER.map(g => (
+        <label key={g} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4, cursor: "pointer" }}>
+          <input type="checkbox" checked={groupFilter.has(g)} onChange={() => toggleSet(setGroupFilter, g)} style={{ accentColor: GROUP_CONFIG[g].color }} />
+          <span style={{ width: 8, height: 8, borderRadius: 2, background: GROUP_CONFIG[g].color, flexShrink: 0 }} />
+          <span style={{ flex: 1, fontSize: 12 }}>{GROUP_CONFIG[g].label}</span>
+          <span style={{ color: "var(--text-4)", fontSize: 11 }}>{groupCounts[g] || 0}</span>
+        </label>
+      ))}
+      <div style={{ borderTop: "1px solid var(--border-3)", margin: "10px 0" }} />
+      <div style={sectionHead}>Margin</div>
+      {MARGINS.map(m => (
+        <label key={m} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4, cursor: "pointer" }}>
+          <input type="checkbox" checked={marginFilter.has(m)} onChange={() => toggleSet(setMarginFilter, m)} style={{ accentColor: MARGIN_COLOR[m] }} />
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: MARGIN_COLOR[m], flexShrink: 0 }} />
+          <span style={{ flex: 1, fontSize: 12 }}>{MARGIN_LABEL[m]}</span>
+          <span style={{ color: "var(--text-4)", fontSize: 11 }}>{marginCounts[m] || 0}</span>
+        </label>
+      ))}
+      <button onClick={() => { setSearch(""); setStateFilter(new Set(STATES)); setGroupFilter(new Set(GROUP_ORDER)); setMarginFilter(new Set(MARGINS)); }}
+        style={{ ...STYLES.btnSecondary, marginTop: 12, width: "100%", padding: "7px 0" }}>
+        Clear all filters
+      </button>
+    </>
+  );
 
   // ── Sync primary sliders to URL params for scenario sharing ─────────────────
   useEffect(() => {
@@ -4712,7 +4773,7 @@ export default function App() {
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: "#F1F5F9", minHeight: "100vh", overflowX: "hidden" }}>
+    <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: "var(--page-bg)", minHeight: "100vh", overflowX: "hidden" }}>
 
       {/* ── Header ── */}
       <div style={{ background: "#0F172A", color: "#fff", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
@@ -4743,10 +4804,28 @@ export default function App() {
           ))}
           {/* Data freshness label */}
           {!isMobile && (
-            <span style={{ marginLeft: "auto", fontSize: 11, color: "#64748B", marginRight: 12, whiteSpace: "nowrap", flexShrink: 0 }}>
+            <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-3)", marginRight: 12, whiteSpace: "nowrap", flexShrink: 0 }}>
               Data: 3 May 2025 final
             </span>
           )}
+          {/* Dark mode toggle */}
+          <button
+            onClick={() => setDarkMode(d => !d)}
+            title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 6,
+              color: "#94A3B8",
+              cursor: "pointer",
+              fontSize: isMobile ? 14 : 15,
+              padding: isMobile ? "4px 7px" : "5px 9px",
+              lineHeight: 1,
+              flexShrink: 0,
+            }}
+          >
+            {darkMode ? "☀" : "🌙"}
+          </button>
           {/* Buy Me a Coffee */}
           <a
             href="https://buymeacoffee.com/auspoll"
@@ -4802,13 +4881,14 @@ export default function App() {
       {/* ══════════════════════ SEATS TAB ═════════════════════════════════════ */}
       {activeTab === "seats" && (
         <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", maxWidth: 1400, margin: "0 auto" }}>
+          {/* Mobile filter trigger */}
           {isMobile && (() => {
             const activeFilterCount = (search ? 1 : 0) + (stateFilter.size < STATES.length ? 1 : 0) + (groupFilter.size < GROUP_ORDER.length ? 1 : 0) + (marginFilter.size < MARGINS.length ? 1 : 0);
             return (
               <div style={{ padding: "12px 16px 0" }}>
-                <button onClick={() => setShowMobileFilters(v => !v)}
+                <button onClick={() => setShowMobileFilters(true)}
                   style={{ ...STYLES.btnSecondary, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                  <span>⚙</span> {showMobileFilters ? "Hide filters" : "Show filters"}
+                  <span>⚙</span> Filters
                   {activeFilterCount > 0 && (
                     <span style={{ background: "#2563EB", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: 10, padding: "1px 7px", marginLeft: 2 }}>
                       {activeFilterCount}
@@ -4818,54 +4898,47 @@ export default function App() {
               </div>
             );
           })()}
-          <aside style={{ width: isMobile ? "100%" : 215, flexShrink: 0, padding: isMobile ? "8px 16px" : "16px 0 16px 16px", display: isMobile && !showMobileFilters ? "none" : "block" }}>
-            <div style={{ ...STYLES.panel, padding: "14px 16px", position: isMobile ? "static" : "sticky", top: isMobile ? "auto" : 90, fontSize: 13, marginBottom: 0 }}>
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Search seats…"
-                style={{ ...STYLES.input, width: "100%", boxSizing: "border-box", marginBottom: 14 }} />
-              {isFederalTab && (<>
-                <div style={sectionHead}>State / Territory</div>
-                <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-                  <button onClick={() => setStateFilter(new Set(STATES))} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>All</button>
-                  <button onClick={() => setStateFilter(new Set())} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>None</button>
-                </div>
-                {STATES.map(s => (
-                  <label key={s} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4, cursor: "pointer" }}>
-                    <input type="checkbox" checked={stateFilter.has(s)} onChange={() => toggleSet(setStateFilter, s)} style={{ accentColor: "#2563EB" }} />
-                    <span style={{ flex: 1 }}>{s}</span>
-                    <span style={{ color: "#9CA3AF", fontSize: 11 }}>{stateCounts[s]}</span>
-                  </label>
-                ))}
-                <div style={{ borderTop: "1px solid #F3F4F6", margin: "10px 0" }} />
-              </>)}
-              <div style={sectionHead}>Party / Group</div>
-              <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-                <button onClick={() => setGroupFilter(new Set(GROUP_ORDER))} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>All</button>
-                <button onClick={() => setGroupFilter(new Set())} style={{ fontSize: 11, color: "#2563EB", background: "none", border: "none", cursor: "pointer", padding: 0 }}>None</button>
+
+          {/* Desktop sidebar */}
+          {!isMobile && (
+            <aside style={{ width: 215, flexShrink: 0, padding: "16px 0 16px 16px" }}>
+              <div style={{ ...STYLES.panel, padding: "14px 16px", position: "sticky", top: 90, fontSize: 13, marginBottom: 0 }}>
+                {seatFilterPanel}
               </div>
-              {GROUP_ORDER.map(g => (
-                <label key={g} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4, cursor: "pointer" }}>
-                  <input type="checkbox" checked={groupFilter.has(g)} onChange={() => toggleSet(setGroupFilter, g)} style={{ accentColor: GROUP_CONFIG[g].color }} />
-                  <span style={{ width: 8, height: 8, borderRadius: 2, background: GROUP_CONFIG[g].color, flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontSize: 12 }}>{GROUP_CONFIG[g].label}</span>
-                  <span style={{ color: "#9CA3AF", fontSize: 11 }}>{groupCounts[g] || 0}</span>
-                </label>
-              ))}
-              <div style={{ borderTop: "1px solid #F3F4F6", margin: "10px 0" }} />
-              <div style={sectionHead}>Margin</div>
-              {MARGINS.map(m => (
-                <label key={m} style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4, cursor: "pointer" }}>
-                  <input type="checkbox" checked={marginFilter.has(m)} onChange={() => toggleSet(setMarginFilter, m)} style={{ accentColor: MARGIN_COLOR[m] }} />
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: MARGIN_COLOR[m], flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontSize: 12 }}>{MARGIN_LABEL[m]}</span>
-                  <span style={{ color: "#9CA3AF", fontSize: 11 }}>{marginCounts[m] || 0}</span>
-                </label>
-              ))}
-              <button onClick={() => { setSearch(""); setStateFilter(new Set(STATES)); setGroupFilter(new Set(GROUP_ORDER)); setMarginFilter(new Set(MARGINS)); }}
-                style={{ ...STYLES.btnSecondary, marginTop: 12, width: "100%", padding: "7px 0" }}>
-                Clear all filters
-              </button>
+            </aside>
+          )}
+
+          {/* Mobile bottom sheet backdrop */}
+          {isMobile && showMobileFilters && (
+            <div onClick={() => setShowMobileFilters(false)}
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 300 }} />
+          )}
+
+          {/* Mobile bottom sheet */}
+          {isMobile && (
+            <div style={{
+              position: "fixed", left: 0, right: 0, bottom: 0,
+              background: "var(--panel-bg)",
+              borderRadius: "16px 16px 0 0",
+              boxShadow: "0 -4px 24px rgba(0,0,0,0.18)",
+              zIndex: 301, maxHeight: "80vh", overflowY: "auto",
+              padding: "0 16px 28px",
+              transform: showMobileFilters ? "translateY(0)" : "translateY(100%)",
+              transition: "transform 0.25s cubic-bezier(0.4,0,0.2,1)",
+            }}>
+              <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: "var(--border-2)" }} />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Filters</span>
+                <button onClick={() => setShowMobileFilters(false)}
+                  style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "var(--text-3)", padding: "4px 8px", lineHeight: 1 }}>×</button>
+              </div>
+              <div style={{ fontSize: 13 }}>
+                {seatFilterPanel}
+              </div>
             </div>
-          </aside>
+          )}
           <div style={{ flex: 1, padding: 16, minWidth: 0 }}>
             {/* ── Jurisdiction selector ── */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
@@ -4879,8 +4952,8 @@ export default function App() {
                       fontSize: 12, fontWeight: seatsJurisdiction === key ? 700 : 500,
                       padding: "4px 11px", borderRadius: 20, border: "1px solid",
                       borderColor: seatsJurisdiction === key ? "#2563EB" : "#D1D5DB",
-                      background: seatsJurisdiction === key ? "#EFF6FF" : "#fff",
-                      color: seatsJurisdiction === key ? "#2563EB" : "#374151",
+                      background: seatsJurisdiction === key ? "var(--row-highlight)" : "var(--panel-bg)",
+                      color: seatsJurisdiction === key ? "#2563EB" : "var(--text-2)",
                       cursor: "pointer", whiteSpace: "nowrap",
                     }}>
                     {ed.label}
@@ -4889,19 +4962,19 @@ export default function App() {
               })}
             </div>
             {/* ── Election subtitle ── */}
-            <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 10 }}>
+            <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 10 }}>
               {ELECTION_DATA[seatsJurisdiction].jurisdiction} · {ELECTION_DATA[seatsJurisdiction].chamber} · {ELECTION_DATA[seatsJurisdiction].date}
               {hasHareClark && <span style={{ marginLeft: 8, color: "#F59E0B", fontWeight: 600 }}>· Hare-Clark (multi-member, approximated)</span>}
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <span style={STYLES.sectionTitle}>All Seats</span>
-              <span style={{ fontSize: 13, color: "#6B7280" }}>{filtered.length} of {seatsForTab.length} seats</span>
+              <span style={{ fontSize: 13, color: "var(--text-3)" }}>{filtered.length} of {seatsForTab.length} seats</span>
             </div>
-            <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, overflow: "hidden" }}>
+            <div style={{ background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 12, overflow: "clip" }}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                  <thead>
-                    <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                  <thead style={{ position: "sticky", top: isMobile ? 86 : 56, zIndex: 2 }}>
+                    <tr style={{ borderBottom: "1px solid var(--border-1)" }}>
                       <SortTh k="name">Division</SortTh>
                       <SortTh k="state">State</SortTh>
                       <SortTh k="party">Party</SortTh>
@@ -4914,7 +4987,7 @@ export default function App() {
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
-                      <tr><td colSpan={isFederalTab ? 8 : 7} style={{ padding: 40, textAlign: "center", color: "#9CA3AF" }}>No seats match current filters.</td></tr>
+                      <tr><td colSpan={isFederalTab ? 8 : 7} style={{ padding: 40, textAlign: "center", color: "var(--text-4)" }}>No seats match current filters.</td></tr>
                     ) : filtered.map((s, i) => {
                       const p = getParty(s.winner.party);
                       const cat = getMarginCat(s.margin);
@@ -4924,23 +4997,23 @@ export default function App() {
                         <>
                           <tr key={s.id}
                             onClick={() => setExpandedSeatTabDemogId(prev => prev === s.id ? null : s.id)}
-                            style={{ background: isExpanded ? "#EFF6FF" : i % 2 === 0 ? "#fff" : "#F5F7FA", borderBottom: isExpanded ? "none" : "1px solid #F3F4F6", cursor: "pointer" }}
-                            onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = "#EFF6FF"; }}
-                            onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = i % 2 === 0 ? "#fff" : "#F5F7FA"; }}>
+                            style={{ background: isExpanded ? "var(--row-highlight)" : i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)", borderBottom: isExpanded ? "none" : "1px solid var(--border-3)", cursor: "pointer" }}
+                            onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = "var(--row-highlight)"; }}
+                            onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)"; }}>
                             <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                                 <div style={{ width: 4, height: 32, background: p.color, borderRadius: 2, flexShrink: 0 }} />
                                 <div>
-                                  <div style={{ fontWeight: 700, color: "#111827" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</div>
-                                  <div style={{ fontSize: 11, color: "#9CA3AF" }}>ID {s.id}</div>
+                                  <div style={{ fontWeight: 700, color: "var(--text-1)" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</div>
+                                  <div style={{ fontSize: 11, color: "var(--text-4)" }}>ID {s.id}</div>
                                 </div>
                               </div>
                             </td>
                             <td style={{ padding: "11px 14px" }}>
-                              <span style={{ background: "#F3F4F6", color: "#374151", fontWeight: 600, fontSize: 12, padding: "2px 7px", borderRadius: 4 }}>{s.state}</span>
+                              <span style={{ background: "var(--subtle-bg)", color: "var(--text-2)", fontWeight: 600, fontSize: 12, padding: "2px 7px", borderRadius: 4 }}>{s.state}</span>
                             </td>
                             <td style={{ padding: "11px 14px" }}><PartyBadge party={s.winner.party} /></td>
-                            <td style={{ padding: "11px 14px", color: "#374151" }}>{s.winner.name}</td>
+                            <td style={{ padding: "11px 14px", color: "var(--text-2)" }}>{s.winner.name}</td>
                             <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}><TcpBar tcp={s.tcp} winnerParty={s.winner.party} /></td>
                             <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}><MarginDot margin={s.margin} /></td>
                             {isFederalTab && <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}><SwingBadge swing={s.swing} /></td>}
@@ -4957,10 +5030,10 @@ export default function App() {
                                   const d = isFederalTab ? getDemog(s.id) : getStateDemog(s.id);
                                   const hasData = d && (d.medianAge != null || d.medianPersonalIncome != null);
                                   if (!isFederalTab && !hasData) {
-                                    return <div style={{ color: "#6B7280", fontSize: 13 }}>Census demographic data is not yet available for this electorate.</div>;
+                                    return <div style={{ color: "var(--text-3)", fontSize: 13 }}>Census demographic data is not yet available for this electorate.</div>;
                                   }
                                   const DemogBar = ({ value, min, max, color = "#3B82F6", fmt }) => {
-                                    if (value == null) return <span style={{ color: "#9CA3AF" }}>—</span>;
+                                    if (value == null) return <span style={{ color: "var(--text-4)" }}>—</span>;
                                     const pct = Math.max(0, Math.min(100, (value - min) / (max - min) * 100));
                                     return (
                                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -4968,7 +5041,7 @@ export default function App() {
                                         <div style={{ flex: 1, height: 5, background: "#E5E7EB", borderRadius: 3, position: "relative" }}>
                                           <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${pct}%`, background: color, borderRadius: 3 }} />
                                         </div>
-                                        <span style={{ fontSize: 10, color: "#9CA3AF", minWidth: 28, textAlign: "right" }}>
+                                        <span style={{ fontSize: 10, color: "var(--text-4)", minWidth: 28, textAlign: "right" }}>
                                           {pct < 33 ? "low" : pct < 66 ? "mid" : "high"}
                                         </span>
                                       </div>
@@ -4979,56 +5052,56 @@ export default function App() {
                                   <div>
                                     <div style={{ ...STYLES.sectionHead, marginBottom: 8 }}>Income</div>
                                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                      <div style={{ fontSize: 11, color: "#6B7280" }}>Personal income/yr (earners)</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)" }}>Personal income/yr (earners)</div>
                                       <DemogBar value={d.medianPersonalIncomeEarners} min={35000} max={130000} color="#DC2626" fmt={v => `$${(v/1000).toFixed(0)}k`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Personal income/yr (all 15+)</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Personal income/yr (all 15+)</div>
                                       <DemogBar value={d.medianPersonalIncome} min={25000} max={100000} color="#F87171" fmt={v => `$${(v/1000).toFixed(0)}k`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Household income/yr</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Household income/yr</div>
                                       <DemogBar value={d.medianHouseholdIncome} min={50000} max={180000} color="#DC2626" fmt={v => `$${(v/1000).toFixed(0)}k`} />
-                                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 6, lineHeight: 1.4 }}>Earners = median excl. nil/negative income · ABS Census 2021</div>
+                                      <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 6, lineHeight: 1.4 }}>Earners = median excl. nil/negative income · ABS Census 2021</div>
                                     </div>
                                   </div>
                                   <div>
                                     <div style={{ ...STYLES.sectionHead, marginBottom: 8 }}>Housing</div>
                                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                      <div style={{ fontSize: 11, color: "#6B7280" }}>Renters</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)" }}>Renters</div>
                                       <DemogBar value={d.renterPct} min={5} max={65} color="#F59E0B" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Weekly rent</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Weekly rent</div>
                                       <DemogBar value={d.medianWeeklyRent} min={150} max={700} color="#F59E0B" fmt={v => `$${v}`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Rent-to-income ratio</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Rent-to-income ratio</div>
                                       <DemogBar value={d.rentalToIncomeRatio} min={10} max={40} color="#EF4444" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Owner w/ mortgage</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Owner w/ mortgage</div>
                                       <DemogBar value={d.ownerMortgagePct} min={10} max={50} color="#D97706" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Owner outright</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Owner outright</div>
                                       <DemogBar value={d.ownerOutrightPct} min={10} max={50} color="#B45309" fmt={v => `${v}%`} />
                                     </div>
                                   </div>
                                   <div>
                                     <div style={{ ...STYLES.sectionHead, marginBottom: 8 }}>People</div>
                                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                      <div style={{ fontSize: 11, color: "#6B7280" }}>Median age</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)" }}>Median age</div>
                                       <DemogBar value={d.medianAge} min={28} max={55} color="#059669" fmt={v => `${Math.round(v)} yrs`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Youth (15–34)</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Youth (15–34)</div>
                                       <DemogBar value={d.youth15to34Pct} min={15} max={80} color="#059669" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Seniors (65+)</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Seniors (65+)</div>
                                       <DemogBar value={d.seniors65PlusPct} min={5} max={35} color="#10B981" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>University educated</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>University educated</div>
                                       <DemogBar value={d.bachelorsOrAbovePct} min={5} max={60} color="#059669" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>No post-school qual.</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>No post-school qual.</div>
                                       <DemogBar value={d.noQualificationPct} min={20} max={70} color="#6B7280" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Overseas born</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Overseas born</div>
                                       <DemogBar value={d.overseasBornPct} min={3} max={60} color="#10B981" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Non-English at home</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Non-English at home</div>
                                       <DemogBar value={d.nonEnglishAtHomePct} min={2} max={60} color="#8B5CF6" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Lone-parent families</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Lone-parent families</div>
                                       <DemogBar value={d.loneparentFamilyPct} min={5} max={35} color="#8B5CF6" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Unemployment rate</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Unemployment rate</div>
                                       <DemogBar value={d.unemploymentRate} min={1} max={12} color="#6366F1" fmt={v => `${v}%`} />
-                                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>Labour participation</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Labour participation</div>
                                       <DemogBar value={d.labourParticipationRate} min={40} max={80} color="#6366F1" fmt={v => `${v}%`} />
                                       {isFederalTab && d.urbanClass && <>
-                                        <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>AEC classification</div>
-                                        <div style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>{d.urbanClass}</div>
+                                        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>AEC classification</div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)" }}>{d.urbanClass}</div>
                                       </>}
                                     </div>
                                   </div>
@@ -5044,8 +5117,8 @@ export default function App() {
                   </tbody>
                 </table>
               </div>
-              <div style={{ padding: "9px 16px", background: "#F9FAFB", borderTop: "1px solid #F3F4F6", fontSize: 12, color: "#9CA3AF", display: "flex", justifyContent: "space-between" }}>
-                <span>Showing <strong style={{ color: "#374151" }}>{filtered.length}</strong> seats · Sorted by <strong style={{ color: "#374151" }}>{sortKey}</strong> ({sortDir})</span>
+              <div style={{ padding: "9px 16px", background: "var(--table-head-bg)", borderTop: "1px solid var(--border-3)", fontSize: 12, color: "var(--text-4)", display: "flex", justifyContent: "space-between" }}>
+                <span>Showing <strong style={{ color: "var(--text-2)" }}>{filtered.length}</strong> seats · Sorted by <strong style={{ color: "var(--text-2)" }}>{sortKey}</strong> ({sortDir})</span>
                 <span>Click headers to sort</span>
               </div>
             </div>
@@ -5059,7 +5132,7 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <div>
               <h2 style={STYLES.sectionTitle}>Polling Tracker</h2>
-              <p style={{ color: "#6B7280", fontSize: 13, margin: "4px 0 0" }}>{polls.length} polls · weighted aggregate with house-effect correction · tap "Load latest" or "Load avg" to run scenarios</p>
+              <p style={{ color: "var(--text-3)", fontSize: 13, margin: "4px 0 0" }}>{polls.length} polls · weighted aggregate with house-effect correction · tap "Load latest" or "Load avg" to run scenarios</p>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={loadFromPoll} style={STYLES.btnPrimary}>
@@ -5087,7 +5160,7 @@ export default function App() {
                   { key: "n", label: "Sample size", type: "number", placeholder: "e.g. 1500" },
                 ].map(({ key, label, type, placeholder }) => (
                   <div key={key}>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: "#374151", display: "block", marginBottom: 3 }}>{label}</label>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", display: "block", marginBottom: 3 }}>{label}</label>
                     <input type={type} value={newPoll[key]} placeholder={placeholder}
                       onChange={e => setNewPoll(p => ({ ...p, [key]: e.target.value }))}
                       style={{ ...STYLES.input, width: "100%", boxSizing: "border-box" }} />
@@ -5095,7 +5168,7 @@ export default function App() {
                 ))}
               </div>
               {newPoll.alp && newPoll.coal && newPoll.grn && (
-                <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 10 }}>
+                <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 10 }}>
                   Ind / Other: {(100 - (+newPoll.alp || 0) - (+newPoll.coal || 0) - (+newPoll.grn || 0) - (+newPoll.on || 0)).toFixed(1)}%
                 </div>
               )}
@@ -5109,7 +5182,7 @@ export default function App() {
           {latestPoll && (
             <div style={{ ...panelStyle, marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Latest: {latestPoll.pollster} · {new Date(latestPoll.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Latest: {latestPoll.pollster} · {new Date(latestPoll.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 12 }}>
                 {(() => {
@@ -5127,7 +5200,7 @@ export default function App() {
                   <div key={card.label} style={STYLES.metricCard}>
                     <div style={{ width: 20, height: 3, background: card.color, borderRadius: 2, marginBottom: 6 }} />
                     <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                      <span style={{ fontSize: 24, fontWeight: 800, color: "#111827", fontStyle: card.est ? "italic" : "normal" }}>
+                      <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)", fontStyle: card.est ? "italic" : "normal" }}>
                         {card.value != null ? `${card.est ? "~" : ""}${card.value}%` : "—"}
                       </span>
                     </div>
@@ -5136,7 +5209,7 @@ export default function App() {
                         {card.delta > 0 ? "+" : ""}{card.delta.toFixed(1)} vs 2025
                       </div>
                     )}
-                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>{card.label}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>{card.label}</div>
                   </div>
                 ))}
               </div>
@@ -5157,8 +5230,8 @@ export default function App() {
               <div style={{ ...panelStyle, marginBottom: 14, borderColor: "#BFDBFE" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <div>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Pipeline Aggregate</span>
-                    <span style={{ fontSize: 12, color: "#6B7280", marginLeft: 8 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Pipeline Aggregate</span>
+                    <span style={{ fontSize: 12, color: "var(--text-3)", marginLeft: 8 }}>
                       House-effect-corrected · {cur.alp?.n ?? "?"} polls · generated {AGGREGATED_POLLS.generated}
                     </span>
                   </div>
@@ -5174,8 +5247,8 @@ export default function App() {
                     return (
                       <div key={card.label} style={STYLES.metricCard}>
                         <div style={{ width: 20, height: 3, background: card.color, borderRadius: 2, marginBottom: 6 }} />
-                        <div style={{ fontSize: 22, fontWeight: 800, color: "#111827" }}>{d.mean?.toFixed(1)}%</div>
-                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 1 }}>
+                        <div style={{ fontSize: 22, fontWeight: 800, color: "var(--text-1)" }}>{d.mean?.toFixed(1)}%</div>
+                        <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 1 }}>
                           [{d.lo95?.toFixed(1)}–{d.hi95?.toFixed(1)}] 95% CI
                         </div>
                         {delta != null && (
@@ -5183,7 +5256,7 @@ export default function App() {
                             {delta > 0 ? "+" : ""}{delta} vs 2025
                           </div>
                         )}
-                        <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>{card.label}</div>
+                        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>{card.label}</div>
                       </div>
                     );
                   })}
@@ -5197,8 +5270,8 @@ export default function App() {
             <div style={{ ...panelStyle, marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>30-Day Weighted Average</span>
-                  <span style={{ fontSize: 12, color: "#6B7280", marginLeft: 8 }}>{pollAvg.n} poll{pollAvg.n !== 1 ? "s" : ""} · exponential decay + sample-size weighted · no house-effect correction</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>30-Day Weighted Average</span>
+                  <span style={{ fontSize: 12, color: "var(--text-3)", marginLeft: 8 }}>{pollAvg.n} poll{pollAvg.n !== 1 ? "s" : ""} · exponential decay + sample-size weighted · no house-effect correction</span>
                 </div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 12 }}>
@@ -5212,7 +5285,7 @@ export default function App() {
                 ].map(card => (
                   <div key={card.label} style={STYLES.metricCard}>
                     <div style={{ width: 20, height: 3, background: card.color, borderRadius: 2, marginBottom: 6 }} />
-                    <span style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>
+                    <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>
                       {card.value != null ? `${card.value}%` : "—"}
                     </span>
                     {card.delta != null && (
@@ -5220,7 +5293,7 @@ export default function App() {
                         {card.delta > 0 ? "+" : ""}{card.delta.toFixed(1)} vs 2025
                       </div>
                     )}
-                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>{card.label}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>{card.label}</div>
                   </div>
                 ))}
               </div>
@@ -5238,10 +5311,10 @@ export default function App() {
                   onClick={() => setShowHouseEffects(o => !o)}
                   style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, padding: 0, width: "100%" }}
                 >
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#374151" }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-2)" }}>
                     {showHouseEffects ? "▾" : "▸"} House Effects
                   </span>
-                  <span style={{ fontSize: 12, color: "#9CA3AF" }}>
+                  <span style={{ fontSize: 12, color: "var(--text-4)" }}>
                     per-pollster bias corrections applied to pipeline aggregate
                   </span>
                 </button>
@@ -5249,7 +5322,7 @@ export default function App() {
                   <div style={{ marginTop: 12, overflowX: "auto" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                       <thead>
-                        <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                        <tr style={{ borderBottom: "1px solid var(--border-1)" }}>
                           {["Pollster", "ALP bias", "Coalition bias", "Greens bias", "ON bias", "2PP bias"].map(h => (
                             <th key={h} style={{ ...STYLES.tableHead, textAlign: h === "Pollster" ? "left" : "center" }}>{h}</th>
                           ))}
@@ -5261,9 +5334,9 @@ export default function App() {
                             <span style={{ fontWeight: 600, color: Math.abs(v) > 2 ? "#DC2626" : Math.abs(v) > 1 ? "#D97706" : "#059669" }}>
                               {v > 0 ? "+" : ""}{v.toFixed(1)}pp
                             </span>
-                          ) : <span style={{ color: "#9CA3AF" }}>—</span>;
+                          ) : <span style={{ color: "var(--text-4)" }}>—</span>;
                           return (
-                            <tr key={p} style={{ background: i % 2 === 0 ? "#fff" : "#FAFAFA", borderBottom: "1px solid #F3F4F6" }}>
+                            <tr key={p} style={{ background: i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)", borderBottom: "1px solid var(--border-3)" }}>
                               <td style={{ padding: "7px 12px", fontWeight: 600 }}>{p}</td>
                               <td style={{ padding: "7px 12px", textAlign: "center" }}>{fmt(he.alp?.[p])}</td>
                               <td style={{ padding: "7px 12px", textAlign: "center" }}>{fmt(he.coal?.[p])}</td>
@@ -5275,7 +5348,7 @@ export default function App() {
                         })}
                       </tbody>
                     </table>
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8 }}>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8 }}>
                       Positive = pollster reads this metric higher than average · Corrected by subtracting bias from each poll before aggregating.
                       Generated {AGGREGATED_POLLS.generated}.
                     </div>
@@ -5288,13 +5361,13 @@ export default function App() {
           {/* Primary vote trend chart */}
           <div style={panelStyle}>
             <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Primary vote trends</div>
-            <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>Thick lines = weighted aggregate (30-day window, decay + sample-size weighted) · Dots = individual polls</div>
+            <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 12 }}>Thick lines = weighted aggregate (30-day window, decay + sample-size weighted) · Dots = individual polls</div>
             <ResponsiveContainer width="100%" height={340}>
               <LineChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis domain={[0, 50]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB", boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }} />
+                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 {/* Raw poll scatter (strokeWidth=0 = dots only, no connecting line) */}
                 <Line type="linear" dataKey="ALP" stroke="#DC2626" strokeWidth={0} dot={{ r: 3, fill: "#DC2626" }} activeDot={{ r: 4 }} legendType="circle" />
@@ -5308,19 +5381,19 @@ export default function App() {
                 <Line type="monotone" dataKey="ON (trend)" stroke="#EA580C" strokeWidth={2.5} dot={false} connectNulls name="One Nation (trend)" />
               </LineChart>
             </ResponsiveContainer>
-            <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>Filled dots = individual primary vote polls · Thick lines = weighted aggregate trends</div>
+            <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6, textAlign: "center" }}>Filled dots = individual primary vote polls · Thick lines = weighted aggregate trends</div>
           </div>
 
           {/* Estimated aggregate 2PP chart */}
           <div style={panelStyle}>
             <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Estimated aggregate 2PP</div>
-            <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>Thick lines = weighted aggregate trend (30-day window, decay + sample-size weighted) · Open circles = polls reporting 2PP directly · Polls reporting only primaries are imputed using 2022 AEC preference flows</div>
+            <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 12 }}>Thick lines = weighted aggregate trend (30-day window, decay + sample-size weighted) · Open circles = polls reporting 2PP directly · Polls reporting only primaries are imputed using 2022 AEC preference flows</div>
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis domain={[38, 62]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB", boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }} />
+                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)" }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <ReferenceLine y={50} stroke="#9CA3AF" strokeDasharray="5 5" label={{ value: "50%", fontSize: 10, fill: "#9CA3AF", position: "insideRight" }} />
                 {BETTING_ODDS?.national?.alp_majority?.implied_2pp != null && (
@@ -5339,19 +5412,19 @@ export default function App() {
                 <Line type="monotone" dataKey="Coal 2PP (trend)" stroke="#1E40AF" strokeWidth={3} dot={false} connectNulls name="Coal 2PP trend" />
               </LineChart>
             </ResponsiveContainer>
-            <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>Open circles = polls reporting 2PP directly · Thick lines = weighted aggregate (includes imputed 2PP from primaries)</div>
+            <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6, textAlign: "center" }}>Open circles = polls reporting 2PP directly · Thick lines = weighted aggregate (includes imputed 2PP from primaries)</div>
           </div>
 
           {/* Pipeline trend chart with 95% CI bands */}
           {pipelineTrendData.length > 0 && (
             <div style={panelStyle}>
               <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Pipeline trend — primary votes with 95% CI</div>
-              <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 12 }}>
+              <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 12 }}>
                 Weekly smoothed trend with 95% confidence intervals · house-effect-corrected · generated {AGGREGATED_POLLS.generated}
               </div>
               <ResponsiveContainer width="100%" height={280}>
                 <ComposedChart data={pipelineTrendData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(pipelineTrendData.length / 8)} />
                   <YAxis domain={[0, 50]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
                   <Tooltip
@@ -5359,7 +5432,7 @@ export default function App() {
                       if (Array.isArray(v)) return [`${v[0]}%–${v[1]}%`, name];
                       return [v != null ? `${v}%` : "—", name];
                     }}
-                    contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E5E7EB" }}
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)" }}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Area type="monotone" dataKey="ALP CI" stroke="none" fill="#DC2626" fillOpacity={0.12} legendType="none" name="ALP 95% CI" />
@@ -5372,17 +5445,17 @@ export default function App() {
                   <Line type="monotone" dataKey="ON mean" stroke="#EA580C" strokeWidth={2} dot={false} name="One Nation" />
                 </ComposedChart>
               </ResponsiveContainer>
-              <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6, textAlign: "center" }}>
+              <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6, textAlign: "center" }}>
                 Shaded bands = 95% confidence intervals · Lines = house-effect-corrected weekly aggregate
               </div>
             </div>
           )}
 
           {/* Polls table */}
-          <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, overflow: "hidden" }}>
+          <div style={{ background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 12, overflow: "hidden" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
-                <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                <tr style={{ borderBottom: "1px solid var(--border-1)" }}>
                   {["Pollster", "Date", "ALP %", "Coalition %", "Greens %", "One Nation %", "Ind/Other %", "2PP ALP %", "n", ""].map((h, i) => (
                     <th key={i} style={{ ...STYLES.tableHead, whiteSpace: "nowrap" }}>{h}</th>
                   ))}
@@ -5393,11 +5466,11 @@ export default function App() {
                   const effTpp = imputedTpp(p);
                   const tppIsImputed = p.tpp == null;
                   return (
-                    <tr key={p.id} style={{ background: i % 2 === 0 ? "#fff" : "#FAFAFA", borderBottom: "1px solid #F3F4F6" }}
-                      onMouseEnter={e => e.currentTarget.style.background = "#EFF6FF"}
-                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? "#fff" : "#FAFAFA"}>
+                    <tr key={p.id} style={{ background: i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)", borderBottom: "1px solid var(--border-3)" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "var(--row-highlight)"}
+                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)"}>
                       <td style={{ padding: "9px 12px", fontWeight: 600 }}>{p.pollster}</td>
-                      <td style={{ padding: "9px 12px", color: "#6B7280" }}>{new Date(p.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</td>
+                      <td style={{ padding: "9px 12px", color: "var(--text-3)" }}>{new Date(p.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</td>
                       {[p.alp, p.coal, p.grn, p.on, p.oth].map((v, j) => (
                         <td key={j} style={{ padding: "9px 12px" }}>
                           <span style={{ fontWeight: 600, color: ["#DC2626", "#1D4ED8", "#059669", "#B45309", "#7C3AED"][j] }}>{v != null ? `${v}%` : "—"}</span>
@@ -5409,13 +5482,13 @@ export default function App() {
                             <span style={{ fontWeight: 700, fontSize: 14, color: effTpp >= 50 ? "#059669" : "#DC2626", fontStyle: tppIsImputed ? "italic" : "normal" }}>
                               {tppIsImputed ? "~" : ""}{effTpp}%
                             </span>
-                            <span style={{ fontSize: 11, color: "#9CA3AF", marginLeft: 5 }}>
+                            <span style={{ fontSize: 11, color: "var(--text-4)", marginLeft: 5 }}>
                               ({effTpp >= 50 ? "ALP ahead" : "Coalition ahead"}{tppIsImputed ? " · est." : ""})
                             </span>
                           </>
-                        ) : <span style={{ color: "#9CA3AF" }}>—</span>}
+                        ) : <span style={{ color: "var(--text-4)" }}>—</span>}
                       </td>
-                      <td style={{ padding: "9px 12px", color: "#9CA3AF", fontSize: 12 }}>{p.n ?? "—"}</td>
+                      <td style={{ padding: "9px 12px", color: "var(--text-4)", fontSize: 12 }}>{p.n ?? "—"}</td>
                       <td style={{ padding: "9px 12px" }}>
                         <button onClick={() => deletePoll(p.id)}
                           style={{ fontSize: 11, color: "#EF4444", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -5440,7 +5513,7 @@ export default function App() {
             return (
               <div style={{ ...panelStyle, marginTop: 16 }}>
                 <div style={STYLES.panelTitle}>Leader Approval Ratings</div>
-                <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 14px" }}>
+                <p style={{ fontSize: 12, color: "var(--text-3)", margin: "0 0 14px" }}>
                   Net approval (approve% − disapprove%) over time. Source: {LEADERS_DATA.source}
                 </p>
                 {/* Summary cards */}
@@ -5451,55 +5524,55 @@ export default function App() {
                     const net = latest.net;
                     const netColor = net >= 0 ? "#059669" : "#DC2626";
                     return (
-                      <div key={leader.name} style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 14px" }}>
+                      <div key={leader.name} style={{ background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "12px 14px" }}>
                         <div style={{ fontSize: 12, fontWeight: 700, color: leader.party_color, marginBottom: 2 }}>{leader.role}</div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "#111827", marginBottom: 6 }}>{leader.name}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", marginBottom: 6 }}>{leader.name}</div>
                         <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
                           <span style={{ fontSize: 22, fontWeight: 800, color: netColor }}>{net >= 0 ? "+" : ""}{net}</span>
-                          <span style={{ fontSize: 11, color: "#6B7280" }}>net approval</span>
+                          <span style={{ fontSize: 11, color: "var(--text-3)" }}>net approval</span>
                         </div>
-                        <div style={{ fontSize: 11, color: "#6B7280", marginTop: 3 }}>
+                        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 3 }}>
                           Approve {latest.approve}% · Disapprove {latest.disapprove}%
                         </div>
-                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>
+                        <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 2 }}>
                           {latest.pollster} · {new Date(latest.date).toLocaleDateString("en-AU", { month: "short", year: "numeric" })}
                         </div>
                       </div>
                     );
                   })}
                   {latestGovtSat && (
-                    <div style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 14px" }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", marginBottom: 2 }}>Government</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: "#111827", marginBottom: 6 }}>Satisfaction Rating</div>
+                    <div style={{ background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "12px 14px" }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-3)", marginBottom: 2 }}>Government</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", marginBottom: 6 }}>Satisfaction Rating</div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
                         <span style={{ fontSize: 22, fontWeight: 800, color: latestGovtSat.net >= 0 ? "#059669" : "#DC2626" }}>
                           {latestGovtSat.net >= 0 ? "+" : ""}{latestGovtSat.net}
                         </span>
-                        <span style={{ fontSize: 11, color: "#6B7280" }}>net sat.</span>
+                        <span style={{ fontSize: 11, color: "var(--text-3)" }}>net sat.</span>
                       </div>
-                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 3 }}>
+                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 3 }}>
                         Satisfied {latestGovtSat.satisfied}% · Dissatisfied {latestGovtSat.dissatisfied}%
                       </div>
-                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>
+                      <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 2 }}>
                         {latestGovtSat.pollster} · {new Date(latestGovtSat.date).toLocaleDateString("en-AU", { month: "short", year: "numeric" })}
                       </div>
                     </div>
                   )}
                   {latestPrefPm && (
-                    <div style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 14px" }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", marginBottom: 2 }}>Preferred</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: "#111827", marginBottom: 6 }}>Prime Minister</div>
+                    <div style={{ background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "12px 14px" }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-3)", marginBottom: 2 }}>Preferred</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", marginBottom: 6 }}>Prime Minister</div>
                       <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
                         <div>
                           <span style={{ fontSize: 18, fontWeight: 800, color: "#DC2626" }}>{latestPrefPm.alp_pct}%</span>
-                          <div style={{ fontSize: 10, color: "#6B7280" }}>ALP leader</div>
+                          <div style={{ fontSize: 10, color: "var(--text-3)" }}>ALP leader</div>
                         </div>
                         <div>
                           <span style={{ fontSize: 18, fontWeight: 800, color: "#1D4ED8" }}>{latestPrefPm.opp_pct}%</span>
-                          <div style={{ fontSize: 10, color: "#6B7280" }}>Opp leader</div>
+                          <div style={{ fontSize: 10, color: "var(--text-3)" }}>Opp leader</div>
                         </div>
                       </div>
-                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4 }}>
+                      <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 4 }}>
                         {latestPrefPm.pollster} · {new Date(latestPrefPm.date).toLocaleDateString("en-AU", { month: "short", year: "numeric" })}
                       </div>
                     </div>
@@ -5526,7 +5599,7 @@ export default function App() {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4, textAlign: "center" }}>
+                <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 4, textAlign: "center" }}>
                   Net approval = approve% − disapprove%. Higher = more popular. Source: {LEADERS_DATA.source}
                 </div>
               </div>
@@ -5552,7 +5625,7 @@ export default function App() {
             return (
               <div style={{ ...panelStyle, marginTop: 16 }}>
                 <div style={STYLES.panelTitle}>Economic Indicators</div>
-                <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 14px" }}>
+                <p style={{ fontSize: 12, color: "var(--text-3)", margin: "0 0 14px" }}>
                   Cameron &amp; Crosby (2000) structural model: inflation and unemployment change predict incumbent vote. Source: ABS, RBA.
                 </p>
                 {/* Key metrics */}
@@ -5587,13 +5660,13 @@ export default function App() {
                     const changeColor = isNeutral ? "#6B7280"
                       : ((change > 0) === m.higherIsBad) ? "#DC2626" : "#059669";
                     return (
-                      <div key={m.label} style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 14px" }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", marginBottom: 3 }}>{m.label}</div>
+                      <div key={m.label} style={{ background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "12px 14px" }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", marginBottom: 3 }}>{m.label}</div>
                         <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
                           <span style={{ fontSize: 22, fontWeight: 800, color: m.isEffect ? netColor : "#111827" }}>
                             {m.isEffect && netEffect > 0 ? "+" : ""}{m.current?.toFixed(1)}
                           </span>
-                          <span style={{ fontSize: 12, color: "#6B7280" }}>{m.unit}</span>
+                          <span style={{ fontSize: 12, color: "var(--text-3)" }}>{m.unit}</span>
                         </div>
                         {m.election != null && !m.isEffect && (
                           <div style={{ fontSize: 11, color: changeColor, marginTop: 3, fontWeight: 600 }}>
@@ -5605,7 +5678,7 @@ export default function App() {
                             {netEffect > 0 ? "Incumbent benefit" : netEffect < -0.2 ? "Incumbent penalty" : "Approx. neutral"}
                           </div>
                         )}
-                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>{m.description}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 2 }}>{m.description}</div>
                       </div>
                     );
                   })}
@@ -5613,7 +5686,7 @@ export default function App() {
                 {/* CPI trend */}
                 {cpiData.length > 1 && (
                   <div style={{ marginBottom: 16 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 6 }}>CPI Annual Change (%) — quarterly</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", marginBottom: 6 }}>CPI Annual Change (%) — quarterly</div>
                     <div style={{ height: 160 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={cpiData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
@@ -5632,7 +5705,7 @@ export default function App() {
                 {/* Unemployment trend */}
                 {unempData.length > 1 && (
                   <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 6 }}>Unemployment Rate (%) — monthly</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", marginBottom: 6 }}>Unemployment Rate (%) — monthly</div>
                     <div style={{ height: 140 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={unempData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
@@ -5668,7 +5741,7 @@ export default function App() {
         const modelElectionOptions = ELECTION_OPTIONS;
         const elSelector = (
           <select value={selectedModelId} onChange={e => setSelectedModelId(e.target.value)}
-            style={{ ...STYLES.input, fontWeight: 700, background: "#fff", cursor: "pointer" }}>
+            style={{ ...STYLES.input, fontWeight: 700, background: "var(--panel-bg)", cursor: "pointer" }}>
             {modelElectionOptions.map(id => <option key={id} value={id}>{ELECTION_DATA[id].label}</option>)}
           </select>
         );
@@ -5682,7 +5755,7 @@ export default function App() {
                   </h2>
                   {elSelector}
                 </div>
-                <p style={{ color: "#6B7280", fontSize: 13, margin: 0 }}>
+                <p style={{ color: "var(--text-3)", fontSize: 13, margin: 0 }}>
                   {el.modelEnabled
                     ? `${el.date} · ${el.chamber} · Adjust primary vote shares and preference flows to model seat outcomes across all ${el.totalSeats} electorates.`
                     : `${el.date} · ${el.chamber} · ${el.totalSeats} seats · Majority: ${el.majority}`}
@@ -5706,11 +5779,11 @@ export default function App() {
 
             {/* ── Model intro text (shown for federal 2025 scenario builder) ── */}
             {el.modelEnabled && selectedModelId === "federal_2025" && (
-              <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, padding: "14px 16px", marginBottom: 16 }}>
-                <p style={{ margin: "0 0 8px", fontSize: 13, color: "#374151", lineHeight: 1.65 }}>
+              <div style={{ background: "var(--metric-bg)", border: "1px solid #E2E8F0", borderRadius: 8, padding: "14px 16px", marginBottom: 16 }}>
+                <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--text-2)", lineHeight: 1.65 }}>
                   <strong>aus-poll</strong> is an open-source, seat-by-seat election modelling tool for Australian federal elections. Adjust the primary vote sliders on the left to explore how shifts in national party support translate to seat outcomes across all 151 House of Representatives electorates.
                 </p>
-                <p style={{ margin: 0, fontSize: 13, color: "#6B7280", lineHeight: 1.65 }}>
+                <p style={{ margin: 0, fontSize: 13, color: "var(--text-3)", lineHeight: 1.65 }}>
                   The model uses per-seat first-preference baselines from the 2022 and 2025 AEC results — not a uniform national swing — and applies preference flows at the division level to compute projected two-candidate preferred (2PP) outcomes with uncertainty bands. See the <button onClick={() => setActiveTab("methodology")} style={{ background: "none", border: "none", padding: 0, color: "#1D4ED8", cursor: "pointer", fontSize: 13, textDecoration: "underline" }}>Methodology tab</button> for full technical details, or the <button onClick={() => setActiveTab("about")} style={{ background: "none", border: "none", padding: 0, color: "#1D4ED8", cursor: "pointer", fontSize: 13, textDecoration: "underline" }}>About tab</button> for FAQs and data sources.
                 </p>
               </div>
@@ -5733,16 +5806,16 @@ export default function App() {
                           <div key={g} style={STYLES.metricCard}>
                             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                               <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
-                              <span style={{ fontSize: 11, fontWeight: 700, color: "#374151" }}>{GROUP_CONFIG[g].label}</span>
+                              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>{GROUP_CONFIG[g].label}</span>
                             </div>
-                            <div style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{n}</div>
-                            <div style={{ fontSize: 11, color: "#9CA3AF" }}>of {el.totalSeats} seats</div>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{n}</div>
+                            <div style={{ fontSize: 11, color: "var(--text-4)" }}>of {el.totalSeats} seats</div>
                           </div>
                         );
                       })}
                     </div>
                     {el.twopp && (
-                      <div style={{ marginTop: 12, fontSize: 13, color: "#6B7280" }}>
+                      <div style={{ marginTop: 12, fontSize: 13, color: "var(--text-3)" }}>
                         2PP (ALP): <strong style={{ color: el.twopp >= 50 ? "#059669" : "#DC2626" }}>{el.twopp}%</strong>
                       </div>
                     )}
@@ -5752,23 +5825,23 @@ export default function App() {
                     {tightest.map(s => {
                       const p = getParty(s.winner.party);
                       return (
-                        <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: "1px solid #F3F4F6" }}>
+                        <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--border-3)" }}>
                           <div style={{ width: 3, height: 34, background: p.color, borderRadius: 2, flexShrink: 0 }} />
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 600, fontSize: 13 }}>{s.name} <span style={{ color: "#9CA3AF", fontWeight: 400 }}>({s.state})</span></div>
-                            <div style={{ fontSize: 11, color: "#6B7280" }}>{s.winner.name}</div>
+                            <div style={{ fontWeight: 600, fontSize: 13 }}>{s.name} <span style={{ color: "var(--text-4)", fontWeight: 400 }}>({s.state})</span></div>
+                            <div style={{ fontSize: 11, color: "var(--text-3)" }}>{s.winner.name}</div>
                           </div>
                           <PartyBadge party={s.winner.party} />
                           <span style={{ fontWeight: 700, color: MARGIN_COLOR[getMarginCat(s.margin)], minWidth: 40, textAlign: "right" }}>{s.margin.toFixed(1)}%</span>
                         </div>
                       );
                     })}
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-3)" }}>
                       Representative marginal seats only · Full seat-by-seat data not available for state elections
                     </div>
                   </div>
-                  <div style={{ ...panelStyle, background: "#F9FAFB", padding: "16px 20px" }}>
-                    <div style={{ fontSize: 13, color: "#6B7280" }}>
+                  <div style={{ ...panelStyle, background: "var(--table-head-bg)", padding: "16px 20px" }}>
+                    <div style={{ fontSize: 13, color: "var(--text-3)" }}>
                       Interactive scenario builders are available for all jurisdictions. Select one from the dropdown above.
                     </div>
                   </div>
@@ -5805,8 +5878,8 @@ export default function App() {
                     }
                     for (const p of parties) blended[p] /= shareSum;
                     return (
-                      <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 6, padding: "7px 10px", marginTop: 4 }}>
-                        <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>Undecided allocated (late-decider model):</div>
+                      <div style={{ background: "var(--table-head-bg)", border: "1px solid var(--border-1)", borderRadius: 6, padding: "7px 10px", marginTop: 4 }}>
+                        <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 4 }}>Undecided allocated (late-decider model):</div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 10px" }}>
                           {parties.map(p => (
                             <span key={p} style={{ fontSize: 11, fontWeight: 600, color: pColors[p] }}>
@@ -5814,7 +5887,7 @@ export default function App() {
                             </span>
                           ))}
                         </div>
-                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4 }}>
+                        <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 4 }}>
                           Uncertainty +{(0.06 * undec).toFixed(2)}pp σ · blend {Math.round(LATE_DECIDER_WEIGHT * 100)}% late-decider / {Math.round((1 - LATE_DECIDER_WEIGHT) * 100)}% proportional
                         </div>
                       </div>
@@ -5826,8 +5899,8 @@ export default function App() {
                     const other = +(100 - entered - undecided).toFixed(1);
                     const overLimit = entered + undecided > 100;
                     return (
-                      <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 12, color: "#6B7280" }}>Other / minor parties</span>
+                      <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span>
                         <span style={{ fontSize: 13, fontWeight: 700, color: overLimit ? "#DC2626" : "#374151" }}>
                           {overLimit ? `−${Math.abs(other).toFixed(1)}% ⚠` : `${other}%`}
                         </span>
@@ -5835,13 +5908,13 @@ export default function App() {
                     );
                   })()}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
-                    <div style={{ fontSize: 11, color: "#9CA3AF" }}>
+                    <div style={{ fontSize: 11, color: "var(--text-4)" }}>
                       2025 result: ALP {BASELINE_2025.alp}% · Coal {BASELINE_2025.coal}% · Grn {BASELINE_2025.grn}% · Ind {BASELINE_2025.teal}% · ON {BASELINE_2025.on}%
                     </div>
                     {hasChanges && (
                       <button
                         onClick={() => navigator.clipboard?.writeText(window.location.href).then(() => alert("Scenario link copied to clipboard!"))}
-                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "#6B7280", textDecoration: "underline", padding: 0 }}
+                        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 11, color: "var(--text-3)", textDecoration: "underline", padding: 0 }}
                         title="Copy a shareable link to this scenario (primaries are encoded in the URL)"
                       >
                         Share link
@@ -5875,11 +5948,11 @@ export default function App() {
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                     <div style={sectionHead}>Preference flows to ALP</div>
                     <button onClick={resetPrefFlows}
-                      style={{ fontSize: 11, color: "#6B7280", background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline", whiteSpace: "nowrap" }}>
+                      style={{ fontSize: 11, color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline", whiteSpace: "nowrap" }}>
                       ↺ Reset to 2025
                     </button>
                   </div>
-                  <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 8 }}>
                     {Object.keys(SEAT_PREF_FLOWS_2025).length > 0
                       ? "Sliders set a national shift applied on top of each seat's AEC 2025 baseline. At default values (zero shift) each seat uses its own observed DOP flows."
                       : "Used in standard ALP vs Coalition finals. Remainder flows to Coalition."}
@@ -5888,7 +5961,7 @@ export default function App() {
                   <PrefInput label="Independents → ALP" value={prefFlows.teal_alp} onChange={v => setPrefFlows(f => ({ ...f, teal_alp: v }))} color="#0891B2" historicalRange={PREF_FLOW_RANGES.teal_alp} />
                   <PrefInput label="One Nation → ALP" value={prefFlows.on_alp} onChange={v => setPrefFlows(f => ({ ...f, on_alp: v }))} color="#B45309" historicalRange={PREF_FLOW_RANGES.on_alp} />
                   <PrefInput label="Other → ALP" value={prefFlows.other_alp} onChange={v => setPrefFlows(f => ({ ...f, other_alp: v }))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_alp} />
-                  <div style={{ fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-4)", borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 4 }}>
                     {Object.keys(SEAT_PREF_FLOWS_2025).length > 0
                       ? "2025 national averages: Grn 81% · Ind 62% · ON 43% · Other 50%. Per-seat AEC DOP flows active — sliders shift all seats by the same delta."
                       : "Defaults: Grn 81% (2025) · Ind 62% (2025) · ON 27% (avg 2022…15%, 2025…43%) · Other 50%. Use \"↺ Reset to 2025\" to restore 2025 actuals."}
@@ -5900,10 +5973,10 @@ export default function App() {
                   <button
                     onClick={() => setShowAdvancedFlows(v => !v)}
                     style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: showAdvancedFlows ? 12 : 0 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#374151" }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-2)" }}>
                       Advanced: ON race flows
                     </span>
-                    <span style={{ fontSize: 13, color: "#9CA3AF" }}>{showAdvancedFlows ? "▲" : "▼"}</span>
+                    <span style={{ fontSize: 13, color: "var(--text-4)" }}>{showAdvancedFlows ? "▲" : "▼"}</span>
                   </button>
                   {showAdvancedFlows && (
                     <div>
@@ -5919,7 +5992,7 @@ export default function App() {
                         <PrefInput label="Independents → ALP" value={prefFlows.teal_alp_v_on} onChange={v => setPrefFlows(f => ({ ...f, teal_alp_v_on: v }))} color="#0891B2" historicalRange={PREF_FLOW_RANGES.teal_alp_v_on} />
                         <PrefInput label="Other → ALP" value={prefFlows.other_alp_v_on} onChange={v => setPrefFlows(f => ({ ...f, other_alp_v_on: v }))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_alp_v_on} />
                         <PrefInput label="Coalition → ALP" value={prefFlows.coal_alp_v_on} onChange={v => setPrefFlows(f => ({ ...f, coal_alp_v_on: v }))} color="#1D4ED8" historicalRange={PREF_FLOW_RANGES.coal_alp_v_on} />
-                        <div style={{ fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #FDE68A", paddingTop: 6, marginTop: 2 }}>
+                        <div style={{ fontSize: 11, color: "var(--text-4)", borderTop: "1px solid #FDE68A", paddingTop: 6, marginTop: 2 }}>
                           Defaults: Grn 90% · Ind 75% · Other 60% · Coal 15% (2025 AEC)
                         </div>
                       </div>
@@ -5935,7 +6008,7 @@ export default function App() {
                         <PrefInput label="Greens → ON" value={prefFlows.grn_on_v_coal} onChange={v => setPrefFlows(f => ({ ...f, grn_on_v_coal: v }))} color="#059669" historicalRange={PREF_FLOW_RANGES.grn_on_v_coal} />
                         <PrefInput label="Independents → ON" value={prefFlows.teal_on_v_coal} onChange={v => setPrefFlows(f => ({ ...f, teal_on_v_coal: v }))} color="#0891B2" historicalRange={PREF_FLOW_RANGES.teal_on_v_coal} />
                         <PrefInput label="Other → ON" value={prefFlows.other_on_v_coal} onChange={v => setPrefFlows(f => ({ ...f, other_on_v_coal: v }))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_on_v_coal} />
-                        <div style={{ fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #FDE68A", paddingTop: 6, marginTop: 2 }}>
+                        <div style={{ fontSize: 11, color: "var(--text-4)", borderTop: "1px solid #FDE68A", paddingTop: 6, marginTop: 2 }}>
                           Defaults: ALP 20% · Grn 8% · Ind 12% · Other 25%. Remainder flows to Coalition.
                         </div>
                       </div>
@@ -5949,30 +6022,30 @@ export default function App() {
                 {/* Implied 2PP + majority */}
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
                   <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                     {implied2pp !== null ? (
                       <>
                         <div style={{ fontSize: 30, fontWeight: 800, color: implied2pp >= 50 ? "#059669" : "#DC2626" }}>{implied2pp.toFixed(1)}%</div>
-                        <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                        <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                           {implied2pp >= RIGHT_BLOC_2PP_2025 ? `▲ +${(implied2pp - RIGHT_BLOC_2PP_2025).toFixed(1)} vs 2025` : `▼ ${(implied2pp - RIGHT_BLOC_2PP_2025).toFixed(1)} vs 2025`}
                         </div>
-                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 1 }}>ON counted in right bloc</div>
+                        <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 1 }}>ON counted in right bloc</div>
                       </>
-                    ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
+                    ) : <div style={{ fontSize: 20, color: "var(--text-4)" }}>—</div>}
                   </div>
                   <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
                     {seatAvg2pp !== null ? (
                       <>
                         <div style={{ fontSize: 30, fontWeight: 800, color: seatAvg2pp.avg >= 50 ? "#059669" : "#DC2626" }}>{seatAvg2pp.avg.toFixed(1)}%</div>
-                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across {seatAvg2pp.count} seats</div>
+                        <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 3 }}>mean across {seatAvg2pp.count} seats</div>
                       </>
-                    ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
+                    ) : <div style={{ fontSize: 20, color: "var(--text-4)" }}>—</div>}
                   </div>
                   <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
                     <div style={{ fontSize: 30, fontWeight: 800, color: changedSeats.length > 0 ? "#F59E0B" : "#6B7280" }}>{changedSeats.length}</div>
-                    <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>of {SEATS.length} modelled</div>
+                    <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>of {SEATS.length} modelled</div>
                   </div>
                   {(() => {
                     const alpProj = projCounts.alp || 0;
@@ -5985,9 +6058,9 @@ export default function App() {
                     const majBorder = isAlpMaj ? "#FECACA" : (isCoalMaj ? "#BFDBFE" : "#FDE68A");
                     return (
                       <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center", background: majBg, borderColor: majBorder }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
                         <div style={{ fontSize: 16, fontWeight: 800, color: majColor, marginTop: 4 }}>{projMaj}</div>
-                        <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>76 seats needed</div>
+                        <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>76 seats needed</div>
                       </div>
                     );
                   })()}
@@ -5997,12 +6070,12 @@ export default function App() {
                 <div style={panelStyle}>
                   <div style={STYLES.panelTitle}>Seat composition</div>
                   <div style={{ marginBottom: 8 }}>
-                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>2025 result</div>
+                    <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>2025 result</div>
                     <TallyBar seats={SEATS} />
                   </div>
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <div style={{ fontSize: 12, color: "#6B7280" }}>Projected</div>
+                      <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
                       {hasChanges && <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
                     </div>
                     <TallyBar seats={modelledSeats} useModelled={true} />
@@ -6018,11 +6091,11 @@ export default function App() {
                         <div key={g} style={STYLES.metricCard}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                             <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
-                            <span style={{ fontSize: 11, fontWeight: 700, color: "#374151" }}>{GROUP_CONFIG[g].label}</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>{GROUP_CONFIG[g].label}</span>
                           </div>
                           <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                            <span style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{proj}</span>
-                            <span style={{ fontSize: 12, color: "#6B7280" }}>/ {base} base</span>
+                            <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{proj}</span>
+                            <span style={{ fontSize: 12, color: "var(--text-3)" }}>/ {base} base</span>
                           </div>
                           {delta !== 0 && (
                             <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? "#059669" : "#DC2626", marginTop: 2 }}>
@@ -6038,30 +6111,30 @@ export default function App() {
                 {/* ── Uncertainty / confidence interval panel ── */}
                 <div style={{ ...STYLES.panel, marginBottom: 14 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-count uncertainty</span>
-                    <span style={{ fontSize: 11, color: "#6B7280", background: "#F3F4F6", padding: "2px 7px", borderRadius: 10 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-count uncertainty</span>
+                    <span style={{ fontSize: 11, color: "var(--text-3)", background: "var(--subtle-bg)", padding: "2px 7px", borderRadius: 10 }}>
                       ±{swingStd}pp swing σ
                     </span>
                   </div>
 
                   {/* ALP seat count distribution */}
                   <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
+                    <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
                       <span style={{ fontSize: 28, fontWeight: 800, color: "#DC2626" }}>{uncertainty.alpMean}</span>
-                      <span style={{ fontSize: 13, color: "#6B7280" }}>seats (mean)</span>
-                      <span style={{ fontSize: 13, color: "#9CA3AF" }}>±{uncertainty.alpStd}</span>
+                      <span style={{ fontSize: 13, color: "var(--text-3)" }}>seats (mean)</span>
+                      <span style={{ fontSize: 13, color: "var(--text-4)" }}>±{uncertainty.alpStd}</span>
                     </div>
-                    <div style={{ fontSize: 12, color: "#374151", marginBottom: 2 }}>
-                      <span style={{ color: "#6B7280" }}>80% CI: </span>
+                    <div style={{ fontSize: 12, color: "var(--text-2)", marginBottom: 2 }}>
+                      <span style={{ color: "var(--text-3)" }}>80% CI: </span>
                       <strong>{uncertainty.alpP10 ?? uncertainty.alpP25}–{uncertainty.alpP90 ?? uncertainty.alpP75}</strong>
                       &nbsp;seats
-                      <span style={{ marginLeft: 10, color: "#6B7280" }}>95% CI: </span>
+                      <span style={{ marginLeft: 10, color: "var(--text-3)" }}>95% CI: </span>
                       <strong>{uncertainty.alpP05}–{uncertainty.alpP95}</strong>
                       &nbsp;seats
                     </div>
-                    <div style={{ fontSize: 12, color: "#374151", marginTop: 4 }}>
-                      <span style={{ color: "#6B7280" }}>P(ALP majority ≥76): </span>
+                    <div style={{ fontSize: 12, color: "var(--text-2)", marginTop: 4 }}>
+                      <span style={{ color: "var(--text-3)" }}>P(ALP majority ≥76): </span>
                       <strong style={{ color: uncertainty.pMajority >= 50 ? "#DC2626" : "#1D4ED8" }}>
                         {uncertainty.pMajority}%
                       </strong>
@@ -6069,7 +6142,7 @@ export default function App() {
                   </div>
 
                   {/* Visual quantile bar */}
-                  <div style={{ position: "relative", height: 20, background: "#F3F4F6", borderRadius: 6, overflow: "hidden", marginBottom: 10 }}>
+                  <div style={{ position: "relative", height: 20, background: "var(--subtle-bg)", borderRadius: 6, overflow: "hidden", marginBottom: 10 }}>
                     {/* 95% CI bar */}
                     <div style={{
                       position: "absolute",
@@ -6097,7 +6170,7 @@ export default function App() {
                       width: 1, height: "100%", background: "#6B7280",
                     }} title="76 seats = majority" />
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#9CA3AF" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-4)" }}>
                     <span>{uncertainty.alpP05}</span>
                     <span style={{ color: "#DC2626", fontWeight: 700 }}>{uncertainty.alpP50} median</span>
                     <span>76 maj.</span>
@@ -6105,16 +6178,16 @@ export default function App() {
                   </div>
 
                   {/* Model options */}
-                  <div style={{ borderTop: "1px solid #F3F4F6", marginTop: 12, paddingTop: 10 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Model options</div>
-                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151", cursor: "pointer", marginBottom: 8 }}>
+                  <div style={{ borderTop: "1px solid var(--border-3)", marginTop: 12, paddingTop: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)", marginBottom: 8 }}>Model options</div>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)", cursor: "pointer", marginBottom: 8 }}>
                       <input type="checkbox" checked={useElasticity} onChange={e => setUseElasticity(e.target.checked)} />
                       Seat elasticity (marginal seats swing more)
-                      <span style={{ fontSize: 11, color: "#9CA3AF" }}>
+                      <span style={{ fontSize: 11, color: "var(--text-4)" }}>
                         {useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}
                       </span>
                     </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151", cursor: "pointer", marginBottom: 8 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)", cursor: "pointer", marginBottom: 8 }}>
                       <input type="checkbox" checked={useEconomicAdj} onChange={e => setUseEconomicAdj(e.target.checked)} />
                       Economic structural adjustment (Cameron &amp; Crosby)
                       <span style={{ fontSize: 11, color: econAdjPp > 0.1 ? "#059669" : econAdjPp < -0.1 ? "#DC2626" : "#9CA3AF" }}>
@@ -6123,14 +6196,14 @@ export default function App() {
                           : `OFF — C&C effect: ${econAdjPp >= 0 ? "+" : ""}${econAdjPp.toFixed(2)}pp`}
                       </span>
                     </label>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151", marginBottom: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)", marginBottom: 8 }}>
                       <label style={{ minWidth: 130 }}>ON auto-detect threshold:</label>
                       <input type="number" min={0} max={30} step={0.5} value={onThreshold}
                         onChange={e => setOnThreshold(+e.target.value)}
-                        style={{ width: 56, border: "1px solid #D1D5DB", borderRadius: 6, padding: "3px 6px", fontSize: 12, textAlign: "center", outline: "none" }} />
-                      <span style={{ fontSize: 11, color: "#6B7280" }}>% primary vote</span>
+                        style={{ width: 56, border: "1px solid var(--border-2)", borderRadius: 6, padding: "3px 6px", fontSize: 12, textAlign: "center", outline: "none" }} />
+                      <span style={{ fontSize: 11, color: "var(--text-3)" }}>% primary vote</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)" }}>
                       <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
                       <input
                         type="range" min={0.5} max={4} step={0.25} value={swingStd}
@@ -6139,7 +6212,7 @@ export default function App() {
                       />
                       <span style={{ minWidth: 36, fontWeight: 600 }}>{swingStd}pp</span>
                     </div>
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 4 }}>
                       Typical Australian federal election polling MAE ≈ 1–2pp nationally.
                     </div>
                   </div>
@@ -6148,8 +6221,8 @@ export default function App() {
                 {/* ── Seat-at-risk rankings ── */}
                 {(() => {
                   const filterBtnStyle = (active) => ({
-                    padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid #D1D5DB",
-                    background: active ? "#374151" : "#fff", color: active ? "#fff" : "#374151",
+                    padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid var(--border-2)",
+                    background: active ? "#374151" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
                   });
                   const filtered = (riskFilter === "all" ? seatsByRisk
                     : riskFilter === "changing" ? seatsByRisk.filter(s => s.modelled.changed)
@@ -6159,9 +6232,9 @@ export default function App() {
                   return (
                     <div style={panelStyle}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: "#111827", flex: 1 }}>Seat-at-risk rankings</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", flex: 1 }}>Seat-at-risk rankings</span>
                         <select value={modelStateFilter} onChange={e => setModelStateFilter(e.target.value)}
-                          style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, fontWeight: 600, outline: "none", background: "#fff" }}>
+                          style={{ border: "1px solid var(--border-2)", borderRadius: 6, padding: "4px 8px", fontSize: 12, fontWeight: 600, outline: "none", background: "var(--panel-bg)" }}>
                           <option value="">All States</option>
                           {STATES.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
@@ -6207,15 +6280,15 @@ export default function App() {
                                   background: isExpanded ? "#F0F9FF" : projGroup === "one_nation" && changed ? "#FFFBEB" : "transparent",
                                   cursor: "pointer",
                                 }}>
-                                <span style={{ fontWeight: changed ? 700 : 400, fontSize: 13, color: "#111827", paddingLeft: changed ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                <span style={{ fontWeight: changed ? 700 : 400, fontSize: 13, color: "var(--text-1)", paddingLeft: changed ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                   {isExpanded ? "▾ " : "▸ "}{seat.name}
                                 </span>
-                                <span style={{ fontSize: 11, color: "#6B7280" }}>{seat.state}</span>
+                                <span style={{ fontSize: 11, color: "var(--text-3)" }}>{seat.state}</span>
                                 <div><PartyBadge party={seat.winner.party} /></div>
                                 <div>
                                   {changed
                                     ? <PartyBadge party={seat.modelled.winnerParty} />
-                                    : <span style={{ fontSize: 11, color: "#9CA3AF" }}>holds</span>
+                                    : <span style={{ fontSize: 11, color: "var(--text-4)" }}>holds</span>
                                   }
                                 </div>
                                 <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
@@ -6233,21 +6306,21 @@ export default function App() {
                                 </span>
                                 <span style={{ fontSize: 10, color: changed ? projColor : "#9CA3AF", fontWeight: 600 }}>
                                   {changed ? "CHANGED" : ""}
-                                  {hasSeatOverrides && <span style={{ marginLeft: 4, fontSize: 9, color: "#6B7280", fontWeight: 700 }}>⚙</span>}
+                                  {hasSeatOverrides && <span style={{ marginLeft: 4, fontSize: 9, color: "var(--text-3)", fontWeight: 700 }}>⚙</span>}
                                 </span>
                               </div>
                               {isExpanded && (
-                                <div style={{ background: "#F8FAFC", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", marginBottom: 2 }}>
+                                <div style={{ background: "var(--metric-bg)", borderBottom: "1px solid var(--border-1)", padding: "12px 16px", marginBottom: 2 }}>
                                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
                                     <div>
-                                      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>Income</div>
+                                      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 6 }}>Income</div>
                                       <div style={{ fontSize: 12, lineHeight: 1.8 }}>
                                         <div><strong>Personal (earners):</strong> {d.medianPersonalIncomeEarners ? `$${(d.medianPersonalIncomeEarners / 1000).toFixed(1)}k/yr` : "—"}</div>
                                         <div><strong>Household:</strong> {d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome / 1000).toFixed(1)}k/yr` : "—"}</div>
                                       </div>
                                     </div>
                                     <div>
-                                      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>Housing</div>
+                                      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 6 }}>Housing</div>
                                       <div style={{ fontSize: 12, lineHeight: 1.8 }}>
                                         <div><strong>Renters:</strong> {d.renterPct != null ? `${d.renterPct}%` : "—"}</div>
                                         <div><strong>Weekly rent:</strong> {d.medianWeeklyRent ? `$${d.medianWeeklyRent}/wk` : "—"}</div>
@@ -6255,7 +6328,7 @@ export default function App() {
                                       </div>
                                     </div>
                                     <div>
-                                      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>People</div>
+                                      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 6 }}>People</div>
                                       <div style={{ fontSize: 12, lineHeight: 1.8 }}>
                                         <div><strong>Median age:</strong> {d.medianAge != null ? Math.round(d.medianAge) : "—"}</div>
                                         <div><strong>Bachelor's+:</strong> {d.bachelorsOrAbovePct != null ? `${d.bachelorsOrAbovePct}%` : "—"}</div>
@@ -6266,8 +6339,8 @@ export default function App() {
                                   </div>
 
                                   {/* ── Seat-level primary vote overrides ── */}
-                                  <div style={{ marginTop: 14, borderTop: "1px solid #E5E7EB", paddingTop: 12 }}>
-                                    <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>
+                                  <div style={{ marginTop: 14, borderTop: "1px solid var(--border-1)", paddingTop: 12 }}>
+                                    <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 6 }}>
                                       Primary Votes (seat override)
                                     </div>
                                     <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6, marginBottom: 4 }}>
@@ -6281,13 +6354,13 @@ export default function App() {
                                               value={ov[key] != null ? ov[key] : ""}
                                               placeholder={seatFp25?.[key]?.toFixed(1) ?? primaries[key]?.toFixed(1) ?? "—"}
                                               onChange={e => updateSeatOverride(seat.id, key, e.target.value)}
-                                              style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 3px", fontSize: 12, textAlign: "center", boxSizing: "border-box" }}
+                                              style={{ width: "100%", border: "1px solid var(--border-2)", borderRadius: 6, padding: "4px 3px", fontSize: 12, textAlign: "center", boxSizing: "border-box" }}
                                             />
                                           </div>
                                         );
                                       })}
                                     </div>
-                                    <div style={{ fontSize: 10, color: "#9CA3AF", marginBottom: 4 }}>
+                                    <div style={{ fontSize: 10, color: "var(--text-4)", marginBottom: 4 }}>
                                       {SEAT_FP_2025[seat.id]
                                         ? `2025 AEC: ALP ${SEAT_FP_2025[seat.id].alp}% · Coal ${SEAT_FP_2025[seat.id].coal}% · Grn ${SEAT_FP_2025[seat.id].grn}% · Ind ${SEAT_FP_2025[seat.id].teal}% · ON ${SEAT_FP_2025[seat.id].on}%`
                                         : `National (2025): ALP ${primaries.alp}% · Coal ${primaries.coal}% · Grn ${primaries.grn}% · Ind ${primaries.teal}% · ON ${primaries.on}%`
@@ -6296,9 +6369,9 @@ export default function App() {
                                   </div>
 
                                   {/* ── Seat-level preference flow overrides ── */}
-                                  <div style={{ marginTop: 12, borderTop: "1px solid #E5E7EB", paddingTop: 12 }}>
+                                  <div style={{ marginTop: 12, borderTop: "1px solid var(--border-1)", paddingTop: 12 }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                                      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF" }}>
+                                      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)" }}>
                                         Preference Flows (seat override)
                                       </div>
                                       {Object.values(seatPrefFlows).some(v => v != null) && (
@@ -6329,13 +6402,13 @@ export default function App() {
                           );
                         })}
                         {filtered.length === 0 && (
-                          <div style={{ padding: "20px 0", textAlign: "center", color: "#9CA3AF", fontSize: 13 }}>
+                          <div style={{ padding: "20px 0", textAlign: "center", color: "var(--text-4)", fontSize: 13 }}>
                             No seats match this filter.
                           </div>
                         )}
                       </div>
                       </div>{/* end overflowX scroll wrapper */}
-                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, borderTop: "1px solid #F3F4F6", paddingTop: 8 }}>
+                      <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, borderTop: "1px solid var(--border-3)", paddingTop: 8 }}>
                         {filtered.length} seats shown · Red = &lt;2pp · Amber = &lt;5pp · Faded = safe (&gt;10pp) · Bold left border = projected change · Click row to expand demographics
                       </div>
                     </div>
@@ -6355,19 +6428,19 @@ export default function App() {
                         const projP = getParty(seat.modelled.winnerParty);
                         const alp2pp = seat.modelled.projAlp2pp;
                         return (
-                          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: "1px solid #F3F4F6" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--border-3)" }}>
                             <span style={{ fontSize: 14 }}>{direction}</span>
                             <div style={{ flex: 1 }}>
                               <span style={{ fontWeight: 600 }}>{seat.name}</span>
-                              <span style={{ color: "#9CA3AF", fontSize: 12, marginLeft: 6 }}>{seat.state}</span>
+                              <span style={{ color: "var(--text-4)", fontSize: 12, marginLeft: 6 }}>{seat.state}</span>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12 }}>
                               <PartyBadge party={seat.winner.party} />
-                              <span style={{ color: "#9CA3AF" }}>→</span>
+                              <span style={{ color: "var(--text-4)" }}>→</span>
                               <PartyBadge party={seat.modelled.winnerParty} />
                             </div>
                             {alp2pp !== null && (
-                              <span style={{ fontSize: 12, color: "#6B7280", minWidth: 80, textAlign: "right" }}>
+                              <span style={{ fontSize: 12, color: "var(--text-3)", minWidth: 80, textAlign: "right" }}>
                                 ALP 2PP {alp2pp.toFixed(1)}%
                               </span>
                             )}
@@ -6391,7 +6464,7 @@ export default function App() {
                           )}
                           {other.length > 0 && (
                             <div>
-                              <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", marginBottom: 6 }}>⚪ Other changes ({other.length})</div>
+                              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-3)", marginBottom: 6 }}>⚪ Other changes ({other.length})</div>
                               {other.map(s => <SeatRow key={s.id} seat={s} direction="↔" />)}
                             </div>
                           )}
@@ -6404,7 +6477,7 @@ export default function App() {
                 {/* Seat-level primary vote overrides */}
                 <div style={panelStyle}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-level primary overrides</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-level primary overrides</span>
                     {Object.keys(seatOverrides).length > 0 && (
                       <>
                         <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
@@ -6417,7 +6490,7 @@ export default function App() {
                       </>
                     )}
                   </div>
-                  <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 10px" }}>
+                  <p style={{ fontSize: 12, color: "var(--text-3)", margin: "0 0 10px" }}>
                     Set custom primary vote %s for specific seats — useful for strong local candidates or known seat-level effects.
                   </p>
 
@@ -6427,22 +6500,22 @@ export default function App() {
                       value={overrideSearch}
                       onChange={e => setOverrideSearch(e.target.value)}
                       placeholder="+ Search for a seat to add…"
-                      style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "7px 10px", fontSize: 13, boxSizing: "border-box", outline: "none" }}
+                      style={{ width: "100%", border: "1px solid var(--border-2)", borderRadius: 6, padding: "7px 10px", fontSize: 13, boxSizing: "border-box", outline: "none" }}
                     />
                     {overrideSearch.length > 0 && (() => {
                       const matches = SEATS.filter(s =>
                         s.name.toLowerCase().includes(overrideSearch.toLowerCase()) && !seatOverrides[s.id]
                       ).slice(0, 8);
                       return matches.length > 0 ? (
-                        <div style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 100, overflow: "hidden" }}>
+                        <div style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 100, overflow: "hidden" }}>
                           {matches.map((s, i) => (
                             <div key={s.id}
                               onMouseDown={() => addSeatOverride(s.id)}
                               style={{ padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderBottom: i < matches.length - 1 ? "1px solid #F3F4F6" : "none" }}>
                               <span style={{ fontWeight: 600, flex: 1, fontSize: 13 }}>{s.name}</span>
-                              <span style={{ fontSize: 12, color: "#9CA3AF" }}>{s.state}</span>
+                              <span style={{ fontSize: 12, color: "var(--text-4)" }}>{s.state}</span>
                               <PartyBadge party={s.winner.party} />
-                              <span style={{ fontSize: 12, color: "#6B7280" }}>{s.margin.toFixed(1)}%</span>
+                              <span style={{ fontSize: 12, color: "var(--text-3)" }}>{s.margin.toFixed(1)}%</span>
                             </div>
                           ))}
                         </div>
@@ -6452,7 +6525,7 @@ export default function App() {
 
                   {/* Overridden seat cards */}
                   {Object.keys(seatOverrides).length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "16px 0", color: "#9CA3AF", fontSize: 12 }}>
+                    <div style={{ textAlign: "center", padding: "16px 0", color: "var(--text-4)", fontSize: 12 }}>
                       No seat overrides active. Search for a seat above to add one.
                     </div>
                   ) : (
@@ -6463,18 +6536,18 @@ export default function App() {
                         const ms = modelledSeats.find(s => s.id === +idStr);
                         const proj2pp = ms?.modelled.projAlp2pp;
                         return (
-                          <div key={idStr} style={{ border: "1px solid #D1D5DB", borderRadius: 8, padding: "12px 14px", background: "#FAFAFA" }}>
+                          <div key={idStr} style={{ border: "1px solid var(--border-2)", borderRadius: 8, padding: "12px 14px", background: "var(--table-row-alt)" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                               <PartyBadge party={seat.winner.party} />
                               <span style={{ fontWeight: 700, fontSize: 13, flex: 1 }}>{seat.name}</span>
-                              <span style={{ fontSize: 12, color: "#9CA3AF" }}>{seat.state} · 2022 margin {seat.margin.toFixed(1)}%</span>
+                              <span style={{ fontSize: 12, color: "var(--text-4)" }}>{seat.state} · 2022 margin {seat.margin.toFixed(1)}%</span>
                               {proj2pp !== null && (
                                 <span style={{ fontSize: 12, fontWeight: 700, color: proj2pp >= 50 ? "#059669" : "#1D4ED8" }}>
                                   ALP 2PP {proj2pp.toFixed(1)}%
                                 </span>
                               )}
                               <button onClick={() => clearOverride(+idStr)}
-                                style={{ fontSize: 13, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}>✕</button>
+                                style={{ fontSize: 13, color: "var(--text-4)", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}>✕</button>
                             </div>
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6 }}>
                               {[["ALP", "alp", "#DC2626"], ["Coal", "coal", "#1D4ED8"], ["Grn", "grn", "#059669"], ["Ind", "teal", "#0891B2"], ["ON", "on", "#B45309"]].map(([label, key, color]) => (
@@ -6484,12 +6557,12 @@ export default function App() {
                                     type="number" min={0} max={100} step={0.5}
                                     value={ov[key] !== null && ov[key] !== undefined ? ov[key] : ""}
                                     onChange={e => updateSeatOverride(+idStr, key, e.target.value)}
-                                    style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "5px 4px", fontSize: 12, textAlign: "center", boxSizing: "border-box", outline: "none" }}
+                                    style={{ width: "100%", border: "1px solid var(--border-2)", borderRadius: 6, padding: "5px 4px", fontSize: 12, textAlign: "center", boxSizing: "border-box", outline: "none" }}
                                   />
                                 </div>
                               ))}
                             </div>
-                            <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8 }}>
+                            <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8 }}>
                               National: ALP {primaries.alp}% · Coal {primaries.coal}% · Grn {primaries.grn}% · Ind {primaries.teal}% · ON {primaries.on}%
                             </div>
 
@@ -6521,23 +6594,23 @@ export default function App() {
                               const margin2pp = displayTcp !== null ? Math.abs(displayTcp - 50).toFixed(1) : null;
                               const tcpWins = displayTcp !== null && displayTcp >= 50;
                               return (
-                                <div style={{ borderTop: "1px solid #E5E7EB", marginTop: 10, paddingTop: 10 }}>
+                                <div style={{ borderTop: "1px solid var(--border-1)", marginTop: 10, paddingTop: 10 }}>
                                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                                    <span style={{ fontSize: 11, fontWeight: 700, color: "#374151", flex: 1 }}>Margin / TCP override</span>
-                                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", flex: 1 }}>Margin / TCP override</span>
+                                    <span style={{ fontSize: 11, color: "var(--text-4)" }}>
                                       2022: {getParty(tcp0.party).short} {tcp0.pct.toFixed(1)}% vs {getParty(tcp1.party).short} {tcp1.pct.toFixed(1)}%
                                     </span>
                                   </div>
                                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                    <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", whiteSpace: "nowrap" }}>{tcpLabel}</label>
+                                    <label style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)", whiteSpace: "nowrap" }}>{tcpLabel}</label>
                                     <input
                                       type="number" min={0} max={100} step={0.1}
                                       value={ovTcpSet ? ovTcp : ""}
                                       placeholder={projTcpPct?.toFixed(1) ?? "—"}
                                       onChange={e => updateSeatOverride(+idStr, "tcpPct", e.target.value)}
-                                      style={{ width: 72, border: ovTcpSet ? "1px solid #6366F1" : "1px solid #D1D5DB", borderRadius: 6, padding: "5px 6px", fontSize: 12, textAlign: "center", outline: "none", background: ovTcpSet ? "#EEF2FF" : "#fff" }}
+                                      style={{ width: 72, border: ovTcpSet ? "1px solid #6366F1" : "1px solid var(--border-2)", borderRadius: 6, padding: "5px 6px", fontSize: 12, textAlign: "center", outline: "none", background: ovTcpSet ? "#EEF2FF" : "var(--panel-bg)", color: "var(--text-1)" }}
                                     />
-                                    <span style={{ fontSize: 12, color: "#6B7280" }}>%</span>
+                                    <span style={{ fontSize: 12, color: "var(--text-3)" }}>%</span>
                                     {displayTcp !== null && (
                                       <span style={{ fontSize: 12, fontWeight: 600, color: tcpWins ? "#059669" : "#1D4ED8" }}>
                                         {tcpWins ? winLabel : loseLabel} +{margin2pp}pp
@@ -6546,11 +6619,11 @@ export default function App() {
                                     {ovTcpSet && (
                                       <button
                                         onClick={() => updateSeatOverride(+idStr, "tcpPct", "")}
-                                        style={{ marginLeft: "auto", fontSize: 11, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}
+                                        style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-4)", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}
                                         title="Clear TCP override">✕</button>
                                     )}
                                   </div>
-                                  <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>
+                                  <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 4 }}>
                                     {`>50% → ${winLabel} wins · <50% → ${loseLabel} wins`}
                                     {projTcpPct !== null && !ovTcpSet && (
                                       <span> · Modelled: {projTcpPct.toFixed(1)}%</span>
@@ -6561,34 +6634,34 @@ export default function App() {
                             })()}
 
                             {/* TCP Matchup override */}
-                            <div style={{ borderTop: "1px solid #E5E7EB", marginTop: 10, paddingTop: 10 }}>
-                              <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 6 }}>TCP Matchup</div>
+                            <div style={{ borderTop: "1px solid var(--border-1)", marginTop: 10, paddingTop: 10 }}>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 6 }}>TCP Matchup</div>
                               <div style={{ display: "flex", gap: 5 }}>
                                 {[["auto", "Auto"], ["on_v_alp", "ON vs ALP"], ["on_v_coal", "ON vs Coal"]].map(([val, label]) => {
                                   const active = (ov.tcpMatchup ?? "auto") === val;
                                   return (
                                     <button key={val}
                                       onClick={() => updateSeatOverride(+idStr, "tcpMatchup", val === "auto" ? null : val)}
-                                      style={{ padding: "3px 9px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer", background: active ? "#B45309" : "#fff", color: active ? "#fff" : "#B45309", border: "1px solid #B45309" }}>
+                                      style={{ padding: "3px 9px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer", background: active ? "#B45309" : "var(--panel-bg)", color: active ? "#fff" : "#B45309", border: "1px solid #B45309" }}>
                                       {label}
                                     </button>
                                   );
                                 })}
                               </div>
                               {ov.tcpMatchup && (
-                                <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4 }}>
+                                <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 4 }}>
                                   {ov.tcpMatchup === "on_v_alp" ? "Uses Coal→ALP (ON race) preference flow." : "Uses ALP→ON (vs Coal) preference flow."}
                                 </div>
                               )}
                             </div>
 
                             {/* Force projected winner */}
-                            <div style={{ borderTop: "1px solid #E5E7EB", marginTop: 10, paddingTop: 10 }}>
+                            <div style={{ borderTop: "1px solid var(--border-1)", marginTop: 10, paddingTop: 10 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                                <span style={{ fontSize: 11, fontWeight: 700, color: "#374151", flex: 1 }}>Force projected winner</span>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", flex: 1 }}>Force projected winner</span>
                                 {ov.forceGroup && (
                                   <button onClick={() => updateSeatOverride(+idStr, "forceGroup", "")}
-                                    style={{ fontSize: 11, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}>
+                                    style={{ fontSize: 11, color: "var(--text-4)", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}>
                                     Clear
                                   </button>
                                 )}
@@ -6599,7 +6672,7 @@ export default function App() {
                                     onClick={() => updateSeatOverride(+idStr, "forceGroup", ov.forceGroup === g ? "" : g)}
                                     style={{
                                       padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer",
-                                      background: ov.forceGroup === g ? GROUP_CONFIG[g].color : "#fff",
+                                      background: ov.forceGroup === g ? GROUP_CONFIG[g].color : "var(--panel-bg)",
                                       color: ov.forceGroup === g ? "#fff" : GROUP_CONFIG[g].color,
                                       border: `1px solid ${GROUP_CONFIG[g].color}`,
                                     }}>
@@ -6636,15 +6709,15 @@ export default function App() {
                     const other = +(100 - entered - undecided).toFixed(1);
                     const overLimit = entered + undecided > 100;
                     return (
-                      <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 12, color: "#6B7280" }}>Other / minor parties</span>
+                      <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span>
                         <span style={{ fontSize: 13, fontWeight: 700, color: overLimit ? "#DC2626" : "#374151" }}>
                           {overLimit ? `−${Math.abs(other).toFixed(1)}% ⚠` : `${other}%`}
                         </span>
                       </div>
                     );
                   })()}
-                  <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6 }}>
                     2022 result: ALP {VIC_BASELINE_2022.alp}% · Coalition {VIC_BASELINE_2022.coal}% · Grn {VIC_BASELINE_2022.grn}% · Ind {VIC_BASELINE_2022.ind}% · ON {VIC_BASELINE_2022.on}%
                   </div>
                 </div>
@@ -6655,14 +6728,14 @@ export default function App() {
                   <PrefInput label="Independents → ALP" value={vicPrefFlows.ind_alp} onChange={v => setVicPrefFlows(f => ({ ...f, ind_alp: v }))} color="#0891B2" />
                   <PrefInput label="One Nation → ALP" value={vicPrefFlows.on_alp} onChange={v => setVicPrefFlows(f => ({ ...f, on_alp: v }))} color="#B45309" />
                   <PrefInput label="Other → ALP" value={vicPrefFlows.other_alp} onChange={v => setVicPrefFlows(f => ({ ...f, other_alp: v }))} color="#7C3AED" />
-                  <div style={{ fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-4)", borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 4 }}>
                     Defaults based on 2022 VIC preference distributions. Remainder flows to Coalition.
                   </div>
                 </div>
 
                 <div style={panelStyle}>
                   <div style={sectionHead}>ON Race Flows</div>
-                  <div style={{ marginBottom: 8, fontSize: 12, color: "#6B7280" }}>Select if One Nation reaches the final two-candidate count statewide.</div>
+                  <div style={{ marginBottom: 8, fontSize: 12, color: "var(--text-3)" }}>Select if One Nation reaches the final two-candidate count statewide.</div>
                   {[{ val: null, label: "Standard (ALP vs Coalition)" }, { val: "on_v_alp", label: "ON vs ALP final" }, { val: "on_v_coal", label: "ON vs Coalition final" }].map(opt => (
                     <label key={String(opt.val)} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, cursor: "pointer" }}>
                       <input type="radio" name="vicOnTcp" checked={vicOnTcp === opt.val} onChange={() => setVicOnTcp(opt.val)}
@@ -6671,7 +6744,7 @@ export default function App() {
                     </label>
                   ))}
                   {vicOnTcp === "on_v_alp" && (
-                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                    <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 4 }}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: "#B45309", marginBottom: 6 }}>ON vs ALP preference flows</div>
                       <PrefInput label="Coal → ALP (vs ON)" value={vicPrefFlows.coal_alp_v_on} onChange={v => setVicPrefFlows(f => ({ ...f, coal_alp_v_on: v }))} color="#1D4ED8" />
                       <PrefInput label="Greens → ALP (vs ON)" value={vicPrefFlows.grn_alp_v_on} onChange={v => setVicPrefFlows(f => ({ ...f, grn_alp_v_on: v }))} color="#059669" />
@@ -6680,7 +6753,7 @@ export default function App() {
                     </div>
                   )}
                   {vicOnTcp === "on_v_coal" && (
-                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                    <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 4 }}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: "#B45309", marginBottom: 6 }}>ON vs Coalition preference flows</div>
                       <PrefInput label="ALP → ON (vs Coal)" value={vicPrefFlows.alp_on_v_coal} onChange={v => setVicPrefFlows(f => ({ ...f, alp_on_v_coal: v }))} color="#DC2626" />
                       <PrefInput label="Greens → ON (vs Coal)" value={vicPrefFlows.grn_on_v_coal} onChange={v => setVicPrefFlows(f => ({ ...f, grn_on_v_coal: v }))} color="#059669" />
@@ -6698,7 +6771,7 @@ export default function App() {
                       style={{ marginTop: 2, accentColor: "#6366F1", width: 16, height: 16 }} />
                     <span>
                       <span style={{ fontWeight: 600, fontSize: 13 }}>Regional swing differentiation</span>
-                      <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>
+                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>
                         Inner-metro seats amplify the state swing (×1.15); regional/rural seats respond
                         less (×0.75). Calibrated from 2014–2022 VEC district-level data.
                       </div>
@@ -6724,32 +6797,32 @@ export default function App() {
                 {/* Summary stat cards */}
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                     {vicImplied2pp !== null ? (
                       <>
                         <div style={{ fontSize: 30, fontWeight: 800, color: vicImplied2pp >= 50 ? "#059669" : "#DC2626" }}>{vicImplied2pp.toFixed(1)}%</div>
-                        <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                        <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                           {vicImplied2pp >= 50 ? `▲ +${(vicImplied2pp - VIC_RIGHT_BLOC_2PP_2022).toFixed(1)} vs 2022` : `▼ ${(vicImplied2pp - VIC_RIGHT_BLOC_2PP_2022).toFixed(1)} vs 2022`}
                         </div>
                       </>
-                    ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
+                    ) : <div style={{ fontSize: 20, color: "var(--text-4)" }}>—</div>}
                   </div>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
                     {vicSeatAvg2pp !== null ? (
                       <>
                         <div style={{ fontSize: 30, fontWeight: 800, color: vicSeatAvg2pp.avg >= 50 ? "#059669" : "#DC2626" }}>{vicSeatAvg2pp.avg.toFixed(1)}%</div>
-                        <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across {vicSeatAvg2pp.count} seats</div>
+                        <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 3 }}>mean across {vicSeatAvg2pp.count} seats</div>
                       </>
-                    ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
+                    ) : <div style={{ fontSize: 20, color: "var(--text-4)" }}>—</div>}
                   </div>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
                     <div style={{ fontSize: 30, fontWeight: 800, color: vicChangedSeats.length > 0 ? "#F59E0B" : "#6B7280" }}>{vicChangedSeats.length}</div>
-                    <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>of 88 modelled</div>
+                    <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>of 88 modelled</div>
                   </div>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
                     {(() => {
                       const alpProj = vicProjCounts.alp || 0;
                       const coalProj = (vicProjCounts.coalition || 0);
@@ -6758,7 +6831,7 @@ export default function App() {
                       return (
                         <>
                           <div style={{ fontSize: 16, fontWeight: 800, color: majColor, marginTop: 4 }}>{projMaj}</div>
-                          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>45 seats needed</div>
+                          <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>45 seats needed</div>
                         </>
                       );
                     })()}
@@ -6769,12 +6842,12 @@ export default function App() {
                 <div style={panelStyle}>
                   <div style={STYLES.panelTitle}>Seat composition</div>
                   <div style={{ marginBottom: 8 }}>
-                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>2022 result</div>
+                    <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>2022 result</div>
                     <TallyBar seats={VIC_SEATS} />
                   </div>
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <div style={{ fontSize: 12, color: "#6B7280" }}>Projected</div>
+                      <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
                       {vicHasChanges && <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
                     </div>
                     <TallyBar seats={vicModelledSeats} useModelled={true} />
@@ -6789,11 +6862,11 @@ export default function App() {
                         <div key={g} style={STYLES.metricCard}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                             <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
-                            <span style={{ fontSize: 11, fontWeight: 700, color: "#374151" }}>{GROUP_CONFIG[g].label}</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>{GROUP_CONFIG[g].label}</span>
                           </div>
                           <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                            <span style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{proj}</span>
-                            <span style={{ fontSize: 12, color: "#6B7280" }}>/ {base} base</span>
+                            <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{proj}</span>
+                            <span style={{ fontSize: 12, color: "var(--text-3)" }}>/ {base} base</span>
                           </div>
                           {delta !== 0 && (
                             <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? "#059669" : "#DC2626", marginTop: 2 }}>
@@ -6809,60 +6882,60 @@ export default function App() {
                 {/* VIC Uncertainty panel */}
                 <div style={{ ...STYLES.panel, marginBottom: 14 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-count uncertainty</span>
-                    <span style={{ fontSize: 11, color: "#6B7280", background: "#F3F4F6", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-count uncertainty</span>
+                    <span style={{ fontSize: 11, color: "var(--text-3)", background: "var(--subtle-bg)", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ</span>
                   </div>
                   <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
+                    <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
                       <span style={{ fontSize: 28, fontWeight: 800, color: "#DC2626" }}>{vicUncertainty.alpMean}</span>
-                      <span style={{ fontSize: 13, color: "#6B7280" }}>seats (mean)</span>
-                      <span style={{ fontSize: 13, color: "#9CA3AF" }}>±{vicUncertainty.alpStd}</span>
+                      <span style={{ fontSize: 13, color: "var(--text-3)" }}>seats (mean)</span>
+                      <span style={{ fontSize: 13, color: "var(--text-4)" }}>±{vicUncertainty.alpStd}</span>
                     </div>
-                    <div style={{ fontSize: 12, color: "#374151", marginBottom: 2 }}>
-                      <span style={{ color: "#6B7280" }}>80% CI: </span>
+                    <div style={{ fontSize: 12, color: "var(--text-2)", marginBottom: 2 }}>
+                      <span style={{ color: "var(--text-3)" }}>80% CI: </span>
                       <strong>{vicUncertainty.alpP25}–{vicUncertainty.alpP75}</strong> seats
-                      <span style={{ marginLeft: 10, color: "#6B7280" }}>95% CI: </span>
+                      <span style={{ marginLeft: 10, color: "var(--text-3)" }}>95% CI: </span>
                       <strong>{vicUncertainty.alpP05}–{vicUncertainty.alpP95}</strong> seats
                     </div>
-                    <div style={{ fontSize: 12, color: "#374151", marginTop: 4 }}>
-                      <span style={{ color: "#6B7280" }}>P(ALP majority ≥45): </span>
+                    <div style={{ fontSize: 12, color: "var(--text-2)", marginTop: 4 }}>
+                      <span style={{ color: "var(--text-3)" }}>P(ALP majority ≥45): </span>
                       <strong style={{ color: vicUncertainty.pMajority >= 50 ? "#DC2626" : "#1D4ED8" }}>{vicUncertainty.pMajority}%</strong>
                     </div>
                   </div>
-                  <div style={{ position: "relative", height: 20, background: "#F3F4F6", borderRadius: 6, overflow: "hidden", marginBottom: 10 }}>
+                  <div style={{ position: "relative", height: 20, background: "var(--subtle-bg)", borderRadius: 6, overflow: "hidden", marginBottom: 10 }}>
                     <div style={{ position: "absolute", left: `${Math.max(0, vicUncertainty.alpP05 / 89 * 100)}%`, width: `${Math.min(100, (vicUncertainty.alpP95 - vicUncertainty.alpP05) / 89 * 100)}%`, height: "100%", background: "#FECACA", borderRadius: 4 }} />
                     <div style={{ position: "absolute", left: `${Math.max(0, vicUncertainty.alpP25 / 89 * 100)}%`, width: `${Math.min(100, (vicUncertainty.alpP75 - vicUncertainty.alpP25) / 89 * 100)}%`, height: "100%", background: "#FCA5A5" }} />
                     <div style={{ position: "absolute", left: `${Math.max(0, vicUncertainty.alpP50 / 89 * 100)}%`, width: 2, height: "100%", background: "#DC2626" }} />
                     <div style={{ position: "absolute", left: `${45 / 89 * 100}%`, width: 1, height: "100%", background: "#6B7280" }} title="45 seats = majority" />
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#9CA3AF" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-4)" }}>
                     <span>{vicUncertainty.alpP05}</span>
                     <span style={{ color: "#DC2626", fontWeight: 700 }}>{vicUncertainty.alpP50} median</span>
                     <span>45 maj.</span>
                     <span>{vicUncertainty.alpP95}</span>
                   </div>
-                  <div style={{ borderTop: "1px solid #F3F4F6", marginTop: 12, paddingTop: 10 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Model options</div>
-                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151", cursor: "pointer", marginBottom: 8 }}>
+                  <div style={{ borderTop: "1px solid var(--border-3)", marginTop: 12, paddingTop: 10 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)", marginBottom: 8 }}>Model options</div>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)", cursor: "pointer", marginBottom: 8 }}>
                       <input type="checkbox" checked={useElasticity} onChange={e => setUseElasticity(e.target.checked)} />
                       Seat elasticity (marginal seats swing more)
-                      <span style={{ fontSize: 11, color: "#9CA3AF" }}>{useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}</span>
+                      <span style={{ fontSize: 11, color: "var(--text-4)" }}>{useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}</span>
                     </label>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)" }}>
                       <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
                       <input type="range" min={0.5} max={4} step={0.25} value={swingStd} onChange={e => setSwingStd(+e.target.value)} style={{ flex: 1 }} />
                       <span style={{ minWidth: 36, fontWeight: 600 }}>{swingStd}pp</span>
                     </div>
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>Shared across all elections. Typical Australian state polling MAE ≈ 1–2pp.</div>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 4 }}>Shared across all elections. Typical Australian state polling MAE ≈ 1–2pp.</div>
                   </div>
                 </div>
 
                 {/* Seat-at-risk table — filterable */}
                 {(() => {
                   const filterBtnStyle = (active) => ({
-                    padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid #D1D5DB",
-                    background: active ? "#374151" : "#fff", color: active ? "#fff" : "#374151",
+                    padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid var(--border-2)",
+                    background: active ? "#374151" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
                   });
                   let vicFiltered = [...vicModelledSeats].sort((a, b) => {
                     const ma = Math.abs((a.modelled.projAlp2pp ?? 50) - 50);
@@ -6874,7 +6947,7 @@ export default function App() {
                   return (
                     <div style={panelStyle}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: "#111827", flex: 1 }}>Seat-at-risk rankings</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", flex: 1 }}>Seat-at-risk rankings</span>
                         <div style={{ display: "flex", gap: 4 }}>
                           {[["all", `All 88`], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"]].map(([val, label]) => (
                             <button key={val} onClick={() => setStateRiskFilter(val)} style={filterBtnStyle(stateRiskFilter === val)}>{label}</button>
@@ -6906,12 +6979,12 @@ export default function App() {
                                     background: hasOv ? "#F0FDF4" : isExpanded ? "#F0F9FF" : changed ? "#FFF7ED" : "transparent",
                                     cursor: "pointer",
                                   }}>
-                                  <span style={{ fontWeight: changed ? 700 : 400, fontSize: 13, color: "#111827", paddingLeft: changed ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                  <span style={{ fontWeight: changed ? 700 : 400, fontSize: 13, color: "var(--text-1)", paddingLeft: changed ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                     {isExpanded ? "▾ " : "▸ "}{seat.name}
                                   </span>
                                   <div><PartyBadge party={seat.winner.party} /></div>
                                   <div>
-                                    {changed ? <PartyBadge party={seat.modelled.winnerParty} /> : <span style={{ fontSize: 11, color: "#9CA3AF" }}>holds</span>}
+                                    {changed ? <PartyBadge party={seat.modelled.winnerParty} /> : <span style={{ fontSize: 11, color: "var(--text-4)" }}>holds</span>}
                                   </div>
                                   <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
                                     {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
@@ -6924,40 +6997,40 @@ export default function App() {
                                   </span>
                                 </div>
                                 {isExpanded && (
-                                  <div style={{ background: "#F8FAFC", borderBottom: "1px solid #E5E7EB", padding: "10px 14px", marginBottom: 2 }}>
+                                  <div style={{ background: "var(--metric-bg)", borderBottom: "1px solid var(--border-1)", padding: "10px 14px", marginBottom: 2 }}>
                                     {Object.keys(d).length > 0 && d.medianAge != null ? (
                                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
                                         <div>
-                                          <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Income</div>
+                                          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", marginBottom: 4 }}>Income</div>
                                           {[{ k: "medianPersonalIncomeEarners", l: "Personal (earners)" }, { k: "medianHouseholdIncome", l: "Household" }].map(({ k, l }) => d[k] != null && (
                                             <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
-                                              <span style={{ color: "#6B7280" }}>{l}</span>
+                                              <span style={{ color: "var(--text-3)" }}>{l}</span>
                                               <span style={{ fontWeight: 600 }}>${(d[k] / 1000).toFixed(0)}k</span>
                                             </div>
                                           ))}
                                         </div>
                                         <div>
-                                          <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Housing</div>
+                                          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", marginBottom: 4 }}>Housing</div>
                                           {[{ k: "renterPct", l: "Renters", fmt: v => `${v}%` }, { k: "medianWeeklyRent", l: "Weekly rent", fmt: v => `$${v}` }, { k: "ownerMortgagePct", l: "Owner+mort", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
                                             <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
-                                              <span style={{ color: "#6B7280" }}>{l}</span>
+                                              <span style={{ color: "var(--text-3)" }}>{l}</span>
                                               <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
                                             </div>
                                           ))}
                                         </div>
                                         <div>
-                                          <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>People</div>
+                                          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", marginBottom: 4 }}>People</div>
                                           {[{ k: "medianAge", l: "Median age", fmt: v => Math.round(v) }, { k: "bachelorsOrAbovePct", l: "Degree+", fmt: v => `${v}%` }, { k: "overseasBornPct", l: "Overseas born", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
                                             <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
-                                              <span style={{ color: "#6B7280" }}>{l}</span>
+                                              <span style={{ color: "var(--text-3)" }}>{l}</span>
                                               <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
                                             </div>
                                           ))}
-                                          {d.urbanClass && <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4 }}>{d.urbanClass}</div>}
+                                          {d.urbanClass && <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 4 }}>{d.urbanClass}</div>}
                                         </div>
                                       </div>
                                     ) : (
-                                      <div style={{ fontSize: 11, color: "#9CA3AF" }}>Region: {seat.modelled.region ?? "—"} · No demographic data yet (run pipeline/fetch_demographics.py to populate)</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-4)" }}>Region: {seat.modelled.region ?? "—"} · No demographic data yet (run pipeline/fetch_demographics.py to populate)</div>
                                     )}
                                   </div>
                                 )}
@@ -6966,7 +7039,7 @@ export default function App() {
                           })}
                         </div>
                       </div>
-                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
+                      <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-3)" }}>
                         Probabilistic swing model · VEC 2022 · 88 Legislative Assembly districts · ALP% shown for ALP/Coalition contests
                       </div>
                     </div>
@@ -6976,7 +7049,7 @@ export default function App() {
                 {/* ── VIC Per-seat overrides panel ── */}
                 <div style={panelStyle}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-level overrides</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-level overrides</span>
                     {Object.keys(vicSeatOverrides).length > 0 && (
                       <>
                         <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
@@ -6989,7 +7062,7 @@ export default function App() {
                       </>
                     )}
                   </div>
-                  <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 10px" }}>
+                  <p style={{ fontSize: 12, color: "var(--text-3)", margin: "0 0 10px" }}>
                     Override primary votes, TCP %, or force a winner for individual seats.
                   </p>
                   <div style={{ position: "relative", marginBottom: 12 }}>
@@ -6997,14 +7070,14 @@ export default function App() {
                       value={vicOverrideSearch}
                       onChange={e => setVicOverrideSearch(e.target.value)}
                       placeholder="+ Search for a seat to override…"
-                      style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "7px 10px", fontSize: 13, boxSizing: "border-box", outline: "none" }}
+                      style={{ width: "100%", border: "1px solid var(--border-2)", borderRadius: 6, padding: "7px 10px", fontSize: 13, boxSizing: "border-box", outline: "none" }}
                     />
                     {vicOverrideSearch.length > 0 && (() => {
                       const matches = VIC_SEATS.filter(s =>
                         s.name.toLowerCase().includes(vicOverrideSearch.toLowerCase()) && !vicSeatOverrides[s.id]
                       ).slice(0, 8);
                       return matches.length > 0 ? (
-                        <div style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 100, overflow: "hidden" }}>
+                        <div style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 100, overflow: "hidden" }}>
                           {matches.map((s, i) => (
                             <div key={s.id}
                               onMouseDown={() => {
@@ -7013,9 +7086,9 @@ export default function App() {
                               }}
                               style={{ padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderBottom: i < matches.length - 1 ? "1px solid #F3F4F6" : "none" }}>
                               <span style={{ fontWeight: 600, flex: 1, fontSize: 13 }}>{s.name}</span>
-                              <span style={{ fontSize: 12, color: "#9CA3AF" }}>{s.tcp[0].party} vs {s.tcp[1].party}</span>
+                              <span style={{ fontSize: 12, color: "var(--text-4)" }}>{s.tcp[0].party} vs {s.tcp[1].party}</span>
                               <PartyBadge party={s.winner.party} />
-                              <span style={{ fontSize: 12, color: "#6B7280" }}>{s.margin.toFixed(1)}%</span>
+                              <span style={{ fontSize: 12, color: "var(--text-3)" }}>{s.margin.toFixed(1)}%</span>
                             </div>
                           ))}
                         </div>
@@ -7023,7 +7096,7 @@ export default function App() {
                     })()}
                   </div>
                   {Object.keys(vicSeatOverrides).length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "16px 0", color: "#9CA3AF", fontSize: 12 }}>
+                    <div style={{ textAlign: "center", padding: "16px 0", color: "var(--text-4)", fontSize: 12 }}>
                       No seat overrides active. Search for a VIC seat above to add one.
                     </div>
                   ) : (
@@ -7036,22 +7109,22 @@ export default function App() {
                         const tcpMatchup = ov.tcpMatchup ?? null;
                         const tcpPct = ov.tcpPct ?? null;
                         return (
-                          <div key={idStr} style={{ border: "1px solid #D1D5DB", borderRadius: 8, padding: "12px 14px", background: "#FAFAFA" }}>
+                          <div key={idStr} style={{ border: "1px solid var(--border-2)", borderRadius: 8, padding: "12px 14px", background: "var(--table-row-alt)" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                               <PartyBadge party={seat.winner.party} />
                               <span style={{ fontWeight: 700, fontSize: 13, flex: 1 }}>{seat.name}</span>
-                              <span style={{ fontSize: 12, color: "#9CA3AF" }}>Baseline: {seat.tcp[0].party} vs {seat.tcp[1].party} · {seat.margin.toFixed(1)}%</span>
+                              <span style={{ fontSize: 12, color: "var(--text-4)" }}>Baseline: {seat.tcp[0].party} vs {seat.tcp[1].party} · {seat.margin.toFixed(1)}%</span>
                               {ms?.modelled.winnerParty && ms.modelled.winnerPct != null && (
                                 <span style={{ fontSize: 12, fontWeight: 700, color: getParty(ms.modelled.winnerParty).color }}>
                                   → {ms.modelled.winnerParty} {ms.modelled.winnerPct.toFixed(1)}%
                                 </span>
                               )}
                               <button onClick={() => setVicSeatOverrides(ovs => { const n = { ...ovs }; delete n[+idStr]; return n; })}
-                                style={{ fontSize: 13, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>✕</button>
+                                style={{ fontSize: 13, color: "var(--text-4)", background: "none", border: "none", cursor: "pointer", padding: "2px 4px" }}>✕</button>
                             </div>
                             {/* Primary vote overrides */}
                             <div style={{ marginBottom: 8 }}>
-                              <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Primary vote % overrides (blank = use statewide)</div>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>Primary vote % overrides (blank = use statewide)</div>
                               <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6 }}>
                                 {[{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coal", c: "#1D4ED8" }, { k: "grn", l: "Grn", c: "#059669" }, { k: "ind", l: "Ind", c: "#0891B2" }, { k: "on", l: "ON", c: "#B45309" }].map(({ k, l, c }) => (
                                   <div key={k} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -7060,7 +7133,7 @@ export default function App() {
                                       value={ov[k] ?? ""}
                                       placeholder="—"
                                       onChange={e => setOv({ [k]: e.target.value === "" ? null : +e.target.value })}
-                                      style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 4, padding: "3px 4px", fontSize: 11, textAlign: "right", boxSizing: "border-box" }}
+                                      style={{ width: "100%", border: "1px solid var(--border-2)", borderRadius: 4, padding: "3px 4px", fontSize: 11, textAlign: "right", boxSizing: "border-box" }}
                                     />
                                   </div>
                                 ))}
@@ -7068,26 +7141,26 @@ export default function App() {
                             </div>
                             {/* TCP% override */}
                             <div style={{ marginBottom: 8 }}>
-                              <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>ALP 2PP % (≥50 = ALP wins)</div>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>ALP 2PP % (≥50 = ALP wins)</div>
                               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                 <input type="number" min={0} max={100} step={0.5}
                                   value={tcpPct ?? ""}
                                   placeholder="auto"
                                   onChange={e => setOv({ tcpPct: e.target.value === "" ? null : +e.target.value })}
-                                  style={{ width: 70, border: "1px solid #D1D5DB", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
+                                  style={{ width: 70, border: "1px solid var(--border-2)", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
                                 />
-                                <span style={{ fontSize: 11, color: "#9CA3AF" }}>% (overrides model)</span>
-                                {tcpPct != null && <button onClick={() => setOv({ tcpPct: null })} style={{ fontSize: 11, color: "#6B7280", background: "none", border: "none", cursor: "pointer" }}>×</button>}
+                                <span style={{ fontSize: 11, color: "var(--text-4)" }}>% (overrides model)</span>
+                                {tcpPct != null && <button onClick={() => setOv({ tcpPct: null })} style={{ fontSize: 11, color: "var(--text-3)", background: "none", border: "none", cursor: "pointer" }}>×</button>}
                               </div>
                             </div>
                             {/* Force winner */}
                             <div>
-                              <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Force projected winner</div>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>Force projected winner</div>
                               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                                 {[["alp", "ALP", "#DC2626"], ["coalition", "Coalition", "#1D4ED8"], ["greens", "Greens", "#059669"], ["ind", "Ind", "#0891B2"], ["one_nation", "ON", "#B45309"]].map(([g, label, c]) => (
                                   <button key={g}
                                     onClick={() => setOv({ forceGroup: ov.forceGroup === g ? null : g })}
-                                    style={{ fontSize: 11, padding: "3px 8px", borderRadius: 5, border: `1px solid ${c}`, cursor: "pointer", fontWeight: ov.forceGroup === g ? 700 : 400, background: ov.forceGroup === g ? c : "#fff", color: ov.forceGroup === g ? "#fff" : c }}>
+                                    style={{ fontSize: 11, padding: "3px 8px", borderRadius: 5, border: `1px solid ${c}`, cursor: "pointer", fontWeight: ov.forceGroup === g ? 700 : 400, background: ov.forceGroup === g ? c : "var(--panel-bg)", color: ov.forceGroup === g ? "#fff" : c }}>
                                     {label}
                                   </button>
                                 ))}
@@ -7143,13 +7216,13 @@ export default function App() {
                     <PrimaryInput label="Undecided" value={prim.undecided ?? 0}
                       onChange={v => setPrim(pr => ({ ...pr, undecided: v }))}
                       color="#9CA3AF" baseline={0} />
-                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 12, color: "#6B7280" }}>Other / minor parties</span>
+                    <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span>
                       <span style={{ fontSize: 13, fontWeight: 700, color: overLimit ? "#DC2626" : "#374151" }}>
                         {overLimit ? `−${Math.abs(other).toFixed(1)}% ⚠` : `${other}%`}
                       </span>
                     </div>
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6 }}>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6 }}>
                       {parties.map(p => `${p.l} ${bl[p.k] ?? 0}%`).join(" · ")}
                     </div>
                   </div>
@@ -7159,19 +7232,19 @@ export default function App() {
                     <PrefInput label="Independents → ALP" value={flows.ind_alp} onChange={v => setFlows(f => ({ ...f, ind_alp: v }))} color="#0891B2" />
                     <PrefInput label="One Nation → ALP" value={flows.on_alp} onChange={v => setFlows(f => ({ ...f, on_alp: v }))} color="#B45309" />
                     <PrefInput label="Other → ALP" value={flows.other_alp} onChange={v => setFlows(f => ({ ...f, other_alp: v }))} color="#7C3AED" />
-                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                    <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 4 }}>
                       <PrefInput label="ON from Coalition adj." value={flows.onCoalOriginFactor ?? 0} onChange={v => setFlows(f => ({ ...f, onCoalOriginFactor: v }))} color="#92400E" />
-                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2, lineHeight: 1.4 }}>
+                      <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 2, lineHeight: 1.4 }}>
                         When ON rises mainly from Coalition defectors (e.g. SA 2026), those voters preference ALP at a higher rate. Set 0.3–0.7 to model this effect. 0 = off (default).
                       </div>
                     </div>
-                    <div style={{ fontSize: 11, color: "#9CA3AF", borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 4 }}>
                       Defaults based on {source} preference distributions.
                     </div>
                   </div>
                   <div style={panelStyle}>
                     <div style={sectionHead}>ON Race Flows</div>
-                    <div style={{ marginBottom: 8, fontSize: 12, color: "#6B7280" }}>Select if One Nation reaches the final two-candidate count statewide.</div>
+                    <div style={{ marginBottom: 8, fontSize: 12, color: "var(--text-3)" }}>Select if One Nation reaches the final two-candidate count statewide.</div>
                     {[{ val: null, label: "Standard (ALP vs Coalition)" }, { val: "on_v_alp", label: "ON vs ALP final" }, { val: "on_v_coal", label: "ON vs Coalition final" }].map(opt => (
                       <label key={String(opt.val)} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, cursor: "pointer" }}>
                         <input type="radio" name={`${selectedModelId}OnTcp`} checked={onTcp === opt.val} onChange={() => setOnTcp(opt.val)}
@@ -7180,7 +7253,7 @@ export default function App() {
                       </label>
                     ))}
                     {onTcp === "on_v_alp" && (
-                      <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                      <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 4 }}>
                         <div style={{ fontSize: 11, fontWeight: 600, color: "#B45309", marginBottom: 6 }}>ON vs ALP preference flows</div>
                         <PrefInput label="Coal → ALP (vs ON)" value={flows.coal_alp_v_on} onChange={v => setFlows(f => ({ ...f, coal_alp_v_on: v }))} color="#1D4ED8" />
                         <PrefInput label="Greens → ALP (vs ON)" value={flows.grn_alp_v_on} onChange={v => setFlows(f => ({ ...f, grn_alp_v_on: v }))} color="#059669" />
@@ -7189,7 +7262,7 @@ export default function App() {
                       </div>
                     )}
                     {onTcp === "on_v_coal" && (
-                      <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 8, marginTop: 4 }}>
+                      <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 4 }}>
                         <div style={{ fontSize: 11, fontWeight: 600, color: "#B45309", marginBottom: 6 }}>ON vs Coalition preference flows</div>
                         <PrefInput label="ALP → ON (vs Coal)" value={flows.alp_on_v_coal} onChange={v => setFlows(f => ({ ...f, alp_on_v_coal: v }))} color="#DC2626" />
                         <PrefInput label="Greens → ON (vs Coal)" value={flows.grn_on_v_coal} onChange={v => setFlows(f => ({ ...f, grn_on_v_coal: v }))} color="#059669" />
@@ -7205,7 +7278,7 @@ export default function App() {
                         style={{ marginTop: 2, accentColor: "#6366F1", width: 16, height: 16 }} />
                       <span>
                         <span style={{ fontWeight: 600, fontSize: 13 }}>Regional swing differentiation</span>
-                        <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>
+                        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>
                           Metro seats track the state swing; regional/rural seats respond less (local factors dominant).
                         </div>
                         {useRegionalSwing && (
@@ -7228,46 +7301,46 @@ export default function App() {
                 <div>
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Implied 2PP (ALP)</div>
                       {implied2pp !== null ? (
                         <>
                           <div style={{ fontSize: 30, fontWeight: 800, color: implied2pp >= 50 ? "#059669" : "#DC2626" }}>{implied2pp.toFixed(1)}%</div>
-                          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                          <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                             {implied2pp >= 50 ? `▲ +${(implied2pp - baseline2pp).toFixed(1)} vs baseline` : `▼ ${(implied2pp - baseline2pp).toFixed(1)} vs baseline`}
                           </div>
                         </>
-                      ) : <div style={{ fontSize: 14, color: "#9CA3AF", marginTop: 8 }}>—</div>}
+                      ) : <div style={{ fontSize: 14, color: "var(--text-4)", marginTop: 8 }}>—</div>}
                     </div>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
                       {seatAvg2ppVal !== null ? (
                         <>
                           <div style={{ fontSize: 30, fontWeight: 800, color: seatAvg2ppVal.avg >= 50 ? "#059669" : "#DC2626" }}>{seatAvg2ppVal.avg.toFixed(1)}%</div>
-                          <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>mean across {seatAvg2ppVal.count} seats</div>
+                          <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 3 }}>mean across {seatAvg2ppVal.count} seats</div>
                         </>
-                      ) : <div style={{ fontSize: 20, color: "#9CA3AF" }}>—</div>}
+                      ) : <div style={{ fontSize: 20, color: "var(--text-4)" }}>—</div>}
                     </div>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
                       <div style={{ fontSize: 30, fontWeight: 800, color: changed.length > 0 ? "#F59E0B" : "#6B7280" }}>{changed.length}</div>
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>of {totalSeats} modelled</div>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>of {totalSeats} modelled</div>
                     </div>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: majColor, marginTop: 4 }}>{projMaj}</div>
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{majority} seats needed</div>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>{majority} seats needed</div>
                     </div>
                   </div>
 
                   <div style={panelStyle}>
                     <div style={STYLES.panelTitle}>Seat composition</div>
                     <div style={{ marginBottom: 8 }}>
-                      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>Baseline result</div>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>Baseline result</div>
                       <TallyBar seats={allSeats} />
                     </div>
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                        <div style={{ fontSize: 12, color: "#6B7280" }}>Projected</div>
+                        <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
                         {hasChanges && <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
                       </div>
                       <TallyBar seats={modelled} useModelled={true} />
@@ -7282,11 +7355,11 @@ export default function App() {
                           <div key={g} style={STYLES.metricCard}>
                             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                               <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
-                              <span style={{ fontSize: 11, fontWeight: 700, color: "#374151" }}>{GROUP_CONFIG[g].label}</span>
+                              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>{GROUP_CONFIG[g].label}</span>
                             </div>
                             <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                              <span style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{pv}</span>
-                              <span style={{ fontSize: 12, color: "#6B7280" }}>/ {bv} base</span>
+                              <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{pv}</span>
+                              <span style={{ fontSize: 12, color: "var(--text-3)" }}>/ {bv} base</span>
                             </div>
                             {delta !== 0 && <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? "#059669" : "#DC2626", marginTop: 2 }}>{delta > 0 ? "+" : ""}{delta} seats</div>}
                           </div>
@@ -7298,60 +7371,60 @@ export default function App() {
                   {/* Uncertainty panel */}
                   <div style={{ ...STYLES.panel, marginBottom: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-count uncertainty</span>
-                      <span style={{ fontSize: 11, color: "#6B7280", background: "#F3F4F6", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ</span>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-count uncertainty</span>
+                      <span style={{ fontSize: 11, color: "var(--text-3)", background: "var(--subtle-bg)", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ</span>
                     </div>
                     <div style={{ marginBottom: 12 }}>
-                      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
                         <span style={{ fontSize: 28, fontWeight: 800, color: "#DC2626" }}>{uncertainty.alpMean}</span>
-                        <span style={{ fontSize: 13, color: "#6B7280" }}>seats (mean)</span>
-                        <span style={{ fontSize: 13, color: "#9CA3AF" }}>±{uncertainty.alpStd}</span>
+                        <span style={{ fontSize: 13, color: "var(--text-3)" }}>seats (mean)</span>
+                        <span style={{ fontSize: 13, color: "var(--text-4)" }}>±{uncertainty.alpStd}</span>
                       </div>
-                      <div style={{ fontSize: 12, color: "#374151", marginBottom: 2 }}>
-                        <span style={{ color: "#6B7280" }}>80% CI: </span>
+                      <div style={{ fontSize: 12, color: "var(--text-2)", marginBottom: 2 }}>
+                        <span style={{ color: "var(--text-3)" }}>80% CI: </span>
                         <strong>{uncertainty.alpP25}–{uncertainty.alpP75}</strong> seats
-                        <span style={{ marginLeft: 10, color: "#6B7280" }}>95% CI: </span>
+                        <span style={{ marginLeft: 10, color: "var(--text-3)" }}>95% CI: </span>
                         <strong>{uncertainty.alpP05}–{uncertainty.alpP95}</strong> seats
                       </div>
-                      <div style={{ fontSize: 12, color: "#374151", marginTop: 4 }}>
-                        <span style={{ color: "#6B7280" }}>P(ALP majority ≥{majority}): </span>
+                      <div style={{ fontSize: 12, color: "var(--text-2)", marginTop: 4 }}>
+                        <span style={{ color: "var(--text-3)" }}>P(ALP majority ≥{majority}): </span>
                         <strong style={{ color: uncertainty.pMajority >= 50 ? "#DC2626" : "#1D4ED8" }}>{uncertainty.pMajority}%</strong>
                       </div>
                     </div>
-                    <div style={{ position: "relative", height: 20, background: "#F3F4F6", borderRadius: 6, overflow: "hidden", marginBottom: 10 }}>
+                    <div style={{ position: "relative", height: 20, background: "var(--subtle-bg)", borderRadius: 6, overflow: "hidden", marginBottom: 10 }}>
                       <div style={{ position: "absolute", left: `${Math.max(0, uncertainty.alpP05 / (totalSeats + 1) * 100)}%`, width: `${Math.min(100, (uncertainty.alpP95 - uncertainty.alpP05) / (totalSeats + 1) * 100)}%`, height: "100%", background: "#FECACA", borderRadius: 4 }} />
                       <div style={{ position: "absolute", left: `${Math.max(0, uncertainty.alpP25 / (totalSeats + 1) * 100)}%`, width: `${Math.min(100, (uncertainty.alpP75 - uncertainty.alpP25) / (totalSeats + 1) * 100)}%`, height: "100%", background: "#FCA5A5" }} />
                       <div style={{ position: "absolute", left: `${Math.max(0, uncertainty.alpP50 / (totalSeats + 1) * 100)}%`, width: 2, height: "100%", background: "#DC2626" }} />
                       <div style={{ position: "absolute", left: `${majority / (totalSeats + 1) * 100}%`, width: 1, height: "100%", background: "#6B7280" }} title={`${majority} seats = majority`} />
                     </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#9CA3AF" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-4)" }}>
                       <span>{uncertainty.alpP05}</span>
                       <span style={{ color: "#DC2626", fontWeight: 700 }}>{uncertainty.alpP50} median</span>
                       <span>{majority} maj.</span>
                       <span>{uncertainty.alpP95}</span>
                     </div>
-                    <div style={{ borderTop: "1px solid #F3F4F6", marginTop: 12, paddingTop: 10 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Model options</div>
-                      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151", cursor: "pointer", marginBottom: 8 }}>
+                    <div style={{ borderTop: "1px solid var(--border-3)", marginTop: 12, paddingTop: 10 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)", marginBottom: 8 }}>Model options</div>
+                      <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)", cursor: "pointer", marginBottom: 8 }}>
                         <input type="checkbox" checked={useElasticity} onChange={e => setUseElasticity(e.target.checked)} />
                         Seat elasticity (marginal seats swing more)
-                        <span style={{ fontSize: 11, color: "#9CA3AF" }}>{useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}</span>
+                        <span style={{ fontSize: 11, color: "var(--text-4)" }}>{useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}</span>
                       </label>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)" }}>
                         <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
                         <input type="range" min={0.5} max={4} step={0.25} value={swingStd} onChange={e => setSwingStd(+e.target.value)} style={{ flex: 1 }} />
                         <span style={{ minWidth: 36, fontWeight: 600 }}>{swingStd}pp</span>
                       </div>
-                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>Shared across all elections. Typical Australian state polling MAE ≈ 1–2pp.</div>
+                      <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 4 }}>Shared across all elections. Typical Australian state polling MAE ≈ 1–2pp.</div>
                     </div>
                   </div>
 
                   {/* Seat-at-risk table — filterable */}
                   {(() => {
                     const filterBtnStyle = (active) => ({
-                      padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid #D1D5DB",
-                      background: active ? "#374151" : "#fff", color: active ? "#fff" : "#374151",
+                      padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid var(--border-2)",
+                      background: active ? "#374151" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
                     });
                     let stateFiltered = [...modelled].sort((a, b) => {
                       const ma = Math.abs((a.modelled.projAlp2pp ?? 50) - 50);
@@ -7363,7 +7436,7 @@ export default function App() {
                     return (
                       <div style={panelStyle}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: "#111827", flex: 1 }}>Seat-at-risk rankings</span>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", flex: 1 }}>Seat-at-risk rankings</span>
                           <div style={{ display: "flex", gap: 4 }}>
                             {[["all", `All ${totalSeats}`], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"]].map(([val, label]) => (
                               <button key={val} onClick={() => setStateRiskFilter(val)} style={filterBtnStyle(stateRiskFilter === val)}>{label}</button>
@@ -7396,12 +7469,12 @@ export default function App() {
                                       background: hasOv ? "#F0FDF4" : isExpanded ? "#F0F9FF" : chg ? "#FFF7ED" : "transparent",
                                       cursor: "pointer",
                                     }}>
-                                    <span style={{ fontWeight: chg ? 700 : 400, fontSize: 13, color: "#111827", paddingLeft: chg ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    <span style={{ fontWeight: chg ? 700 : 400, fontSize: 13, color: "var(--text-1)", paddingLeft: chg ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                       {isExpanded ? "▾ " : "▸ "}{seat.name}
                                     </span>
                                     <div><PartyBadge party={seat.winner.party} /></div>
                                     <div>
-                                      {chg ? <PartyBadge party={seat.modelled.winnerParty} /> : <span style={{ fontSize: 11, color: "#9CA3AF" }}>holds</span>}
+                                      {chg ? <PartyBadge party={seat.modelled.winnerParty} /> : <span style={{ fontSize: 11, color: "var(--text-4)" }}>holds</span>}
                                     </div>
                                     <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
                                       {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
@@ -7414,40 +7487,40 @@ export default function App() {
                                     </span>
                                   </div>
                                   {isExpanded && (
-                                    <div style={{ background: "#F8FAFC", borderBottom: "1px solid #E5E7EB", padding: "10px 14px", marginBottom: 2 }}>
+                                    <div style={{ background: "var(--metric-bg)", borderBottom: "1px solid var(--border-1)", padding: "10px 14px", marginBottom: 2 }}>
                                       {Object.keys(d).length > 0 && d.medianAge != null ? (
                                         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
                                           <div>
-                                            <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Income</div>
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", marginBottom: 4 }}>Income</div>
                                             {[{ k: "medianPersonalIncomeEarners", l: "Personal (earners)" }, { k: "medianHouseholdIncome", l: "Household" }].map(({ k, l }) => d[k] != null && (
                                               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
-                                                <span style={{ color: "#6B7280" }}>{l}</span>
+                                                <span style={{ color: "var(--text-3)" }}>{l}</span>
                                                 <span style={{ fontWeight: 600 }}>${(d[k] / 1000).toFixed(0)}k</span>
                                               </div>
                                             ))}
                                           </div>
                                           <div>
-                                            <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>Housing</div>
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", marginBottom: 4 }}>Housing</div>
                                             {[{ k: "renterPct", l: "Renters", fmt: v => `${v}%` }, { k: "medianWeeklyRent", l: "Weekly rent", fmt: v => `$${v}` }, { k: "ownerMortgagePct", l: "Owner+mort", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
                                               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
-                                                <span style={{ color: "#6B7280" }}>{l}</span>
+                                                <span style={{ color: "var(--text-3)" }}>{l}</span>
                                                 <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
                                               </div>
                                             ))}
                                           </div>
                                           <div>
-                                            <div style={{ fontSize: 10, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>People</div>
+                                            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", marginBottom: 4 }}>People</div>
                                             {[{ k: "medianAge", l: "Median age", fmt: v => Math.round(v) }, { k: "bachelorsOrAbovePct", l: "Degree+", fmt: v => `${v}%` }, { k: "overseasBornPct", l: "Overseas born", fmt: v => `${v}%` }].map(({ k, l, fmt }) => d[k] != null && (
                                               <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 2 }}>
-                                                <span style={{ color: "#6B7280" }}>{l}</span>
+                                                <span style={{ color: "var(--text-3)" }}>{l}</span>
                                                 <span style={{ fontWeight: 600 }}>{fmt(d[k])}</span>
                                               </div>
                                             ))}
-                                            {d.urbanClass && <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4 }}>{d.urbanClass}</div>}
+                                            {d.urbanClass && <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 4 }}>{d.urbanClass}</div>}
                                           </div>
                                         </div>
                                       ) : (
-                                        <div style={{ fontSize: 11, color: "#9CA3AF" }}>
+                                        <div style={{ fontSize: 11, color: "var(--text-4)" }}>
                                           TCP: {seat.modelled.activeTcpMatchup ? seat.modelled.activeTcpMatchup.replace("on_v_alp", "ON vs ALP").replace("on_v_coal", "ON vs Coal") : `${seat.tcp[0].party} vs ${seat.tcp[1].party}`}
                                           {seat.modelled.region ? ` · Region: ${seat.modelled.region}` : ""}
                                           {" · No demographic data yet (run pipeline/fetch_demographics.py to populate)"}
@@ -7460,7 +7533,7 @@ export default function App() {
                             })}
                           </div>
                         </div>
-                        <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
+                        <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-3)" }}>
                           Probabilistic swing model · {source} · {totalSeats} seats · ALP% shown for ALP/Coalition contests
                         </div>
                       </div>
@@ -7471,7 +7544,7 @@ export default function App() {
                   {setSeatOverrides && (
                     <div style={panelStyle}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-level overrides</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-level overrides</span>
                         {Object.keys(seatOverrides ?? {}).length > 0 && (
                           <>
                             <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
@@ -7484,7 +7557,7 @@ export default function App() {
                           </>
                         )}
                       </div>
-                      <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 10px" }}>
+                      <p style={{ fontSize: 12, color: "var(--text-3)", margin: "0 0 10px" }}>
                         Override primary votes, TCP %, TCP matchup, or force a winner for individual seats.
                       </p>
                       {/* Seat search */}
@@ -7493,14 +7566,14 @@ export default function App() {
                           value={stateOverrideSearch}
                           onChange={e => setStateOverrideSearch(e.target.value)}
                           placeholder="+ Search for a seat to override…"
-                          style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "7px 10px", fontSize: 13, boxSizing: "border-box", outline: "none" }}
+                          style={{ width: "100%", border: "1px solid var(--border-2)", borderRadius: 6, padding: "7px 10px", fontSize: 13, boxSizing: "border-box", outline: "none" }}
                         />
                         {stateOverrideSearch.length > 0 && (() => {
                           const matches = allSeats.filter(s =>
                             s.name.toLowerCase().includes(stateOverrideSearch.toLowerCase()) && !seatOverrides?.[s.id]
                           ).slice(0, 8);
                           return matches.length > 0 ? (
-                            <div style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 100, overflow: "hidden" }}>
+                            <div style={{ position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 6, boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 100, overflow: "hidden" }}>
                               {matches.map((s, i) => (
                                 <div key={s.id}
                                   onMouseDown={() => {
@@ -7509,9 +7582,9 @@ export default function App() {
                                   }}
                                   style={{ padding: "8px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, borderBottom: i < matches.length - 1 ? "1px solid #F3F4F6" : "none" }}>
                                   <span style={{ fontWeight: 600, flex: 1, fontSize: 13 }}>{s.name}</span>
-                                  <span style={{ fontSize: 12, color: "#9CA3AF" }}>{s.tcp[0].party} vs {s.tcp[1].party}</span>
+                                  <span style={{ fontSize: 12, color: "var(--text-4)" }}>{s.tcp[0].party} vs {s.tcp[1].party}</span>
                                   <PartyBadge party={s.winner.party} />
-                                  <span style={{ fontSize: 12, color: "#6B7280" }}>{s.margin.toFixed(1)}%</span>
+                                  <span style={{ fontSize: 12, color: "var(--text-3)" }}>{s.margin.toFixed(1)}%</span>
                                 </div>
                               ))}
                             </div>
@@ -7520,7 +7593,7 @@ export default function App() {
                       </div>
                       {/* Active override cards */}
                       {Object.keys(seatOverrides ?? {}).length === 0 ? (
-                        <div style={{ textAlign: "center", padding: "16px 0", color: "#9CA3AF", fontSize: 12 }}>
+                        <div style={{ textAlign: "center", padding: "16px 0", color: "var(--text-4)", fontSize: 12 }}>
                           No seat overrides active. Search for a seat above to add one.
                         </div>
                       ) : (
@@ -7534,22 +7607,22 @@ export default function App() {
                             const tcpPct = ov.tcpPct ?? null;
                             const onFp = ov.on ?? null;
                             return (
-                              <div key={idStr} style={{ border: "1px solid #D1D5DB", borderRadius: 8, padding: "12px 14px", background: "#FAFAFA" }}>
+                              <div key={idStr} style={{ border: "1px solid var(--border-2)", borderRadius: 8, padding: "12px 14px", background: "var(--table-row-alt)" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                                   <PartyBadge party={seat.winner.party} />
                                   <span style={{ fontWeight: 700, fontSize: 13, flex: 1 }}>{seat.name}</span>
-                                  <span style={{ fontSize: 12, color: "#9CA3AF" }}>Baseline: {seat.tcp[0].party} vs {seat.tcp[1].party} · {seat.margin.toFixed(1)}%</span>
+                                  <span style={{ fontSize: 12, color: "var(--text-4)" }}>Baseline: {seat.tcp[0].party} vs {seat.tcp[1].party} · {seat.margin.toFixed(1)}%</span>
                                   {ms?.modelled.winnerParty && ms.modelled.winnerPct != null && (
                                     <span style={{ fontSize: 12, fontWeight: 700, color: getParty(ms.modelled.winnerParty).color }}>
                                       → {ms.modelled.winnerParty} {ms.modelled.winnerPct.toFixed(1)}%
                                     </span>
                                   )}
                                   <button onClick={() => setSeatOverrides(ovs => { const n = { ...ovs }; delete n[+idStr]; return n; })}
-                                    style={{ fontSize: 13, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}>✕</button>
+                                    style={{ fontSize: 13, color: "var(--text-4)", background: "none", border: "none", cursor: "pointer", padding: "2px 4px", lineHeight: 1 }}>✕</button>
                                 </div>
                                 {/* Primary vote overrides */}
                                 <div style={{ marginBottom: 8 }}>
-                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Primary vote % overrides (blank = use statewide)</div>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>Primary vote % overrides (blank = use statewide)</div>
                                   <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6 }}>
                                     {parties.map(p => (
                                       <div key={p.k} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -7558,7 +7631,7 @@ export default function App() {
                                           value={ov[p.k] ?? ""}
                                           placeholder="—"
                                           onChange={e => setOv({ [p.k]: e.target.value === "" ? null : +e.target.value })}
-                                          style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 4, padding: "3px 4px", fontSize: 11, textAlign: "right", boxSizing: "border-box" }}
+                                          style={{ width: "100%", border: "1px solid var(--border-2)", borderRadius: 4, padding: "3px 4px", fontSize: 11, textAlign: "right", boxSizing: "border-box" }}
                                         />
                                       </div>
                                     ))}
@@ -7566,7 +7639,7 @@ export default function App() {
                                 </div>
                                 {/* TCP matchup selector */}
                                 <div style={{ marginBottom: 8 }}>
-                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>TCP matchup</div>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>TCP matchup</div>
                                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                                     {[
                                       { val: null, label: "Auto" },
@@ -7583,7 +7656,7 @@ export default function App() {
                                 </div>
                                 {/* TCP% override */}
                                 <div style={{ marginBottom: 8 }}>
-                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>
                                     {tcpMatchup === "on_v_alp" || tcpMatchup === "on_v_coal" ? "ON TCP % (≥50 = ON wins)" : "ALP 2CP % (≥50 = ALP wins)"}
                                   </div>
                                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -7592,35 +7665,35 @@ export default function App() {
                                       value={tcpPct ?? ""}
                                       placeholder="auto"
                                       onChange={e => setOv({ tcpPct: e.target.value === "" ? null : +e.target.value })}
-                                      style={{ width: 70, border: "1px solid #D1D5DB", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
+                                      style={{ width: 70, border: "1px solid var(--border-2)", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
                                     />
-                                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>%  (leave blank = model-computed)</span>
-                                    {tcpPct != null && <button onClick={() => setOv({ tcpPct: null })} style={{ fontSize: 11, color: "#6B7280", background: "none", border: "none", cursor: "pointer" }}>×</button>}
+                                    <span style={{ fontSize: 11, color: "var(--text-4)" }}>%  (leave blank = model-computed)</span>
+                                    {tcpPct != null && <button onClick={() => setOv({ tcpPct: null })} style={{ fontSize: 11, color: "var(--text-3)", background: "none", border: "none", cursor: "pointer" }}>×</button>}
                                   </div>
                                 </div>
                                 {/* ON primary override */}
                                 <div style={{ marginBottom: 8 }}>
-                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>ON primary % override</div>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>ON primary % override</div>
                                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     <input
                                       type="number" min={0} max={100} step={0.5}
                                       value={onFp ?? ""}
                                       placeholder="auto"
                                       onChange={e => setOv({ on: e.target.value === "" ? null : +e.target.value })}
-                                      style={{ width: 70, border: "1px solid #D1D5DB", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
+                                      style={{ width: 70, border: "1px solid var(--border-2)", borderRadius: 4, padding: "4px 6px", fontSize: 12, textAlign: "right" }}
                                     />
-                                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>% (overrides auto-detected ON for this seat)</span>
-                                    {onFp != null && <button onClick={() => setOv({ on: null })} style={{ fontSize: 11, color: "#6B7280", background: "none", border: "none", cursor: "pointer" }}>×</button>}
+                                    <span style={{ fontSize: 11, color: "var(--text-4)" }}>% (overrides auto-detected ON for this seat)</span>
+                                    {onFp != null && <button onClick={() => setOv({ on: null })} style={{ fontSize: 11, color: "var(--text-3)", background: "none", border: "none", cursor: "pointer" }}>×</button>}
                                   </div>
                                 </div>
                                 {/* Force winner */}
                                 <div>
-                                  <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Force projected winner</div>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>Force projected winner</div>
                                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                                     {[["alp", "ALP", "#DC2626"], ["coalition", "Coalition", "#1D4ED8"], ["greens", "Greens", "#059669"], ["ind", "Ind", "#0891B2"], ["one_nation", "ON", "#B45309"]].map(([g, label, c]) => (
                                       <button key={g}
                                         onClick={() => setOv({ forceGroup: ov.forceGroup === g ? null : g })}
-                                        style={{ fontSize: 11, padding: "3px 8px", borderRadius: 5, border: `1px solid ${c}`, cursor: "pointer", fontWeight: ov.forceGroup === g ? 700 : 400, background: ov.forceGroup === g ? c : "#fff", color: ov.forceGroup === g ? "#fff" : c }}>
+                                        style={{ fontSize: 11, padding: "3px 8px", borderRadius: 5, border: `1px solid ${c}`, cursor: "pointer", fontWeight: ov.forceGroup === g ? 700 : 400, background: ov.forceGroup === g ? c : "var(--panel-bg)", color: ov.forceGroup === g ? "#fff" : c }}>
                                         {label}
                                       </button>
                                     ))}
@@ -7658,24 +7731,24 @@ export default function App() {
                     <PrimaryInput label="Undecided" value={tasPrim.undecided ?? 0} onChange={v => setTasPrim(p => ({ ...p, undecided: v }))} color="#9CA3AF" baseline={0} />
                     {(() => {
                       const e = +(tasPrim.alp + tasPrim.coal + tasPrim.grn + tasPrim.ind + (tasPrim.on ?? 0)).toFixed(1); const ud = +(tasPrim.undecided ?? 0); const o = +(100 - e - ud).toFixed(1); const ov = e + ud > 100;
-                      return <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 12, color: "#6B7280" }}>Other / minor parties</span><span style={{ fontSize: 13, fontWeight: 700, color: ov ? "#DC2626" : "#374151" }}>{ov ? `−${Math.abs(o).toFixed(1)}% ⚠` : `${o}%`}</span></div>;
+                      return <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span><span style={{ fontSize: 13, fontWeight: 700, color: ov ? "#DC2626" : "#374151" }}>{ov ? `−${Math.abs(o).toFixed(1)}% ⚠` : `${o}%`}</span></div>;
                     })()}
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6 }}>Baseline: ALP {TAS_BL.alp}% · Coalition {TAS_BL.coal}% · Grn {TAS_BL.grn}% · Ind {TAS_BL.ind}% · ON {TAS_BL.on}%</div>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6 }}>Baseline: ALP {TAS_BL.alp}% · Coalition {TAS_BL.coal}% · Grn {TAS_BL.grn}% · Ind {TAS_BL.ind}% · ON {TAS_BL.on}%</div>
                   </div>
                   {tasHasChanges && <button onClick={() => setTasPrim({ ...TAS_BL, undecided: 0 })} style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>Reset TAS model</button>}
                 </div>
                 <div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: majColor, marginTop: 4 }}>{projMaj}</div>
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{majority} seats needed</div>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>{majority} seats needed</div>
                     </div>
                     {[{ l: "ALP", v: alpProj, bl: 10, c: "#DC2626" }, { l: "Coalition", v: coalProj, bl: 15, c: "#1D4ED8" }, { l: "Greens", v: grnProj, bl: 7, c: "#059669" }].map(({ l, v, bl, c }) => (
                       <div key={l} style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{l}</div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{l}</div>
                         <div style={{ fontSize: 30, fontWeight: 800, color: c }}>{v}</div>
-                        <div style={{ fontSize: 12, color: "#6B7280" }}>{v - bl >= 0 ? "+" : ""}{v - bl} vs baseline</div>
+                        <div style={{ fontSize: 12, color: "var(--text-3)" }}>{v - bl >= 0 ? "+" : ""}{v - bl} vs baseline</div>
                       </div>
                     ))}
                   </div>
@@ -7698,7 +7771,7 @@ export default function App() {
                         );
                       })}
                     </div>
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-3)" }}>
                       Hare-Clark proportional model (Droop quota) · TEC 2024 official results · 7 electorates × 5 seats
                     </div>
                   </div>
@@ -7706,8 +7779,8 @@ export default function App() {
                   {/* TAS Uncertainty panel */}
                   <div style={{ ...STYLES.panel, marginBottom: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-count uncertainty (Monte Carlo)</span>
-                      <span style={{ fontSize: 11, color: "#6B7280", background: "#F3F4F6", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ · N=500</span>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-count uncertainty (Monte Carlo)</span>
+                      <span style={{ fontSize: 11, color: "var(--text-3)", background: "var(--subtle-bg)", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ · N=500</span>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 12, marginBottom: 12 }}>
                       {[{ k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "alp", l: "ALP", c: "#DC2626" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Ind", c: "#0891B2" }].map(({ k, l, c }) => {
@@ -7716,22 +7789,22 @@ export default function App() {
                         return (
                           <div key={k} style={STYLES.metricCard}>
                             <div style={{ fontSize: 11, fontWeight: 700, color: c, marginBottom: 4 }}>{l}</div>
-                            <div style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{s.mean}</div>
-                            <div style={{ fontSize: 11, color: "#6B7280" }}>P25–P75: {s.p25}–{s.p75}</div>
-                            <div style={{ fontSize: 11, color: "#9CA3AF" }}>P05–P95: {s.p05}–{s.p95}</div>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{s.mean}</div>
+                            <div style={{ fontSize: 11, color: "var(--text-3)" }}>P25–P75: {s.p25}–{s.p75}</div>
+                            <div style={{ fontSize: 11, color: "var(--text-4)" }}>P05–P95: {s.p05}–{s.p95}</div>
                             {k === "coal" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#1D4ED8" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
                             {k === "alp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#DC2626" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
                           </div>
                         );
                       })}
                     </div>
-                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 10 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
+                    <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)" }}>
                         <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
                         <input type="range" min={0.5} max={4} step={0.25} value={swingStd} onChange={e => setSwingStd(+e.target.value)} style={{ flex: 1 }} />
                         <span style={{ minWidth: 36, fontWeight: 600 }}>{swingStd}pp</span>
                       </div>
-                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>Shared across all elections.</div>
+                      <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 4 }}>Shared across all elections.</div>
                     </div>
                   </div>
                 </div>
@@ -7758,24 +7831,24 @@ export default function App() {
                     <PrimaryInput label="Undecided" value={actPrim.undecided ?? 0} onChange={v => setActPrim(p => ({ ...p, undecided: v }))} color="#9CA3AF" baseline={0} />
                     {(() => {
                       const e = +(actPrim.alp + actPrim.coal + actPrim.grn + actPrim.ind + (actPrim.on ?? 0)).toFixed(1); const ud = +(actPrim.undecided ?? 0); const o = +(100 - e - ud).toFixed(1); const ov = e + ud > 100;
-                      return <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 12, color: "#6B7280" }}>Other / minor parties</span><span style={{ fontSize: 13, fontWeight: 700, color: ov ? "#DC2626" : "#374151" }}>{ov ? `−${Math.abs(o).toFixed(1)}% ⚠` : `${o}%`}</span></div>;
+                      return <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span><span style={{ fontSize: 13, fontWeight: 700, color: ov ? "#DC2626" : "#374151" }}>{ov ? `−${Math.abs(o).toFixed(1)}% ⚠` : `${o}%`}</span></div>;
                     })()}
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 6 }}>Baseline: ALP {ACT_BL.alp}% · Coalition {ACT_BL.coal}% · Grn {ACT_BL.grn}% · Ind {ACT_BL.ind}% · ON {ACT_BL.on}%</div>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6 }}>Baseline: ALP {ACT_BL.alp}% · Coalition {ACT_BL.coal}% · Grn {ACT_BL.grn}% · Ind {ACT_BL.ind}% · ON {ACT_BL.on}%</div>
                   </div>
                   {actHasChanges && <button onClick={() => setActPrim({ ...ACT_BL, undecided: 0 })} style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>Reset ACT model</button>}
                 </div>
                 <div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 14 }}>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
                       <div style={{ fontSize: 16, fontWeight: 800, color: majColor, marginTop: 4 }}>{projMaj}</div>
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{majority} seats needed</div>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>{majority} seats needed</div>
                     </div>
                     {[{ l: "ALP", v: alpProj, bl: 9, c: "#DC2626" }, { l: "Coalition", v: coalProj, bl: 9, c: "#1D4ED8" }, { l: "Greens", v: grnProj, bl: 7, c: "#059669" }].map(({ l, v, bl, c }) => (
                       <div key={l} style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{l}</div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{l}</div>
                         <div style={{ fontSize: 30, fontWeight: 800, color: c }}>{v}</div>
-                        <div style={{ fontSize: 12, color: "#6B7280" }}>{v - bl >= 0 ? "+" : ""}{v - bl} vs baseline</div>
+                        <div style={{ fontSize: 12, color: "var(--text-3)" }}>{v - bl >= 0 ? "+" : ""}{v - bl} vs baseline</div>
                       </div>
                     ))}
                   </div>
@@ -7798,7 +7871,7 @@ export default function App() {
                         );
                       })}
                     </div>
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8, paddingTop: 8, borderTop: "1px solid #F3F4F6" }}>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-3)" }}>
                       Hare-Clark proportional model (Droop quota) · ACT EC 2024 official results · 5 electorates × 5 seats
                     </div>
                   </div>
@@ -7806,8 +7879,8 @@ export default function App() {
                   {/* ACT Uncertainty panel */}
                   <div style={{ ...STYLES.panel, marginBottom: 14 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>Seat-count uncertainty (Monte Carlo)</span>
-                      <span style={{ fontSize: 11, color: "#6B7280", background: "#F3F4F6", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ · N=500</span>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-count uncertainty (Monte Carlo)</span>
+                      <span style={{ fontSize: 11, color: "var(--text-3)", background: "var(--subtle-bg)", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ · N=500</span>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 12, marginBottom: 12 }}>
                       {[{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Ind", c: "#0891B2" }].map(({ k, l, c }) => {
@@ -7816,22 +7889,22 @@ export default function App() {
                         return (
                           <div key={k} style={STYLES.metricCard}>
                             <div style={{ fontSize: 11, fontWeight: 700, color: c, marginBottom: 4 }}>{l}</div>
-                            <div style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{s.mean}</div>
-                            <div style={{ fontSize: 11, color: "#6B7280" }}>P25–P75: {s.p25}–{s.p75}</div>
-                            <div style={{ fontSize: 11, color: "#9CA3AF" }}>P05–P95: {s.p05}–{s.p95}</div>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{s.mean}</div>
+                            <div style={{ fontSize: 11, color: "var(--text-3)" }}>P25–P75: {s.p25}–{s.p75}</div>
+                            <div style={{ fontSize: 11, color: "var(--text-4)" }}>P05–P95: {s.p05}–{s.p95}</div>
                             {k === "alp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#DC2626" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
                             {k === "coal" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#1D4ED8" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
                           </div>
                         );
                       })}
                     </div>
-                    <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 10 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#374151" }}>
+                    <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)" }}>
                         <label style={{ minWidth: 130 }}>Swing uncertainty (σ):</label>
                         <input type="range" min={0.5} max={4} step={0.25} value={swingStd} onChange={e => setSwingStd(+e.target.value)} style={{ flex: 1 }} />
                         <span style={{ minWidth: 36, fontWeight: 600 }}>{swingStd}pp</span>
                       </div>
-                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>Shared across all elections.</div>
+                      <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 4 }}>Shared across all elections.</div>
                     </div>
                   </div>
                 </div>
@@ -7842,25 +7915,25 @@ export default function App() {
               <>{/* ── Demographics Overview (collapsible) ── */}
                 <div style={{ marginTop: 8 }}>
                   <button onClick={() => setDemogSectionOpen(o => !o)}
-                    style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "14px 20px", cursor: "pointer", textAlign: "left", fontWeight: 700, fontSize: 14, color: "#374151" }}>
+                    style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 12, padding: "14px 20px", cursor: "pointer", textAlign: "left", fontWeight: 700, fontSize: 14, color: "var(--text-2)" }}>
                     <span style={{ fontSize: 16 }}>{demogSectionOpen ? "▾" : "▸"}</span>
                     Demographics Overview
-                    <span style={{ fontSize: 12, fontWeight: 400, color: "#9CA3AF", marginLeft: 4 }}>— seat-level census data</span>
+                    <span style={{ fontSize: 12, fontWeight: 400, color: "var(--text-4)", marginLeft: 4 }}>— seat-level census data</span>
                   </button>
                   {demogSectionOpen && (
-                    <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderTopWidth: 0, borderRadius: "0 0 12px 12px", padding: "20px" }}>
+                    <div style={{ background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderTopWidth: 0, borderRadius: "0 0 12px 12px", padding: "20px" }}>
 
                       {/* Filters row */}
-                      <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 16px", marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase" }}>Filter:</span>
+                      <div style={{ background: "var(--table-head-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "12px 16px", marginBottom: 14, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase" }}>Filter:</span>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                           {STATES.map(st => (
                             <button key={st} onClick={() => toggleSet(setDemogStateFilter, st)}
                               style={{
                                 padding: "3px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                                background: demogStateFilter.has(st) ? "#374151" : "#F3F4F6",
-                                color: demogStateFilter.has(st) ? "#fff" : "#6B7280",
-                                border: "1px solid " + (demogStateFilter.has(st) ? "#374151" : "#E5E7EB")
+                                background: demogStateFilter.has(st) ? "#374151" : "var(--subtle-bg)",
+                                color: demogStateFilter.has(st) ? "#fff" : "var(--text-3)",
+                                border: "1px solid " + (demogStateFilter.has(st) ? "#374151" : "var(--border-1)")
                               }}>
                               {st}
                             </button>
@@ -7872,15 +7945,15 @@ export default function App() {
                             <button key={cls} onClick={() => toggleSet(setDemogClassFilter, cls)}
                               style={{
                                 padding: "3px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                                background: demogClassFilter.has(cls) ? "#1D4ED8" : "#F3F4F6",
-                                color: demogClassFilter.has(cls) ? "#fff" : "#6B7280",
-                                border: "1px solid " + (demogClassFilter.has(cls) ? "#1D4ED8" : "#E5E7EB")
+                                background: demogClassFilter.has(cls) ? "#1D4ED8" : "var(--subtle-bg)",
+                                color: demogClassFilter.has(cls) ? "#fff" : "var(--text-3)",
+                                border: "1px solid " + (demogClassFilter.has(cls) ? "#1D4ED8" : "var(--border-1)")
                               }}>
                               {cls}
                             </button>
                           ))}
                         </div>
-                        <span style={{ marginLeft: "auto", fontSize: 12, color: "#9CA3AF" }}>{demogFiltered.length} seats</span>
+                        <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--text-4)" }}>{demogFiltered.length} seats</span>
                       </div>
 
                       {/* Summary cards — averages for filtered seats */}
@@ -7901,17 +7974,17 @@ export default function App() {
                           if (!s) return null;
                           return (
                             <div key={key} style={STYLES.metricCard}>
-                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 6 }}>{label}</div>
-                              <div style={{ fontSize: 24, fontWeight: 800, color: "#111827", marginBottom: 4 }}>{fmt(s.avg)}</div>
-                              <div style={{ fontSize: 11, color: "#9CA3AF" }}>Range: {fmt(s.min)} – {fmt(s.max)}</div>
+                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 6 }}>{label}</div>
+                              <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)", marginBottom: 4 }}>{fmt(s.avg)}</div>
+                              <div style={{ fontSize: 11, color: "var(--text-4)" }}>Range: {fmt(s.min)} – {fmt(s.max)}</div>
                             </div>
                           );
                         })}
                       </div>
-                      <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 14 }}>Averages are for filtered seats above · Personal income (earners) = median of persons with income &gt; $0, excl. nil/negative · All other income = all persons 15+ · ABS Census 2021</div>
+                      <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 14 }}>Averages are for filtered seats above · Personal income (earners) = median of persons with income &gt; $0, excl. nil/negative · All other income = all persons 15+ · ABS Census 2021</div>
 
                       {/* Demographic table */}
-                      <div style={{ border: "1px solid #E5E7EB", borderRadius: 10, marginBottom: 20, overflow: "hidden" }}>
+                      <div style={{ border: "1px solid var(--border-1)", borderRadius: 10, marginBottom: 20, overflow: "hidden" }}>
                         <div style={{ overflowX: "auto", maxHeight: 520, overflowY: "auto" }}>
                           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                             <thead style={{ position: "sticky", top: 0, zIndex: 2 }}>
@@ -7942,7 +8015,7 @@ export default function App() {
                                       setDemogSortKey(k);
                                       setDemogSortDir("desc");
                                     }
-                                  }} style={{ padding: "10px 10px", textAlign: "left", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280", background: "#F9FAFB", cursor: "pointer", userSelect: "none", whiteSpace: "nowrap", borderBottom: "1px solid #E5E7EB" }}>
+                                  }} style={{ padding: "10px 10px", textAlign: "left", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-3)", background: "var(--table-head-bg)", cursor: "pointer", userSelect: "none", whiteSpace: "nowrap", borderBottom: "1px solid var(--border-1)" }}>
                                     {label}{" "}
                                     <span style={{ color: demogSortKey === k ? "#374151" : "#D1D5DB" }}>
                                       {demogSortKey === k ? (demogSortDir === "asc" ? "↑" : "↓") : "↕"}
@@ -7960,19 +8033,19 @@ export default function App() {
                                   <>
                                     <tr key={s.id} onClick={() => setExpandedDemogId(prev => prev === s.id ? null : s.id)}
                                       style={{
-                                        borderBottom: "1px solid #F3F4F6", cursor: "pointer",
+                                        borderBottom: "1px solid var(--border-3)", cursor: "pointer",
                                         borderLeft: `3px solid ${pg.color}`,
-                                        background: isExpanded ? "#F9FAFB" : undefined,
+                                        background: isExpanded ? "var(--table-head-bg)" : undefined,
                                         transition: "background 0.1s"
                                       }}
-                                      onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = "#F9FAFB"; }}
+                                      onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = "var(--table-head-bg)"; }}
                                       onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = ""; }}>
-                                      <td style={{ padding: "9px 12px", fontWeight: 600, color: "#111827" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</td>
-                                      <td style={{ padding: "9px 12px", color: "#6B7280" }}>{s.state}</td>
+                                      <td style={{ padding: "9px 12px", fontWeight: 600, color: "var(--text-1)" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</td>
+                                      <td style={{ padding: "9px 12px", color: "var(--text-3)" }}>{s.state}</td>
                                       <td style={{ padding: "9px 12px" }}>
                                         <span style={{ background: pg.bg, color: pg.color, fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>{pg.short}</span>
                                       </td>
-                                      <td style={{ padding: "9px 12px", color: "#6B7280", fontSize: 11 }}>{d.urbanClass ?? "—"}</td>
+                                      <td style={{ padding: "9px 12px", color: "var(--text-3)", fontSize: 11 }}>{d.urbanClass ?? "—"}</td>
                                       <td style={{ padding: "9px 12px", fontWeight: 600 }}>{d.medianPersonalIncomeEarners ? `$${(d.medianPersonalIncomeEarners / 1000).toFixed(0)}k` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.medianHouseholdIncome ? `$${(d.medianHouseholdIncome / 1000).toFixed(0)}k` : "—"}</td>
                                       <td style={{ padding: "9px 12px" }}>{d.medianWeeklyRent ? `$${d.medianWeeklyRent}` : "—"}</td>
@@ -7989,10 +8062,10 @@ export default function App() {
                                     </tr>
                                     {isExpanded && (
                                       <tr key={`${s.id}-exp`}>
-                                        <td colSpan={17} style={{ background: "#F9FAFB", padding: "16px 20px", borderBottom: "2px solid #E5E7EB" }}>
+                                        <td colSpan={17} style={{ background: "var(--table-head-bg)", padding: "16px 20px", borderBottom: "2px solid #E5E7EB" }}>
                                           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
                                             <div>
-                                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 8 }}>Income</div>
+                                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 8 }}>Income</div>
                                               <div style={{ fontSize: 12, lineHeight: 1.8 }}>
                                                 <div><strong>Personal (earners):</strong> {d.medianPersonalIncomeEarners ? `$${(d.medianPersonalIncomeEarners / 1000).toFixed(1)}k/yr` : "—"}</div>
                                                 <div><strong>Personal (all 15+):</strong> {d.medianPersonalIncome ? `$${(d.medianPersonalIncome / 1000).toFixed(1)}k/yr` : "—"}</div>
@@ -8000,7 +8073,7 @@ export default function App() {
                                               </div>
                                             </div>
                                             <div>
-                                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 8 }}>Housing</div>
+                                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 8 }}>Housing</div>
                                               <div style={{ fontSize: 12, lineHeight: 1.8 }}>
                                                 <div><strong>Owner outright:</strong> {d.ownerOutrightPct != null ? `${d.ownerOutrightPct}%` : "—"}</div>
                                                 <div><strong>Owner w/ mortgage:</strong> {d.ownerMortgagePct != null ? `${d.ownerMortgagePct}%` : "—"}</div>
@@ -8011,7 +8084,7 @@ export default function App() {
                                               </div>
                                             </div>
                                             <div>
-                                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF", marginBottom: 8 }}>People</div>
+                                              <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 8 }}>People</div>
                                               <div style={{ fontSize: 12, lineHeight: 1.8 }}>
                                                 <div><strong>Median age:</strong> {d.medianAge != null ? Math.round(d.medianAge) : "—"}</div>
                                                 <div><strong>Youth (15–34):</strong> {d.youth15to34Pct != null ? `${d.youth15to34Pct}%` : "—"}</div>
@@ -8039,20 +8112,20 @@ export default function App() {
                       </div>
 
                       {/* Correlation scatter plot */}
-                      <div style={{ border: "1px solid #E5E7EB", borderRadius: 10, padding: "18px 20px" }}>
+                      <div style={{ border: "1px solid var(--border-1)", borderRadius: 10, padding: "18px 20px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                          <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3AF" }}>Correlation Explorer</div>
+                          <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)" }}>Correlation Explorer</div>
                           <select value={demogXMetric} onChange={e => setDemogXMetric(e.target.value)}
-                            style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, fontWeight: 600, outline: "none" }}>
+                            style={{ border: "1px solid var(--border-2)", borderRadius: 6, padding: "4px 8px", fontSize: 12, fontWeight: 600, outline: "none" }}>
                             {DEMOG_METRICS.map(({ key, label }) => (
                               <option key={key} value={key}>{label}</option>
                             ))}
                           </select>
-                          <span style={{ fontSize: 12, color: "#9CA3AF" }}>vs Modelled 2PP Margin (ALP above/below 50%)</span>
+                          <span style={{ fontSize: 12, color: "var(--text-4)" }}>vs Modelled 2PP Margin (ALP above/below 50%)</span>
                         </div>
                         <ResponsiveContainer width="100%" height={320}>
                           <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
                             <XAxis dataKey="x" name="X" type="number" domain={["auto", "auto"]}
                               tickFormatter={v => {
                                 const m = DEMOG_METRICS.find(m => m.key === demogXMetric);
@@ -8067,12 +8140,12 @@ export default function App() {
                                 if (!active || !payload?.length) return null;
                                 const p = payload[0].payload;
                                 const m = DEMOG_METRICS.find(m => m.key === demogXMetric);
-                                const grpCfg = GROUP_CONFIG[p.group] ?? { color: "#6B7280", label: p.group };
+                                const grpCfg = GROUP_CONFIG[p.group] ?? { color: "var(--text-3)", label: p.group };
                                 return (
-                                  <div style={{ background: "#fff", border: `1px solid ${grpCfg.color}`, borderRadius: 8, padding: "8px 12px", fontSize: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+                                  <div style={{ background: "var(--panel-bg)", border: `1px solid ${grpCfg.color}`, borderRadius: 8, padding: "8px 12px", fontSize: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
                                     <div style={{ fontWeight: 700, marginBottom: 4 }}>{p.name} ({p.state})</div>
-                                    <div style={{ color: "#6B7280" }}>{m?.label}: <strong>{m ? m.fmt(p.x) : p.x}</strong></div>
-                                    <div style={{ color: "#6B7280" }}>2PP margin: <strong>{p.y > 0 ? "+" : ""}{p.y.toFixed(1)}pp</strong></div>
+                                    <div style={{ color: "var(--text-3)" }}>{m?.label}: <strong>{m ? m.fmt(p.x) : p.x}</strong></div>
+                                    <div style={{ color: "var(--text-3)" }}>2PP margin: <strong>{p.y > 0 ? "+" : ""}{p.y.toFixed(1)}pp</strong></div>
                                     <div style={{ color: grpCfg.color, fontWeight: 600, marginTop: 2 }}>{grpCfg.label}</div>
                                   </div>
                                 );
@@ -8095,7 +8168,7 @@ export default function App() {
                             const pts = scatterData.filter(p => p.group === grp);
                             if (!pts.length) return null;
                             return (
-                              <span key={grp} style={{ fontSize: 11, color: "#374151", display: "flex", alignItems: "center", gap: 4 }}>
+                              <span key={grp} style={{ fontSize: 11, color: "var(--text-2)", display: "flex", alignItems: "center", gap: 4 }}>
                                 <span style={{ width: 10, height: 10, borderRadius: "50%", background: GROUP_CONFIG[grp]?.color, display: "inline-block" }} />
                                 {GROUP_CONFIG[grp]?.label}
                               </span>
@@ -8125,7 +8198,7 @@ export default function App() {
           betfair:      { label: "Betfair Exchange", color: "#059669", bg: "#D1FAE5" },
           "the-odds-api": { label: "The Odds API", color: "#1D4ED8", bg: "#DBEAFE" },
           manual:       { label: "Indicative", color: "#D97706", bg: "#FEF3C7" },
-        }[mktSource] ?? { label: mktSource, color: "#6B7280", bg: "#F3F4F6" };
+        }[mktSource] ?? { label: mktSource, color: "var(--text-3)", bg: "#F3F4F6" };
 
         const alpMajority = mktNational.alp_majority;
         const coalMajority = mktNational.coalition_majority;
@@ -8147,7 +8220,7 @@ export default function App() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
               <div>
                 <h2 style={STYLES.sectionTitle}>Betting Markets</h2>
-                <p style={{ color: "#6B7280", fontSize: 13, margin: 0 }}>
+                <p style={{ color: "var(--text-3)", fontSize: 13, margin: 0 }}>
                   Market-implied probabilities and estimated 2PP values. Read-only overlay — does not affect the model.
                 </p>
               </div>
@@ -8157,7 +8230,7 @@ export default function App() {
                     {sourceBadge.label}
                   </span>
                   {mktGenerated && (
-                    <span style={{ fontSize: 11, color: "#9CA3AF" }}>Updated {mktGenerated}</span>
+                    <span style={{ fontSize: 11, color: "var(--text-4)" }}>Updated {mktGenerated}</span>
                   )}
                 </div>
               )}
@@ -8166,25 +8239,25 @@ export default function App() {
 
             {/* National government odds */}
             <div style={{ ...panelStyle, marginBottom: 14 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 }}>National government odds</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 12 }}>National government odds</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
                 {alpMajority && (
                   <div style={STYLES.metricCard}>
                     <div style={{ width: 20, height: 3, background: "#DC2626", borderRadius: 2, marginBottom: 6 }} />
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>ALP Majority</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>ALP Majority</div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                       <span style={{ fontSize: 28, fontWeight: 800, color: "#DC2626" }}>
                         {(alpMajority.implied_prob * 100).toFixed(0)}%
                       </span>
-                      <span style={{ fontSize: 13, color: "#6B7280" }}>implied</span>
+                      <span style={{ fontSize: 13, color: "var(--text-3)" }}>implied</span>
                     </div>
                     {alpMajority.decimal_odds && (
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                         Odds: ${alpMajority.decimal_odds.toFixed(2)}
                       </div>
                     )}
                     {alpMajority.implied_2pp != null && (
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                         Implied 2PP: <strong style={{ color: "#DC2626" }}>{alpMajority.implied_2pp}%</strong>
                       </div>
                     )}
@@ -8193,15 +8266,15 @@ export default function App() {
                 {coalMajority && (
                   <div style={STYLES.metricCard}>
                     <div style={{ width: 20, height: 3, background: "#1D4ED8", borderRadius: 2, marginBottom: 6 }} />
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Coalition Majority</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>Coalition Majority</div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                       <span style={{ fontSize: 28, fontWeight: 800, color: "#1D4ED8" }}>
                         {(coalMajority.implied_prob * 100).toFixed(0)}%
                       </span>
-                      <span style={{ fontSize: 13, color: "#6B7280" }}>implied</span>
+                      <span style={{ fontSize: 13, color: "var(--text-3)" }}>implied</span>
                     </div>
                     {coalMajority.decimal_odds && (
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                         Odds: ${coalMajority.decimal_odds.toFixed(2)}
                       </div>
                     )}
@@ -8210,51 +8283,51 @@ export default function App() {
                 {mktNational.hung_parliament && (
                   <div style={STYLES.metricCard}>
                     <div style={{ width: 20, height: 3, background: "#7C3AED", borderRadius: 2, marginBottom: 6 }} />
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#374151", marginBottom: 4 }}>Hung Parliament</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>Hung Parliament</div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                       <span style={{ fontSize: 28, fontWeight: 800, color: "#7C3AED" }}>
                         {(mktNational.hung_parliament.implied_prob * 100).toFixed(0)}%
                       </span>
-                      <span style={{ fontSize: 13, color: "#6B7280" }}>implied</span>
+                      <span style={{ fontSize: 13, color: "var(--text-3)" }}>implied</span>
                     </div>
                     {mktNational.hung_parliament.decimal_odds && (
-                      <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                         Odds: ${mktNational.hung_parliament.decimal_odds.toFixed(2)}
                       </div>
                     )}
                   </div>
                 )}
                 {!alpMajority && !coalMajority && (
-                  <div style={{ fontSize: 13, color: "#9CA3AF", padding: "12px 0" }}>
+                  <div style={{ fontSize: 13, color: "var(--text-4)", padding: "12px 0" }}>
                     No national market data available.
                   </div>
                 )}
               </div>
-              <div style={{ marginTop: 12, fontSize: 11, color: "#9CA3AF" }}>
+              <div style={{ marginTop: 12, fontSize: 11, color: "var(--text-4)" }}>
                 Implied 2PP uses: 2PP = 50 + {BETTING_ODDS?.sigma_national ?? 1.5}pp × Φ⁻¹(P_win) · Per-seat σ = {BETTING_ODDS?.sigma_per_seat ?? 2.5}pp
               </div>
             </div>
 
             {/* Seat markets table */}
-            <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, overflow: "hidden", marginBottom: 14 }}>
-              <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #F3F4F6" }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>
+            <div style={{ background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 12, overflow: "hidden", marginBottom: 14 }}>
+              <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid var(--border-3)" }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>
                   Seat markets{seatRows.length > 0 ? ` (${seatRows.length} seats)` : ""}
                 </div>
-                <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
                   Only ~20–40 contested seats have liquid betting markets before an election. Sorted by contest tightness.
                 </div>
               </div>
               {seatRows.length === 0 ? (
-                <div style={{ padding: "20px 16px", fontSize: 13, color: "#9CA3AF", textAlign: "center" }}>
+                <div style={{ padding: "20px 16px", fontSize: 13, color: "var(--text-4)", textAlign: "center" }}>
                   No seat market data available.
                 </div>
               ) : (
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                   <thead>
-                    <tr style={{ borderBottom: "1px solid #E5E7EB", background: "#F9FAFB" }}>
+                    <tr style={{ borderBottom: "1px solid var(--border-1)", background: "var(--table-head-bg)" }}>
                       {["Seat", "Finalist A", "Prob", "Finalist B", "Prob", "Implied 2PP (ALP)"].map((h, i) => (
-                        <th key={i} style={{ padding: "9px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#6B7280" }}>{h}</th>
+                        <th key={i} style={{ padding: "9px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-3)" }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -8266,7 +8339,7 @@ export default function App() {
                         ? "#DC2626" : Math.min(mkt.finalist_a_prob, mkt.finalist_b_prob) > 0.3
                           ? "#D97706" : "#374151";
                       return (
-                        <tr key={seatName} style={{ background: i % 2 === 0 ? "#fff" : "#FAFAFA", borderBottom: "1px solid #F3F4F6" }}>
+                        <tr key={seatName} style={{ background: i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)", borderBottom: "1px solid var(--border-3)" }}>
                           <td style={{ padding: "8px 12px", fontWeight: 600 }}>{seatName}</td>
                           <td style={{ padding: "8px 12px" }}>
                             <span style={{ fontWeight: 700, color: faColor, textTransform: "capitalize" }}>{mkt.finalist_a}</span>
@@ -8283,7 +8356,7 @@ export default function App() {
                           <td style={{ padding: "8px 12px" }}>
                             {mkt.implied_2pp_alp != null
                               ? <strong style={{ color: mkt.implied_2pp_alp >= 50 ? "#DC2626" : "#1D4ED8" }}>{mkt.implied_2pp_alp}%</strong>
-                              : <span style={{ color: "#9CA3AF" }}>—</span>
+                              : <span style={{ color: "var(--text-4)" }}>—</span>
                             }
                           </td>
                         </tr>
@@ -8304,7 +8377,7 @@ export default function App() {
 
               return (
                 <div style={{ ...panelStyle, marginBottom: 14 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 }}>State & territory elections</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 12 }}>State & territory elections</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
                     {stateEntries.map(([stateCode, mkt]) => {
                       const alpProb  = mkt.alp_win?.implied_prob;
@@ -8315,12 +8388,12 @@ export default function App() {
                         : null;
                       return (
                         <div key={stateCode} style={{ ...STYLES.metricCard, position: "relative" }}>
-                          <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 2 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", marginBottom: 2 }}>
                             {stateCode.toUpperCase()}
                           </div>
-                          <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 8 }}>
+                          <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 8 }}>
                             {mkt.election_name ?? `${stateCode.toUpperCase()} Election`}
-                            {mkt.date && <span style={{ marginLeft: 6, color: "#9CA3AF" }}>{mkt.date}</span>}
+                            {mkt.date && <span style={{ marginLeft: 6, color: "var(--text-4)" }}>{mkt.date}</span>}
                           </div>
                           <div style={{ display: "flex", gap: 10 }}>
                             {alpProb != null && (
@@ -8330,7 +8403,7 @@ export default function App() {
                                   {(alpProb * 100).toFixed(0)}%
                                 </div>
                                 {mkt.alp_win?.decimal_odds && (
-                                  <div style={{ fontSize: 11, color: "#9CA3AF" }}>${mkt.alp_win.decimal_odds.toFixed(2)}</div>
+                                  <div style={{ fontSize: 11, color: "var(--text-4)" }}>${mkt.alp_win.decimal_odds.toFixed(2)}</div>
                                 )}
                               </div>
                             )}
@@ -8341,7 +8414,7 @@ export default function App() {
                                   {(coalProb * 100).toFixed(0)}%
                                 </div>
                                 {mkt.coalition_win?.decimal_odds && (
-                                  <div style={{ fontSize: 11, color: "#9CA3AF" }}>${mkt.coalition_win.decimal_odds.toFixed(2)}</div>
+                                  <div style={{ fontSize: 11, color: "var(--text-4)" }}>${mkt.coalition_win.decimal_odds.toFixed(2)}</div>
                                 )}
                               </div>
                             )}
@@ -8350,7 +8423,7 @@ export default function App() {
                       );
                     })}
                   </div>
-                  <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 8 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8 }}>
                     State markets appear on The Odds API as elections approach. Only states with active markets are shown.
                   </div>
                 </div>
@@ -8358,8 +8431,8 @@ export default function App() {
             })()}
 
             {/* Methodology note */}
-            <div style={{ background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 10, padding: "14px 16px", fontSize: 12, color: "#6B7280" }}>
-              <strong style={{ color: "#374151" }}>How odds translate to 2PP:</strong>{" "}
+            <div style={{ background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "14px 16px", fontSize: 12, color: "var(--text-3)" }}>
+              <strong style={{ color: "var(--text-2)" }}>How odds translate to 2PP:</strong>{" "}
               Decimal odds are converted to implied probabilities by removing the bookmaker overround
               (normalising raw implied probs to sum to 100%). For ALP vs Coalition seats, the win
               probability is inverted through the normal distribution:
@@ -8376,14 +8449,14 @@ export default function App() {
       {false && (
         <div style={{ padding: isMobile ? "14px 16px" : "20px 24px", maxWidth: 960, margin: "0 auto" }}>
           <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 2 }}>2022 Victorian State Election</h1>
-          <p style={{ color: "#6B7280", marginBottom: 18 }}>
+          <p style={{ color: "var(--text-3)", marginBottom: 18 }}>
             {VIC_2022_SUMMARY.date} · Legislative Assembly · {VIC_2022_SUMMARY.total} seats
             &nbsp;·&nbsp; Premier: {VIC_2022_SUMMARY.premier}
           </p>
 
           {/* Summary bar */}
           <div style={{ ...STYLES.panel, marginBottom: 14 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-3)", marginBottom: 8 }}>
               2022 result — {VIC_2022_SUMMARY.total} seats
             </div>
             <div style={{ display: "flex", height: 26, borderRadius: 6, overflow: "hidden", gap: 2 }}>
@@ -8405,7 +8478,7 @@ export default function App() {
                 { label: "Greens", count: VIC_2022_SUMMARY.grn, color: "#059669" },
                 { label: "IND", count: VIC_2022_SUMMARY.ind, color: "#0891B2" },
               ].map(g => (
-                <span key={g.label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "#374151" }}>
+                <span key={g.label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--text-2)" }}>
                   <span style={{ width: 9, height: 9, borderRadius: 2, background: g.color, display: "inline-block" }} />
                   {g.label} <strong>{g.count}</strong>
                 </span>
@@ -8425,9 +8498,9 @@ export default function App() {
               <div key={card.label} style={{ ...STYLES.statCard }}>
 
                 <div style={{ width: 24, height: 3, background: card.color, borderRadius: 2, marginBottom: 8 }} />
-                <div style={{ fontSize: 24, fontWeight: 800, color: "#111827" }}>{card.value}</div>
-                <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{card.label}</div>
-                <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 1 }}>{card.note}</div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{card.value}</div>
+                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>{card.label}</div>
+                <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 1 }}>{card.note}</div>
               </div>
             ))}
           </div>
@@ -8437,32 +8510,32 @@ export default function App() {
             <div style={{ fontWeight: 700, color: "#1D4ED8", marginBottom: 6, fontSize: 14 }}>
               Load full 88-seat data
             </div>
-            <p style={{ fontSize: 13, color: "#374151", margin: "0 0 8px" }}>
+            <p style={{ fontSize: 13, color: "var(--text-2)", margin: "0 0 8px" }}>
               The VEC pipeline downloads district-level first preference and two-candidate preferred
               results from <strong>vec.vic.gov.au</strong> for all 88 Legislative Assembly seats.
             </p>
             <code style={{ display: "block", background: "#1E293B", color: "#93C5FD", padding: "8px 12px", borderRadius: 6, fontSize: 12, fontFamily: "monospace" }}>
               python main.py --state vic --year 202211
             </code>
-            <p style={{ fontSize: 12, color: "#6B7280", marginTop: 8, marginBottom: 0 }}>
+            <p style={{ fontSize: 12, color: "var(--text-3)", marginTop: 8, marginBottom: 0 }}>
               For booth-level data, place The Tally Room CSVs (2022 is free at tallyroom.com.au)
               in <code>data/raw/vic/202211/</code> before running.
             </p>
           </div>
 
           {/* Key seats table */}
-          <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 12, padding: "18px 20px" }}>
-            <div style={{ fontWeight: 700, marginBottom: 2, color: "#374151" }}>
+          <div style={{ background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 12, padding: "18px 20px" }}>
+            <div style={{ fontWeight: 700, marginBottom: 2, color: "var(--text-2)" }}>
               Key seats — 2022 confirmed results
             </div>
-            <p style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 14 }}>
+            <p style={{ fontSize: 12, color: "var(--text-4)", marginBottom: 14 }}>
               Non-ALP/Liberal seats plus selected marginals. Margins are 2CP % margin.
             </p>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
                   {["District", "Winner", "Party", "2CP Matchup", "Margin"].map(h => (
-                    <th key={h} style={{ padding: "9px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#6B7280" }}>{h}</th>
+                    <th key={h} style={{ padding: "9px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-3)" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -8476,19 +8549,19 @@ export default function App() {
                   const p = getParty(party);
                   const marginCat = margin < 2 ? "very_marginal" : margin < 5 ? "marginal" : margin < 10 ? "fairly_safe" : "safe";
                   return (
-                    <tr key={seat.id} style={{ borderBottom: "1px solid #F3F4F6" }}>
+                    <tr key={seat.id} style={{ borderBottom: "1px solid var(--border-3)" }}>
                       <td style={{ padding: "9px 12px", fontWeight: 600, fontSize: 13 }}>{seat.name}</td>
-                      <td style={{ padding: "9px 12px", fontSize: 12, color: "#374151" }}>{winner}</td>
+                      <td style={{ padding: "9px 12px", fontSize: 12, color: "var(--text-2)" }}>{winner}</td>
                       <td style={{ padding: "9px 12px" }}>
                         <span style={{ background: p.color, color: "#fff", fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>{p.short}</span>
                       </td>
-                      <td style={{ padding: "9px 12px", fontSize: 12, color: "#6B7280" }}>
+                      <td style={{ padding: "9px 12px", fontSize: 12, color: "var(--text-3)" }}>
                         {getParty(tcp1).short} v {getParty(tcp2).short}
                       </td>
                       <td style={{ padding: "9px 12px" }}>
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: MARGIN_COLOR[marginCat], display: "inline-block" }} />
-                          <span style={{ fontWeight: 600, color: "#111827", fontSize: 13 }}>{margin.toFixed(1)}%</span>
+                          <span style={{ fontWeight: 600, color: "var(--text-1)", fontSize: 13 }}>{margin.toFixed(1)}%</span>
                         </span>
                       </td>
                     </tr>
@@ -8496,15 +8569,15 @@ export default function App() {
                 })}
               </tbody>
             </table>
-            <p style={{ fontSize: 11, color: "#9CA3AF", marginTop: 12, marginBottom: 0 }}>
+            <p style={{ fontSize: 11, color: "var(--text-4)", marginTop: 12, marginBottom: 0 }}>
               All 88 Legislative Assembly districts. Margins are 2CP (two-candidate preferred) vs the second finalist.
               Independent seat margins are 2CP vs nearest rival. Winner names for safe ALP seats show "Labor MP" where the specific MP name was not recorded in this dataset.
             </p>
           </div>
 
           {/* Data source note */}
-          <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: "12px 16px", marginTop: 14 }}>
-            <div style={{ fontSize: 12, color: "#6B7280" }}>
+          <div style={{ background: "var(--table-head-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "12px 16px", marginTop: 14 }}>
+            <div style={{ fontSize: 12, color: "var(--text-3)" }}>
               <strong>Data sources:</strong>{" "}
               <a href="https://www.vec.vic.gov.au/results/state-election-results/2022-state-election-results"
                 target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>
@@ -8524,8 +8597,8 @@ export default function App() {
       {/* ══════════════════════ METHODOLOGY TAB ══════════════════════════════════ */}
       {activeTab === "methodology" && (() => {
         const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 };
-        const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "#0F172A", margin: "0 0 10px" };
-        const prose = { fontSize: 13, color: "#374151", lineHeight: 1.75, margin: "0 0 12px" };
+        const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "var(--text-dark)", margin: "0 0 10px" };
+        const prose = { fontSize: 13, color: "var(--text-2)", lineHeight: 1.75, margin: "0 0 12px" };
         const codeBlock = {
           fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace",
           fontSize: isMobile ? 11 : 12,
@@ -8538,8 +8611,8 @@ export default function App() {
           lineHeight: 1.7,
           margin: "0 0 16px",
         };
-        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "#374151", borderBottom: "1px solid #CBD5E1", background: "#F8FAFC" };
-        const tblCell = { padding: "8px 12px", fontSize: 13, color: "#374151", borderBottom: "1px solid #F1F5F9" };
+        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "var(--text-2)", borderBottom: "1px solid #CBD5E1", background: "var(--metric-bg)" };
+        const tblCell = { padding: "8px 12px", fontSize: 13, color: "var(--text-2)", borderBottom: "1px solid #F1F5F9" };
         const tblCellR = { ...tblCell, textAlign: "right", fontVariantNumeric: "tabular-nums" };
         const divider = { borderTop: "1px solid #E2E8F0", margin: "20px 0" };
         const panel = { ...STYLES.panel, marginBottom: 16 };
@@ -8548,8 +8621,8 @@ export default function App() {
 
             {/* Page title */}
             <div style={{ marginBottom: 28 }}>
-              <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: "#0F172A", margin: "0 0 8px", letterSpacing: "-0.02em" }}>Methodology</h1>
-              <p style={{ ...prose, color: "#64748B", marginBottom: 0 }}>
+              <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: "var(--text-dark)", margin: "0 0 8px", letterSpacing: "-0.02em" }}>Methodology</h1>
+              <p style={{ ...prose, color: "var(--text-3)", marginBottom: 0 }}>
                 aus-poll is a scenario modelling tool — it projects seat outcomes given the primary vote inputs you specify.
                 It is not a forward prediction and does not account for campaign dynamics or candidate-specific factors.
               </p>
@@ -8561,7 +8634,7 @@ export default function App() {
               <h2 style={secTitle}>Per-seat first-preference baselines</h2>
               <p style={prose}>
                 The model uses each division's actual 2025 AEC first-preference result as its starting point, drawn from
-                the <code style={{ fontFamily: "monospace", background: "#F1F5F9", padding: "1px 5px", borderRadius: 3 }}>SEAT_FP_2025</code> constant
+                the <code style={{ fontFamily: "monospace", background: "var(--page-bg)", padding: "1px 5px", borderRadius: 3 }}>SEAT_FP_2025</code> constant
                 (booth-level totals aggregated to division level). For the handful of seats missing granular data, the
                 2025 national primary average is substituted.
               </p>
@@ -8584,7 +8657,7 @@ export default function App() {
 2PP_ALP(i) = ──────────────────────────────────────────────────────────────────────────────────────────
                 FP_ALP + FP_COAL + FP_GRN + FP_TEAL + FP_ON + FP_UAP + FP_OTH`
               }</pre>
-              <p style={{ ...prose, color: "#6B7280", fontSize: 12, marginBottom: 14 }}>
+              <p style={{ ...prose, color: "var(--text-3)", fontSize: 12, marginBottom: 14 }}>
                 FP_X(i) is the primary vote share for party X in seat <em>i</em> after swing adjustment. f_X is the
                 preference flow rate to ALP for that voter group (see table). Primaries are floored at 0 and Other
                 is the residual after summing all named parties.
@@ -8596,7 +8669,7 @@ export default function App() {
                     <th style={tblHead}>Voter group</th>
                     <th style={{ ...tblHead, textAlign: "right", color: "#DC2626" }}>f (→ ALP)</th>
                     <th style={{ ...tblHead, textAlign: "right", color: "#1D4ED8" }}>→ Coalition</th>
-                    <th style={{ ...tblHead, textAlign: "right", color: "#6B7280" }}>Source</th>
+                    <th style={{ ...tblHead, textAlign: "right", color: "var(--text-3)" }}>Source</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -8616,7 +8689,7 @@ export default function App() {
                   ))}
                 </tbody>
               </table>
-              <p style={{ ...prose, color: "#6B7280", fontSize: 12, marginBottom: 0 }}>
+              <p style={{ ...prose, color: "var(--text-3)", fontSize: 12, marginBottom: 0 }}>
                 Per-seat DOP flows are available for most divisions and take precedence over the national averages above
                 where present (<code style={{ fontFamily: "monospace" }}>SEAT_PREF_FLOWS_2025</code>). A calibration delta
                 corrects for the difference between national-average and per-seat flows at zero swing.
@@ -8668,7 +8741,7 @@ FP_OTH(i) = max(0, 100 − FP_ALP − FP_COAL − FP_GRN − FP_TEAL − FP_ON)`
                     <tr key={m}>
                       <td style={tblCell}>{m}</td>
                       <td style={{ ...tblCellR, fontWeight: 600 }}>{e}</td>
-                      <td style={{ ...tblCellR, color: "#6B7280" }}>{fx}</td>
+                      <td style={{ ...tblCellR, color: "var(--text-3)" }}>{fx}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -8690,8 +8763,8 @@ if ON > COAL and ALP  ≥ COAL  →  Coalition eliminated  →  ON vs ALP final`
               }</pre>
               <p style={prose}>
                 In ON-race branches, separate preference flow constants apply (
-                <code style={{ fontFamily: "monospace", background: "#F1F5F9", padding: "1px 5px", borderRadius: 3 }}>grn_alp_v_on</code>,
-                <code style={{ fontFamily: "monospace", background: "#F1F5F9", padding: "1px 5px", borderRadius: 3 }}> teal_alp_v_on</code>, etc.).
+                <code style={{ fontFamily: "monospace", background: "var(--page-bg)", padding: "1px 5px", borderRadius: 3 }}>grn_alp_v_on</code>,
+                <code style={{ fontFamily: "monospace", background: "var(--page-bg)", padding: "1px 5px", borderRadius: 3 }}> teal_alp_v_on</code>, etc.).
                 These are higher toward ALP than standard flows, reflecting strong anti-ON preference sorting.
                 The detection can be overridden per seat on the Model tab.
               </p>
@@ -8728,12 +8801,12 @@ P(ALP wins seat i) = Φ( (2PP_ALP(i) − 50) / σ_seat(i) )`
                     <tr key={p}>
                       <td style={{ ...tblCell, fontFamily: "monospace", fontSize: 12 }}>{p}</td>
                       <td style={{ ...tblCellR, fontWeight: 600 }}>{v}</td>
-                      <td style={{ ...tblCell, color: "#6B7280", fontSize: 12 }}>{src}</td>
+                      <td style={{ ...tblCell, color: "var(--text-3)", fontSize: 12 }}>{src}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p style={{ ...prose, marginBottom: 0, color: "#6B7280", fontSize: 12 }}>
+              <p style={{ ...prose, marginBottom: 0, color: "var(--text-3)", fontSize: 12 }}>
                 σ_nat is correlated across seats (a polling error moves all seats together); σ_res and σ_pref are
                 independent per seat. The seat-count CDF is computed by integrating over a 100-point grid of ±3σ_nat
                 national swing values, summing per-seat win probabilities at each grid point.
@@ -8776,7 +8849,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                 TCP races (Greens, Teal, Independent contests) are excluded from calibration as the model does not
                 compute a standard 2PP for them.
               </p>
-              <p style={{ ...prose, marginBottom: 0, color: "#6B7280", fontSize: 12 }}>
+              <p style={{ ...prose, marginBottom: 0, color: "var(--text-3)", fontSize: 12 }}>
                 Residual uncertainty (σ_res = 1.0 pp) was calibrated from the 2019→2022 RMSE of seat-level swing
                 deviations after removing the national swing component.
               </p>
@@ -8798,7 +8871,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                   ].map(([title, desc], i) => (
                     <tr key={i} style={{ borderBottom: "1px solid #F1F5F9" }}>
                       <td style={{ ...tblCell, fontWeight: 600, whiteSpace: "nowrap", verticalAlign: "top", paddingRight: 16, width: "28%" }}>{title}</td>
-                      <td style={{ ...tblCell, color: "#6B7280" }}>{desc}</td>
+                      <td style={{ ...tblCell, color: "var(--text-3)" }}>{desc}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -8833,16 +8906,16 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
       {/* ══════════════════════ USER GUIDE TAB ══════════════════════════════════ */}
       {activeTab === "guide" && (() => {
         const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 };
-        const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "#0F172A", margin: "0 0 10px" };
-        const prose = { fontSize: 13, color: "#374151", lineHeight: 1.75, margin: "0 0 12px" };
+        const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "var(--text-dark)", margin: "0 0 10px" };
+        const prose = { fontSize: 13, color: "var(--text-2)", lineHeight: 1.75, margin: "0 0 12px" };
         const panel = { ...STYLES.panel, marginBottom: 16 };
-        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "#374151", borderBottom: "1px solid #CBD5E1", background: "#F8FAFC" };
-        const tblCell = { padding: "8px 12px", fontSize: 13, color: "#374151", borderBottom: "1px solid #F1F5F9", verticalAlign: "top" };
+        const tblHead = { padding: "8px 12px", textAlign: "left", fontWeight: 700, fontSize: 12, color: "var(--text-2)", borderBottom: "1px solid #CBD5E1", background: "var(--metric-bg)" };
+        const tblCell = { padding: "8px 12px", fontSize: 13, color: "var(--text-2)", borderBottom: "1px solid #F1F5F9", verticalAlign: "top" };
         const tblCellMono = { ...tblCell, fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace", fontSize: 12, color: "#2563EB" };
         const divider = { borderTop: "1px solid #E2E8F0", margin: "18px 0" };
         const tip = { background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#1E40AF", lineHeight: 1.65, marginBottom: 14 };
         const warn = { background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#92400E", lineHeight: 1.65, marginBottom: 14 };
-        const inlineCode = { fontFamily: "monospace", background: "#F1F5F9", padding: "1px 5px", borderRadius: 3, fontSize: 12 };
+        const inlineCode = { fontFamily: "monospace", background: "var(--page-bg)", padding: "1px 5px", borderRadius: 3, fontSize: 12 };
         const badge = (color, text) => (
           <span style={{ display: "inline-block", background: color, color: "#fff", borderRadius: 4, fontSize: 11, fontWeight: 700, padding: "1px 7px", letterSpacing: "0.03em" }}>{text}</span>
         );
@@ -8851,8 +8924,8 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
 
             {/* Page title */}
             <div style={{ marginBottom: 28 }}>
-              <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: "#0F172A", margin: "0 0 8px", letterSpacing: "-0.02em" }}>User Guide</h1>
-              <p style={{ ...prose, color: "#64748B", marginBottom: 0 }}>
+              <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: "var(--text-dark)", margin: "0 0 8px", letterSpacing: "-0.02em" }}>User Guide</h1>
+              <p style={{ ...prose, color: "var(--text-3)", marginBottom: 0 }}>
                 A complete reference for every input, slider, and control in the aus-poll scenario builder.
                 aus-poll is a <strong>scenario modelling tool</strong> — it projects seat outcomes given the primary vote inputs
                 you specify. It is not a forward prediction and does not account for campaign dynamics or candidate-specific factors.
@@ -8939,7 +9012,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                     <tr key={flow}>
                       <td style={tblCellMono}>{flow}</td>
                       <td style={{ ...tblCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{def}</td>
-                      <td style={{ ...tblCell, textAlign: "right", color: "#64748B", fontVariantNumeric: "tabular-nums" }}>{hist}</td>
+                      <td style={{ ...tblCell, textAlign: "right", color: "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>{hist}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -9245,7 +9318,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                   ].map(([input, type, effect, where]) => (
                     <tr key={input}>
                       <td style={{ ...tblCell, fontWeight: 500 }}>{input}</td>
-                      <td style={{ ...tblCell, color: "#64748B", whiteSpace: "nowrap" }}>{type}</td>
+                      <td style={{ ...tblCell, color: "var(--text-3)", whiteSpace: "nowrap" }}>{type}</td>
                       <td style={tblCell}>{effect}</td>
                       <td style={{ ...tblCell, color: "#2563EB", whiteSpace: isMobile ? "normal" : "nowrap" }}>{where}</td>
                     </tr>
@@ -9260,10 +9333,10 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
 
       {/* ══════════════════════ ABOUT TAB ════════════════════════════════════════ */}
       {activeTab === "about" && (() => {
-        const panel = { background: "#fff", border: "1px solid #E2E8F0", borderRadius: 10, padding: isMobile ? "16px 14px" : "20px 24px", marginBottom: 16 };
+        const panel = { background: "var(--panel-bg)", border: "1px solid #E2E8F0", borderRadius: 10, padding: isMobile ? "16px 14px" : "20px 24px", marginBottom: 16 };
         const secHead = { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 };
-        const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "#0F172A", margin: "0 0 10px" };
-        const bodyText = { fontSize: 13, color: "#374151", lineHeight: 1.7, margin: "0 0 10px" };
+        const secTitle = { fontSize: isMobile ? 15 : 16, fontWeight: 700, color: "var(--text-dark)", margin: "0 0 10px" };
+        const bodyText = { fontSize: 13, color: "var(--text-2)", lineHeight: 1.7, margin: "0 0 10px" };
         const faqItems = [
           {
             q: "What is two-candidate preferred (2PP)?",
@@ -9327,9 +9400,9 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                   { label: "Betting markets", desc: "National government outcome odds and seat-level win markets from Sportsbet and Betfair Exchange, updated manually.", url: null, urlLabel: null },
                   { label: "ABS Census 2021", desc: "SA1/SA2-level demographic data (income, education, occupation, age) mapped to electoral divisions for contextual overlays.", url: null, urlLabel: null },
                 ].map(({ label, desc, url, urlLabel }) => (
-                  <div key={label} style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, padding: "12px 14px" }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: "#0F172A", marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>{desc}</div>
+                  <div key={label} style={{ background: "var(--metric-bg)", border: "1px solid #E2E8F0", borderRadius: 8, padding: "12px 14px" }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: "var(--text-dark)", marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.6 }}>{desc}</div>
                     {url && <a href={url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#1D4ED8", display: "inline-block", marginTop: 4 }}>{urlLabel}</a>}
                   </div>
                 ))}
@@ -9346,11 +9419,11 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                     style={{ background: "none", border: "none", width: "100%", textAlign: "left", padding: "12px 0", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}
                   >
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#0F172A", lineHeight: 1.5 }}>{item.q}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-dark)", lineHeight: 1.5 }}>{item.q}</span>
                     <span style={{ color: "#94A3B8", fontSize: 16, flexShrink: 0 }}>{openFaq === i ? "▲" : "▼"}</span>
                   </button>
                   {openFaq === i && (
-                    <p style={{ margin: "0 0 12px", fontSize: 13, color: "#6B7280", lineHeight: 1.7 }}>{item.a}</p>
+                    <p style={{ margin: "0 0 12px", fontSize: 13, color: "var(--text-3)", lineHeight: 1.7 }}>{item.a}</p>
                   )}
                 </div>
               ))}

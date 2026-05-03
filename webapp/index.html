@@ -10,6 +10,46 @@
     <meta property="og:title" content="aus-poll – Australian Election Modelling Dashboard" />
     <meta property="og:description" content="Interactive seat-by-seat election modelling for the 2025 Australian federal election. Explore polls, swings, and scenarios." />
     <meta property="og:type" content="website" />
+    <style>
+      :root {
+        --page-bg: #F1F5F9;
+        --panel-bg: #ffffff;
+        --metric-bg: #F8FAFC;
+        --subtle-bg: #F3F4F6;
+        --table-head-bg: #F9FAFB;
+        --table-row-alt: #F5F7FA;
+        --row-highlight: #EFF6FF;
+        --text-1: #111827;
+        --text-2: #374151;
+        --text-3: #6B7280;
+        --text-4: #9CA3AF;
+        --text-dark: #0F172A;
+        --border-1: #E5E7EB;
+        --border-2: #D1D5DB;
+        --border-3: #F3F4F6;
+        color-scheme: light;
+      }
+      [data-theme="dark"] {
+        --page-bg: #0D1117;
+        --panel-bg: #161B22;
+        --metric-bg: #1C2128;
+        --subtle-bg: #21262D;
+        --table-head-bg: #21262D;
+        --table-row-alt: #1A1F28;
+        --row-highlight: #1C2D4A;
+        --text-1: #E6EDF3;
+        --text-2: #C9D1D9;
+        --text-3: #8B949E;
+        --text-4: #6E7681;
+        --text-dark: #E6EDF3;
+        --border-1: #30363D;
+        --border-2: #30363D;
+        --border-3: #21262D;
+        color-scheme: dark;
+      }
+      html { background: var(--page-bg); }
+      *, *::before, *::after { box-sizing: border-box; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
