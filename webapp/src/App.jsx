@@ -4688,10 +4688,6 @@ export default function App() {
   const panelStyle = isMobile ? { ...STYLES.panel, padding: "14px 14px" } : STYLES.panel;
   const sectionHead = STYLES.sectionHead;
 
-  useEffect(() => {
-    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
-  }, []);
-
   // ── Sync primary sliders to URL params for scenario sharing ─────────────────
   useEffect(() => {
     const base = BASELINE_2025;
@@ -4801,18 +4797,6 @@ export default function App() {
             ))}
           </div>
         )}
-      </div>
-
-      {/* ── AdSense banner ── */}
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: isMobile ? "8px 16px 0" : "10px 24px 0" }}>
-        <ins
-          className="adsbygoogle"
-          style={{ display: "block" }}
-          data-ad-client="ca-pub-8230549400439546"
-          data-ad-slot="1661591367"
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        />
       </div>
 
       {/* ══════════════════════ SEATS TAB ═════════════════════════════════════ */}
