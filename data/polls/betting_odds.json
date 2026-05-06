@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-05",
+  "generated": "2026-05-06",
   "source": "manual",
   "note": "Placeholder data based on typical pre-election market prices. Replace with live data by running: python pipeline/betting_odds.py",
   "sigma_per_seat": 2.5,
