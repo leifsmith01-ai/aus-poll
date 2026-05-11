@@ -3156,6 +3156,7 @@ function SwingBadge({ swing }) {
 }
 
 function TcpBar({ tcp, winnerParty }) {
+  if (!tcp || !tcp.length) return <span style={{ color: "var(--text-4)", fontSize: 12 }}>—</span>;
   const winner = tcp.find(t => t.party === winnerParty);
   if (!winner) return null;
   const p = getParty(winnerParty);
