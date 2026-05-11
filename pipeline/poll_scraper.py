@@ -183,7 +183,7 @@ _FEDERAL_SCHEMA = {
     "pollster": ["firm", "pollster", "polling firm"],
     "n":        ["sample"],
     "alp":      ["alp"],
-    "coal":     ["l/np", "lnp", "coalition", "coal"],
+    "coal":     ["l/np", "lnp", "coalition", "coal", "liberal", "lib"],
     "grn":      ["grn", "green"],
     "on":       ["onp", "one nation"],
     "tpp":      ["2pp", "tpp"],
@@ -286,7 +286,7 @@ def _parse_table(table, schema: dict, allow_coal_2pp: bool) -> list[dict]:
         else:
             rec["n"] = None
 
-        if rec["tpp"] is None or rec["alp"] is None:
+        if rec["alp"] is None:
             continue
 
         out.append(rec)
@@ -422,8 +422,10 @@ def _main(argv: list[str] | None = None) -> int:
     )
 
     appended = 0
+    total_fetched = 0
     if not args.vic_only:
         records = scrape_federal()
+        total_fetched += len(records)
         logger.info("scraped %d federal records", len(records))
         if args.dry_run:
             print(json.dumps(records, indent=2))
@@ -432,6 +434,7 @@ def _main(argv: list[str] | None = None) -> int:
 
     if not args.federal_only:
         records = scrape_vic()
+        total_fetched += len(records)
         logger.info("scraped %d VIC records", len(records))
         if args.dry_run:
             print(json.dumps(records, indent=2))
@@ -439,6 +442,9 @@ def _main(argv: list[str] | None = None) -> int:
             appended += merge_into_file(VIC_JSON, records)
 
     logger.info("total new records appended: %d", appended)
+    if total_fetched == 0:
+        logger.error("scraper returned 0 records from all sources — Wikipedia fetch or parse failed")
+        return 1
     return 0
 
 

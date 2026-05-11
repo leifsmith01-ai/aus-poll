@@ -25,11 +25,31 @@ jobs:
       - name: Install scraper + aggregator dependencies
         run: pip install requests beautifulsoup4
 
+      - name: Show poll counts before scrape
+        run: |
+          python -c "
+          import json
+          fed = json.load(open('data/polls/bludgertrack.json'))
+          vic = json.load(open('data/polls/vic_polls.json'))
+          print(f'Federal polls before: {len(fed[\"polls\"])} (retrieved {fed.get(\"retrieved\",\"unknown\")})')
+          print(f'VIC polls before: {len(vic[\"polls\"])}')
+          "
+
       - name: Fetch latest polls from Wikipedia
-        # Soft-fail: scraper exits 0 even on network/parse failure so the
-        # aggregator step still runs against existing curated data.
+        # Soft-fail: aggregator still runs on existing curated data if scrape fails.
+        # Scraper now exits 1 when 0 records fetched (visible as failed step in UI).
         continue-on-error: true
         run: python scripts/update_poll_inputs.py -v
+
+      - name: Show poll counts after scrape
+        run: |
+          python -c "
+          import json
+          fed = json.load(open('data/polls/bludgertrack.json'))
+          vic = json.load(open('data/polls/vic_polls.json'))
+          print(f'Federal polls after: {len(fed[\"polls\"])} (retrieved {fed.get(\"retrieved\",\"unknown\")})')
+          print(f'VIC polls after: {len(vic[\"polls\"])}')
+          "
 
       - name: Run federal poll aggregator
         run: python -m pipeline.poll_aggregator
