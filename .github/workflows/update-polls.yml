@@ -57,6 +57,11 @@ jobs:
       - name: Run VIC poll aggregator
         run: python -m pipeline.poll_aggregator --state vic
 
+      - name: Copy aggregated polls to frontend
+        run: |
+          cp data/polls/aggregated.json webapp/src/data/aggregated.json
+          cp data/polls/vic_aggregated.json webapp/src/data/vic_aggregated.json 2>/dev/null || true
+
       - name: Commit updated poll data if changed
         run: |
           git diff --quiet \
@@ -64,6 +69,7 @@ jobs:
             data/polls/vic_polls.json \
             data/polls/aggregated.json \
             data/polls/vic_aggregated.json \
+            webapp/src/data/aggregated.json \
           && echo "Nothing changed — skipping commit." && exit 0
 
           git config user.name  "github-actions[bot]"
@@ -72,7 +78,8 @@ jobs:
             data/polls/bludgertrack.json \
             data/polls/vic_polls.json \
             data/polls/aggregated.json \
-            data/polls/vic_aggregated.json
+            data/polls/vic_aggregated.json \
+            webapp/src/data/aggregated.json
           git commit -m "chore: auto-fetch + regenerate polls [skip ci]"
           git pull --rebase origin main
           git push

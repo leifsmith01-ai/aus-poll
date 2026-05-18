@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/polldata.htm",
-  "retrieved": "2026-03-29",
+  "retrieved": "2026-05-18",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -39,6 +39,17 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2025-06-28",
+      "alp": 36.5,
+      "coal": 30.5,
+      "grn": 12,
+      "on": 8.5,
+      "tpp": 56.5,
+      "n": 2537
+    },
+    {
+      "scope": "NAT",
       "pollster": "RedBridge Group",
       "date": "2025-06-29",
       "alp": 37,
@@ -50,14 +61,15 @@
     },
     {
       "scope": "NAT",
-      "pollster": "Roy Morgan",
-      "date": "2025-06-28",
-      "alp": 36.5,
-      "coal": 30.5,
-      "grn": 12,
-      "on": 8.5,
-      "tpp": 56.5,
-      "n": 2537
+      "pollster": "RedBridge Group",
+      "date": "2025-06-30",
+      "alp": 38.0,
+      "coal": 30.0,
+      "grn": 9.0,
+      "on": 9.0,
+      "teal": 0.0,
+      "tpp": 54.0,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -72,14 +84,27 @@
     },
     {
       "scope": "NAT",
-      "pollster": "Roy Morgan",
-      "date": "2025-07-26",
-      "alp": 36.5,
-      "coal": 31,
-      "grn": 12,
-      "on": 7,
-      "tpp": 57,
-      "n": 2537
+      "pollster": "DemosAU",
+      "date": "2025-07-06",
+      "alp": 36.0,
+      "coal": 25.0,
+      "grn": 15.0,
+      "on": 15.0,
+      "teal": 0.0,
+      "tpp": 60.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2025-07-09",
+      "alp": 31.0,
+      "coal": 35.0,
+      "grn": 12.0,
+      "on": 13.0,
+      "teal": 0.0,
+      "tpp": 53.0,
+      "n": 1027
     },
     {
       "scope": "NAT",
@@ -106,12 +131,12 @@
     {
       "scope": "NAT",
       "pollster": "Roy Morgan",
-      "date": "2025-08-23",
-      "alp": 34,
-      "coal": 30,
+      "date": "2025-07-26",
+      "alp": 36.5,
+      "coal": 31,
       "grn": 12,
-      "on": 9,
-      "tpp": 55.5,
+      "on": 7,
+      "tpp": 57,
       "n": 2537
     },
     {
@@ -138,6 +163,17 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2025-08-23",
+      "alp": 34,
+      "coal": 30,
+      "grn": 12,
+      "on": 9,
+      "tpp": 55.5,
+      "n": 2537
+    },
+    {
+      "scope": "NAT",
       "pollster": "RedBridge Group",
       "date": "2025-09-07",
       "alp": 35,
@@ -149,14 +185,27 @@
     },
     {
       "scope": "NAT",
-      "pollster": "Roy Morgan",
-      "date": "2025-09-20",
-      "alp": 34,
-      "coal": 30,
-      "grn": 12,
-      "on": 9.5,
-      "tpp": 55.5,
-      "n": 2537
+      "pollster": "RedBridge Group",
+      "date": "2025-09-08",
+      "alp": 34.0,
+      "coal": 29.0,
+      "grn": 10.0,
+      "on": 12.0,
+      "teal": 0.0,
+      "tpp": 54.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2025-09-09",
+      "alp": 32.0,
+      "coal": 29.0,
+      "grn": 13.0,
+      "on": 12.0,
+      "teal": 0.0,
+      "tpp": 55.0,
+      "n": 1327
     },
     {
       "scope": "NAT",
@@ -171,6 +220,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2025-09-11",
+      "alp": 38.0,
+      "coal": 25.0,
+      "grn": 13.0,
+      "on": 10.0,
+      "teal": 0.0,
+      "tpp": 60.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Resolve Strategic",
       "date": "2025-09-12",
       "alp": 35,
@@ -179,6 +240,29 @@
       "on": 12,
       "tpp": 55,
       "n": 1605
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2025-09-13",
+      "alp": 34.0,
+      "coal": 28.0,
+      "grn": 9.0,
+      "on": 16.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2025-09-20",
+      "alp": 34,
+      "coal": 30,
+      "grn": 12,
+      "on": 9.5,
+      "tpp": 55.5,
+      "n": 2537
     },
     {
       "scope": "NAT",
@@ -204,6 +288,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Essential Research",
+      "date": "2025-09-29",
+      "alp": 35.0,
+      "coal": 24.0,
+      "grn": 14.0,
+      "on": 14.0,
+      "teal": 0.0,
+      "tpp": 55.5,
+      "n": 517
+    },
+    {
+      "scope": "NAT",
       "pollster": "Newspoll",
       "date": "2025-10-01",
       "alp": 37,
@@ -226,14 +322,15 @@
     },
     {
       "scope": "NAT",
-      "pollster": "Roy Morgan",
-      "date": "2025-10-18",
-      "alp": 35,
-      "coal": 27,
-      "grn": 13,
-      "on": 12,
-      "tpp": 57,
-      "n": 2537
+      "pollster": "RedBridge Group",
+      "date": "2025-10-07",
+      "alp": 39.0,
+      "coal": 29.0,
+      "grn": 13.0,
+      "on": 9.0,
+      "teal": 0.0,
+      "tpp": 58.0,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -248,6 +345,29 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2025-10-12",
+      "alp": 35.0,
+      "coal": 29.0,
+      "grn": 9.0,
+      "on": 14.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2025-10-18",
+      "alp": 35,
+      "coal": 27,
+      "grn": 13,
+      "on": 12,
+      "tpp": 57,
+      "n": 2537
+    },
+    {
+      "scope": "NAT",
       "pollster": "Freshwater Strategy",
       "date": "2025-10-19",
       "alp": 33,
@@ -256,6 +376,18 @@
       "on": 10,
       "tpp": 55,
       "n": 1000
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Freshwater Strategy",
+      "date": "2025-10-20",
+      "alp": 32.0,
+      "coal": 37.0,
+      "grn": 13.0,
+      "on": 10.0,
+      "teal": 0.0,
+      "tpp": 52.0,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -270,14 +402,15 @@
     },
     {
       "scope": "NAT",
-      "pollster": "DemosAU",
-      "date": "2025-11-10",
-      "alp": 33,
-      "coal": 24,
-      "grn": 13,
-      "on": 17,
-      "tpp": 56,
-      "n": 1500
+      "pollster": "Essential Research",
+      "date": "2025-10-27",
+      "alp": 32.0,
+      "coal": 26.0,
+      "grn": 13.0,
+      "on": 14.0,
+      "teal": 0.0,
+      "tpp": 52.5,
+      "n": 595
     },
     {
       "scope": "NAT",
@@ -292,17 +425,6 @@
     },
     {
       "scope": "NAT",
-      "pollster": "Roy Morgan",
-      "date": "2025-11-15",
-      "alp": 33,
-      "coal": 27,
-      "grn": 12.5,
-      "on": 14,
-      "tpp": 55,
-      "n": 2537
-    },
-    {
-      "scope": "NAT",
       "pollster": "Resolve Strategic",
       "date": "2025-11-07",
       "alp": 33,
@@ -311,6 +433,29 @@
       "on": 12,
       "tpp": 53,
       "n": 1605
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2025-11-08",
+      "alp": 34.0,
+      "coal": 31.0,
+      "grn": 11.0,
+      "on": 13.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2025-11-10",
+      "alp": 33,
+      "coal": 24,
+      "grn": 13,
+      "on": 17,
+      "tpp": 56,
+      "n": 1500
     },
     {
       "scope": "NAT",
@@ -325,6 +470,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2025-11-11",
+      "alp": 98.0,
+      "coal": 29.0,
+      "grn": 0.0,
+      "on": 12.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 6928
+    },
+    {
+      "scope": "NAT",
       "pollster": "RedBridge Group",
       "date": "2025-11-12",
       "alp": 38,
@@ -333,6 +490,29 @@
       "on": 18,
       "tpp": 56,
       "n": 1000
+    },
+    {
+      "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2025-11-13",
+      "alp": 51.0,
+      "coal": 10.0,
+      "grn": 24.0,
+      "on": 5.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2025-11-15",
+      "alp": 33,
+      "coal": 27,
+      "grn": 12.5,
+      "on": 14,
+      "tpp": 55,
+      "n": 2537
     },
     {
       "scope": "NAT",
@@ -358,14 +538,15 @@
     },
     {
       "scope": "NAT",
-      "pollster": "RedBridge Group",
-      "date": "2025-11-25",
-      "alp": 35,
-      "coal": 26,
-      "grn": 10,
-      "on": 18,
-      "tpp": 54,
-      "n": 1000
+      "pollster": "Roy Morgan",
+      "date": "2025-11-16",
+      "alp": 33.5,
+      "coal": 28.5,
+      "grn": 10.5,
+      "on": 14.5,
+      "teal": 0.0,
+      "tpp": 55.5,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -380,6 +561,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2025-11-20",
+      "alp": 37.0,
+      "coal": 24.0,
+      "grn": 12.0,
+      "on": 14.0,
+      "teal": 0.0,
+      "tpp": 58.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Essential Research",
       "date": "2025-11-23",
       "alp": 36,
@@ -391,14 +584,26 @@
     },
     {
       "scope": "NAT",
-      "pollster": "Roy Morgan",
-      "date": "2025-12-13",
-      "alp": 32,
-      "coal": 26.5,
-      "grn": 13.5,
-      "on": 15.5,
-      "tpp": 55,
-      "n": 2537
+      "pollster": "Essential Research",
+      "date": "2025-11-24",
+      "alp": 37.0,
+      "coal": 30.0,
+      "grn": 7.0,
+      "on": 15.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 530
+    },
+    {
+      "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2025-11-25",
+      "alp": 35,
+      "coal": 26,
+      "grn": 10,
+      "on": 18,
+      "tpp": 54,
+      "n": 1000
     },
     {
       "scope": "NAT",
@@ -435,6 +640,30 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2025-12-07",
+      "alp": 35.0,
+      "coal": 26.0,
+      "grn": 11.0,
+      "on": 17.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Essential Research",
+      "date": "2025-12-08",
+      "alp": 33.0,
+      "coal": 25.0,
+      "grn": 12.0,
+      "on": 16.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 558
+    },
+    {
+      "scope": "NAT",
       "pollster": "RedBridge Group",
       "date": "2025-12-11",
       "alp": 35,
@@ -446,6 +675,41 @@
     },
     {
       "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2025-12-12",
+      "alp": 39.0,
+      "coal": 23.0,
+      "grn": 17.0,
+      "on": 12.0,
+      "teal": 0.0,
+      "tpp": 62.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2025-12-13",
+      "alp": 32,
+      "coal": 26.5,
+      "grn": 13.5,
+      "on": 15.5,
+      "tpp": 55,
+      "n": 2537
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2025-12-14",
+      "alp": 33.5,
+      "coal": 25.5,
+      "grn": 11.5,
+      "on": 17.5,
+      "teal": 0.0,
+      "tpp": 57.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Resolve Strategic",
       "date": "2025-12-19",
       "alp": 32,
@@ -454,6 +718,18 @@
       "on": 16,
       "tpp": 54,
       "n": 1605
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2025-12-20",
+      "alp": 31.0,
+      "coal": 29.0,
+      "grn": 9.0,
+      "on": 20.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -490,6 +766,30 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Fox & Hedgehog",
+      "date": "2026-01-06",
+      "alp": 29.0,
+      "coal": 27.0,
+      "grn": 13.0,
+      "on": 19.0,
+      "teal": 0.0,
+      "tpp": 52.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2026-01-06",
+      "alp": 37.0,
+      "coal": 26.0,
+      "grn": 15.0,
+      "on": 16.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Roy Morgan",
       "date": "2026-01-10",
       "alp": 30,
@@ -498,6 +798,17 @@
       "on": 15,
       "tpp": 52,
       "n": 2537
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2026-01-14",
+      "alp": 32,
+      "coal": 21,
+      "grn": 12,
+      "on": 22,
+      "tpp": 55,
+      "n": 1597
     },
     {
       "scope": "NAT",
@@ -512,14 +823,15 @@
     },
     {
       "scope": "NAT",
-      "pollster": "Newspoll",
-      "date": "2026-01-14",
-      "alp": 32,
-      "coal": 21,
-      "grn": 12,
-      "on": 22,
-      "tpp": 55,
-      "n": 1597
+      "pollster": "Resolve Strategic",
+      "date": "2026-01-16",
+      "alp": 31.0,
+      "coal": 26.0,
+      "grn": 12.0,
+      "on": 20.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -545,6 +857,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Freshwater Strategy",
+      "date": "2026-01-18",
+      "alp": 33.0,
+      "coal": 37.0,
+      "grn": 5.0,
+      "on": 21.0,
+      "teal": 0.0,
+      "tpp": 48.0,
+      "n": 308
+    },
+    {
+      "scope": "NAT",
       "pollster": "DemosAU",
       "date": "2026-01-20",
       "alp": 30,
@@ -553,6 +877,30 @@
       "on": 24,
       "tpp": null,
       "n": 1500
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2026-01-21",
+      "alp": 38.0,
+      "coal": 19.0,
+      "grn": 17.0,
+      "on": 17.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Essential Research",
+      "date": "2026-01-23",
+      "alp": 29.0,
+      "coal": 20.0,
+      "grn": 11.0,
+      "on": 23.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 599
     },
     {
       "scope": "NAT",
@@ -589,6 +937,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-01-27",
+      "alp": 29.0,
+      "coal": 14.0,
+      "grn": 11.0,
+      "on": 26.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "RedBridge Group",
       "date": "2026-01-28",
       "alp": 34,
@@ -600,6 +960,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2026-01-29",
+      "alp": 43.0,
+      "coal": 16.0,
+      "grn": 13.0,
+      "on": 16.0,
+      "teal": 0.0,
+      "tpp": 64.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Roy Morgan",
       "date": "2026-01-31",
       "alp": 30.5,
@@ -608,6 +980,18 @@
       "on": 25,
       "tpp": 54.5,
       "n": 2537
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-02-01",
+      "alp": 30.0,
+      "coal": 17.5,
+      "grn": 11.5,
+      "on": 25.5,
+      "teal": 0.0,
+      "tpp": 54.0,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -656,6 +1040,18 @@
     {
       "scope": "NAT",
       "pollster": "Resolve Strategic",
+      "date": "2026-02-12",
+      "alp": 29.0,
+      "coal": 20.0,
+      "grn": 12.0,
+      "on": 27.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
       "date": "2026-02-13",
       "alp": 32,
       "coal": 23,
@@ -663,6 +1059,18 @@
       "on": 23,
       "tpp": 55,
       "n": 1605
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2026-02-14",
+      "alp": 32.0,
+      "coal": 21.0,
+      "grn": 11.0,
+      "on": 24.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -699,14 +1107,15 @@
     },
     {
       "scope": "NAT",
-      "pollster": "Roy Morgan",
-      "date": "2026-02-21",
-      "alp": 31,
-      "coal": 24,
-      "grn": 12.5,
-      "on": 20.5,
-      "tpp": 54,
-      "n": 2537
+      "pollster": "Fox & Hedgehog",
+      "date": "2026-02-19",
+      "alp": 31.0,
+      "coal": 26.0,
+      "grn": 10.0,
+      "on": 22.0,
+      "teal": 0.0,
+      "tpp": 51.0,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -718,6 +1127,29 @@
       "on": 22,
       "tpp": 47,
       "n": 1020
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2026-02-20",
+      "alp": 36.0,
+      "coal": 26.0,
+      "grn": 14.0,
+      "on": 18.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-02-21",
+      "alp": 31,
+      "coal": 24,
+      "grn": 12.5,
+      "on": 20.5,
+      "tpp": 54,
+      "n": 2537
     },
     {
       "scope": "NAT",
@@ -754,6 +1186,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2026-02-27",
+      "alp": 41.0,
+      "coal": 17.0,
+      "grn": 14.0,
+      "on": 16.0,
+      "teal": 0.0,
+      "tpp": 63.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Roy Morgan",
       "date": "2026-03-01",
       "alp": 30.5,
@@ -762,6 +1206,18 @@
       "on": 22,
       "tpp": 53.5,
       "n": 2537
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2026-03-03",
+      "alp": 83.0,
+      "coal": 9.0,
+      "grn": 1.0,
+      "on": 52.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 8424
     },
     {
       "scope": "NAT",
@@ -809,6 +1265,30 @@
     },
     {
       "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-03-17",
+      "alp": 33.0,
+      "coal": 20.0,
+      "grn": 13.0,
+      "on": 25.0,
+      "teal": 0.0,
+      "tpp": 55.0,
+      "n": 1265
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-03-19",
+      "alp": 29.0,
+      "coal": 17.0,
+      "grn": 13.0,
+      "on": 24.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 489
+    },
+    {
+      "scope": "NAT",
       "pollster": "Roy Morgan",
       "date": "2026-03-22",
       "alp": 27,
@@ -820,17 +1300,6 @@
     },
     {
       "scope": "NAT",
-      "pollster": "YouGov",
-      "date": "2026-03-24",
-      "alp": 29,
-      "coal": 19,
-      "grn": 13,
-      "on": 27,
-      "tpp": null,
-      "n": 1511
-    },
-    {
-      "scope": "NAT",
       "pollster": "Essential Research",
       "date": "2026-03-23",
       "alp": 31,
@@ -839,6 +1308,17 @@
       "on": 24,
       "tpp": null,
       "n": 1008
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-03-24",
+      "alp": 29,
+      "coal": 19,
+      "grn": 13,
+      "on": 27,
+      "tpp": null,
+      "n": 1511
     },
     {
       "scope": "NAT",
@@ -883,6 +1363,18 @@
       "on": 23.5,
       "tpp": 56.5,
       "n": 1562
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-04-07",
+      "alp": 29.0,
+      "coal": 20.0,
+      "grn": 12.0,
+      "on": 26.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
     }
   ]
 }
