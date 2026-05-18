@@ -215,6 +215,53 @@ def _is_coal_2pp(header_text: str) -> bool:
 
 
 # ── Table parsing ─────────────────────────────────────────────────────────────
+def _build_col_labels(table) -> list[str]:
+    """Flatten a multi-row wikitable header (colspan + rowspan) into one label per column.
+
+    Handles tables like the 2028 Wikipedia polling table where 'Primary vote'
+    spans 8 sub-columns and 'Date'/'Polling Firm' use rowspan across 5 header rows.
+    Labels from different rows are combined with a space (e.g. 'Primary vote ALP').
+    """
+    header_rows: list[list] = []
+    for tr in table.find_all("tr"):
+        cells = tr.find_all(["th", "td"])
+        if not cells or not all(c.name == "th" for c in cells):
+            break
+        header_rows.append(cells)
+
+    if not header_rows:
+        return []
+
+    n_cols = sum(int(c.get("colspan", 1)) for c in header_rows[0])
+    n_rows = len(header_rows)
+    grid: list[list[str | None]] = [[None] * n_cols for _ in range(n_rows)]
+
+    for r, cells in enumerate(header_rows):
+        col = 0
+        for cell in cells:
+            while col < n_cols and grid[r][col] is not None:
+                col += 1
+            colspan = int(cell.get("colspan", 1))
+            rowspan = int(cell.get("rowspan", 1))
+            text = _cell_text(cell)
+            for dr in range(rowspan):
+                for dc in range(colspan):
+                    rr, cc = r + dr, col + dc
+                    if rr < n_rows and cc < n_cols:
+                        grid[rr][cc] = text
+            col += colspan
+
+    labels: list[str] = []
+    for c in range(n_cols):
+        parts: list[str] = []
+        for r in range(n_rows):
+            t = grid[r][c]
+            if t and t not in parts:
+                parts.append(t)
+        labels.append(" ".join(parts))
+    return labels
+
+
 def _iter_data_rows(table) -> Iterable[list]:
     """Yield <td> rows of a wikitable, skipping pure-header rows."""
     for tr in table.find_all("tr"):
@@ -229,10 +276,7 @@ def _iter_data_rows(table) -> Iterable[list]:
 def _parse_table(table, schema: dict, allow_coal_2pp: bool) -> list[dict]:
     """Parse one wikitable using header-driven column mapping. Returns a list
     of dicts in the schema's keys; rows missing required fields are dropped."""
-    header_row = table.find("tr")
-    if not header_row:
-        return []
-    headers = [_cell_text(c) for c in header_row.find_all(["th", "td"])]
+    headers = _build_col_labels(table)
     if not headers:
         return []
 
@@ -249,9 +293,13 @@ def _parse_table(table, schema: dict, allow_coal_2pp: bool) -> list[dict]:
 
     out: list[dict] = []
     for row in _iter_data_rows(table):
-        if len(row) < max(cols.values()) + 1:
+        # Expand cells by colspan so indices align with the header grid.
+        texts: list[str] = []
+        for cell in row:
+            texts.extend([_cell_text(cell)] * int(cell.get("colspan", 1)))
+
+        if len(texts) < max(cols.values()) + 1:
             continue
-        texts = [_cell_text(c) for c in row]
 
         pollster = normalise_pollster(texts[cols["pollster"]])
         if not pollster:
@@ -386,10 +434,21 @@ def merge_into_file(path: Path, new_records: list[dict]) -> int:
     existing = data.get("polls", [])
     existing_keys = {(p.get("pollster"), p.get("date")) for p in existing}
 
-    additions = [
-        r for r in new_records
-        if (r.get("pollster"), r.get("date")) not in existing_keys
-    ]
+    # Deduplicate within new_records too (state-level tables can yield multiple
+    # rows for the same pollster+date with different state breakdowns; keep the
+    # entry with the largest sample size, or the first one if n is missing).
+    seen_new: dict[tuple, dict] = {}
+    for r in new_records:
+        key = (r.get("pollster"), r.get("date"))
+        if key in existing_keys:
+            continue
+        if key not in seen_new:
+            seen_new[key] = r
+        else:
+            prev = seen_new[key]
+            if (r.get("n") or 0) > (prev.get("n") or 0):
+                seen_new[key] = r
+    additions = list(seen_new.values())
     if not additions:
         logger.info("merge_into_file(%s): all %d scraped records already present",
                     path.name, len(new_records))
