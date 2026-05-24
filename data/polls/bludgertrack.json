@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/polldata.htm",
-  "retrieved": "2026-05-18",
+  "retrieved": "2026-05-24",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -1375,6 +1375,114 @@
       "teal": 0.0,
       "tpp": null,
       "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Spectre Strategy",
+      "date": "2026-04-08",
+      "alp": 28,
+      "coal": 24,
+      "grn": 12,
+      "on": 26,
+      "teal": 0.0,
+      "tpp": 51,
+      "n": 1000
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-04-12",
+      "alp": 30,
+      "coal": 22.5,
+      "grn": 12.5,
+      "on": 24.5,
+      "teal": 0.0,
+      "tpp": 56,
+      "n": 2537
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2026-04-14",
+      "alp": 26,
+      "coal": 23,
+      "grn": 13,
+      "on": 26,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1500
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2026-04-16",
+      "alp": 31,
+      "coal": 21,
+      "grn": 13,
+      "on": 24,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1597
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2026-04-18",
+      "alp": 32,
+      "coal": 23,
+      "grn": 12,
+      "on": 22,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1605
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-04-19",
+      "alp": 30.5,
+      "coal": 23,
+      "grn": 13.5,
+      "on": 21.5,
+      "teal": 0.0,
+      "tpp": 55.5,
+      "n": 2537
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-04-21",
+      "alp": 27,
+      "coal": 20,
+      "grn": 14,
+      "on": 27,
+      "teal": 0.0,
+      "tpp": 53,
+      "n": 1511
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-04-26",
+      "alp": 30,
+      "coal": 22.5,
+      "grn": 14,
+      "on": 22.5,
+      "teal": 0.0,
+      "tpp": 54.5,
+      "n": 2537
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Essential Research",
+      "date": "2026-04-27",
+      "alp": 30,
+      "coal": 24,
+      "grn": 11,
+      "on": 25,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1020
     }
   ]
 }
