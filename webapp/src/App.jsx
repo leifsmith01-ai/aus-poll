@@ -646,8 +646,8 @@ const SEAT_CALIB_2025 = {
 // Format: { seatId: { grn_alp, teal_alp, on_alp, other_alp } }
 const SEAT_PREF_FLOWS_2025 = {
   // ΓöÇΓöÇ ACT ΓöÇΓöÇ
-  101: { grn_alp: 0.8100, teal_alp: 0.6231, on_alp: 0.4300, other_alp: 0.7074 },  // Canberra
-  102: { grn_alp: 0.8926, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Fenner
+  101: { grn_alp: 0.8100, teal_alp: 0.6231, on_alp: 0.2550, other_alp: 0.7074 },  // Canberra
+  102: { grn_alp: 0.8926, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5000 },  // Fenner
   // ΓöÇΓöÇ NSW ΓöÇΓöÇ
   103: { grn_alp: 0.8563, teal_alp: 0.5748, on_alp: 0.1977, other_alp: 0.3620 },  // Banks
   104: { grn_alp: 0.8329, teal_alp: 0.6200, on_alp: 0.3361, other_alp: 0.3735 },  // Barton
@@ -669,14 +669,14 @@ const SEAT_PREF_FLOWS_2025 = {
   122: { grn_alp: 0.7577, teal_alp: 0.5429, on_alp: 0.3050, other_alp: 0.4557 },  // Greenway
   124: { grn_alp: 0.8252, teal_alp: 0.6200, on_alp: 0.1797, other_alp: 0.3719 },  // Hughes
   125: { grn_alp: 0.8315, teal_alp: 0.6390, on_alp: 0.3207, other_alp: 0.3158 },  // Hume
-  126: { grn_alp: 0.8399, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5779 },  // Hunter
+  126: { grn_alp: 0.8399, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5779 },  // Hunter (national-default fallback; ex-Labor ON vote here may flow more evenly — candidate for per-seat refinement)
   127: { grn_alp: 0.8709, teal_alp: 0.6200, on_alp: 0.2944, other_alp: 0.5000 },  // Kingsford Smith
   128: { grn_alp: 0.8597, teal_alp: 0.6200, on_alp: 0.3327, other_alp: 0.4059 },  // Lindsay
   130: { grn_alp: 0.8700, teal_alp: 0.5041, on_alp: 0.1774, other_alp: 0.3473 },  // Lyne
   131: { grn_alp: 0.8195, teal_alp: 0.6200, on_alp: 0.2556, other_alp: 0.4438 },  // Macarthur
   132: { grn_alp: 0.6012, teal_alp: 0.3170, on_alp: 0.0874, other_alp: 0.1669 },  // Mackellar
   133: { grn_alp: 0.8695, teal_alp: 0.6200, on_alp: 0.1866, other_alp: 0.4460 },  // Macquarie
-  315: { grn_alp: 0.8817, teal_alp: 0.3912, on_alp: 0.4300, other_alp: 0.5000 },  // McMahon
+  315: { grn_alp: 0.8817, teal_alp: 0.3912, on_alp: 0.2550, other_alp: 0.5000 },  // McMahon
   134: { grn_alp: 0.7933, teal_alp: 0.6200, on_alp: 0.2011, other_alp: 0.5000 },  // Mitchell
   135: { grn_alp: 0.7977, teal_alp: 0.5565, on_alp: 0.2664, other_alp: 0.4056 },  // New England
   136: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.2720, other_alp: 0.4960 },  // Newcastle
@@ -719,7 +719,7 @@ const SEAT_PREF_FLOWS_2025 = {
   168: { grn_alp: 0.8587, teal_alp: 0.5071, on_alp: 0.3590, other_alp: 0.5581 },  // Leichhardt
   169: { grn_alp: 0.8842, teal_alp: 0.6200, on_alp: 0.1951, other_alp: 0.5591 },  // Lilley
   302: { grn_alp: 0.8547, teal_alp: 0.6200, on_alp: 0.3375, other_alp: 0.4105 },  // Longman
-  170: { grn_alp: 0.7976, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.3215 },  // Maranoa
+  170: { grn_alp: 0.7976, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.3215 },  // Maranoa
   171: { grn_alp: 0.8212, teal_alp: 0.5903, on_alp: 0.1188, other_alp: 0.4550 },  // McPherson
   172: { grn_alp: 0.6728, teal_alp: 0.5477, on_alp: 0.1744, other_alp: 0.4322 },  // Moncrieff
   173: { grn_alp: 0.8856, teal_alp: 0.6200, on_alp: 0.2001, other_alp: 0.5101 },  // Moreton
@@ -743,8 +743,8 @@ const SEAT_PREF_FLOWS_2025 = {
   // ΓöÇΓöÇ TAS ΓöÇΓöÇ
   192: { grn_alp: 0.8180, teal_alp: 0.5629, on_alp: 0.2949, other_alp: 0.4626 },  // Bass
   193: { grn_alp: 0.9074, teal_alp: 0.5682, on_alp: 0.4603, other_alp: 0.5000 },  // Braddon
-  319: { grn_alp: 0.8857, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Clark
-  195: { grn_alp: 0.9176, teal_alp: 0.3903, on_alp: 0.4300, other_alp: 0.5000 },  // Franklin
+  319: { grn_alp: 0.8857, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5000 },  // Clark
+  195: { grn_alp: 0.9176, teal_alp: 0.3903, on_alp: 0.2550, other_alp: 0.5000 },  // Franklin
   196: { grn_alp: 0.7680, teal_alp: 0.6746, on_alp: 0.3504, other_alp: 0.5395 },  // Lyons
   // ΓöÇΓöÇ VIC ΓöÇΓöÇ
   197: { grn_alp: 0.8449, teal_alp: 0.6252, on_alp: 0.1941, other_alp: 0.3259 },  // Aston
@@ -776,7 +776,7 @@ const SEAT_PREF_FLOWS_2025 = {
   222: { grn_alp: 0.8249, teal_alp: 0.4994, on_alp: 0.2736, other_alp: 0.4701 },  // Lalor
   322: { grn_alp: 0.9188, teal_alp: 0.4961, on_alp: 0.1782, other_alp: 0.5000 },  // Macnamara
   224: { grn_alp: 0.6492, teal_alp: 0.6200, on_alp: 0.2399, other_alp: 0.3260 },  // Mallee
-  225: { grn_alp: 0.8995, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Maribyrnong
+  225: { grn_alp: 0.8995, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5000 },  // Maribyrnong
   226: { grn_alp: 0.7558, teal_alp: 0.6200, on_alp: 0.2286, other_alp: 0.5463 },  // McEwen
   228: { grn_alp: 0.8100, teal_alp: 0.4066, on_alp: 0.3474, other_alp: 0.6646 },  // Melbourne
   229: { grn_alp: 0.8317, teal_alp: 0.5722, on_alp: 0.1364, other_alp: 0.2443 },  // Menzies
@@ -799,7 +799,7 @@ const SEAT_PREF_FLOWS_2025 = {
   242: { grn_alp: 0.8682, teal_alp: 0.5716, on_alp: 0.1134, other_alp: 0.4457 },  // Moore
   243: { grn_alp: 0.8855, teal_alp: 0.6200, on_alp: 0.2387, other_alp: 0.4425 },  // O'Connor
   244: { grn_alp: 0.6869, teal_alp: 0.6200, on_alp: 0.2265, other_alp: 0.5709 },  // Pearce
-  245: { grn_alp: 0.8790, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Perth
+  245: { grn_alp: 0.8790, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5000 },  // Perth
   247: { grn_alp: 0.8596, teal_alp: 0.6200, on_alp: 0.1875, other_alp: 0.6728 },  // Swan
   248: { grn_alp: 0.7921, teal_alp: 0.6200, on_alp: 0.1850, other_alp: 0.2888 },  // Tangney
 };
@@ -808,8 +808,17 @@ const SEAT_PREF_FLOWS_2025 = {
 // ── 2025 national-average preference flows (AEC DOP) ──────────────────────────
 // These are the baseline values the aggregate sliders default to.  Used as the
 // reference point for the additive-delta calculation in applyPrefDelta().
+// One Nation → ALP flow by federal election (AEC DOP; Antony Green): 2016 ~49.6%,
+// 2019 34.7%, 2022 35.7%, 2025 25.5% (74.5% to Coalition — the highest-ever flow to
+// the Coalition). on_alp is set to the 2025 actual (0.255). A large ON primary surge
+// therefore correctly helps the Coalition's 2PP, not Labor's.
+// By-election validation (not baked into constants): the 2026 Farrer by-election saw
+// ON win the seat (39.5% FP → 57.6% TCP, def. IND 42.4%) on strong Coalition→ON
+// preferences — the first lower-house seat ON has won at an election. This was an
+// ON-vs-Independent final, a matchup the model does not yet handle (only ON-vs-ALP and
+// ON-vs-Coalition); see "Out of scope" in the plan for the deferred branch.
 const PREF_FLOWS_2025 = {
-  grn_alp: 0.81, teal_alp: 0.62, on_alp: 0.43, other_alp: 0.50,
+  grn_alp: 0.81, teal_alp: 0.62, on_alp: 0.255, other_alp: 0.50,
   coal_alp_v_on: 0.10, grn_alp_v_on: 0.90, teal_alp_v_on: 0.75, other_alp_v_on: 0.60,
   alp_on_v_coal: 0.20, grn_on_v_coal: 0.08, teal_on_v_coal: 0.12, other_on_v_coal: 0.25,
 };
@@ -830,16 +839,25 @@ function applyPrefDelta(seatBase, prefFlows) {
   };
 }
 
-// Compute the 2PP delta between using per-seat DOP flows vs national-average flows
-// at zero swing for a given seat.  This corrects SEAT_CALIB_2025, which was computed
-// against national-average flows; subtracting this delta from the stored calibration
-// gives a residual calibrated against the actual per-seat DOP flows instead.
+// Preference-flow basis that SEAT_CALIB_2025 and the SEAT_FP_2025 alp/coal
+// back-calculation were originally fitted against (national 2025 averages with
+// on_alp = 0.43). dopCalibDelta must re-base against THIS frozen basis — not the
+// live PREF_FLOWS_2025 default — so that lowering the national ON→ALP flow to the
+// 2025 actual (0.255) sharpens ON-swing sensitivity without shifting the zero-swing
+// projection away from the 2025 AEC result (the calibration term fades to zero at
+// ±5pp national swing, after which the primary model with the new flow takes over).
+const CALIB_BASIS_FLOWS = { grn_alp: 0.81, teal_alp: 0.62, on_alp: 0.43, other_alp: 0.50 };
+
+// Compute the 2PP delta between using per-seat DOP flows vs the calibration-basis
+// national flows at zero swing for a given seat.  This corrects SEAT_CALIB_2025, which
+// was computed against those national-average flows; subtracting this delta from the
+// stored calibration gives a residual calibrated against the actual per-seat DOP flows.
 // Returns 0 for seats without DOP or FP data (no correction needed).
 function dopCalibDelta(seatId) {
   const fp = SEAT_FP_2025[seatId];
   const dop = SEAT_PREF_FLOWS_2025[seatId];
   if (!fp || !dop) return 0;
-  const nat = PREF_FLOWS_2025;
+  const nat = CALIB_BASIS_FLOWS;
   const gd = dop.grn_alp   ?? nat.grn_alp,  gn = nat.grn_alp;
   const td = dop.teal_alp  ?? nat.teal_alp, tn = nat.teal_alp;
   const od = dop.on_alp    ?? nat.on_alp,   on_ = nat.on_alp;
@@ -1997,13 +2015,46 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
   };
 }
 
+// Percentage share x/total*100 with a guard: returns 50 (a neutral 2PP tie) when the
+// denominator is zero or the result is non-finite. Prevents NaN/Infinity from
+// propagating into winner logic when degenerate primaries (e.g. an extreme One
+// Nation surge that empties a vote pool) produce an empty preference bucket.
+const safePct = (x, total) => (total > 0 && Number.isFinite(x / total)) ? (x / total) * 100 : 50;
+
+// Build a coherent first-preference vector that sums to ~100, with `other` as the
+// residual pool. When the named parties sum to <=100, behaviour is unchanged:
+// other = 100 - sum (preserving all existing results). When they exceed 100 — e.g.
+// after a large One Nation increase is added on top of the seat baseline — the excess
+// is drawn proportionally from the "free" (non-locked) named parties so user-set /
+// overridden parties keep their values; if the free pool can't absorb it (or all
+// parties are locked), every named party is scaled proportionally to 100.
+function normalizePrimaries(fp, locked = []) {
+  const keys = ["alp", "coal", "grn", "teal", "on"];
+  const v = {};
+  for (const k of keys) v[k] = Math.max(0, fp[k] ?? 0);
+  const named = keys.reduce((s, k) => s + v[k], 0);
+  if (named <= 100) return { ...v, other: Math.max(0, 100 - named) };
+  const excess = named - 100;
+  const lockedSet = new Set(locked);
+  const free = keys.filter(k => !lockedSet.has(k));
+  const freeSum = free.reduce((s, k) => s + v[k], 0);
+  if (freeSum > 0 && freeSum >= excess) {
+    for (const k of free) v[k] = Math.max(0, v[k] - excess * (v[k] / freeSum));
+  } else {
+    const scale = 100 / named;
+    for (const k of keys) v[k] *= scale;
+  }
+  const newNamed = keys.reduce((s, k) => s + v[k], 0);
+  return { ...v, other: Math.max(0, 100 - newNamed) };
+}
+
 // Compute implied national ALP 2PP from primary votes and preference flows.
 // Used to derive nat2ppSwing for the uniform swing model.
 function computeNat2pp(prim, flows) {
-  const other = Math.max(0, 100 - prim.alp - prim.coal - prim.grn - prim.teal - prim.on);
-  const a = prim.alp + prim.grn * flows.grn_alp + prim.teal * flows.teal_alp + prim.on * flows.on_alp + other * flows.other_alp;
-  const c = prim.coal + prim.grn * (1 - flows.grn_alp) + prim.teal * (1 - flows.teal_alp) + prim.on * (1 - flows.on_alp) + other * (1 - flows.other_alp);
-  return a / (a + c) * 100;
+  const p = normalizePrimaries(prim);
+  const a = p.alp + p.grn * flows.grn_alp + p.teal * flows.teal_alp + p.on * flows.on_alp + p.other * flows.other_alp;
+  const c = p.coal + p.grn * (1 - flows.grn_alp) + p.teal * (1 - flows.teal_alp) + p.on * (1 - flows.on_alp) + p.other * (1 - flows.other_alp);
+  return safePct(a, a + c);
 }
 
 // ── Named model parameters ───────────────────────────────────────────────────
@@ -2088,7 +2139,11 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         teal: Math.max(0, override.teal ?? (seatBase.teal + sSwings.teal)),
         on: Math.max(0, override.on ?? (seatBase.on + sSwings.on)),
       };
-      newFp.other = Math.max(0, 100 - newFp.alp - newFp.coal - newFp.grn - newFp.teal - newFp.on);
+      // Normalize to sum to 100. User-overridden parties are locked so the excess
+      // (e.g. from a large ON increase added on top of the baseline) is drawn from
+      // the unset parties rather than pushing the total over 100% / pinning other to 0.
+      const lockedParties = ["alp", "coal", "grn", "teal", "on"].filter(k => override[k] != null);
+      newFp = normalizePrimaries(newFp, lockedParties);
       effAlpSwing = newFp.alp - seatBase.alp;
       effCoalSwing = newFp.coal - seatBase.coal;
       effGrnSwing = newFp.grn - seatBase.grn;
@@ -2173,7 +2228,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         const g = Math.max(0, sb.grn + sSwings.grn);
         const t = Math.max(0, sb.teal + sSwings.teal);
         const o = Math.max(0, sb.on + sSwings.on);
-        return { alp: a, coal: c, grn: g, teal: t, on: o, other: Math.max(0, 100 - a - c - g - t - o) };
+        return normalizePrimaries({ alp: a, coal: c, grn: g, teal: t, on: o });
       })();
       // Use ON-race-specific flows: grn_alp_v_on, teal_alp_v_on, other_alp_v_on (all higher
       // toward ALP than standard rates because voters strongly oppose ON over ALP)
@@ -2181,7 +2236,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         + fp.coal * prefFlows.coal_alp_v_on + fp.other * ef.other_alp_v_on;
       const onTcp = fp.on + fp.grn * (1 - ef.grn_alp_v_on) + fp.teal * (1 - ef.teal_alp_v_on)
         + fp.coal * (1 - prefFlows.coal_alp_v_on) + fp.other * (1 - ef.other_alp_v_on);
-      const onPct = hasTcpOverride ? override.tcpPct : onTcp / (alpTcp + onTcp) * 100;
+      const onPct = hasTcpOverride ? override.tcpPct : safePct(onTcp, alpTcp + onTcp);
       const wGroup = onPct >= 50 ? "one_nation" : "alp";
       const wParty = onPct >= 50 ? "ON" : "ALP";
       const wPct = onPct >= 50 ? onPct : 100 - onPct;
@@ -2189,7 +2244,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       // Calculate the standard 2PP (ALP vs Coal) to keep the national tracker accurate
       const a2 = fp.alp + fp.grn * prefFlows.grn_alp + fp.teal * prefFlows.teal_alp + fp.on * prefFlows.on_alp + fp.other * prefFlows.other_alp;
       const c2 = fp.coal + fp.grn * (1 - prefFlows.grn_alp) + fp.teal * (1 - prefFlows.teal_alp) + fp.on * (1 - prefFlows.on_alp) + fp.other * (1 - prefFlows.other_alp);
-      const synthAlp2pp = a2 / (a2 + c2) * 100;
+      const synthAlp2pp = safePct(a2, a2 + c2);
 
       return {
         ...seat,
@@ -2218,7 +2273,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         const g = Math.max(0, sb.grn + sSwings.grn);
         const t = Math.max(0, sb.teal + sSwings.teal);
         const o = Math.max(0, sb.on + sSwings.on);
-        return { alp: a, coal: c, grn: g, teal: t, on: o, other: Math.max(0, 100 - a - c - g - t - o) };
+        return normalizePrimaries({ alp: a, coal: c, grn: g, teal: t, on: o });
       })();
       // Use ON-race-specific flows: grn_on_v_coal, teal_on_v_coal, other_on_v_coal (all low
       // toward ON because Greens/teal voters strongly prefer Coalition over ON when forced to choose)
@@ -2226,7 +2281,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         + fp.teal * ef.teal_on_v_coal + fp.other * ef.other_on_v_coal;
       const coalTcp = fp.coal + fp.alp * (1 - prefFlows.alp_on_v_coal) + fp.grn * (1 - ef.grn_on_v_coal)
         + fp.teal * (1 - ef.teal_on_v_coal) + fp.other * (1 - ef.other_on_v_coal);
-      const onPct = hasTcpOverride ? override.tcpPct : onTcp / (onTcp + coalTcp) * 100;
+      const onPct = hasTcpOverride ? override.tcpPct : safePct(onTcp, onTcp + coalTcp);
       const coalP = seat.tcp.find(t => ["LP", "LNP", "NP", "CLP"].includes(t.party))?.party ?? "LP";
       const wGroup = onPct >= 50 ? "one_nation" : "coalition";
       const wParty = onPct >= 50 ? "ON" : coalP;
@@ -2235,7 +2290,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
       // Calculate the standard 2PP (ALP vs Coal) to keep the national tracker accurate
       const a2 = fp.alp + fp.grn * prefFlows.grn_alp + fp.teal * prefFlows.teal_alp + fp.on * prefFlows.on_alp + fp.other * prefFlows.other_alp;
       const c2 = fp.coal + fp.grn * (1 - prefFlows.grn_alp) + fp.teal * (1 - prefFlows.teal_alp) + fp.on * (1 - prefFlows.on_alp) + fp.other * (1 - prefFlows.other_alp);
-      const synthAlp2pp = a2 / (a2 + c2) * 100;
+      const synthAlp2pp = safePct(a2, a2 + c2);
 
       return {
         ...seat,
@@ -2273,7 +2328,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
             : prefFlows;
         const a2 = newFp.alp + newFp.grn * ef.grn_alp + newFp.teal * ef.teal_alp + newFp.on * ef.on_alp + newFp.other * ef.other_alp;
         const c2 = newFp.coal + newFp.grn * (1 - ef.grn_alp) + newFp.teal * (1 - ef.teal_alp) + newFp.on * (1 - ef.on_alp) + newFp.other * (1 - ef.other_alp);
-        projAlp2pp = a2 / (a2 + c2) * 100;
+        projAlp2pp = safePct(a2, a2 + c2);
         // Apply calibration offset (Phase 1): blends to zero at ±5pp national swing.
         // dopCalibDelta corrects for SEAT_CALIB_2025 having been computed against national
         // average flows; subtracting it re-bases the calibration to the actual DOP flows.
@@ -2289,21 +2344,23 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
           // Primary-based: apply state-blended swing to seat-level 2025 primaries → 2PP.
           // Use per-seat preference flows if available (Phase 3), otherwise national average.
           const sSwings = blendSwings(swings, stateSwings, seat.state);
-          const projFp = {
-            alp: Math.max(0, seatFp.alp + sSwings.alp),
-            coal: Math.max(0, seatFp.coal + sSwings.coal),
-            grn: Math.max(0, seatFp.grn + sSwings.grn),
-            teal: Math.max(0, seatFp.teal + sSwings.teal),
-            on: Math.max(0, seatFp.on + sSwings.on),
-          };
-          projFp.other = Math.max(0, 100 - projFp.alp - projFp.coal - projFp.grn - projFp.teal - projFp.on);
+          // Renormalize swung primaries to sum to 100 (nothing locked) so a large
+          // national ON swing draws proportionally from other parties rather than
+          // pushing the seat's total over 100%.
+          const projFp = normalizePrimaries({
+            alp: seatFp.alp + sSwings.alp,
+            coal: seatFp.coal + sSwings.coal,
+            grn: seatFp.grn + sSwings.grn,
+            teal: seatFp.teal + sSwings.teal,
+            on: seatFp.on + sSwings.on,
+          });
           // AEC per-seat baseline + national slider delta; fall back to slider only.
           const ef = SEAT_PREF_FLOWS_2025[seat.id]
             ? applyPrefDelta(SEAT_PREF_FLOWS_2025[seat.id], prefFlows)
             : prefFlows;
           const a2 = projFp.alp + projFp.grn * ef.grn_alp + projFp.teal * ef.teal_alp + projFp.on * ef.on_alp + projFp.other * ef.other_alp;
           const c2 = projFp.coal + projFp.grn * (1 - ef.grn_alp) + projFp.teal * (1 - ef.teal_alp) + projFp.on * (1 - ef.on_alp) + projFp.other * (1 - ef.other_alp);
-          projAlp2pp = a2 / (a2 + c2) * 100;
+          projAlp2pp = safePct(a2, a2 + c2);
           // Apply calibration offset (Phase 1): blends to zero at ±5pp national swing.
           // dopCalibDelta corrects for SEAT_CALIB_2025 having been computed against national
           // average flows; subtracting it re-bases the calibration to the actual DOP flows.
@@ -3377,11 +3434,11 @@ export default function App() {
     // Standard flows (used in ALP vs Coalition finals)
     grn_alp: 0.81,
     teal_alp: 0.62,
-    // ON→ALP: 2025 AEC DOP result (43.0%). This matches PREF_FLOWS_2025 so that
-    // the model loads clean (no scenario active) and the Reset button restores
-    // to the same state. Use the slider to explore other historical values
-    // (range: 0.14–0.43, historical average ~0.27).
-    on_alp: 0.43,
+    // ON→ALP: 2025 AEC DOP result (25.5%; 74.5% to the Coalition — highest ever).
+    // This matches PREF_FLOWS_2025 so the model loads clean (no scenario active) and
+    // the Reset button restores to the same state. Use the slider to explore other
+    // historical values (2016 ~49.6%, 2019 34.7%, 2022 35.7%, 2025 25.5%).
+    on_alp: 0.255,
     other_alp: 0.50,
     coal_alp: 0.05, // Coal → ALP in 3rd party contests (usually very low)
     alp_grn: 0.85,
@@ -4572,8 +4629,9 @@ export default function App() {
   const PREF_FLOW_RANGES = {
     grn_alp: [0.80, 0.86],
     teal_alp: [0.62, 0.74],
-    // ON→ALP: 14.9% in 2022 (low-hostility), 43.0% in 2025 (peak anti-ON). Default = 27% (avg).
-    on_alp: [0.14, 0.43],
+    // ON→ALP federal series (AEC DOP): 2016 ~49.6%, 2019 34.7%, 2022 35.7%,
+    // 2025 25.5% (highest-ever flow to the Coalition). Default = 25.5% (2025 actual).
+    on_alp: [0.20, 0.50],
     other_alp: [0.50, 0.57],
     // Coal→ALP in ON vs ALP: 2025 was ~15%. Range reflects limited historical data.
     coal_alp_v_on: [0.10, 0.20],
@@ -8859,7 +8917,7 @@ P(ALP wins seat i) = Φ( (2PP_ALP(i) − 50) / σ_seat(i) )`
                   {[
                     ["σ_nat", "from poll CI", "National 2PP swing uncertainty; correlated across all seats"],
                     ["σ_res", "1.0 pp", "Seat-level deviation from national swing — calibrated from 2019→2022 RMSE"],
-                    ["σ_pref", "0.8 pp", "Historical inter-election preference flow variation (e.g. ON→ALP: 14.9% in 2022, 43.0% in 2025)"],
+                    ["σ_pref", "0.8 pp", "Historical inter-election preference flow variation (e.g. ON→ALP: 35.7% in 2022, 25.5% in 2025)"],
                     ["Φ", "Normal CDF", "Abramowitz & Stegun 26.2.17 polynomial approximation, max error 7.5×10⁻⁸"],
                   ].map(([p, v, src]) => (
                     <tr key={p}>
@@ -8927,7 +8985,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                 <tbody>
                   {[
                     ["Uniform national swings", "State-level swing variation is not modelled. Labor may swing harder in Queensland than Victoria; the model applies the same national Δ everywhere unless state swings are set manually."],
-                    ["Fixed preference flows", "Flow constants do not vary by candidate, campaign, or division. Real flows can differ by several pp from these averages, as the ON→ALP example illustrates (14.9% in 2022 vs 43.0% in 2025)."],
+                    ["Fixed preference flows", "Flow constants do not vary by candidate, campaign, or division. Real flows can differ by several pp from these averages, as the ON→ALP example illustrates (35.7% in 2022 vs 25.5% in 2025)."],
                     ["Hardcoded teal seats", "Six seats are designated teal-contest seats: Warringah, Wentworth, Bradfield, Mackellar, Kooyong, Goldstein. Teal candidates in other seats are not automatically modelled."],
                     ["Independent TCP overrides required", "Where the final count is ALP vs. an independent (not Coalition), the user must set the TCP percentage manually on the Model tab."],
                     ["No redistribution modelling", "Baselines use 2025 electoral boundaries. Boundary changes between elections are not reflected."],
