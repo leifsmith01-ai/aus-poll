@@ -306,14 +306,22 @@ A previous bug caused a white screen when `STYLES` was defined inside the compon
 - **First preferences (FP):** Primary votes before preference distribution
 - **Distribution of preferences (DOP):** Count-by-count elimination of minor candidates
 
-### Key preference flow constants (as used in poll_aggregator.py)
+### Key preference flow constants (`DEFAULT_PREF_FLOWS`, 2025 AEC DOP)
 
-| Group | →ALP flow |
-|-------|-----------|
-| Greens (GRN) | ~85.7% |
-| Teal independents | ~73.5% |
-| One Nation (ON) | ~14.9% |
-| UAP | ~25–30% |
+These are the 2025 defaults actually used in `poll_aggregator.py` / `PREF_FLOWS_2025`:
+
+| Group | →ALP flow (2025) |
+|-------|------------------|
+| Greens (GRN) | ~81.0% |
+| Teal independents | ~62.0% |
+| One Nation (ON) | ~25.5% (74.5% to Coalition) |
+| Other minor | ~50% |
+
+**One Nation → ALP has shifted every election** (AEC DOP; Antony Green): 2016 ~49.6%,
+2019 34.7%, 2022 35.7%, 2025 25.5% (the highest-ever flow to the Coalition). A rising ON
+primary therefore favours the Coalition, not Labor. The 2026 Farrer by-election (ON won
+the seat on strong Coalition→ON preferences) is additional validation — note that an
+ON-vs-Independent final is not yet modelled (only ON-vs-ALP and ON-vs-Coalition).
 
 ### AEC data files (per election)
 
