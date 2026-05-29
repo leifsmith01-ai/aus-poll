@@ -814,13 +814,28 @@ const SEAT_PREF_FLOWS_2025 = {
 // therefore correctly helps the Coalition's 2PP, not Labor's.
 // By-election validation (not baked into constants): the 2026 Farrer by-election saw
 // ON win the seat (39.5% FP → 57.6% TCP, def. IND 42.4%) on strong Coalition→ON
-// preferences — the first lower-house seat ON has won at an election. This was an
-// ON-vs-Independent final, a matchup the model does not yet handle (only ON-vs-ALP and
-// ON-vs-Coalition); see "Out of scope" in the plan for the deferred branch.
+// preferences — the first lower-house seat ON has won at an election. It was an
+// ON-vs-Independent final, now modelled via the on_v_ind branch (flows below).
 const PREF_FLOWS_2025 = {
   grn_alp: 0.81, teal_alp: 0.62, on_alp: 0.255, other_alp: 0.50,
   coal_alp_v_on: 0.10, grn_alp_v_on: 0.90, teal_alp_v_on: 0.75, other_alp_v_on: 0.60,
   alp_on_v_coal: 0.20, grn_on_v_coal: 0.08, teal_on_v_coal: 0.12, other_on_v_coal: 0.25,
+  // ON vs Independent final (Farrer 2026-type): sources distribute between ON and the
+  // independent. Coalition voters flow strongly to ON (HTV cards), ALP/Greens strongly
+  // to the independent. Calibrated to the 2026 Farrer by-election (the only federal
+  // precedent — ON won 57.6% with Coalition→ON ~0.61–0.83); necessarily approximate.
+  coal_on_v_ind: 0.65, alp_on_v_ind: 0.15, grn_on_v_ind: 0.08, other_on_v_ind: 0.50,
+};
+
+// ── Per-seat ON-race preference flows (2025 AEC DOP) ──────────────────────────
+// Overrides the national ON-race flows for seats where ON actually reached the final
+// two in 2025, so high-ON regional seats are not modelled on national averages. Only
+// the keys present here override; the rest fall back to the national/slider flows.
+//   Hunter (126): ALP-vs-ON in 2025. The Nationals directed 83% of preferences to ON
+//   (AEC 2025 DOP), i.e. Coal→ALP = 0.17 vs the 0.10 national default — its ex-Labor
+//   ON base flows a little more evenly. (Antony Green: Hunter NP→ON 83%.)
+const SEAT_ON_RACE_FLOWS = {
+  126: { coal_alp_v_on: 0.17 }, // Hunter (NSW) — Nationals → ON 83% (AEC 2025 DOP)
 };
 
 // Apply the national slider delta on top of a per-seat AEC flow baseline.
@@ -2057,6 +2072,44 @@ function computeNat2pp(prim, flows) {
   return safePct(a, a + c);
 }
 
+// ── ON-race two-candidate-preferred share helpers ─────────────────────────────
+// Each returns ON's TCP% in a final pairing, distributing the eliminated parties'
+// preferences via the ON-race flows in `ef`. fp must sum to ~100 (normalizePrimaries).
+function onVsAlpPct(fp, ef) {
+  const alpTcp = fp.alp + fp.grn * ef.grn_alp_v_on + fp.teal * ef.teal_alp_v_on + fp.coal * ef.coal_alp_v_on + fp.other * ef.other_alp_v_on;
+  const onTcp = fp.on + fp.grn * (1 - ef.grn_alp_v_on) + fp.teal * (1 - ef.teal_alp_v_on) + fp.coal * (1 - ef.coal_alp_v_on) + fp.other * (1 - ef.other_alp_v_on);
+  return safePct(onTcp, alpTcp + onTcp);
+}
+function onVsCoalPct(fp, ef) {
+  const onTcp = fp.on + fp.alp * ef.alp_on_v_coal + fp.grn * ef.grn_on_v_coal + fp.teal * ef.teal_on_v_coal + fp.other * ef.other_on_v_coal;
+  const coalTcp = fp.coal + fp.alp * (1 - ef.alp_on_v_coal) + fp.grn * (1 - ef.grn_on_v_coal) + fp.teal * (1 - ef.teal_on_v_coal) + fp.other * (1 - ef.other_on_v_coal);
+  return safePct(onTcp, onTcp + coalTcp);
+}
+function onVsIndPct(fp, ef) {
+  const onTcp = fp.on + fp.alp * ef.alp_on_v_ind + fp.coal * ef.coal_on_v_ind + fp.grn * ef.grn_on_v_ind + fp.other * ef.other_on_v_ind;
+  const indTcp = fp.teal + fp.alp * (1 - ef.alp_on_v_ind) + fp.coal * (1 - ef.coal_on_v_ind) + fp.grn * (1 - ef.grn_on_v_ind) + fp.other * (1 - ef.other_on_v_ind);
+  return safePct(onTcp, onTcp + indTcp);
+}
+
+// Seat baseline primaries (unswung), normalized to sum to 100. Used to compute the
+// zero-swing ON% for calibrating ON-race seats to their actual 2025 result.
+function seatBaselineFp(seatId) {
+  const sb = getSeatFpBaseline(seatId) ?? BASELINE_2025;
+  return normalizePrimaries({ alp: sb.alp, coal: sb.coal, grn: sb.grn, teal: sb.teal ?? 0, on: sb.on });
+}
+
+// For seats where ON was actually in the 2025 final two (Hunter ALP-v-ON, Maranoa
+// LNP-v-ON), the back-calculated primaries don't on their own reproduce an ON-vs-major
+// count, so anchor the modelled ON% to the real 2025 TCP at zero swing and fade the
+// offset out by ±5pp national swing (mirroring SEAT_CALIB_2025). For surge-detected ON
+// races (ON not in the 2025 TCP) there is no actual to anchor to, so this is a no-op.
+function calibrateOnPct(seat, modelOnPct, baselineOnPct, nat2ppSwing) {
+  const onEntry = seat.tcp.find(t => t.party === "ON");
+  if (!onEntry) return modelOnPct;
+  const blend = Math.max(0, 1 - Math.abs(nat2ppSwing) / MODEL_PARAMS.calibFadeHalfWidth);
+  return Math.min(100, Math.max(0, modelOnPct + (onEntry.pct - baselineOnPct) * blend));
+}
+
 // ── Named model parameters ───────────────────────────────────────────────────
 // Collected so the previously scattered magic numbers have one documented home.
 // Touch these rather than the raw literals, unless you're changing the logic
@@ -2175,21 +2228,32 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     const hasCoal = tcpP.some(p => ["LP", "LNP", "NP", "CLP"].includes(p));
     const hasGrn = tcpP.includes("GRN");
     const hasTeal = tcpP.some(p => ["IND", "CA"].includes(p));
+    const hasOnTcp = tcpP.includes("ON");
 
-    // Auto-detect ON TCP matchup when ON is above threshold, unless manually overridden.
-    // Only applies to ALP vs Coalition seats — Greens/Teal seats have such high local
-    // primary votes for those candidates that ON cannot realistically reach the final 2CP.
+    // Auto-detect ON TCP matchup, unless manually overridden.
     let activeTcpMatchup = override?.tcpMatchup ?? null;
-    if (!activeTcpMatchup && estOnFp >= onThreshold && hasAlp && hasCoal) {
+    if (!activeTcpMatchup && hasOnTcp) {
+      // Seats whose 2025 TCP already pairs ON with a major (Hunter ALP-v-ON, Maranoa
+      // LNP-v-ON): default to that ON race so they are swing-modelled rather than left
+      // frozen at the static 2025 result.
+      if (hasAlp) activeTcpMatchup = "on_v_alp";
+      else if (hasCoal) activeTcpMatchup = "on_v_coal";
+    }
+    if (!activeTcpMatchup && estOnFp >= onThreshold) {
       const _sb = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
       const estAlp = override?.alp != null ? override.alp : Math.max(0, _sb.alp + sSwings.alp);
       const estCoal = override?.coal != null ? override.coal : Math.max(0, _sb.coal + sSwings.coal);
-      if (estOnFp > estAlp && estCoal >= estAlp) {
-        // ALP eliminated (fewest votes) → ON vs Coalition final
-        activeTcpMatchup = "on_v_coal";
-      } else if (estOnFp > estCoal && estAlp >= estCoal) {
-        // Coalition eliminated (fewest votes) → ON vs ALP final
-        activeTcpMatchup = "on_v_alp";
+      if (hasAlp && hasCoal) {
+        // Traditional ALP-vs-Coalition seat where ON surges into the final 2CP.
+        if (estOnFp > estAlp && estCoal >= estAlp) {
+          activeTcpMatchup = "on_v_coal";   // ALP eliminated → ON vs Coalition final
+        } else if (estOnFp > estCoal && estAlp >= estCoal) {
+          activeTcpMatchup = "on_v_alp";    // Coalition eliminated → ON vs ALP final
+        }
+      } else if (hasTeal && !(hasAlp && hasCoal)) {
+        // Teal/independent seat (e.g. Farrer 2026): if ON surges past both majors it
+        // reaches the final two against the independent → ON vs Independent final.
+        if (estOnFp > estAlp && estOnFp > estCoal) activeTcpMatchup = "on_v_ind";
       }
     }
     const isAutoMatchup = activeTcpMatchup !== null && !(override?.tcpMatchup);
@@ -2220,7 +2284,9 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     // Uses ON-race-specific preference flows (grn_alp_v_on etc.) which are typically
     // higher toward ALP than standard flows because voters more strongly oppose ON.
     if (activeTcpMatchup === "on_v_alp") {
-      const ef = override?.prefFlows ?? prefFlows;
+      // Effective flows: national/slider base, then per-seat ON-race overrides
+      // (SEAT_ON_RACE_FLOWS, e.g. Hunter's stronger Coal→ON), then user override on top.
+      const ef = { ...prefFlows, ...(SEAT_ON_RACE_FLOWS[seat.id] ?? {}), ...(override?.prefFlows ?? {}) };
       const fp = newFp ?? (() => {
         const sb = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
         const a = Math.max(0, sb.alp + sSwings.alp);
@@ -2230,13 +2296,11 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         const o = Math.max(0, sb.on + sSwings.on);
         return normalizePrimaries({ alp: a, coal: c, grn: g, teal: t, on: o });
       })();
-      // Use ON-race-specific flows: grn_alp_v_on, teal_alp_v_on, other_alp_v_on (all higher
-      // toward ALP than standard rates because voters strongly oppose ON over ALP)
-      const alpTcp = fp.alp + fp.grn * ef.grn_alp_v_on + fp.teal * ef.teal_alp_v_on
-        + fp.coal * prefFlows.coal_alp_v_on + fp.other * ef.other_alp_v_on;
-      const onTcp = fp.on + fp.grn * (1 - ef.grn_alp_v_on) + fp.teal * (1 - ef.teal_alp_v_on)
-        + fp.coal * (1 - prefFlows.coal_alp_v_on) + fp.other * (1 - ef.other_alp_v_on);
-      const onPct = hasTcpOverride ? override.tcpPct : safePct(onTcp, alpTcp + onTcp);
+      // ON-race flows toward ALP run higher than standard rates because voters strongly
+      // oppose ON. Seats where ON was in the actual 2025 TCP (Hunter) are anchored to that
+      // result at zero swing via calibrateOnPct (a no-op for surge-detected seats).
+      const onPct = hasTcpOverride ? override.tcpPct
+        : calibrateOnPct(seat, onVsAlpPct(fp, ef), onVsAlpPct(seatBaselineFp(seat.id), ef), nat2ppSwing);
       const wGroup = onPct >= 50 ? "one_nation" : "alp";
       const wParty = onPct >= 50 ? "ON" : "ALP";
       const wPct = onPct >= 50 ? onPct : 100 - onPct;
@@ -2265,7 +2329,7 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
     // Uses ON-race-specific preference flows (grn_on_v_coal etc.) which are typically
     // very low toward ON because progressive voters strongly prefer Coalition over ON.
     if (activeTcpMatchup === "on_v_coal") {
-      const ef = override?.prefFlows ?? prefFlows;
+      const ef = { ...prefFlows, ...(SEAT_ON_RACE_FLOWS[seat.id] ?? {}), ...(override?.prefFlows ?? {}) };
       const fp = newFp ?? (() => {
         const sb = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
         const a = Math.max(0, sb.alp + sSwings.alp);
@@ -2275,13 +2339,11 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
         const o = Math.max(0, sb.on + sSwings.on);
         return normalizePrimaries({ alp: a, coal: c, grn: g, teal: t, on: o });
       })();
-      // Use ON-race-specific flows: grn_on_v_coal, teal_on_v_coal, other_on_v_coal (all low
-      // toward ON because Greens/teal voters strongly prefer Coalition over ON when forced to choose)
-      const onTcp = fp.on + fp.alp * prefFlows.alp_on_v_coal + fp.grn * ef.grn_on_v_coal
-        + fp.teal * ef.teal_on_v_coal + fp.other * ef.other_on_v_coal;
-      const coalTcp = fp.coal + fp.alp * (1 - prefFlows.alp_on_v_coal) + fp.grn * (1 - ef.grn_on_v_coal)
-        + fp.teal * (1 - ef.teal_on_v_coal) + fp.other * (1 - ef.other_on_v_coal);
-      const onPct = hasTcpOverride ? override.tcpPct : safePct(onTcp, onTcp + coalTcp);
+      // ON-race flows toward ON run low because Greens/teal voters strongly prefer the
+      // Coalition over ON. Seats where ON was in the actual 2025 TCP (Maranoa) are anchored
+      // to that result at zero swing via calibrateOnPct (a no-op for surge-detected seats).
+      const onPct = hasTcpOverride ? override.tcpPct
+        : calibrateOnPct(seat, onVsCoalPct(fp, ef), onVsCoalPct(seatBaselineFp(seat.id), ef), nat2ppSwing);
       const coalP = seat.tcp.find(t => ["LP", "LNP", "NP", "CLP"].includes(t.party))?.party ?? "LP";
       const wGroup = onPct >= 50 ? "one_nation" : "coalition";
       const wParty = onPct >= 50 ? "ON" : coalP;
@@ -2303,6 +2365,47 @@ function computeModelledSeats(seats, swings, prefFlows, overrides, nat2ppSwing, 
           isOverride: !isAutoMatchup,
           isAutoMatchup,
           activeTcpMatchup: "on_v_coal",
+        },
+      };
+    }
+
+    // ON vs Independent branch (Farrer 2026-type): ON and a community/teal independent
+    // are the two final candidates, both majors eliminated. Coalition voters flow
+    // strongly to ON, ALP/Greens strongly to the independent. The independent's primary
+    // is carried in fp.teal. Flow assumptions (coal_on_v_ind etc.) are calibrated to the
+    // 2026 Farrer by-election — the only federal precedent — and are necessarily coarse.
+    if (activeTcpMatchup === "on_v_ind") {
+      const ef = { ...prefFlows, ...(SEAT_ON_RACE_FLOWS[seat.id] ?? {}), ...(override?.prefFlows ?? {}) };
+      const fp = newFp ?? (() => {
+        const sb = getSeatFpBaseline(seat.id) ?? BASELINE_2025;
+        const a = Math.max(0, sb.alp + sSwings.alp);
+        const c = Math.max(0, sb.coal + sSwings.coal);
+        const g = Math.max(0, sb.grn + sSwings.grn);
+        const t = Math.max(0, sb.teal + sSwings.teal);
+        const o = Math.max(0, sb.on + sSwings.on);
+        return normalizePrimaries({ alp: a, coal: c, grn: g, teal: t, on: o });
+      })();
+      const onPct = hasTcpOverride ? override.tcpPct
+        : calibrateOnPct(seat, onVsIndPct(fp, ef), onVsIndPct(seatBaselineFp(seat.id), ef), nat2ppSwing);
+      const indP = seat.tcp.find(t => ["IND", "CA"].includes(t.party))?.party ?? "IND";
+      const indGroup = TEAL_SEAT_IDS.has(seat.id) ? "teal" : "ind";
+      const wGroup = onPct >= 50 ? "one_nation" : indGroup;
+      const wParty = onPct >= 50 ? "ON" : indP;
+      const wPct = onPct >= 50 ? onPct : 100 - onPct;
+
+      return {
+        ...seat,
+        modelled: {
+          winnerParty: wParty, winnerGroup: wGroup, winnerPct: wPct,
+          // Both majors are eliminated, so there is no meaningful ALP-vs-Coal 2PP for
+          // this seat — leave null so the national 2PP tracker excludes it (as for
+          // other teal/IND seats).
+          projAlp2pp: null,
+          isOnRace: true,
+          changed: wGroup !== getParty(seat.winner.party).group,
+          isOverride: !isAutoMatchup,
+          isAutoMatchup,
+          activeTcpMatchup: "on_v_ind",
         },
       };
     }
@@ -3460,6 +3563,11 @@ export default function App() {
     grn_on_v_coal: 0.08,
     teal_on_v_coal: 0.12,
     other_on_v_coal: 0.25,
+    // ON vs Independent final (Farrer 2026-type) — sources distribute between ON and IND
+    coal_on_v_ind: 0.65,
+    alp_on_v_ind: 0.15,
+    grn_on_v_ind: 0.08,
+    other_on_v_ind: 0.50,
   });
   // Derive swings from primaries vs 2025 baseline — used by computeModelledSeats
   const swings = {
@@ -6759,7 +6867,7 @@ export default function App() {
                             <div style={{ borderTop: "1px solid var(--border-1)", marginTop: 10, paddingTop: 10 }}>
                               <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", marginBottom: 6 }}>TCP Matchup</div>
                               <div style={{ display: "flex", gap: 5 }}>
-                                {[["auto", "Auto"], ["on_v_alp", "ON vs ALP"], ["on_v_coal", "ON vs Coal"]].map(([val, label]) => {
+                                {[["auto", "Auto"], ["on_v_alp", "ON vs ALP"], ["on_v_coal", "ON vs Coal"], ["on_v_ind", "ON vs IND"]].map(([val, label]) => {
                                   const active = (ov.tcpMatchup ?? "auto") === val;
                                   return (
                                     <button key={val}
@@ -6772,7 +6880,9 @@ export default function App() {
                               </div>
                               {ov.tcpMatchup && (
                                 <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 4 }}>
-                                  {ov.tcpMatchup === "on_v_alp" ? "Uses Coal→ALP (ON race) preference flow." : "Uses ALP→ON (vs Coal) preference flow."}
+                                  {ov.tcpMatchup === "on_v_alp" ? "Uses Coal→ALP (ON race) preference flow."
+                                    : ov.tcpMatchup === "on_v_ind" ? "ON vs Independent final (Farrer-type); Coal→ON, ALP/GRN→IND flows."
+                                    : "Uses ALP→ON (vs Coal) preference flow."}
                                 </div>
                               )}
                             </div>
@@ -7643,7 +7753,7 @@ export default function App() {
                                         </div>
                                       ) : (
                                         <div style={{ fontSize: 11, color: "var(--text-4)" }}>
-                                          TCP: {seat.modelled.activeTcpMatchup ? seat.modelled.activeTcpMatchup.replace("on_v_alp", "ON vs ALP").replace("on_v_coal", "ON vs Coal") : `${seat.tcp[0].party} vs ${seat.tcp[1].party}`}
+                                          TCP: {seat.modelled.activeTcpMatchup ? seat.modelled.activeTcpMatchup.replace("on_v_alp", "ON vs ALP").replace("on_v_coal", "ON vs Coal").replace("on_v_ind", "ON vs IND") : `${seat.tcp[0].party} vs ${seat.tcp[1].party}`}
                                           {seat.modelled.region ? ` · Region: ${seat.modelled.region}` : ""}
                                           {" · No demographic data yet (run pipeline/fetch_demographics.py to populate)"}
                                         </div>
