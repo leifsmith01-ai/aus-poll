@@ -6299,7 +6299,7 @@ export default function App() {
                     ) : <div style={{ fontSize: 20, color: "var(--text-4)" }}>—</div>}
                   </div>
                   <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Avg seat 2PP result</div>
                     {seatAvg2pp !== null ? (
                       <>
                         <div style={{ fontSize: 30, fontWeight: 800, color: seatAvg2pp.avg >= 50 ? "#059669" : "#DC2626" }}>{seatAvg2pp.avg.toFixed(1)}%</div>
@@ -7075,7 +7075,7 @@ export default function App() {
                     ) : <div style={{ fontSize: 20, color: "var(--text-4)" }}>—</div>}
                   </div>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Avg seat 2PP result</div>
                     {vicSeatAvg2pp !== null ? (
                       <>
                         <div style={{ fontSize: 30, fontWeight: 800, color: vicSeatAvg2pp.avg >= 50 ? "#059669" : "#DC2626" }}>{vicSeatAvg2pp.avg.toFixed(1)}%</div>
@@ -7579,7 +7579,7 @@ export default function App() {
                       ) : <div style={{ fontSize: 14, color: "var(--text-4)", marginTop: 8 }}>—</div>}
                     </div>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seat 2PP avg (ALP)</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Avg seat 2PP result</div>
                       {seatAvg2ppVal !== null ? (
                         <>
                           <div style={{ fontSize: 30, fontWeight: 800, color: seatAvg2ppVal.avg >= 50 ? "#059669" : "#DC2626" }}>{seatAvg2ppVal.avg.toFixed(1)}%</div>
