@@ -6028,6 +6028,11 @@ export default function App() {
                       Load from latest poll
                     </button>
                   )}
+                  {AGGREGATED_POLLS?.current && (
+                    <button onClick={loadFromAvg} style={STYLES.btnPrimary}>
+                      Load pipeline aggregate
+                    </button>
+                  )}
                 </div>
               )}
             </div>
