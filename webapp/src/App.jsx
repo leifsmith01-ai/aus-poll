@@ -4721,17 +4721,19 @@ export default function App() {
     }));
   }, []);
 
-  const loadFromPoll = () => {
-    if (!latestPoll) return;
+  const loadPollIntoModel = (poll) => {
+    if (!poll) return;
     setPrimaries(p => ({
       ...p,
-      alp:  latestPoll.alp,
-      coal: latestPoll.coal,
-      grn:  latestPoll.grn,
-      on:   latestPoll.on ?? p.on,   // teal not tracked in polls
+      alp:  poll.alp,
+      coal: poll.coal,
+      grn:  poll.grn,
+      on:   poll.on ?? p.on,   // teal not tracked in polls
     }));
     setActiveTab("model");
   };
+
+  const loadFromPoll = () => loadPollIntoModel(latestPoll);
 
   const loadFromAvg = () => {
     // Prefer the pipeline's house-effect-corrected aggregate (AGGREGATED_POLLS.current)
@@ -5744,7 +5746,11 @@ export default function App() {
                         ) : <span style={{ color: "var(--text-4)" }}>—</span>}
                       </td>
                       <td style={{ padding: "9px 12px", color: "var(--text-4)", fontSize: 12 }}>{p.n ?? "—"}</td>
-                      <td style={{ padding: "9px 12px" }}>
+                      <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}>
+                        <button onClick={() => loadPollIntoModel(p)}
+                          style={{ fontSize: 11, color: "#1D4ED8", background: "none", border: "none", cursor: "pointer", padding: 0, marginRight: 10 }}>
+                          Load
+                        </button>
                         <button onClick={() => deletePoll(p.id)}
                           style={{ fontSize: 11, color: "#EF4444", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                           Remove
