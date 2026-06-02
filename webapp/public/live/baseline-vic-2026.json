@@ -1,0 +1,2119 @@
+{
+  "electionId": "vic_2022",
+  "jurisdiction": "vic",
+  "asAt": "2022-11-26T18:00:00+11:00",
+  "seats": {
+    "narracan": {
+      "name": "Narracan",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 32.6,
+        "coal": 39.9,
+        "grn": 11.7,
+        "ind": 5.7,
+        "on": 4.1,
+        "other": 6.0
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 50.8,
+          "ALP": 49.2
+        }
+      },
+      "totalVotes": 44481
+    },
+    "albert_park": {
+      "name": "Albert Park",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.8,
+        "coal": 37.2,
+        "grn": 11.2,
+        "ind": 3.8,
+        "on": 3.2,
+        "other": 4.8
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 55.6,
+          "LP": 44.4
+        }
+      },
+      "totalVotes": 37814
+    },
+    "ashwood": {
+      "name": "Ashwood",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 37.4,
+        "coal": 38.8,
+        "grn": 14.0,
+        "ind": 2.5,
+        "on": 4.5,
+        "other": 2.8
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 53.1,
+          "LP": 46.9
+        }
+      },
+      "totalVotes": 38394
+    },
+    "bass": {
+      "name": "Bass",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 37.3,
+        "coal": 43.1,
+        "grn": 10.9,
+        "ind": 5.0,
+        "on": 1.2,
+        "other": 2.5
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 50.1,
+          "LP": 49.9
+        }
+      },
+      "totalVotes": 44740
+    },
+    "bayswater": {
+      "name": "Bayswater",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 37.1,
+        "coal": 39.9,
+        "grn": 11.3,
+        "ind": 4.1,
+        "on": 2.4,
+        "other": 5.2
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 52.1,
+          "LP": 47.9
+        }
+      },
+      "totalVotes": 44849
+    },
+    "bellarine": {
+      "name": "Bellarine",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.5,
+        "coal": 39.8,
+        "grn": 10.7,
+        "ind": 5.1,
+        "on": 1.8,
+        "other": 2.1
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.2,
+          "LP": 45.8
+        }
+      },
+      "totalVotes": 36984
+    },
+    "benambra": {
+      "name": "Benambra",
+      "region": "Regional",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 28.5,
+        "coal": 44.2,
+        "grn": 14.9,
+        "ind": 6.9,
+        "on": 2.5,
+        "other": 3.0
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 56.6,
+          "ALP": 43.4
+        }
+      },
+      "totalVotes": 44292
+    },
+    "bendigo_east": {
+      "name": "Bendigo East",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.3,
+        "coal": 36.9,
+        "grn": 14.8,
+        "ind": 3.1,
+        "on": 1.9,
+        "other": 4.0
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 55.5,
+          "LP": 44.5
+        }
+      },
+      "totalVotes": 41738
+    },
+    "bendigo_west": {
+      "name": "Bendigo West",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.8,
+        "coal": 35.0,
+        "grn": 14.3,
+        "ind": 3.9,
+        "on": 4.2,
+        "other": 2.8
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 57.2,
+          "LP": 42.8
+        }
+      },
+      "totalVotes": 37112
+    },
+    "bentleigh": {
+      "name": "Bentleigh",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.3,
+        "coal": 39.8,
+        "grn": 9.8,
+        "ind": 6.4,
+        "on": 1.3,
+        "other": 2.4
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.0,
+          "LP": 46.0
+        }
+      },
+      "totalVotes": 39950
+    },
+    "berwick": {
+      "name": "Berwick",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 33.2,
+        "coal": 42.8,
+        "grn": 8.9,
+        "ind": 6.8,
+        "on": 2.6,
+        "other": 5.7
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 52.4,
+          "ALP": 47.6
+        }
+      },
+      "totalVotes": 38843
+    },
+    "box_hill": {
+      "name": "Box Hill",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 35.4,
+        "coal": 36.2,
+        "grn": 12.8,
+        "ind": 5.0,
+        "on": 4.6,
+        "other": 6.0
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 53.6,
+          "LP": 46.4
+        }
+      },
+      "totalVotes": 36699
+    },
+    "brighton": {
+      "name": "Brighton",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 34.4,
+        "coal": 43.7,
+        "grn": 8.4,
+        "ind": 6.4,
+        "on": 1.9,
+        "other": 5.2
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 52.1,
+          "ALP": 47.9
+        }
+      },
+      "totalVotes": 35690
+    },
+    "broadmeadows": {
+      "name": "Broadmeadows",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 41.3,
+        "coal": 35.4,
+        "grn": 12.4,
+        "ind": 4.8,
+        "on": 1.9,
+        "other": 4.2
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 57.7,
+          "LP": 42.3
+        }
+      },
+      "totalVotes": 40840
+    },
+    "brunswick": {
+      "name": "Brunswick",
+      "region": "Melbourne",
+      "winnerParty": "GRN",
+      "fp": {
+        "alp": 41.6,
+        "coal": 0.0,
+        "grn": 52.0,
+        "ind": 0.0,
+        "on": 2.9,
+        "other": 3.5
+      },
+      "tcp": {
+        "pair": [
+          "GRN",
+          "ALP"
+        ],
+        "pct": {
+          "GRN": 55.5,
+          "ALP": 44.5
+        }
+      },
+      "totalVotes": 34779
+    },
+    "bulleen": {
+      "name": "Bulleen",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 30.4,
+        "coal": 40.7,
+        "grn": 14.4,
+        "ind": 4.8,
+        "on": 4.1,
+        "other": 5.6
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 53.0,
+          "ALP": 47.0
+        }
+      },
+      "totalVotes": 41510
+    },
+    "bundoora": {
+      "name": "Bundoora",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.9,
+        "coal": 36.2,
+        "grn": 8.5,
+        "ind": 5.7,
+        "on": 4.6,
+        "other": 5.1
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 56.4,
+          "LP": 43.6
+        }
+      },
+      "totalVotes": 41704
+    },
+    "carrum": {
+      "name": "Carrum",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.8,
+        "coal": 38.1,
+        "grn": 9.5,
+        "ind": 4.0,
+        "on": 3.5,
+        "other": 5.1
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 55.0,
+          "LP": 45.0
+        }
+      },
+      "totalVotes": 34949
+    },
+    "caulfield": {
+      "name": "Caulfield",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 34.8,
+        "coal": 42.4,
+        "grn": 10.4,
+        "ind": 5.1,
+        "on": 3.6,
+        "other": 3.7
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 51.0,
+          "ALP": 49.0
+        }
+      },
+      "totalVotes": 36107
+    },
+    "clarinda": {
+      "name": "Clarinda",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 38.3,
+        "coal": 36.6,
+        "grn": 10.6,
+        "ind": 6.3,
+        "on": 3.7,
+        "other": 4.5
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 55.2,
+          "LP": 44.8
+        }
+      },
+      "totalVotes": 34609
+    },
+    "cranbourne": {
+      "name": "Cranbourne",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 34.7,
+        "coal": 34.4,
+        "grn": 14.6,
+        "ind": 6.0,
+        "on": 5.0,
+        "other": 5.3
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.5,
+          "LP": 45.5
+        }
+      },
+      "totalVotes": 42762
+    },
+    "croydon": {
+      "name": "Croydon",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 36.0,
+        "coal": 43.1,
+        "grn": 11.5,
+        "ind": 2.2,
+        "on": 4.4,
+        "other": 2.8
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 50.7,
+          "ALP": 49.3
+        }
+      },
+      "totalVotes": 39709
+    },
+    "dandenong": {
+      "name": "Dandenong",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 42.4,
+        "coal": 33.9,
+        "grn": 11.9,
+        "ind": 5.6,
+        "on": 3.9,
+        "other": 2.3
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 59.6,
+          "LP": 40.4
+        }
+      },
+      "totalVotes": 39833
+    },
+    "eildon": {
+      "name": "Eildon",
+      "region": "Regional",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 30.7,
+        "coal": 41.8,
+        "grn": 14.4,
+        "ind": 5.3,
+        "on": 4.8,
+        "other": 3.0
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 53.5,
+          "ALP": 46.5
+        }
+      },
+      "totalVotes": 45145
+    },
+    "eltham": {
+      "name": "Eltham",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 35.9,
+        "coal": 35.5,
+        "grn": 12.8,
+        "ind": 6.9,
+        "on": 4.6,
+        "other": 4.3
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.5,
+          "LP": 45.5
+        }
+      },
+      "totalVotes": 35264
+    },
+    "essendon": {
+      "name": "Essendon",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.5,
+        "coal": 36.8,
+        "grn": 12.2,
+        "ind": 2.8,
+        "on": 3.0,
+        "other": 4.7
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 56.2,
+          "LP": 43.8
+        }
+      },
+      "totalVotes": 42675
+    },
+    "eureka": {
+      "name": "Eureka",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 37.4,
+        "coal": 38.0,
+        "grn": 15.1,
+        "ind": 5.6,
+        "on": 1.7,
+        "other": 2.2
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 53.6,
+          "LP": 46.4
+        }
+      },
+      "totalVotes": 45173
+    },
+    "euroa": {
+      "name": "Euroa",
+      "region": "Regional",
+      "winnerParty": "NP",
+      "fp": {
+        "alp": 29.6,
+        "coal": 42.8,
+        "grn": 15.9,
+        "ind": 4.7,
+        "on": 2.9,
+        "other": 4.1
+      },
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "pct": {
+          "NP": 55.0,
+          "ALP": 45.0
+        }
+      },
+      "totalVotes": 43883
+    },
+    "evelyn": {
+      "name": "Evelyn",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 31.8,
+        "coal": 41.7,
+        "grn": 12.0,
+        "ind": 6.3,
+        "on": 2.8,
+        "other": 5.4
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 52.6,
+          "ALP": 47.4
+        }
+      },
+      "totalVotes": 40189
+    },
+    "footscray": {
+      "name": "Footscray",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 48.8,
+        "coal": 33.6,
+        "grn": 9.2,
+        "ind": 2.7,
+        "on": 2.0,
+        "other": 3.7
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 62.8,
+          "LP": 37.2
+        }
+      },
+      "totalVotes": 41259
+    },
+    "frankston": {
+      "name": "Frankston",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 35.3,
+        "coal": 35.2,
+        "grn": 13.0,
+        "ind": 5.8,
+        "on": 4.8,
+        "other": 5.9
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.3,
+          "LP": 45.7
+        }
+      },
+      "totalVotes": 39464
+    },
+    "geelong": {
+      "name": "Geelong",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 41.7,
+        "coal": 36.3,
+        "grn": 10.4,
+        "ind": 5.0,
+        "on": 3.8,
+        "other": 2.8
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 57.4,
+          "LP": 42.6
+        }
+      },
+      "totalVotes": 37350
+    },
+    "gippsland_east": {
+      "name": "Gippsland East",
+      "region": "Regional",
+      "winnerParty": "NP",
+      "fp": {
+        "alp": 24.9,
+        "coal": 48.5,
+        "grn": 12.7,
+        "ind": 5.1,
+        "on": 3.8,
+        "other": 5.0
+      },
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "pct": {
+          "NP": 62.0,
+          "ALP": 38.0
+        }
+      },
+      "totalVotes": 41022
+    },
+    "gippsland_south": {
+      "name": "Gippsland South",
+      "region": "Regional",
+      "winnerParty": "NP",
+      "fp": {
+        "alp": 28.9,
+        "coal": 46.4,
+        "grn": 11.5,
+        "ind": 6.7,
+        "on": 2.1,
+        "other": 4.4
+      },
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "pct": {
+          "NP": 57.6,
+          "ALP": 42.4
+        }
+      },
+      "totalVotes": 40710
+    },
+    "glen_waverley": {
+      "name": "Glen Waverley",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 36.1,
+        "coal": 39.6,
+        "grn": 15.3,
+        "ind": 2.8,
+        "on": 3.2,
+        "other": 3.0
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 51.6,
+          "LP": 48.4
+        }
+      },
+      "totalVotes": 39654
+    },
+    "greenvale": {
+      "name": "Greenvale",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 38.5,
+        "coal": 39.1,
+        "grn": 13.5,
+        "ind": 2.9,
+        "on": 1.9,
+        "other": 4.1
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 53.5,
+          "LP": 46.5
+        }
+      },
+      "totalVotes": 39046
+    },
+    "hastings": {
+      "name": "Hastings",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 36.4,
+        "coal": 41.4,
+        "grn": 9.5,
+        "ind": 4.5,
+        "on": 4.0,
+        "other": 4.2
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 50.7,
+          "LP": 49.3
+        }
+      },
+      "totalVotes": 42821
+    },
+    "hawthorn": {
+      "name": "Hawthorn",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 33.5,
+        "coal": 40.7,
+        "grn": 14.8,
+        "ind": 3.0,
+        "on": 2.8,
+        "other": 5.2
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 50.9,
+          "ALP": 49.1
+        }
+      },
+      "totalVotes": 36579
+    },
+    "ivanhoe": {
+      "name": "Ivanhoe",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.8,
+        "coal": 36.9,
+        "grn": 10.8,
+        "ind": 4.3,
+        "on": 1.8,
+        "other": 5.4
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 56.4,
+          "LP": 43.6
+        }
+      },
+      "totalVotes": 35800
+    },
+    "kalkallo": {
+      "name": "Kalkallo",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 43.0,
+        "coal": 36.1,
+        "grn": 9.5,
+        "ind": 2.7,
+        "on": 3.3,
+        "other": 5.4
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 58.2,
+          "LP": 41.8
+        }
+      },
+      "totalVotes": 39206
+    },
+    "kew": {
+      "name": "Kew",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 33.8,
+        "coal": 42.9,
+        "grn": 10.3,
+        "ind": 5.1,
+        "on": 3.5,
+        "other": 4.4
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 52.0,
+          "ALP": 48.0
+        }
+      },
+      "totalVotes": 45770
+    },
+    "kororoit": {
+      "name": "Kororoit",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.3,
+        "coal": 35.5,
+        "grn": 12.3,
+        "ind": 4.7,
+        "on": 2.9,
+        "other": 4.3
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 57.1,
+          "LP": 42.9
+        }
+      },
+      "totalVotes": 38453
+    },
+    "lara": {
+      "name": "Lara",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 38.3,
+        "coal": 32.8,
+        "grn": 14.7,
+        "ind": 3.8,
+        "on": 4.5,
+        "other": 5.9
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 58.1,
+          "LP": 41.9
+        }
+      },
+      "totalVotes": 36032
+    },
+    "laverton": {
+      "name": "Laverton",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 44.9,
+        "coal": 36.2,
+        "grn": 9.9,
+        "ind": 2.3,
+        "on": 2.8,
+        "other": 3.9
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 59.0,
+          "LP": 41.0
+        }
+      },
+      "totalVotes": 38318
+    },
+    "lowan": {
+      "name": "Lowan",
+      "region": "Regional",
+      "winnerParty": "NP",
+      "fp": {
+        "alp": 28.6,
+        "coal": 51.9,
+        "grn": 10.6,
+        "ind": 4.0,
+        "on": 1.7,
+        "other": 3.2
+      },
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "pct": {
+          "NP": 60.8,
+          "ALP": 39.2
+        }
+      },
+      "totalVotes": 36301
+    },
+    "macedon": {
+      "name": "Macedon",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 38.7,
+        "coal": 37.5,
+        "grn": 14.1,
+        "ind": 5.0,
+        "on": 1.4,
+        "other": 3.3
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.8,
+          "LP": 45.2
+        }
+      },
+      "totalVotes": 34903
+    },
+    "malvern": {
+      "name": "Malvern",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 34.2,
+        "coal": 47.0,
+        "grn": 11.8,
+        "ind": 2.6,
+        "on": 1.6,
+        "other": 2.8
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 54.1,
+          "ALP": 45.9
+        }
+      },
+      "totalVotes": 38554
+    },
+    "melbourne": {
+      "name": "Melbourne",
+      "region": "Melbourne",
+      "winnerParty": "GRN",
+      "fp": {
+        "alp": 42.0,
+        "coal": 0.0,
+        "grn": 51.6,
+        "ind": 0.0,
+        "on": 3.0,
+        "other": 3.4
+      },
+      "tcp": {
+        "pair": [
+          "GRN",
+          "ALP"
+        ],
+        "pct": {
+          "GRN": 55.1,
+          "ALP": 44.9
+        }
+      },
+      "totalVotes": 43419
+    },
+    "melton": {
+      "name": "Melton",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 37.5,
+        "coal": 40.0,
+        "grn": 11.3,
+        "ind": 3.5,
+        "on": 2.6,
+        "other": 5.1
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 52.3,
+          "LP": 47.7
+        }
+      },
+      "totalVotes": 42613
+    },
+    "mildura": {
+      "name": "Mildura",
+      "region": "Regional",
+      "winnerParty": "NP",
+      "fp": {
+        "alp": 33.0,
+        "coal": 45.6,
+        "grn": 10.0,
+        "ind": 6.1,
+        "on": 2.5,
+        "other": 2.8
+      },
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "pct": {
+          "NP": 54.2,
+          "ALP": 45.8
+        }
+      },
+      "totalVotes": 43229
+    },
+    "mill_park": {
+      "name": "Mill Park",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 42.3,
+        "coal": 39.0,
+        "grn": 8.5,
+        "ind": 3.2,
+        "on": 3.3,
+        "other": 3.7
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 55.7,
+          "LP": 44.3
+        }
+      },
+      "totalVotes": 37169
+    },
+    "monbulk": {
+      "name": "Monbulk",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.2,
+        "coal": 40.1,
+        "grn": 9.5,
+        "ind": 2.7,
+        "on": 1.5,
+        "other": 6.0
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 53.8,
+          "LP": 46.2
+        }
+      },
+      "totalVotes": 35755
+    },
+    "mordialloc": {
+      "name": "Mordialloc",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 38.7,
+        "coal": 38.4,
+        "grn": 11.9,
+        "ind": 3.4,
+        "on": 3.3,
+        "other": 4.3
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.1,
+          "LP": 45.9
+        }
+      },
+      "totalVotes": 41629
+    },
+    "mornington": {
+      "name": "Mornington",
+      "region": "Regional",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 33.7,
+        "coal": 46.4,
+        "grn": 11.9,
+        "ind": 3.9,
+        "on": 1.7,
+        "other": 2.4
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 54.1,
+          "ALP": 45.9
+        }
+      },
+      "totalVotes": 38116
+    },
+    "morwell": {
+      "name": "Morwell",
+      "region": "Regional",
+      "winnerParty": "NP",
+      "fp": {
+        "alp": 36.3,
+        "coal": 46.0,
+        "grn": 9.6,
+        "ind": 2.4,
+        "on": 2.9,
+        "other": 2.8
+      },
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "pct": {
+          "NP": 52.2,
+          "ALP": 47.8
+        }
+      },
+      "totalVotes": 39287
+    },
+    "mulgrave": {
+      "name": "Mulgrave",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.2,
+        "coal": 38.2,
+        "grn": 10.8,
+        "ind": 4.4,
+        "on": 1.8,
+        "other": 4.6
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 55.1,
+          "LP": 44.9
+        }
+      },
+      "totalVotes": 39206
+    },
+    "murray_plains": {
+      "name": "Murray Plains",
+      "region": "Regional",
+      "winnerParty": "NP",
+      "fp": {
+        "alp": 26.4,
+        "coal": 49.8,
+        "grn": 10.0,
+        "ind": 5.8,
+        "on": 2.3,
+        "other": 5.7
+      },
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "pct": {
+          "NP": 61.4,
+          "ALP": 38.6
+        }
+      },
+      "totalVotes": 36199
+    },
+    "narre_warren_north": {
+      "name": "Narre Warren North",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.4,
+        "coal": 38.3,
+        "grn": 15.9,
+        "ind": 2.1,
+        "on": 1.8,
+        "other": 2.5
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.6,
+          "LP": 45.4
+        }
+      },
+      "totalVotes": 45045
+    },
+    "narre_warren_south": {
+      "name": "Narre Warren South",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 37.8,
+        "coal": 37.4,
+        "grn": 12.5,
+        "ind": 3.1,
+        "on": 3.6,
+        "other": 5.6
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.2,
+          "LP": 45.8
+        }
+      },
+      "totalVotes": 34168
+    },
+    "nepean": {
+      "name": "Nepean",
+      "region": "Regional",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 33.2,
+        "coal": 44.4,
+        "grn": 10.4,
+        "ind": 4.8,
+        "on": 3.5,
+        "other": 3.7
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 53.3,
+          "ALP": 46.7
+        }
+      },
+      "totalVotes": 35109
+    },
+    "niddrie": {
+      "name": "Niddrie",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.0,
+        "coal": 39.7,
+        "grn": 9.8,
+        "ind": 5.5,
+        "on": 3.9,
+        "other": 2.1
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 53.3,
+          "LP": 46.7
+        }
+      },
+      "totalVotes": 45151
+    },
+    "northcote": {
+      "name": "Northcote",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 37.1,
+        "coal": 39.3,
+        "grn": 11.8,
+        "ind": 5.1,
+        "on": 3.8,
+        "other": 2.9
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 52.5,
+          "LP": 47.5
+        }
+      },
+      "totalVotes": 45432
+    },
+    "oakleigh": {
+      "name": "Oakleigh",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.6,
+        "coal": 36.3,
+        "grn": 12.8,
+        "ind": 4.3,
+        "on": 3.1,
+        "other": 2.9
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 56.7,
+          "LP": 43.3
+        }
+      },
+      "totalVotes": 35917
+    },
+    "ovens_valley": {
+      "name": "Ovens Valley",
+      "region": "Regional",
+      "winnerParty": "NP",
+      "fp": {
+        "alp": 26.6,
+        "coal": 45.5,
+        "grn": 15.4,
+        "ind": 4.0,
+        "on": 4.1,
+        "other": 4.4
+      },
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "pct": {
+          "NP": 59.0,
+          "ALP": 41.0
+        }
+      },
+      "totalVotes": 44783
+    },
+    "pakenham": {
+      "name": "Pakenham",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 36.8,
+        "coal": 42.4,
+        "grn": 8.6,
+        "ind": 4.4,
+        "on": 4.1,
+        "other": 3.7
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 50.2,
+          "LP": 49.8
+        }
+      },
+      "totalVotes": 43737
+    },
+    "pascoe_vale": {
+      "name": "Pascoe Vale",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 46.8,
+        "coal": 34.7,
+        "grn": 9.3,
+        "ind": 4.7,
+        "on": 1.1,
+        "other": 3.4
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 61.1,
+          "LP": 38.9
+        }
+      },
+      "totalVotes": 39270
+    },
+    "point_cook": {
+      "name": "Point Cook",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.2,
+        "coal": 39.6,
+        "grn": 9.3,
+        "ind": 4.4,
+        "on": 3.4,
+        "other": 3.1
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.2,
+          "LP": 45.8
+        }
+      },
+      "totalVotes": 38474
+    },
+    "polwarth": {
+      "name": "Polwarth",
+      "region": "Regional",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 35.4,
+        "coal": 42.8,
+        "grn": 8.4,
+        "ind": 6.9,
+        "on": 2.0,
+        "other": 4.5
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 50.9,
+          "ALP": 49.1
+        }
+      },
+      "totalVotes": 42177
+    },
+    "prahran": {
+      "name": "Prahran",
+      "region": "Melbourne",
+      "winnerParty": "GRN",
+      "fp": {
+        "alp": 0.0,
+        "coal": 45.1,
+        "grn": 47.1,
+        "ind": 0.0,
+        "on": 4.6,
+        "other": 3.2
+      },
+      "tcp": {
+        "pair": [
+          "GRN",
+          "LP"
+        ],
+        "pct": {
+          "GRN": 51.1,
+          "LP": 48.9
+        }
+      },
+      "totalVotes": 35852
+    },
+    "preston": {
+      "name": "Preston",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.1,
+        "coal": 32.0,
+        "grn": 14.6,
+        "ind": 4.0,
+        "on": 4.2,
+        "other": 5.1
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 59.8,
+          "LP": 40.2
+        }
+      },
+      "totalVotes": 39514
+    },
+    "richmond": {
+      "name": "Richmond",
+      "region": "Melbourne",
+      "winnerParty": "GRN",
+      "fp": {
+        "alp": 45.1,
+        "coal": 0.0,
+        "grn": 47.9,
+        "ind": 0.0,
+        "on": 1.0,
+        "other": 6.0
+      },
+      "tcp": {
+        "pair": [
+          "GRN",
+          "ALP"
+        ],
+        "pct": {
+          "GRN": 51.5,
+          "ALP": 48.5
+        }
+      },
+      "totalVotes": 35685
+    },
+    "ringwood": {
+      "name": "Ringwood",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 38.7,
+        "coal": 38.9,
+        "grn": 12.1,
+        "ind": 2.5,
+        "on": 4.8,
+        "other": 3.0
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 53.8,
+          "LP": 46.2
+        }
+      },
+      "totalVotes": 42539
+    },
+    "ripon": {
+      "name": "Ripon",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 36.2,
+        "coal": 40.0,
+        "grn": 10.5,
+        "ind": 6.3,
+        "on": 4.8,
+        "other": 2.2
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 51.5,
+          "LP": 48.5
+        }
+      },
+      "totalVotes": 45534
+    },
+    "rowville": {
+      "name": "Rowville",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 35.5,
+        "coal": 44.4,
+        "grn": 9.4,
+        "ind": 5.0,
+        "on": 1.4,
+        "other": 4.3
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 51.8,
+          "ALP": 48.2
+        }
+      },
+      "totalVotes": 36648
+    },
+    "sandringham": {
+      "name": "Sandringham",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 32.4,
+        "coal": 42.3,
+        "grn": 13.2,
+        "ind": 4.8,
+        "on": 2.3,
+        "other": 5.0
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 52.6,
+          "ALP": 47.4
+        }
+      },
+      "totalVotes": 36894
+    },
+    "shepparton": {
+      "name": "Shepparton",
+      "region": "Regional",
+      "winnerParty": "NP",
+      "fp": {
+        "alp": 36.6,
+        "coal": 46.6,
+        "grn": 8.0,
+        "ind": 2.4,
+        "on": 3.1,
+        "other": 3.3
+      },
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "pct": {
+          "NP": 52.4,
+          "ALP": 47.6
+        }
+      },
+      "totalVotes": 41143
+    },
+    "south_barwon": {
+      "name": "South Barwon",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.8,
+        "coal": 38.2,
+        "grn": 11.3,
+        "ind": 5.7,
+        "on": 1.1,
+        "other": 3.9
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.9,
+          "LP": 45.1
+        }
+      },
+      "totalVotes": 44979
+    },
+    "south_west_coast": {
+      "name": "South-West Coast",
+      "region": "Regional",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 34.5,
+        "coal": 47.1,
+        "grn": 9.4,
+        "ind": 3.9,
+        "on": 2.9,
+        "other": 2.2
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 54.0,
+          "ALP": 46.0
+        }
+      },
+      "totalVotes": 44921
+    },
+    "st_albans": {
+      "name": "St Albans",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.2,
+        "coal": 37.8,
+        "grn": 13.4,
+        "ind": 3.9,
+        "on": 1.5,
+        "other": 4.2
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.8,
+          "LP": 45.2
+        }
+      },
+      "totalVotes": 36158
+    },
+    "sunbury": {
+      "name": "Sunbury",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 38.6,
+        "coal": 39.6,
+        "grn": 10.5,
+        "ind": 3.9,
+        "on": 4.4,
+        "other": 3.0
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 53.2,
+          "LP": 46.8
+        }
+      },
+      "totalVotes": 44370
+    },
+    "sydenham": {
+      "name": "Sydenham",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.7,
+        "coal": 38.9,
+        "grn": 8.4,
+        "ind": 5.8,
+        "on": 2.6,
+        "other": 4.6
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 54.4,
+          "LP": 45.6
+        }
+      },
+      "totalVotes": 39919
+    },
+    "tarneit": {
+      "name": "Tarneit",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 37.5,
+        "coal": 34.4,
+        "grn": 14.5,
+        "ind": 6.8,
+        "on": 2.6,
+        "other": 4.2
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 56.3,
+          "LP": 43.7
+        }
+      },
+      "totalVotes": 44185
+    },
+    "thomastown": {
+      "name": "Thomastown",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 41.2,
+        "coal": 35.0,
+        "grn": 11.3,
+        "ind": 4.7,
+        "on": 1.8,
+        "other": 6.0
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 58.0,
+          "LP": 42.0
+        }
+      },
+      "totalVotes": 41023
+    },
+    "warrandyte": {
+      "name": "Warrandyte",
+      "region": "Melbourne",
+      "winnerParty": "LP",
+      "fp": {
+        "alp": 33.1,
+        "coal": 42.3,
+        "grn": 12.3,
+        "ind": 6.6,
+        "on": 3.1,
+        "other": 2.6
+      },
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "pct": {
+          "LP": 52.1,
+          "ALP": 47.9
+        }
+      },
+      "totalVotes": 45286
+    },
+    "wendouree": {
+      "name": "Wendouree",
+      "region": "Regional",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.6,
+        "coal": 35.5,
+        "grn": 14.3,
+        "ind": 3.2,
+        "on": 2.0,
+        "other": 5.4
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 56.7,
+          "LP": 43.3
+        }
+      },
+      "totalVotes": 42194
+    },
+    "werribee": {
+      "name": "Werribee",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 39.4,
+        "coal": 37.3,
+        "grn": 12.3,
+        "ind": 4.6,
+        "on": 2.6,
+        "other": 3.8
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 55.2,
+          "LP": 44.8
+        }
+      },
+      "totalVotes": 36058
+    },
+    "williamstown": {
+      "name": "Williamstown",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 40.2,
+        "coal": 35.9,
+        "grn": 12.0,
+        "ind": 2.8,
+        "on": 3.7,
+        "other": 5.4
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 56.7,
+          "LP": 43.3
+        }
+      },
+      "totalVotes": 40497
+    },
+    "yan_yean": {
+      "name": "Yan Yean",
+      "region": "Melbourne",
+      "winnerParty": "ALP",
+      "fp": {
+        "alp": 38.9,
+        "coal": 41.3,
+        "grn": 11.4,
+        "ind": 4.5,
+        "on": 1.2,
+        "other": 2.7
+      },
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "pct": {
+          "ALP": 52.2,
+          "LP": 47.8
+        }
+      },
+      "totalVotes": 44746
+    }
+  }
+}
