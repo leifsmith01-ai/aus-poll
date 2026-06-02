@@ -69,8 +69,11 @@ export function createPoller({ source, onUpdate, onError }) {
 
   function schedule(ms) {
     clearTimer();
-    if (stopped || ms <= 0) return;
-    timer = setTimeout(tick, ms);
+    if (stopped) return;
+    // ms <= 0 means "fetch now" (manual refresh, refetch-on-focus, source switch) — run on
+    // the next tick rather than dropping it. tick() only re-arms the timer when pollMs > 0,
+    // so non-polling sources still fetch once per immediate request without looping.
+    timer = setTimeout(tick, Math.max(0, ms));
   }
 
   function onVisibility() {
