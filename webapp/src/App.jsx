@@ -8,6 +8,7 @@ import {
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
   ScatterChart, Scatter, ZAxis,
   ComposedChart, Area,
+  BarChart, Bar, Cell,
 } from "recharts";
 import { Analytics } from "@vercel/analytics/react";
 import DEMOGRAPHICS from "./data/demographics.js";
@@ -17,6 +18,10 @@ import ECONOMICS_DATA from "./data/economics.json";
 import LEADERS_DATA from "./data/leaders.json";
 import AGGREGATED_POLLS from "./data/aggregated.json";
 import * as STATE_SEAT_FP from "./data/state_seat_fp.js";
+import { useLiveResults } from "./live/useLiveResults.js";
+import { projectSeats } from "./live/project.js";
+import { computeLiveConfidence } from "./live/confidence.js";
+import { LIVE_CONFIG, SAMPLE_SNAPSHOTS } from "./live/config.js";
 
 // VIC_SEATS_KNOWN removed — full 88-seat data is in _VS / VIC_SEATS below.
 
@@ -3417,6 +3422,285 @@ function TallyBar({ seats, useModelled = false }) {
   );
 }
 
+// ─── Live Results page ────────────────────────────────────────────────────────
+// Presentational component for the Live tab. All data is computed in App() (the
+// useLiveResults hook + projection/confidence memos) and passed in as props, so this
+// stays a pure render that closes over module-scope STYLES / GROUP_CONFIG.
+const LIVE_STATUS_STYLE = {
+  called:      { label: "Called",   bg: "#DCFCE7", fg: "#166534" },
+  likely:      { label: "Likely",   bg: "#FEF9C3", fg: "#854D0E" },
+  in_doubt:    { label: "In doubt", bg: "#FEE2E2", fg: "#991B1B" },
+  not_started: { label: "Not started", bg: "#F1F5F9", fg: "#64748B" },
+};
+
+function fmtTime(iso) {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch { return "—"; }
+}
+
+function LivePage({
+  meta, projected, confidence, status, error, lastFetched, refresh,
+  isMobile, devSnapshots, snapshotUrl, onPickSnapshot, sourceLabel,
+}) {
+  const [sortKey, setSortKey] = useState("countedPct");
+  const [sortDir, setSortDir] = useState("desc");
+
+  const hasData = projected && projected.length > 0 && confidence;
+
+  // Point-estimate projected seat counts (deterministic winner per seat).
+  const projCounts = useMemo(() => {
+    const c = {};
+    (projected || []).forEach(s => { c[s.winnerGroup] = (c[s.winnerGroup] || 0) + 1; });
+    return c;
+  }, [projected]);
+
+  const sortedSeats = useMemo(() => {
+    const rows = [...(projected || [])];
+    const dir = sortDir === "asc" ? 1 : -1;
+    const val = (s) => {
+      switch (sortKey) {
+        case "name": return s.name;
+        case "countedPct": return s.countedPct;
+        case "margin": return s.margin;
+        case "swing": return s.swing2cp ?? -999;
+        case "winProb": return confidence?.seatWinProbs?.[s.seatId] ?? 0;
+        case "leader": return s.winnerGroup;
+        default: return s.countedPct;
+      }
+    };
+    rows.sort((a, b) => {
+      const va = val(a), vb = val(b);
+      if (typeof va === "string") return va.localeCompare(vb) * dir;
+      return (va - vb) * dir;
+    });
+    return rows;
+  }, [projected, confidence, sortKey, sortDir]);
+
+  const toggleSort = (k) => {
+    if (sortKey === k) setSortDir(d => (d === "asc" ? "desc" : "asc"));
+    else { setSortKey(k); setSortDir(k === "name" ? "asc" : "desc"); }
+  };
+  const Th = ({ k, children, align = "left" }) => (
+    <th onClick={() => toggleSort(k)}
+      style={{ ...STYLES.tableHead, textAlign: align, cursor: "pointer", whiteSpace: "nowrap" }}>
+      {children}{sortKey === k ? (sortDir === "asc" ? " ▲" : " ▼") : ""}
+    </th>
+  );
+
+  const majority = meta?.majority ?? LIVE_CONFIG.active.majority;
+
+  // ── Header / status row ──
+  const header = (
+    <div style={{ ...STYLES.panel, marginBottom: 14, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 800, color: "#DC2626" }}>
+        <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#DC2626", display: "inline-block",
+          animation: status === "ok" ? "livePulse 1.6s ease-in-out infinite" : "none" }} />
+        LIVE
+      </span>
+      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>
+        {LIVE_CONFIG.active.label} · {meta?.chamber || LIVE_CONFIG.active.chamber}
+      </span>
+      <span style={{ fontSize: 12, color: "var(--text-3)" }}>
+        {hasData ? `${(confidence.asOfCounted).toFixed(1)}% counted` : "awaiting data"}
+        {lastFetched ? ` · updated ${fmtTime(lastFetched)}` : ""}
+        {` · ${sourceLabel}`}
+      </span>
+      <span style={{ flex: 1 }} />
+      {devSnapshots && (
+        <select value={snapshotUrl || ""} onChange={(e) => onPickSnapshot(e.target.value || null)}
+          title="Dev: simulate count progression"
+          style={{ ...STYLES.input, padding: "5px 8px" }}>
+          <option value="">Live source</option>
+          {devSnapshots.map(s => <option key={s.url} value={s.url}>{`Sample ${s.label}`}</option>)}
+        </select>
+      )}
+      <button onClick={refresh} style={STYLES.btnSecondary}>↻ Refresh</button>
+    </div>
+  );
+
+  if (!hasData) {
+    return (
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: 16 }}>
+        {header}
+        <div style={{ ...STYLES.panel, textAlign: "center", padding: "48px 22px", color: "var(--text-3)" }}>
+          {status === "error"
+            ? <>Could not load live results.<div style={{ fontSize: 12, marginTop: 8, color: "#B91C1C" }}>{error}</div></>
+            : status === "loading"
+            ? "Loading live results…"
+            : "Polls are not yet open — live results will appear here once counting begins."}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Headline projection cards ──
+  const card = (group, dist) => {
+    const cfg = GROUP_CONFIG[group] || { label: group, color: "#64748B" };
+    const pMaj = group === "alp" ? confidence.pMajority.alp
+      : group === "coalition" ? confidence.pMajority.coalition : null;
+    return (
+      <div key={group} style={{ ...STYLES.statCard, flex: "1 1 150px", minWidth: 140 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+          <span style={{ width: 11, height: 11, borderRadius: 3, background: cfg.color, display: "inline-block" }} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)" }}>{cfg.label}</span>
+        </div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: "var(--text-1)", lineHeight: 1 }}>
+          {dist ? Math.round(dist.mean) : (projCounts[group] || 0)}
+        </div>
+        {dist && (
+          <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 3 }}>
+            range {dist.p05}–{dist.p95}
+          </div>
+        )}
+        {pMaj != null && (
+          <div style={{ fontSize: 11, color: cfg.color, fontWeight: 700, marginTop: 4 }}>
+            {pMaj}% majority
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ── Projected seat bar with majority marker ──
+  const totalShown = projected.length;
+  const majorityPct = (majority / (meta?.totalSeats || totalShown)) * 100;
+  const seatBar = (
+    <div style={{ position: "relative", marginTop: 4 }}>
+      <div style={{ display: "flex", height: 34, borderRadius: 6, overflow: "hidden", gap: 2 }}>
+        {GROUP_ORDER.filter(g => projCounts[g]).map(g => (
+          <div key={g} style={{ flex: projCounts[g], background: GROUP_CONFIG[g].color, display: "flex",
+            alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>
+            {projCounts[g] >= 2 ? projCounts[g] : ""}
+          </div>
+        ))}
+      </div>
+      <div style={{ position: "absolute", top: -2, bottom: -2, left: `${majorityPct}%`, width: 2, background: "rgba(0,0,0,0.45)" }} />
+      <div style={{ position: "absolute", top: -18, left: `${majorityPct}%`, transform: "translateX(-50%)",
+        fontSize: 10, fontWeight: 700, color: "var(--text-3)", whiteSpace: "nowrap" }}>
+        {majority} for majority
+      </div>
+    </div>
+  );
+
+  // ── ALP seat-total distribution chart ──
+  const distData = confidence.seatTotalDist.map(d => ({ seats: d.seats, prob: +(d.prob * 100).toFixed(2) }));
+
+  return (
+    <div style={{ maxWidth: 1400, margin: "0 auto", padding: 16 }}>
+      <style>{"@keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.25}}"}</style>
+      {header}
+
+      <div style={{ ...STYLES.panel, marginBottom: 14 }}>
+        <div style={STYLES.sectionHead}>Projected outcome</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 22, marginTop: 4 }}>
+          {card("alp", confidence.alp)}
+          {card("coalition", confidence.coalition)}
+          {card("greens", null)}
+          {card("ind", null)}
+        </div>
+        {seatBar}
+        <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 18 }}>
+          Most likely:&nbsp;
+          {confidence.pMajority.alp >= 50 ? `Labor majority (${confidence.pMajority.alp}%)`
+            : confidence.pMajority.coalition >= 50 ? `Coalition majority (${confidence.pMajority.coalition}%)`
+            : `Hung parliament most likely (${confidence.pMajority.hung}%) — ALP majority ${confidence.pMajority.alp}%, Coalition ${confidence.pMajority.coalition}%`}
+        </div>
+      </div>
+
+      <div style={{ ...STYLES.panel, marginBottom: 14 }}>
+        <div style={STYLES.panelTitle}>Labor seat total — probability distribution</div>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={distData} margin={{ top: 8, right: 10, left: -16, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+            <XAxis dataKey="seats" tick={{ fontSize: 10 }} interval={isMobile ? 4 : 2} />
+            <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} />
+            <Tooltip formatter={(v) => [`${v}%`, "probability"]}
+              labelFormatter={(l) => `${l} seats`}
+              contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+            <ReferenceLine x={majority} stroke="#0F172A" strokeDasharray="4 2"
+              label={{ value: `maj ${majority}`, fontSize: 10, position: "top" }} />
+            <Bar dataKey="prob">
+              {distData.map((d) => (
+                <Cell key={d.seats} fill={d.seats >= majority ? GROUP_CONFIG.alp.color : "#FCA5A5"} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>
+          Darker bars = Labor majority outcomes. Distribution narrows as more votes are counted.
+        </div>
+      </div>
+
+      <div style={{ ...STYLES.panel }}>
+        <div style={STYLES.panelTitle}>Seats ({projected.length})</div>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr>
+                <Th k="name">Seat</Th>
+                <Th k="countedPct" align="right">Counted</Th>
+                <Th k="leader">Leader</Th>
+                <Th k="margin" align="right">Margin</Th>
+                <Th k="swing" align="right">Swing</Th>
+                <Th k="winProb" align="right">Win prob</Th>
+                <th style={{ ...STYLES.tableHead, textAlign: "center" }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedSeats.map(s => {
+                const cfg = GROUP_CONFIG[s.winnerGroup] || { label: s.winnerParty, color: "#64748B" };
+                const st = LIVE_STATUS_STYLE[s.status] || LIVE_STATUS_STYLE.in_doubt;
+                const wp = confidence.seatWinProbs?.[s.seatId];
+                const swing = s.swing2cp;
+                return (
+                  <tr key={s.seatId} style={{ borderTop: "1px solid var(--border-2)" }}>
+                    <td style={{ ...STYLES.tableCell }}>
+                      <div style={{ fontWeight: 600, color: "var(--text-1)" }}>{s.name}</div>
+                      {s.region && <div style={{ fontSize: 11, color: "var(--text-3)" }}>{s.region}</div>}
+                    </td>
+                    <td style={{ ...STYLES.tableCell, textAlign: "right", color: "var(--text-2)" }}>
+                      {s.countedPct.toFixed(0)}%
+                    </td>
+                    <td style={{ ...STYLES.tableCell }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ width: 9, height: 9, borderRadius: 2, background: cfg.color }} />
+                        <span style={{ fontWeight: 600 }}>{s.winnerParty}</span>
+                        {s.changed && <span style={{ fontSize: 10, color: "#B45309", fontWeight: 700 }}>GAIN</span>}
+                      </span>
+                    </td>
+                    <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+                      {s.margin.toFixed(1)}
+                    </td>
+                    <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums",
+                      color: swing == null ? "var(--text-3)" : swing >= 0 ? "#DC2626" : "#1D4ED8" }}>
+                      {swing == null ? "—" : `${swing >= 0 ? "+" : ""}${swing.toFixed(1)}`}
+                    </td>
+                    <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+                      {wp == null ? "—" : `${Math.round(wp * 100)}%`}
+                    </td>
+                    <td style={{ ...STYLES.tableCell, textAlign: "center" }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: st.fg, background: st.bg,
+                        borderRadius: 5, padding: "2px 8px", whiteSpace: "nowrap" }}>{st.label}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 10 }}>
+          Margin and swing are projected final two-candidate-preferred (pp). Swing is vs the{" "}
+          {meta?.baselineElectionId === "vic_2022" ? "2022" : "previous"} result. VEC publishes
+          district-level counts, so projections use district swing; booth-matched swing is used
+          automatically where booth-level feeds are available.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Primary vote % input ─────────────────────────────────────────────────────
 function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
   const [raw, setRaw] = useState(String(value));
@@ -3749,6 +4033,18 @@ export default function App() {
   const uncertainty = useMemo(() =>
     computeUncertainty(modelledSeats, nat2ppSwing, undecAdjStd, useElasticity),
     [modelledSeats, nat2ppSwing, undecAdjStd, useElasticity]);
+
+  // ── Live Results (election-night counting) ──────────────────────────────────
+  // Fetches the normalized Electoral Commission feed, projects each seat's final
+  // outcome via swing vs the prior-election baseline, and quantifies confidence.
+  const [liveSnapshotUrl, setLiveSnapshotUrl] = useState(null);
+  const live = useLiveResults(LIVE_CONFIG.active?.sourceId, liveSnapshotUrl);
+  const liveProjected = useMemo(
+    () => (live.feed ? projectSeats(live.feed, live.baseline, LIVE_CONFIG.active.cfg) : null),
+    [live.feed, live.baseline]);
+  const liveConfidence = useMemo(
+    () => (liveProjected ? computeLiveConfidence(liveProjected, LIVE_CONFIG.active.cfg) : null),
+    [liveProjected]);
 
   const projCounts = useMemo(() => {
     const c = {};
@@ -4892,6 +5188,7 @@ export default function App() {
   );
 
   const tabs = [
+    ...(LIVE_CONFIG.active?.enabled ? [{ id: "live", label: `🔴 ${LIVE_CONFIG.active.label}` }] : []),
     { id: "model",       label: `Model${hasChanges ? " ●" : ""}` },
     { id: "seats",       label: "Seats" },
     { id: "polls",       label: "Polls" },
@@ -5126,6 +5423,24 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* ══════════════════════ LIVE RESULTS TAB ══════════════════════════════ */}
+      {activeTab === "live" && (
+        <LivePage
+          meta={live.feed?.meta}
+          projected={liveProjected}
+          confidence={liveConfidence}
+          status={live.status}
+          error={live.error}
+          lastFetched={live.lastFetched}
+          refresh={live.refresh}
+          isMobile={isMobile}
+          devSnapshots={import.meta.env.DEV ? SAMPLE_SNAPSHOTS : null}
+          snapshotUrl={liveSnapshotUrl}
+          onPickSnapshot={setLiveSnapshotUrl}
+          sourceLabel={live.source?.label || "live"}
+        />
+      )}
 
       {/* ══════════════════════ SEATS TAB ═════════════════════════════════════ */}
       {activeTab === "seats" && (

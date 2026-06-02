@@ -1,0 +1,5561 @@
+{
+  "contractVersion": 1,
+  "meta": {
+    "jurisdiction": "vic",
+    "electionId": "vic_2026",
+    "chamber": "Legislative Assembly",
+    "asAt": "2026-11-29T00:48:00+11:00",
+    "totalSeats": 88,
+    "majority": 45,
+    "boothLevel": false,
+    "source": "sample",
+    "baselineElectionId": "vic_2022",
+    "countedPct": 80.0
+  },
+  "seats": [
+    {
+      "seatId": "narracan",
+      "name": "Narracan",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 44481,
+      "enrolment": 49423,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11672,
+          "pct": 32.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13914,
+          "pct": 39.1
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4163,
+          "pct": 11.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1993,
+          "pct": 5.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1672,
+          "pct": 4.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 2206,
+          "pct": 6.2
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 17709,
+          "ALP": 15207
+        },
+        "pct": {
+          "LP": 53.8,
+          "ALP": 46.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "albert_park",
+      "name": "Albert Park",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 37814,
+      "enrolment": 42015,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12010,
+          "pct": 39.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11374,
+          "pct": 37.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3358,
+          "pct": 11.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1089,
+          "pct": 3.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 847,
+          "pct": 2.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1573,
+          "pct": 5.2
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14691,
+          "LP": 13292
+        },
+        "pct": {
+          "ALP": 52.5,
+          "LP": 47.5
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "ashwood",
+      "name": "Ashwood",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 38394,
+      "enrolment": 42660,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11334,
+          "pct": 36.9
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11856,
+          "pct": 38.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4300,
+          "pct": 14.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 860,
+          "pct": 2.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1474,
+          "pct": 4.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 891,
+          "pct": 2.9
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13836,
+          "LP": 14575
+        },
+        "pct": {
+          "ALP": 48.7,
+          "LP": 51.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "bass",
+      "name": "Bass",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 44740,
+      "enrolment": 49711,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13422,
+          "pct": 37.5
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15176,
+          "pct": 42.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3901,
+          "pct": 10.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1790,
+          "pct": 5.0
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 573,
+          "pct": 1.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 931,
+          "pct": 2.6
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16388,
+          "LP": 16719
+        },
+        "pct": {
+          "ALP": 49.5,
+          "LP": 50.5
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "bayswater",
+      "name": "Bayswater",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 44849,
+      "enrolment": 49832,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12988,
+          "pct": 36.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14387,
+          "pct": 40.1
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4126,
+          "pct": 11.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1399,
+          "pct": 3.9
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 933,
+          "pct": 2.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 2081,
+          "pct": 5.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16959,
+          "LP": 16229
+        },
+        "pct": {
+          "ALP": 51.1,
+          "LP": 48.9
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "bellarine",
+      "name": "Bellarine",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 36984,
+      "enrolment": 41093,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11894,
+          "pct": 40.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11628,
+          "pct": 39.3
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3225,
+          "pct": 10.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1509,
+          "pct": 5.1
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 503,
+          "pct": 1.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 828,
+          "pct": 2.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14012,
+          "LP": 13356
+        },
+        "pct": {
+          "ALP": 51.2,
+          "LP": 48.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "benambra",
+      "name": "Benambra",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 44292,
+      "enrolment": 49213,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10099,
+          "pct": 28.5
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15485,
+          "pct": 43.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 5351,
+          "pct": 15.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2516,
+          "pct": 7.1
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 815,
+          "pct": 2.3
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1169,
+          "pct": 3.3
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 19961,
+          "ALP": 12815
+        },
+        "pct": {
+          "LP": 60.9,
+          "ALP": 39.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "bendigo_east",
+      "name": "Bendigo East",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 41738,
+      "enrolment": 46375,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12755,
+          "pct": 38.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12421,
+          "pct": 37.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4975,
+          "pct": 14.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1235,
+          "pct": 3.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 601,
+          "pct": 1.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1402,
+          "pct": 4.2
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15875,
+          "LP": 15011
+        },
+        "pct": {
+          "ALP": 51.4,
+          "LP": 48.6
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "bendigo_west",
+      "name": "Bendigo West",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 37112,
+      "enrolment": 41235,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11846,
+          "pct": 39.9
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10510,
+          "pct": 35.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4127,
+          "pct": 13.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1039,
+          "pct": 3.5
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1306,
+          "pct": 4.4
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 891,
+          "pct": 3.0
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14638,
+          "LP": 12825
+        },
+        "pct": {
+          "ALP": 53.3,
+          "LP": 46.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "bentleigh",
+      "name": "Bentleigh",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39950,
+      "enrolment": 44388,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12720,
+          "pct": 39.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12624,
+          "pct": 39.5
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3196,
+          "pct": 10.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2141,
+          "pct": 6.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 511,
+          "pct": 1.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 767,
+          "pct": 2.4
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14988,
+          "LP": 14575
+        },
+        "pct": {
+          "ALP": 50.7,
+          "LP": 49.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "berwick",
+      "name": "Berwick",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 38843,
+      "enrolment": 43158,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10161,
+          "pct": 32.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12958,
+          "pct": 41.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2859,
+          "pct": 9.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2424,
+          "pct": 7.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 839,
+          "pct": 2.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1833,
+          "pct": 5.9
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 15292,
+          "ALP": 13452
+        },
+        "pct": {
+          "LP": 53.2,
+          "ALP": 46.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "box_hill",
+      "name": "Box Hill",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 36699,
+      "enrolment": 40776,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10188,
+          "pct": 34.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10687,
+          "pct": 36.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3787,
+          "pct": 12.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1439,
+          "pct": 4.9
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1409,
+          "pct": 4.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1850,
+          "pct": 6.3
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13334,
+          "LP": 13823
+        },
+        "pct": {
+          "ALP": 49.1,
+          "LP": 50.9
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "brighton",
+      "name": "Brighton",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 35690,
+      "enrolment": 39655,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 9965,
+          "pct": 34.9
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12620,
+          "pct": 44.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2341,
+          "pct": 8.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1713,
+          "pct": 6.0
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 457,
+          "pct": 1.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1456,
+          "pct": 5.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 14235,
+          "ALP": 12175
+        },
+        "pct": {
+          "LP": 53.9,
+          "ALP": 46.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "broadmeadows",
+      "name": "Broadmeadows",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 40840,
+      "enrolment": 45377,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13624,
+          "pct": 41.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11599,
+          "pct": 35.5
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3888,
+          "pct": 11.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1470,
+          "pct": 4.5
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 621,
+          "pct": 1.9
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1470,
+          "pct": 4.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16320,
+          "LP": 13902
+        },
+        "pct": {
+          "ALP": 54.0,
+          "LP": 46.0
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "brunswick",
+      "name": "Brunswick",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 34779,
+      "enrolment": 38643,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11602,
+          "pct": 41.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 0,
+          "pct": 0.0
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 14357,
+          "pct": 51.6
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 0,
+          "pct": 0.0
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 807,
+          "pct": 2.9
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1057,
+          "pct": 3.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "GRN",
+          "ALP"
+        ],
+        "votes": {
+          "GRN": 14824,
+          "ALP": 10912
+        },
+        "pct": {
+          "GRN": 57.6,
+          "ALP": 42.4
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "bulleen",
+      "name": "Bulleen",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 41510,
+      "enrolment": 46122,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 9962,
+          "pct": 30.0
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13350,
+          "pct": 40.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4782,
+          "pct": 14.4
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1860,
+          "pct": 5.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1494,
+          "pct": 4.5
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1727,
+          "pct": 5.2
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 17509,
+          "ALP": 13208
+        },
+        "pct": {
+          "LP": 57.0,
+          "ALP": 43.0
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "bundoora",
+      "name": "Bundoora",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 41704,
+      "enrolment": 46337,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13479,
+          "pct": 40.4
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11977,
+          "pct": 35.9
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2736,
+          "pct": 8.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1802,
+          "pct": 5.4
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1735,
+          "pct": 5.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1601,
+          "pct": 4.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16572,
+          "LP": 14289
+        },
+        "pct": {
+          "ALP": 53.7,
+          "LP": 46.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "carrum",
+      "name": "Carrum",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 34949,
+      "enrolment": 38832,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11044,
+          "pct": 39.5
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10708,
+          "pct": 38.3
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2656,
+          "pct": 9.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1007,
+          "pct": 3.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1146,
+          "pct": 4.1
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1398,
+          "pct": 5.0
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14198,
+          "LP": 11664
+        },
+        "pct": {
+          "ALP": 54.9,
+          "LP": 45.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "caulfield",
+      "name": "Caulfield",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 36107,
+      "enrolment": 40118,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10081,
+          "pct": 34.9
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12277,
+          "pct": 42.5
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2744,
+          "pct": 9.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1502,
+          "pct": 5.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1155,
+          "pct": 4.0
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1155,
+          "pct": 4.0
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 15898,
+          "ALP": 10821
+        },
+        "pct": {
+          "LP": 59.5,
+          "ALP": 40.5
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "clarinda",
+      "name": "Clarinda",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 34609,
+      "enrolment": 38454,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10576,
+          "pct": 38.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 9967,
+          "pct": 36.0
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2796,
+          "pct": 10.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2077,
+          "pct": 7.5
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1135,
+          "pct": 4.1
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1107,
+          "pct": 4.0
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13446,
+          "LP": 12165
+        },
+        "pct": {
+          "ALP": 52.5,
+          "LP": 47.5
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "cranbourne",
+      "name": "Cranbourne",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 42762,
+      "enrolment": 47513,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12145,
+          "pct": 35.5
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11631,
+          "pct": 34.0
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 5097,
+          "pct": 14.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2121,
+          "pct": 6.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1334,
+          "pct": 3.9
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1882,
+          "pct": 5.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15157,
+          "LP": 16486
+        },
+        "pct": {
+          "ALP": 47.9,
+          "LP": 52.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "croydon",
+      "name": "Croydon",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39709,
+      "enrolment": 44121,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11246,
+          "pct": 35.4
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13469,
+          "pct": 42.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3717,
+          "pct": 11.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 858,
+          "pct": 2.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1461,
+          "pct": 4.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1017,
+          "pct": 3.2
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 16044,
+          "ALP": 13341
+        },
+        "pct": {
+          "LP": 54.6,
+          "ALP": 45.4
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "dandenong",
+      "name": "Dandenong",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39833,
+      "enrolment": 44258,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13543,
+          "pct": 42.5
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11026,
+          "pct": 34.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3792,
+          "pct": 11.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1657,
+          "pct": 5.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1179,
+          "pct": 3.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 669,
+          "pct": 2.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16271,
+          "LP": 13205
+        },
+        "pct": {
+          "ALP": 55.2,
+          "LP": 44.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "eildon",
+      "name": "Eildon",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 45145,
+      "enrolment": 50161,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11124,
+          "pct": 30.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15060,
+          "pct": 41.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 5309,
+          "pct": 14.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1842,
+          "pct": 5.1
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1734,
+          "pct": 4.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1011,
+          "pct": 2.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 18708,
+          "ALP": 14699
+        },
+        "pct": {
+          "LP": 56.0,
+          "ALP": 44.0
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "eltham",
+      "name": "Eltham",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 35264,
+      "enrolment": 39182,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10100,
+          "pct": 35.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10071,
+          "pct": 35.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3667,
+          "pct": 13.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2003,
+          "pct": 7.1
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1100,
+          "pct": 3.9
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1269,
+          "pct": 4.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 12839,
+          "LP": 13256
+        },
+        "pct": {
+          "ALP": 49.2,
+          "LP": 50.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "essendon",
+      "name": "Essendon",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 42675,
+      "enrolment": 47416,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13861,
+          "pct": 40.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12905,
+          "pct": 37.8
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4165,
+          "pct": 12.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 922,
+          "pct": 2.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 888,
+          "pct": 2.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1400,
+          "pct": 4.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15758,
+          "LP": 15821
+        },
+        "pct": {
+          "ALP": 49.9,
+          "LP": 50.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "eureka",
+      "name": "Eureka",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 45173,
+      "enrolment": 50192,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13516,
+          "pct": 37.4
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13552,
+          "pct": 37.5
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 5457,
+          "pct": 15.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2168,
+          "pct": 6.0
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 578,
+          "pct": 1.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 867,
+          "pct": 2.4
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16881,
+          "LP": 16547
+        },
+        "pct": {
+          "ALP": 50.5,
+          "LP": 49.5
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "euroa",
+      "name": "Euroa",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 43883,
+      "enrolment": 48758,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10567,
+          "pct": 30.1
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15096,
+          "pct": 43.0
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 5441,
+          "pct": 15.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1474,
+          "pct": 4.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1088,
+          "pct": 3.1
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1439,
+          "pct": 4.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "votes": {
+          "NP": 19419,
+          "ALP": 13054
+        },
+        "pct": {
+          "NP": 59.8,
+          "ALP": 40.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "evelyn",
+      "name": "Evelyn",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 40189,
+      "enrolment": 44654,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10128,
+          "pct": 31.5
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13085,
+          "pct": 40.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4019,
+          "pct": 12.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2058,
+          "pct": 6.4
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 900,
+          "pct": 2.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1961,
+          "pct": 6.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 16238,
+          "ALP": 13502
+        },
+        "pct": {
+          "LP": 54.6,
+          "ALP": 45.4
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "footscray",
+      "name": "Footscray",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 41259,
+      "enrolment": 45843,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 15843,
+          "pct": 48.0
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11024,
+          "pct": 33.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2971,
+          "pct": 9.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 924,
+          "pct": 2.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 858,
+          "pct": 2.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1386,
+          "pct": 4.2
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 18655,
+          "LP": 11877
+        },
+        "pct": {
+          "ALP": 61.1,
+          "LP": 38.9
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "frankston",
+      "name": "Frankston",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39464,
+      "enrolment": 43848,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11429,
+          "pct": 36.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11145,
+          "pct": 35.3
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3789,
+          "pct": 12.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2021,
+          "pct": 6.4
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1484,
+          "pct": 4.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1736,
+          "pct": 5.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14105,
+          "LP": 15098
+        },
+        "pct": {
+          "ALP": 48.3,
+          "LP": 51.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "geelong",
+      "name": "Geelong",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 37350,
+      "enrolment": 41500,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12161,
+          "pct": 40.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10966,
+          "pct": 36.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3108,
+          "pct": 10.4
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1554,
+          "pct": 5.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1165,
+          "pct": 3.9
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 926,
+          "pct": 3.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14732,
+          "LP": 12907
+        },
+        "pct": {
+          "ALP": 53.3,
+          "LP": 46.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "gippsland_east",
+      "name": "Gippsland East",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 41022,
+      "enrolment": 45580,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 8106,
+          "pct": 24.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15654,
+          "pct": 47.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4201,
+          "pct": 12.8
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1871,
+          "pct": 5.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1411,
+          "pct": 4.3
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1542,
+          "pct": 4.7
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "votes": {
+          "NP": 19641,
+          "ALP": 10716
+        },
+        "pct": {
+          "NP": 64.7,
+          "ALP": 35.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "gippsland_south",
+      "name": "Gippsland South",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 40710,
+      "enrolment": 45233,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 9705,
+          "pct": 29.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15144,
+          "pct": 46.5
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3582,
+          "pct": 11.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2117,
+          "pct": 6.5
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 684,
+          "pct": 2.1
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1335,
+          "pct": 4.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "votes": {
+          "NP": 18617,
+          "ALP": 11508
+        },
+        "pct": {
+          "NP": 61.8,
+          "ALP": 38.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "glen_waverley",
+      "name": "Glen Waverley",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39654,
+      "enrolment": 44060,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11389,
+          "pct": 35.9
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12277,
+          "pct": 38.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4917,
+          "pct": 15.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 952,
+          "pct": 3.0
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1015,
+          "pct": 3.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1174,
+          "pct": 3.7
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14173,
+          "LP": 15171
+        },
+        "pct": {
+          "ALP": 48.3,
+          "LP": 51.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "greenvale",
+      "name": "Greenvale",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39046,
+      "enrolment": 43384,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12089,
+          "pct": 38.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12432,
+          "pct": 39.8
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4123,
+          "pct": 13.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 781,
+          "pct": 2.5
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 687,
+          "pct": 2.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1125,
+          "pct": 3.6
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14534,
+          "LP": 14360
+        },
+        "pct": {
+          "ALP": 50.3,
+          "LP": 49.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "hastings",
+      "name": "Hastings",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 42821,
+      "enrolment": 47578,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12572,
+          "pct": 36.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14114,
+          "pct": 41.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3494,
+          "pct": 10.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1473,
+          "pct": 4.3
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1165,
+          "pct": 3.4
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1405,
+          "pct": 4.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16002,
+          "LP": 15685
+        },
+        "pct": {
+          "ALP": 50.5,
+          "LP": 49.5
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "hawthorn",
+      "name": "Hawthorn",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 36579,
+      "enrolment": 40643,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 9949,
+          "pct": 34.0
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11852,
+          "pct": 40.5
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4419,
+          "pct": 15.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 819,
+          "pct": 2.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 702,
+          "pct": 2.4
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1463,
+          "pct": 5.0
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 14617,
+          "ALP": 12451
+        },
+        "pct": {
+          "LP": 54.0,
+          "ALP": 46.0
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "ivanhoe",
+      "name": "Ivanhoe",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 35800,
+      "enrolment": 39777,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11828,
+          "pct": 41.3
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10540,
+          "pct": 36.8
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3150,
+          "pct": 11.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1174,
+          "pct": 4.1
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 516,
+          "pct": 1.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1403,
+          "pct": 4.9
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13723,
+          "LP": 12769
+        },
+        "pct": {
+          "ALP": 51.8,
+          "LP": 48.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "kalkallo",
+      "name": "Kalkallo",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39206,
+      "enrolment": 43562,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13518,
+          "pct": 43.1
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11385,
+          "pct": 36.3
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2791,
+          "pct": 8.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1004,
+          "pct": 3.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1004,
+          "pct": 3.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1694,
+          "pct": 5.4
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15725,
+          "LP": 13288
+        },
+        "pct": {
+          "ALP": 54.2,
+          "LP": 45.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "kew",
+      "name": "Kew",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 45770,
+      "enrolment": 50855,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12157,
+          "pct": 33.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15525,
+          "pct": 42.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3845,
+          "pct": 10.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2014,
+          "pct": 5.5
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1282,
+          "pct": 3.5
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1831,
+          "pct": 5.0
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 18188,
+          "ALP": 15682
+        },
+        "pct": {
+          "LP": 53.7,
+          "ALP": 46.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "kororoit",
+      "name": "Kororoit",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 38453,
+      "enrolment": 42725,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12459,
+          "pct": 40.5
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11136,
+          "pct": 36.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3938,
+          "pct": 12.8
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1292,
+          "pct": 4.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 800,
+          "pct": 2.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1138,
+          "pct": 3.7
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15622,
+          "LP": 12833
+        },
+        "pct": {
+          "ALP": 54.9,
+          "LP": 45.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "lara",
+      "name": "Lara",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 36032,
+      "enrolment": 40035,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10723,
+          "pct": 37.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 9599,
+          "pct": 33.3
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4324,
+          "pct": 15.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1326,
+          "pct": 4.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1211,
+          "pct": 4.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1585,
+          "pct": 5.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14212,
+          "LP": 12452
+        },
+        "pct": {
+          "ALP": 53.3,
+          "LP": 46.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "laverton",
+      "name": "Laverton",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 38318,
+      "enrolment": 42575,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13733,
+          "pct": 44.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11035,
+          "pct": 36.0
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3096,
+          "pct": 10.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 705,
+          "pct": 2.3
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 828,
+          "pct": 2.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1257,
+          "pct": 4.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15539,
+          "LP": 12817
+        },
+        "pct": {
+          "ALP": 54.8,
+          "LP": 45.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "lowan",
+      "name": "Lowan",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 36301,
+      "enrolment": 40334,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 8364,
+          "pct": 28.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14840,
+          "pct": 51.1
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3107,
+          "pct": 10.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1249,
+          "pct": 4.3
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 494,
+          "pct": 1.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 987,
+          "pct": 3.4
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "votes": {
+          "NP": 17273,
+          "ALP": 9590
+        },
+        "pct": {
+          "NP": 64.3,
+          "ALP": 35.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "macedon",
+      "name": "Macedon",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 34903,
+      "enrolment": 38781,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10806,
+          "pct": 38.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10722,
+          "pct": 38.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3769,
+          "pct": 13.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1340,
+          "pct": 4.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 335,
+          "pct": 1.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 977,
+          "pct": 3.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13224,
+          "LP": 12604
+        },
+        "pct": {
+          "ALP": 51.2,
+          "LP": 48.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "malvern",
+      "name": "Malvern",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 38554,
+      "enrolment": 42837,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10425,
+          "pct": 33.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14558,
+          "pct": 47.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3825,
+          "pct": 12.4
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 679,
+          "pct": 2.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 463,
+          "pct": 1.5
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 894,
+          "pct": 2.9
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 16005,
+          "ALP": 12525
+        },
+        "pct": {
+          "LP": 56.1,
+          "ALP": 43.9
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "melbourne",
+      "name": "Melbourne",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 43419,
+      "enrolment": 48243,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 14346,
+          "pct": 41.3
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 208,
+          "pct": 0.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 17819,
+          "pct": 51.3
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 104,
+          "pct": 0.3
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 973,
+          "pct": 2.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1285,
+          "pct": 3.7
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "GRN",
+          "ALP"
+        ],
+        "votes": {
+          "GRN": 18025,
+          "ALP": 14105
+        },
+        "pct": {
+          "GRN": 56.1,
+          "ALP": 43.9
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "melton",
+      "name": "Melton",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 42613,
+      "enrolment": 47347,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12784,
+          "pct": 37.5
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13704,
+          "pct": 40.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3682,
+          "pct": 10.8
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1432,
+          "pct": 4.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 784,
+          "pct": 2.3
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1670,
+          "pct": 4.9
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15010,
+          "LP": 16524
+        },
+        "pct": {
+          "ALP": 47.6,
+          "LP": 52.4
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "mildura",
+      "name": "Mildura",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 43229,
+      "enrolment": 48032,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11378,
+          "pct": 32.9
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15597,
+          "pct": 45.1
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3355,
+          "pct": 9.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2110,
+          "pct": 6.1
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1037,
+          "pct": 3.0
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1072,
+          "pct": 3.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "votes": {
+          "NP": 19002,
+          "ALP": 12988
+        },
+        "pct": {
+          "NP": 59.4,
+          "ALP": 40.6
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "mill_park",
+      "name": "Mill Park",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 37169,
+      "enrolment": 41298,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12459,
+          "pct": 41.9
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11448,
+          "pct": 38.5
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2646,
+          "pct": 8.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1100,
+          "pct": 3.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1070,
+          "pct": 3.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1041,
+          "pct": 3.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13670,
+          "LP": 13835
+        },
+        "pct": {
+          "ALP": 49.7,
+          "LP": 50.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "monbulk",
+      "name": "Monbulk",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 35755,
+      "enrolment": 39727,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11213,
+          "pct": 39.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11499,
+          "pct": 40.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2860,
+          "pct": 10.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 772,
+          "pct": 2.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 572,
+          "pct": 2.0
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1659,
+          "pct": 5.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13573,
+          "LP": 12885
+        },
+        "pct": {
+          "ALP": 51.3,
+          "LP": 48.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "mordialloc",
+      "name": "Mordialloc",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 41629,
+      "enrolment": 46254,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12855,
+          "pct": 38.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12788,
+          "pct": 38.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3863,
+          "pct": 11.6
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1266,
+          "pct": 3.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1066,
+          "pct": 3.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1432,
+          "pct": 4.3
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15957,
+          "LP": 14848
+        },
+        "pct": {
+          "ALP": 51.8,
+          "LP": 48.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "mornington",
+      "name": "Mornington",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 38116,
+      "enrolment": 42351,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10246,
+          "pct": 33.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14027,
+          "pct": 46.0
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3690,
+          "pct": 12.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1250,
+          "pct": 4.1
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 427,
+          "pct": 1.4
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 823,
+          "pct": 2.7
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 15711,
+          "ALP": 12495
+        },
+        "pct": {
+          "LP": 55.7,
+          "ALP": 44.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "morwell",
+      "name": "Morwell",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 39287,
+      "enrolment": 43652,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11629,
+          "pct": 37.0
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14175,
+          "pct": 45.1
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3143,
+          "pct": 10.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 723,
+          "pct": 2.3
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 817,
+          "pct": 2.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 974,
+          "pct": 3.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "votes": {
+          "NP": 15292,
+          "ALP": 13780
+        },
+        "pct": {
+          "NP": 52.6,
+          "ALP": 47.4
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "mulgrave",
+      "name": "Mulgrave",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39206,
+      "enrolment": 43562,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12860,
+          "pct": 41.0
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12044,
+          "pct": 38.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3262,
+          "pct": 10.4
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1443,
+          "pct": 4.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 376,
+          "pct": 1.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1411,
+          "pct": 4.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14535,
+          "LP": 14477
+        },
+        "pct": {
+          "ALP": 50.1,
+          "LP": 49.9
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "murray_plains",
+      "name": "Murray Plains",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 36199,
+      "enrolment": 40221,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 7790,
+          "pct": 26.9
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14103,
+          "pct": 48.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2809,
+          "pct": 9.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1853,
+          "pct": 6.4
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 724,
+          "pct": 2.5
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1680,
+          "pct": 5.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "votes": {
+          "NP": 17144,
+          "ALP": 9643
+        },
+        "pct": {
+          "NP": 64.0,
+          "ALP": 36.0
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "narre_warren_north",
+      "name": "Narre Warren North",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 45045,
+      "enrolment": 50050,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 14162,
+          "pct": 39.3
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13658,
+          "pct": 37.9
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 5802,
+          "pct": 16.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 649,
+          "pct": 1.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 865,
+          "pct": 2.4
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 901,
+          "pct": 2.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16933,
+          "LP": 16400
+        },
+        "pct": {
+          "ALP": 50.8,
+          "LP": 49.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "narre_warren_south",
+      "name": "Narre Warren South",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 34168,
+      "enrolment": 37964,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10305,
+          "pct": 37.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10332,
+          "pct": 37.8
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3280,
+          "pct": 12.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 847,
+          "pct": 3.1
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 929,
+          "pct": 3.4
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1667,
+          "pct": 6.1
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 12769,
+          "LP": 12516
+        },
+        "pct": {
+          "ALP": 50.5,
+          "LP": 49.5
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "nepean",
+      "name": "Nepean",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 35109,
+      "enrolment": 39010,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 9381,
+          "pct": 33.4
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12527,
+          "pct": 44.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2949,
+          "pct": 10.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1264,
+          "pct": 4.5
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 899,
+          "pct": 3.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1067,
+          "pct": 3.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 14809,
+          "ALP": 11172
+        },
+        "pct": {
+          "LP": 57.0,
+          "ALP": 43.0
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "niddrie",
+      "name": "Niddrie",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 45151,
+      "enrolment": 50167,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 14232,
+          "pct": 39.4
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14485,
+          "pct": 40.1
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3323,
+          "pct": 9.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2059,
+          "pct": 5.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1445,
+          "pct": 4.0
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 578,
+          "pct": 1.6
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 17541,
+          "LP": 15871
+        },
+        "pct": {
+          "ALP": 52.5,
+          "LP": 47.5
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "northcote",
+      "name": "Northcote",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 45432,
+      "enrolment": 50480,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13484,
+          "pct": 37.1
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14248,
+          "pct": 39.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4289,
+          "pct": 11.8
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1890,
+          "pct": 5.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1563,
+          "pct": 4.3
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 872,
+          "pct": 2.4
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16474,
+          "LP": 17146
+        },
+        "pct": {
+          "ALP": 49.0,
+          "LP": 51.0
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "oakleigh",
+      "name": "Oakleigh",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 35917,
+      "enrolment": 39907,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11494,
+          "pct": 40.0
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10459,
+          "pct": 36.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3678,
+          "pct": 12.8
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1379,
+          "pct": 4.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 862,
+          "pct": 3.0
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 833,
+          "pct": 2.9
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13794,
+          "LP": 12784
+        },
+        "pct": {
+          "ALP": 51.9,
+          "LP": 48.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "ovens_valley",
+      "name": "Ovens Valley",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 44783,
+      "enrolment": 49758,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 9494,
+          "pct": 26.5
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 16337,
+          "pct": 45.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 5517,
+          "pct": 15.4
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1541,
+          "pct": 4.3
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1326,
+          "pct": 3.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1576,
+          "pct": 4.4
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "votes": {
+          "NP": 20513,
+          "ALP": 12626
+        },
+        "pct": {
+          "NP": 61.9,
+          "ALP": 38.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "pakenham",
+      "name": "Pakenham",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 43737,
+      "enrolment": 48596,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13086,
+          "pct": 37.4
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14801,
+          "pct": 42.3
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3149,
+          "pct": 9.0
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1540,
+          "pct": 4.4
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1400,
+          "pct": 4.0
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1015,
+          "pct": 2.9
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15471,
+          "LP": 16895
+        },
+        "pct": {
+          "ALP": 47.8,
+          "LP": 52.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "pascoe_vale",
+      "name": "Pascoe Vale",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39270,
+      "enrolment": 43633,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 14514,
+          "pct": 46.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11121,
+          "pct": 35.4
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2890,
+          "pct": 9.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1445,
+          "pct": 4.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 377,
+          "pct": 1.2
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1068,
+          "pct": 3.4
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16913,
+          "LP": 12147
+        },
+        "pct": {
+          "ALP": 58.2,
+          "LP": 41.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "ec_called"
+    },
+    {
+      "seatId": "point_cook",
+      "name": "Point Cook",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 38474,
+      "enrolment": 42748,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12219,
+          "pct": 39.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12219,
+          "pct": 39.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3047,
+          "pct": 9.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1570,
+          "pct": 5.1
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 954,
+          "pct": 3.1
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 769,
+          "pct": 2.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 14719,
+          "LP": 13751
+        },
+        "pct": {
+          "ALP": 51.7,
+          "LP": 48.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "polwarth",
+      "name": "Polwarth",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 42177,
+      "enrolment": 46863,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12012,
+          "pct": 35.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14104,
+          "pct": 41.8
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3003,
+          "pct": 8.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2261,
+          "pct": 6.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 911,
+          "pct": 2.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1451,
+          "pct": 4.3
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 16198,
+          "ALP": 15012
+        },
+        "pct": {
+          "LP": 51.9,
+          "ALP": 48.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "prahran",
+      "name": "Prahran",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 35852,
+      "enrolment": 39835,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 172,
+          "pct": 0.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12878,
+          "pct": 44.9
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 13452,
+          "pct": 46.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 0,
+          "pct": 0.0
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1463,
+          "pct": 5.1
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 746,
+          "pct": 2.6
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "GRN",
+          "LP"
+        ],
+        "votes": {
+          "GRN": 14035,
+          "LP": 12496
+        },
+        "pct": {
+          "GRN": 52.9,
+          "LP": 47.1
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "preston",
+      "name": "Preston",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39514,
+      "enrolment": 43904,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12581,
+          "pct": 39.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10052,
+          "pct": 31.8
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4805,
+          "pct": 15.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1328,
+          "pct": 4.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1201,
+          "pct": 3.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1644,
+          "pct": 5.2
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15585,
+          "LP": 13655
+        },
+        "pct": {
+          "ALP": 53.3,
+          "LP": 46.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "richmond",
+      "name": "Richmond",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 35685,
+      "enrolment": 39650,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12961,
+          "pct": 45.4
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 143,
+          "pct": 0.5
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 13560,
+          "pct": 47.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 114,
+          "pct": 0.4
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 171,
+          "pct": 0.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1627,
+          "pct": 5.7
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "GRN",
+          "ALP"
+        ],
+        "votes": {
+          "GRN": 14128,
+          "ALP": 12279
+        },
+        "pct": {
+          "GRN": 53.5,
+          "ALP": 46.5
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "ringwood",
+      "name": "Ringwood",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 42539,
+      "enrolment": 47265,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13034,
+          "pct": 38.3
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12898,
+          "pct": 37.9
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4220,
+          "pct": 12.4
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1123,
+          "pct": 3.3
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1668,
+          "pct": 4.9
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1089,
+          "pct": 3.2
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15865,
+          "LP": 15614
+        },
+        "pct": {
+          "ALP": 50.4,
+          "LP": 49.6
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "ripon",
+      "name": "Ripon",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 45534,
+      "enrolment": 50593,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13369,
+          "pct": 36.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14425,
+          "pct": 39.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3898,
+          "pct": 10.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2404,
+          "pct": 6.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1639,
+          "pct": 4.5
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 729,
+          "pct": 2.0
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15365,
+          "LP": 18330
+        },
+        "pct": {
+          "ALP": 45.6,
+          "LP": 54.4
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "rowville",
+      "name": "Rowville",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 36648,
+      "enrolment": 40720,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 10173,
+          "pct": 34.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13076,
+          "pct": 44.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2873,
+          "pct": 9.8
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1407,
+          "pct": 4.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 469,
+          "pct": 1.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1349,
+          "pct": 4.6
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 14590,
+          "ALP": 12529
+        },
+        "pct": {
+          "LP": 53.8,
+          "ALP": 46.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "sandringham",
+      "name": "Sandringham",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 36894,
+      "enrolment": 40993,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 9504,
+          "pct": 32.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12308,
+          "pct": 41.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4103,
+          "pct": 13.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1387,
+          "pct": 4.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 797,
+          "pct": 2.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1387,
+          "pct": 4.7
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 14634,
+          "ALP": 12668
+        },
+        "pct": {
+          "LP": 53.6,
+          "ALP": 46.4
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "shepparton",
+      "name": "Shepparton",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 41143,
+      "enrolment": 45714,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12244,
+          "pct": 37.2
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15338,
+          "pct": 46.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2567,
+          "pct": 7.8
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 724,
+          "pct": 2.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1185,
+          "pct": 3.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 856,
+          "pct": 2.6
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "NP",
+          "ALP"
+        ],
+        "votes": {
+          "NP": 16654,
+          "ALP": 13792
+        },
+        "pct": {
+          "NP": 54.7,
+          "ALP": 45.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "south_barwon",
+      "name": "South Barwon",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 44979,
+      "enrolment": 49976,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 14249,
+          "pct": 39.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13853,
+          "pct": 38.5
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4138,
+          "pct": 11.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1943,
+          "pct": 5.4
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 288,
+          "pct": 0.8
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1547,
+          "pct": 4.3
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 17075,
+          "LP": 16210
+        },
+        "pct": {
+          "ALP": 51.3,
+          "LP": 48.7
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "south_west_coast",
+      "name": "South-West Coast",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 44921,
+      "enrolment": 49912,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12686,
+          "pct": 35.3
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 17106,
+          "pct": 47.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3414,
+          "pct": 9.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1330,
+          "pct": 3.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 755,
+          "pct": 2.1
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 683,
+          "pct": 1.9
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 18017,
+          "ALP": 15225
+        },
+        "pct": {
+          "LP": 54.2,
+          "ALP": 45.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "st_albans",
+      "name": "St Albans",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 36158,
+      "enrolment": 40175,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11223,
+          "pct": 38.8
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10905,
+          "pct": 37.7
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3847,
+          "pct": 13.3
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1099,
+          "pct": 3.8
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 694,
+          "pct": 2.4
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1157,
+          "pct": 4.0
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13914,
+          "LP": 12843
+        },
+        "pct": {
+          "ALP": 52.0,
+          "LP": 48.0
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "sunbury",
+      "name": "Sunbury",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 44370,
+      "enrolment": 49300,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13701,
+          "pct": 38.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 13843,
+          "pct": 39.0
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3940,
+          "pct": 11.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1171,
+          "pct": 3.3
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1668,
+          "pct": 4.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1171,
+          "pct": 3.3
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16483,
+          "LP": 16351
+        },
+        "pct": {
+          "ALP": 50.2,
+          "LP": 49.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "sydenham",
+      "name": "Sydenham",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 39919,
+      "enrolment": 44354,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12646,
+          "pct": 39.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12519,
+          "pct": 39.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 2587,
+          "pct": 8.1
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1820,
+          "pct": 5.7
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 830,
+          "pct": 2.6
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1565,
+          "pct": 4.9
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15597,
+          "LP": 13943
+        },
+        "pct": {
+          "ALP": 52.8,
+          "LP": 47.2
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "tarneit",
+      "name": "Tarneit",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 44185,
+      "enrolment": 49094,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12973,
+          "pct": 36.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12230,
+          "pct": 34.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 5055,
+          "pct": 14.3
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2298,
+          "pct": 6.5
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1166,
+          "pct": 3.3
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1591,
+          "pct": 4.5
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 18506,
+          "LP": 14190
+        },
+        "pct": {
+          "ALP": 56.6,
+          "LP": 43.4
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "thomastown",
+      "name": "Thomastown",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 41023,
+      "enrolment": 45581,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13324,
+          "pct": 40.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11552,
+          "pct": 35.2
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3676,
+          "pct": 11.2
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1608,
+          "pct": 4.9
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 624,
+          "pct": 1.9
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 2035,
+          "pct": 6.2
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16150,
+          "LP": 14207
+        },
+        "pct": {
+          "ALP": 53.2,
+          "LP": 46.8
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "warrandyte",
+      "name": "Warrandyte",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 45286,
+      "enrolment": 50317,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 12064,
+          "pct": 33.3
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 15180,
+          "pct": 41.9
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4601,
+          "pct": 12.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 2246,
+          "pct": 6.2
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1196,
+          "pct": 3.3
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 942,
+          "pct": 2.6
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "LP",
+          "ALP"
+        ],
+        "votes": {
+          "LP": 18431,
+          "ALP": 15080
+        },
+        "pct": {
+          "LP": 55.0,
+          "ALP": 45.0
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "wendouree",
+      "name": "Wendouree",
+      "region": "Regional",
+      "countedPct": 80.0,
+      "expectedTotal": 42194,
+      "enrolment": 46882,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13367,
+          "pct": 39.6
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 12422,
+          "pct": 36.8
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4894,
+          "pct": 14.5
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 878,
+          "pct": 2.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 574,
+          "pct": 1.7
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1586,
+          "pct": 4.7
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16267,
+          "LP": 14956
+        },
+        "pct": {
+          "ALP": 52.1,
+          "LP": 47.9
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "werribee",
+      "name": "Werribee",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 36058,
+      "enrolment": 40064,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 11452,
+          "pct": 39.7
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 10904,
+          "pct": 37.8
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3375,
+          "pct": 11.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1327,
+          "pct": 4.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 721,
+          "pct": 2.5
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1067,
+          "pct": 3.7
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 13795,
+          "LP": 12888
+        },
+        "pct": {
+          "ALP": 51.7,
+          "LP": 48.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "williamstown",
+      "name": "Williamstown",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 40497,
+      "enrolment": 44996,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13089,
+          "pct": 40.4
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 11760,
+          "pct": 36.3
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 3855,
+          "pct": 11.9
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 745,
+          "pct": 2.3
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 1393,
+          "pct": 4.3
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1555,
+          "pct": 4.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 15793,
+          "LP": 14175
+        },
+        "pct": {
+          "ALP": 52.7,
+          "LP": 47.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    },
+    {
+      "seatId": "yan_yean",
+      "name": "Yan Yean",
+      "region": "Melbourne",
+      "countedPct": 80.0,
+      "expectedTotal": 44746,
+      "enrolment": 49717,
+      "lastUpdated": "2026-11-29T00:48:00+11:00",
+      "fp": [
+        {
+          "party": "ALP",
+          "name": "",
+          "votes": 13997,
+          "pct": 39.1
+        },
+        {
+          "party": "LP",
+          "name": "",
+          "votes": 14534,
+          "pct": 40.6
+        },
+        {
+          "party": "GRN",
+          "name": "",
+          "votes": 4188,
+          "pct": 11.7
+        },
+        {
+          "party": "IND",
+          "name": "",
+          "votes": 1647,
+          "pct": 4.6
+        },
+        {
+          "party": "ON",
+          "name": "",
+          "votes": 394,
+          "pct": 1.1
+        },
+        {
+          "party": "OTH",
+          "name": "",
+          "votes": 1002,
+          "pct": 2.8
+        }
+      ],
+      "tcp": {
+        "pair": [
+          "ALP",
+          "LP"
+        ],
+        "votes": {
+          "ALP": 16457,
+          "LP": 16655
+        },
+        "pct": {
+          "ALP": 49.7,
+          "LP": 50.3
+        },
+        "countedPct": 74.0
+      },
+      "status": "in_progress"
+    }
+  ]
+}
