@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-05-24",
+  "retrieved": "2026-06-08",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2002,6 +2002,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-05-05",
+      "alp": 29.0,
+      "coal": 21.0,
+      "grn": 16.0,
+      "on": 22.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Roy Morgan",
       "date": "2026-05-10",
       "alp": 30.5,
@@ -2011,6 +2023,18 @@
       "teal": 0.0,
       "tpp": 52.5,
       "n": 1605
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-05-14",
+      "alp": 44.5,
+      "coal": 19.0,
+      "grn": 0.0,
+      "on": 36.5,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 2348
     },
     {
       "scope": "NAT",
@@ -2083,6 +2107,30 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1502
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Fox & Hedgehog",
+      "date": "2026-05-26",
+      "alp": 43.0,
+      "coal": 27.0,
+      "grn": 0.0,
+      "on": 30.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1700
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-06-02",
+      "alp": 34.0,
+      "coal": 30.0,
+      "grn": 23.0,
+      "on": 39.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1471
     }
   ]
 }
