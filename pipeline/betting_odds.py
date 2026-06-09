@@ -547,18 +547,30 @@ def run(force_source: str | None = None) -> dict:
         logger.info("Using manual placeholder data from %s", MANUAL_JSON)
         output = load_manual()
 
-    # If a live source was used but has no state_elections, fill from manual
-    # so the frontend always has at least the placeholder state data.
-    if output.get("source") != "manual" and not output.get("state_elections"):
-        manual = load_manual()
-        if manual.get("state_elections"):
-            output["state_elections"] = manual["state_elections"]
-            logger.info("State elections: no live markets found — using manual placeholder")
+    # Per-state merge: live markets win, manual placeholders fill only the
+    # states the live feed didn't return. Each manual entry keeps its
+    # source="manual" tag so the frontend can label it indicative rather than
+    # passing it off as live.
+    if output.get("source") != "manual":
+        live_states = output.setdefault("state_elections", {})
+        manual_states = load_manual().get("state_elections", {})
+        filled = []
+        for code, entry in manual_states.items():
+            if code not in live_states:
+                live_states[code] = entry
+                filled.append(code)
+        if filled:
+            logger.info("State elections: no live market for %s — using manual placeholder",
+                        ", ".join(c.upper() for c in sorted(filled)))
 
     output.setdefault("state_elections", {})
 
-    # Attach metadata
-    output["generated"] = date.today().isoformat()
+    # Attach metadata. Live sources are stamped with today's date. The manual
+    # fallback keeps its own as-of date (already present in the loaded data) so
+    # the dashboard never implies a freshness the placeholder doesn't have.
+    if output.get("source") != "manual":
+        output["generated"] = date.today().isoformat()
+    output.setdefault("generated", date.today().isoformat())
     output.setdefault("sigma_per_seat", SIGMA_PER_SEAT)
     output.setdefault("sigma_national", SIGMA_NATIONAL)
 
