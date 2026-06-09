@@ -8817,16 +8817,14 @@ export default function App() {
                   Market-implied probabilities and estimated 2PP values. Read-only overlay — does not affect the model.
                 </p>
               </div>
-              {!isManual && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: sourceBadge.color, background: sourceBadge.bg, padding: "3px 8px", borderRadius: 8 }}>
-                    {sourceBadge.label}
-                  </span>
-                  {mktGenerated && (
-                    <span style={{ fontSize: 11, color: "var(--text-4)" }}>Updated {mktGenerated}</span>
-                  )}
-                </div>
-              )}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: sourceBadge.color, background: sourceBadge.bg, padding: "3px 8px", borderRadius: 8 }}>
+                  {sourceBadge.label}
+                </span>
+                {mktGenerated && (
+                  <span style={{ fontSize: 11, color: "var(--text-4)" }}>{isManual ? "As of" : "Updated"} {mktGenerated}</span>
+                )}
+              </div>
             </div>
 
 
@@ -8981,6 +8979,11 @@ export default function App() {
                         : null;
                       return (
                         <div key={stateCode} style={{ ...STYLES.metricCard, position: "relative" }}>
+                          {isManualState && (
+                            <span style={{ position: "absolute", top: 8, right: 8, fontSize: 9, fontWeight: 700, color: "#D97706", background: "#FEF3C7", padding: "2px 6px", borderRadius: 6 }}>
+                              Indicative
+                            </span>
+                          )}
                           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", marginBottom: 2 }}>
                             {stateCode.toUpperCase()}
                           </div>
@@ -9012,12 +9015,17 @@ export default function App() {
                               </div>
                             )}
                           </div>
+                          {isManualState && mkt.as_of && (
+                            <div style={{ fontSize: 9, color: "var(--text-4)", marginTop: 6, textAlign: "center" }}>
+                              as of {mkt.as_of}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
                   <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8 }}>
-                    State markets appear on The Odds API as elections approach. Only states with active markets are shown.
+                    Live markets (Betfair / The Odds API) override these as elections approach. States without a live market show indicative placeholder odds, tagged above.
                   </div>
                 </div>
               );

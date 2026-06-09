@@ -1,7 +1,7 @@
 {
   "generated": "2026-06-09",
   "source": "manual",
-  "note": "Placeholder data based on typical pre-election market prices. Replace with live data by running: python pipeline/betting_odds.py",
+  "note": "Indicative placeholder odds, curated by hand on the 'generated' date. These are NOT live \u2014 when an ODDS_API_KEY (or Betfair) secret is set, live markets override these via python pipeline/betting_odds.py. State/territory entries fall back to these placeholders only when no live market exists.",
   "sigma_per_seat": 2.5,
   "sigma_national": 1.5,
   "national": {
@@ -160,18 +160,38 @@
   "state_elections": {
     "vic": {
       "source": "manual",
+      "as_of": "2026-06-09",
+      "note": "Indicative \u2014 Betfair Exchange snapshot; race near-even with Coalition a slight favourite.",
       "election_name": "2026 Victorian State Election",
       "date": "2026-11-28",
       "chamber": "Legislative Assembly",
       "total_seats": 88,
       "majority": 45,
       "alp_win": {
-        "decimal_odds": 1.45,
-        "implied_prob": 0.69
+        "decimal_odds": 2.12,
+        "implied_prob": 0.48
       },
       "coalition_win": {
-        "decimal_odds": 3.2,
-        "implied_prob": 0.31
+        "decimal_odds": 1.94,
+        "implied_prob": 0.52
+      }
+    },
+    "nsw": {
+      "source": "manual",
+      "as_of": "2026-06-09",
+      "note": "Indicative \u2014 limited early markets; Labor minority government favoured for a second term.",
+      "election_name": "2027 NSW State Election",
+      "date": "2027-03-27",
+      "chamber": "Legislative Assembly",
+      "total_seats": 93,
+      "majority": 47,
+      "alp_win": {
+        "decimal_odds": 1.4,
+        "implied_prob": 0.67
+      },
+      "coalition_win": {
+        "decimal_odds": 2.9,
+        "implied_prob": 0.33
       }
     }
   }
