@@ -1,0 +1,28 @@
+{
+  "source": "QLD state-level polls (manual collection)",
+  "jurisdiction": "qld_state",
+  "election_date": "2028-10-28",
+  "note": "QLD state polls. Includes Newspoll QLD state breakdowns, YouGov/Essential QLD sub-national estimates, and dedicated QLD state polls where available. tpp = ALP 2-party-preferred vs LNP. n = sample size. Last election result (2024-10-26) used as baseline.",
+  "party_keys": {
+    "alp":  "Australian Labor Party (QLD Branch)",
+    "lnp":  "Liberal National Party of Queensland",
+    "grn":  "The Greens (QLD)",
+    "ind":  "Independents and other minor parties",
+    "on":   "Pauline Hanson's One Nation"
+  },
+  "polls": [
+    {
+      "scope": "QLD",
+      "pollster": "2024 Election Result",
+      "date": "2024-10-26",
+      "alp": 33.4,
+      "lnp": 40.3,
+      "grn": 11.5,
+      "ind": 6.6,
+      "on": 8.2,
+      "tpp": 46.3,
+      "n": null,
+      "note": "ECQ official 2024 result — used as baseline"
+    }
+  ]
+}

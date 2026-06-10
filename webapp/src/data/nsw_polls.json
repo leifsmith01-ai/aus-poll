@@ -1,0 +1,30 @@
+{
+  "source": "NSW state-level polls (manual collection)",
+  "jurisdiction": "nsw_state",
+  "election_date": "2027-03-27",
+  "note": "NSW state polls. Includes Newspoll NSW state breakdowns, YouGov/Essential NSW sub-national estimates, and dedicated NSW state polls where available. tpp = ALP 2-party-preferred vs Coalition. n = sample size. Last election result (2023-03-25) used as baseline.",
+  "party_keys": {
+    "alp":  "Australian Labor Party (NSW Branch)",
+    "lp":   "Liberal Party of Australia (NSW Division)",
+    "np":   "The Nationals (NSW)",
+    "grn":  "The Greens (NSW)",
+    "ind":  "Independents and other minor parties",
+    "on":   "Pauline Hanson's One Nation"
+  },
+  "polls": [
+    {
+      "scope": "NSW",
+      "pollster": "2023 Election Result",
+      "date": "2023-03-25",
+      "alp": 37.6,
+      "lp": 28.6,
+      "np": 8.4,
+      "grn": 10.4,
+      "ind": 8.5,
+      "on": 2.0,
+      "tpp": 53.2,
+      "n": null,
+      "note": "NSWEC official 2023 result — used as baseline"
+    }
+  ]
+}
