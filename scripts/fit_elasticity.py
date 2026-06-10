@@ -35,7 +35,8 @@ from pathlib import Path
 from typing import Iterable
 
 ROOT = Path(__file__).parent.parent
-DB_PATH = ROOT / "data" / "elections.db"
+# DB filename must match pipeline/config.py (DB_PATH = data/aec_elections.db).
+DB_PATH = ROOT / "data" / "aec_elections.db"
 
 ELECTION_2022 = 2022
 ELECTION_2025 = 2025
@@ -63,7 +64,10 @@ def division_alp_tcp(conn: sqlite3.Connection, election_id: int) -> dict[int, di
         SELECT t.division_id,
                d.division_name,
                c.party_ab,
-               SUM(t.total_votes) AS votes
+               -- Booth-level TCP rows populate the per-vote-type columns and leave
+               -- total_votes at 0, so sum the components rather than total_votes.
+               SUM(t.ordinary_votes + t.absent_votes + t.provisional_votes
+                   + t.prepoll_votes + t.postal_votes) AS votes
         FROM tcp_votes t
         JOIN candidates c ON c.candidate_id = t.candidate_id
                           AND c.election_id = t.election_id

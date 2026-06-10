@@ -33,7 +33,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-DB_PATH = ROOT / "data" / "elections.db"
+# DB filename must match pipeline/config.py (DB_PATH = data/aec_elections.db).
+DB_PATH = ROOT / "data" / "aec_elections.db"
 ELECTION_ID = 2025
 COALITION = {"LP", "LNP", "NP", "CLP"}
 

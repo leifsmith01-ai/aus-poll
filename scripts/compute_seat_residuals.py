@@ -87,11 +87,14 @@ def load_divisions(year: int) -> dict[int, dict]:
         alp_entry = next((t for t in tcp if t["party_ab"] == "ALP"), None)
         if alp_entry is None:
             continue
+        # Export schema uses division_name / state_ab; enrolment is often null,
+        # so fall back to total TCP votes as the seat weight.
+        tcp_total = sum(t.get("votes") or 0 for t in tcp)
         results[div["division_id"]] = {
-            "name":      div["name"],
-            "state":     div.get("state", ""),
+            "name":      div.get("division_name") or div.get("name", ""),
+            "state":     div.get("state_ab") or div.get("state", ""),
             "alp_2pp":   alp_entry["pct"],
-            "enrolment": div.get("enrolment") or 1,
+            "enrolment": div.get("enrolment") or tcp_total or 1,
         }
     return results
 

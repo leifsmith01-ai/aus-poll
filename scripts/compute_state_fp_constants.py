@@ -34,7 +34,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 APP_JSX = ROOT / "webapp" / "src" / "App.jsx"
-DB_PATH = ROOT / "data" / "elections.db"
+# DB filename must match pipeline/config.py (DB_PATH = data/aec_elections.db).
+DB_PATH = ROOT / "data" / "aec_elections.db"
 REPORT_PATH = ROOT / "data" / "state_fp_report.txt"
 
 # ── State configuration ───────────────────────────────────────────────────────
