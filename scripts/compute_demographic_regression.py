@@ -94,16 +94,21 @@ def extract_seat_results(divisions: list[dict]) -> dict[int, dict]:
         if alp_2pp is None:
             continue
 
-        fp_data = div.get("first_preferences", {}) or {}
+        # Export schema uses division_name / state_ab / first_prefs; enrolment is
+        # often null, so fall back to total TCP votes as the seat weight.
+        fp_data = div.get("first_prefs", []) or []
+        fp_by_party = {f.get("party_ab"): f.get("pct") for f in fp_data if isinstance(f, dict)}
+        coal_fp = next((fp_by_party[p] for p in COALITION_PARTIES if p in fp_by_party), None)
+        tcp_total = sum(t.get("votes") or 0 for t in tcp)
         results[div["division_id"]] = {
-            "name":          div["name"],
-            "state":         div.get("state", ""),
+            "name":          div.get("division_name") or div.get("name", ""),
+            "state":         div.get("state_ab") or div.get("state", ""),
             "alp_2pp":       alp_2pp,
-            "alp_fp":        fp_data.get("alp_pct"),
-            "coal_fp":       fp_data.get("coal_pct"),
-            "grn_fp":        fp_data.get("grn_pct"),
-            "winner_party":  div.get("winner", {}).get("party_ab", ""),
-            "enrolment":     div.get("enrolment") or 1,
+            "alp_fp":        fp_by_party.get("ALP"),
+            "coal_fp":       coal_fp,
+            "grn_fp":        fp_by_party.get("GRN"),
+            "winner_party":  (div.get("winner") or {}).get("party_ab", ""),
+            "enrolment":     div.get("enrolment") or tcp_total or 1,
         }
     return results
 

@@ -38,7 +38,8 @@ from pathlib import Path
 
 # ── Path setup ────────────────────────────────────────────────────────────────
 ROOT = Path(__file__).parent.parent
-DB_PATH = ROOT / "data" / "elections.db"
+# DB filename must match pipeline/config.py (DB_PATH = data/aec_elections.db).
+DB_PATH = ROOT / "data" / "aec_elections.db"
 CALIB_DIR = ROOT / "data" / "calibration"
 
 # ── Coalition parties per state (mirrors App.jsx model constants) ──────────────

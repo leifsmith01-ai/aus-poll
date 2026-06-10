@@ -45,7 +45,8 @@ sys.path.insert(0, str(ROOT))
 try:
     from pipeline.config import DB_PATH, STATE_REGISTRY
 except ImportError:
-    DB_PATH = ROOT / "data" / "elections.db"
+    # Fallback must match pipeline/config.py (DB_PATH = data/aec_elections.db).
+    DB_PATH = ROOT / "data" / "aec_elections.db"
     STATE_REGISTRY = {}
 
 # ── Per-state coalition party abbreviations ───────────────────────────────────
