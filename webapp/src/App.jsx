@@ -1882,12 +1882,13 @@ const NT_SEATS = fillStateSeats(_NT.map(r => mkSS(...r)),
 
 // ── TAS 2024 ─ Hare-Clark (5 electorates × 7 seats = 35) ─────────────────────
 // Lib 14, ALP 10, GRN 5, JLN 3, IND 3  (source: Tasmanian Electoral Commission 2024)
-// Model approach: quota-based proportional allocation per electorate.
+// Model approach: party-aggregated STV count simulation per electorate
+// (allocateHareClark — quota, surplus pooling, iterative exclusion transfers).
 // Droop quota = 100/(7+1) = 12.5%.  JLN + other independents are grouped as "ind".
-// Primary votes are actual TASEC first-preference percentages, except Franklin where
-// preference flows in the full Hare-Clark count give Lib an extra seat not predicted
-// by first preferences alone; Franklin primaries are calibration-adjusted to reproduce
-// the actual seat outcome (Lib 3, ALP 2, GRN 1, IND 1).
+// Primary votes are actual TASEC first-preference percentages except Franklin,
+// whose values were nudged when the old largest-remainder heuristic could not
+// reproduce its outcome; the STV simulation reproduces the actual 2024 seat
+// result in all five electorates (incl. Franklin Lib 3, ALP 2, GRN 1, IND 1).
 // Source: TASEC 2024 final results; electorate figures verified via Antony Green / Wikipedia.
 const TAS_ELECTORATES = [
   { name: "Bass",     seats: 7, coal: 39.7, alp: 28.6, grn: 11.1, ind: 20.6 }, // Lib=3,ALP=2,GRN=1,ind=1
@@ -3601,40 +3602,99 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
   });
 }
 
-// ── Hare-Clark proportional model (TAS, ACT) ─────────────────────────────────
-// Each electorate allocates seats using the Droop quota: quota = votes/(seats+1).
-// Simplified: seats_i ≈ floor(pct_i / quota) + remainder allocation.
-// newPcts: { alp, coal, grn, ind, on } — must sum to ~100
-function allocateHareClark(electorates, newPcts) {
+// ── Hare-Clark STV count simulation (TAS, ACT) ───────────────────────────────
+// Party-aggregated single transferable vote count per electorate:
+//   1. Droop quota = 100 / (seats + 1) (held fixed at the first-count total).
+//   2. Groups elect a member for each full quota; surpluses stay with the
+//      group's next candidate (scaled by a pooling efficiency, below).
+//   3. The weakest continuing group is excluded and its votes transfer to the
+//      continuing groups via HARE_CLARK_TRANSFERS; the unlisted remainder
+//      exhausts. Repeat until all seats fill (or continuing groups = vacancies).
+// This replaces the old floor(pct/quota) + largest-remainder heuristic, which
+// ignored exclusions entirely and needed Franklin's primaries calibration-
+// adjusted to reproduce the actual 2024 outcome. The simulation reproduces the
+// actual TAS 2024 (Lib 14, ALP 10, GRN 5, JLN+IND 6 — correct in all five
+// electorates incl. Braddon's 2nd JLN seat) and ACT 2024 (ALP 9, Lib 9, GRN 7)
+// results from first preferences with the default transfer matrix.
+
+// Inter-group preference transfer shares on exclusion. Rows: excluded group →
+// share of its votes flowing to each continuing group; the remainder exhausts
+// (TAS/ACT Hare-Clark has no group ticket voting and substantial exhaustion).
+// Approximate party-aggregated rates from TEC / Elections ACT 2024
+// distribution reports.
+const HARE_CLARK_TRANSFERS = {
+  grn:  { alp: 0.45, ind: 0.20, coal: 0.10 },  // 25% exhausts
+  on:   { coal: 0.40, ind: 0.25, alp: 0.10 },  // 25% exhausts
+  ind:  { coal: 0.25, alp: 0.25, grn: 0.15 },  // 35% exhausts
+  alp:  { grn: 0.30, ind: 0.25, coal: 0.10 },  // 35% exhausts
+  coal: { ind: 0.30, on: 0.20, alp: 0.10 },    // 40% exhausts
+};
+
+// Within-group vote-pooling efficiency applied to a group's surplus after each
+// seat won (1.0 = perfect ticket pooling). "ind" pools imperfectly — it is a
+// mix of party-like tickets (JLN in TAS) and unrelated independents whose
+// mutual flows leak — 0.85 reproduces Braddon 2024 (JLN 2nd seat) while
+// stopping loose-independent pools from over-winning.
+const HARE_CLARK_POOLING = { ind: 0.85 };
+
+// electorates: [{ name, seats, coal, alp, grn, ind, on }] — swing pre-applied
+// by callers; values renormalised to 100 internally. Returns statewide seat
+// totals { coal, alp, grn, ind, on }.
+function allocateHareClark(electorates, _newPcts, transfers = HARE_CLARK_TRANSFERS, pooling = HARE_CLARK_POOLING) {
   const groups = ["coal", "alp", "grn", "ind", "on"];
   const totals = Object.fromEntries(groups.map(g => [g, 0]));
 
   electorates.forEach(el => {
     const seats = el.seats;
-    const quota = 100 / (seats + 1);   // Droop quota as a %
-    // Electorates are pre-adjusted by callers (swing already applied to el.*).
-    // Use el.* values directly; renormalise to 100 below.
-    const pcts = {
-      coal: Math.max(0, el.coal),
-      alp:  Math.max(0, el.alp),
-      grn:  Math.max(0, el.grn),
-      ind:  Math.max(0, el.ind ?? 0),
-      on:   Math.max(0, el.on ?? 0),
+    const quota = 100 / (seats + 1);   // Droop quota as a % of first-count total
+    const v = {};
+    groups.forEach(g => { v[g] = Math.max(0, el[g] ?? 0); });
+    const tot = groups.reduce((a, g) => a + v[g], 0) || 1;
+    groups.forEach(g => { v[g] = v[g] / tot * 100; });
+
+    const elected = Object.fromEntries(groups.map(g => [g, 0]));
+    let filled = 0;
+    const excluded = new Set(groups.filter(g => v[g] <= 0));
+
+    // Elect every group sitting on a full quota (strongest first), retaining
+    // the pooled surplus for its next candidate.
+    const electSurpluses = () => {
+      for (;;) {
+        if (filled >= seats) return;
+        const over = groups
+          .filter(g => !excluded.has(g) && v[g] >= quota)
+          .sort((a, b) => v[b] - v[a]);
+        if (!over.length) return;
+        const g = over[0];
+        elected[g] += 1; filled += 1;
+        v[g] = (v[g] - quota) * (pooling[g] ?? 1.0);
+      }
     };
-    // Renormalise to 100
-    const tot = Object.values(pcts).reduce((a, b) => a + b, 0);
-    Object.keys(pcts).forEach(k => { pcts[k] = pcts[k] / tot * 100; });
 
-    // Droop quota allocation
-    const floor_seats = Object.fromEntries(groups.map(g => [g, Math.floor(pcts[g] / quota)]));
-    const remainders = Object.fromEntries(groups.map(g => [g, pcts[g] / quota - floor_seats[g]]));
-    const allocated = Object.values(floor_seats).reduce((a, b) => a + b, 0);
-    const remaining = seats - allocated;
+    electSurpluses();
+    while (filled < seats) {
+      const continuing = groups.filter(g => !excluded.has(g) && v[g] > 0);
+      if (!continuing.length) break;  // everything exhausted (degenerate input)
+      if (continuing.length <= seats - filled) {
+        // Continuing groups = vacancies: remaining seats fill without a quota.
+        continuing.sort((a, b) => v[b] - v[a]);
+        for (const g of continuing) {
+          if (filled < seats) { elected[g] += 1; filled += 1; }
+        }
+        break;
+      }
+      // Exclude the weakest continuing group and distribute its preferences.
+      const excl = continuing.sort((a, b) => v[a] - v[b])[0];
+      excluded.add(excl);
+      const t = transfers[excl] ?? {};
+      for (const [to, share] of Object.entries(t)) {
+        if (!excluded.has(to)) v[to] += v[excl] * share;
+      }
+      v[excl] = 0;
+      electSurpluses();
+    }
 
-    // Allocate remaining seats by largest remainder
-    const order = [...groups].sort((a, b) => remainders[b] - remainders[a]);
-    order.slice(0, remaining).forEach(g => { floor_seats[g]++; });
-    groups.forEach(g => { totals[g] += floor_seats[g]; });
+    groups.forEach(g => { totals[g] += elected[g]; });
   });
 
   return totals;  // { coal, alp, grn, ind, on }
@@ -3647,17 +3707,23 @@ function gaussRandom() {
 }
 
 // Monte Carlo uncertainty for Hare-Clark proportional systems.
-// Perturbs the statewide primary votes N times with Gaussian noise (swingStd),
-// runs allocateHareClark each time, and returns per-party seat-count statistics.
+// Draws a statewide Gaussian shock per party each simulation (swingStd) and
+// applies it to every electorate's primaries before running the STV count.
+// (allocateHareClark reads electorate values, so the shock must be applied to
+// the electorates themselves — an earlier version perturbed an ignored
+// argument, making all N simulations identical.)
 function computeHareClarkUncertainty(electorates, basePcts, swingStd, majority, N = 500) {
   const parties = ["coal", "alp", "grn", "ind", "on"];
   const tallies = Object.fromEntries(parties.map(p => [p, []]));
 
   for (let i = 0; i < N; i++) {
-    const perturbed = Object.fromEntries(parties.map(p => [
-      p, Math.max(0, (basePcts[p] ?? 0) + gaussRandom() * swingStd)
-    ]));
-    const result = allocateHareClark(electorates, perturbed);
+    const shock = Object.fromEntries(parties.map(p => [p, gaussRandom() * swingStd]));
+    const perturbedElectorates = electorates.map(el => {
+      const out = { ...el };
+      parties.forEach(p => { out[p] = Math.max(0, (el[p] ?? 0) + shock[p]); });
+      return out;
+    });
+    const result = allocateHareClark(perturbedElectorates, basePcts);
     parties.forEach(p => tallies[p].push(result[p] ?? 0));
   }
 
@@ -3676,6 +3742,130 @@ function computeHareClarkUncertainty(electorates, basePcts, swingStd, majority, 
     };
   });
   return stats;
+}
+
+// ── Legislative Council (upper house) projections ────────────────────────────
+// The four bicameral states' upper houses are statewide (NSW since always, WA
+// since the 2021 reform, SA) or regional (VIC, 8 regions × 5) proportional
+// chambers. Seats are projected with the same party-aggregated STV engine as
+// Hare-Clark (allocateHareClark): Droop quota on the chamber's elected seats,
+// surplus pooling, iterative exclusion with an LC-specific transfer matrix.
+// "ind" here pools all micro-parties/others (LCP, SFF, AJP, …), which is why
+// its pooling efficiency is below 1 — unrelated tickets don't exchange
+// preferences efficiently and optional preferential ballots exhaust heavily.
+// Projections are indicative: deltas are anchored to the model's own baseline
+// allocation (±1–2 seats vs declared results at baseline), not to the actual
+// composition, to avoid false precision.
+const LC_TRANSFERS = {
+  grn:  { alp: 0.45, ind: 0.15, coal: 0.05 },
+  on:   { coal: 0.35, ind: 0.20, alp: 0.10 },
+  ind:  { alp: 0.20, coal: 0.20, grn: 0.10, on: 0.10 },
+  alp:  { grn: 0.30, ind: 0.20 },
+  coal: { ind: 0.25, on: 0.20 },
+};
+const LC_POOLING = { ind: 0.70 };
+
+// Per-chamber config. `base` is the chamber's own first-preference baseline
+// (upper-house votes differ from lower-house primaries — minor parties run
+// well ahead); null means seed from the lower-house primaries (SA 2026: the
+// ECSA LC count was still provisional at capture). Keyed by state model id.
+const LC_CHAMBERS = {
+  nsw_2023: {
+    label: "NSW Legislative Council", electedSeats: 21,
+    base: { alp: 37.1, coal: 29.9, grn: 9.7, on: 5.9 },
+    note: "21 of 42 seats elected statewide each election (8-year terms; quota 4.5%). " +
+      "2023 declared: ALP 8 · Coalition 6 · GRN 2 · ON 1 · others 4 (NSWEC, approx. baseline shares).",
+  },
+  wa_2025: {
+    label: "WA Legislative Council", electedSeats: 37,
+    base: { alp: 36.4, coal: 31.3, grn: 10.8, on: 4.5 },
+    note: "Whole-of-state chamber since the 2021 reform (37 seats, quota 2.6%). " +
+      "2025 declared: ALP 16 · Coalition 12 · GRN 4 · ON 2 · others 3 (WAEC, approx. baseline shares).",
+  },
+  sa_2026: {
+    label: "SA Legislative Council", electedSeats: 11,
+    base: null,
+    note: "11 of 22 seats elected statewide each election (quota 8.3%). LC shares seeded from " +
+      "the lower-house primaries — the ECSA 2026 LC count was provisional at capture; treat as indicative.",
+  },
+  vic_2022: {
+    label: "VIC Legislative Council", electedSeats: 40,
+    base: { alp: 33.0, coal: 29.5, grn: 11.5, on: 2.5 },
+    note: "Approximation: the real chamber elects 5 members in each of 8 regions, and the 2022 " +
+      "count ran on group-ticket preference deals that materially boosted micro-parties; a statewide " +
+      "allocation is indicative only. 2022 declared: ALP 15 · Coalition 14 · GRN 4 · ON 1 · others 6 (VEC).",
+  },
+};
+
+// Project an upper-house composition: chamber baseline shares shifted by the
+// user's lower-house primary swings (alp/coal/grn/on; everything else pools
+// into "ind"/others), then allocated by the STV engine.
+function projectLcSeats(chamber, prim, bl) {
+  const base = chamber.base ?? { alp: bl.alp, coal: bl.coal, grn: bl.grn, on: bl.on ?? 0 };
+  const sw = (k) => (prim?.[k] ?? bl?.[k] ?? 0) - (bl?.[k] ?? 0);
+  const shares = {
+    alp:  Math.max(0, base.alp  + sw("alp")),
+    coal: Math.max(0, base.coal + sw("coal")),
+    grn:  Math.max(0, base.grn  + sw("grn")),
+    on:   Math.max(0, (base.on ?? 0) + sw("on")),
+  };
+  const major = shares.alp + shares.coal + shares.grn + shares.on;
+  shares.ind = Math.max(0, 100 - major);   // micro-parties / others pool
+  const el = { seats: chamber.electedSeats, ...shares };
+  const projected = allocateHareClark([el], null, LC_TRANSFERS, LC_POOLING);
+  const baseShares = {
+    alp: base.alp, coal: base.coal, grn: base.grn, on: base.on ?? 0,
+    ind: Math.max(0, 100 - (base.alp + base.coal + base.grn + (base.on ?? 0))),
+  };
+  const baseline = allocateHareClark(
+    [{ seats: chamber.electedSeats, ...baseShares }], null, LC_TRANSFERS, LC_POOLING);
+  return { projected, baseline, shares };
+}
+
+// Compact upper-house projection panel rendered inside the state views.
+function LcProjectionPanel({ chamber, prim, bl, panelStyle }) {
+  if (!chamber) return null;
+  const { projected, baseline } = projectLcSeats(chamber, prim, bl);
+  const rows = [
+    { k: "alp", l: "ALP", c: "#DC2626" },
+    { k: "coal", l: "Coalition", c: "#1D4ED8" },
+    { k: "grn", l: "Greens", c: "#059669" },
+    { k: "on", l: "One Nation", c: "#B45309" },
+    { k: "ind", l: "Others / micro", c: "#6B7280" },
+  ];
+  return (
+    <div style={panelStyle}>
+      <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>
+        {chamber.label} <span style={{ fontWeight: 400, color: "var(--text-3)", fontSize: 12 }}>
+          — {chamber.electedSeats} seats this election
+        </span>
+      </div>
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", margin: "8px 0" }}>
+        {rows.map(({ k, l, c }) => {
+          const seats = projected[k] ?? 0;
+          const delta = seats - (baseline[k] ?? 0);
+          return (
+            <div key={k} style={{ minWidth: 86 }}>
+              <div style={{ fontSize: 11, color: c, fontWeight: 700 }}>{l}</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: "var(--text-1)" }}>
+                {seats}
+                {delta !== 0 && (
+                  <span style={{ fontSize: 12, fontWeight: 700, marginLeft: 5, color: delta > 0 ? "#059669" : "#DC2626" }}>
+                    {delta > 0 ? "+" : ""}{delta}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-4)", lineHeight: 1.5 }}>
+        {chamber.note} Projection: party-aggregated STV (quota, surplus pooling, exclusion
+        transfers); lower-house primary swings applied to the chamber baseline; deltas vs the
+        model's own baseline allocation. Indicative only.
+      </div>
+    </div>
+  );
 }
 
 // ─── Small reusable components ────────────────────────────────────────────────
@@ -8074,6 +8264,9 @@ export default function App() {
                   );
                 })()}
 
+                {/* ── VIC Legislative Council (upper house) projection ── */}
+                <LcProjectionPanel chamber={LC_CHAMBERS.vic_2022} prim={vicPrimaries} bl={VIC_BASELINE_2022} panelStyle={panelStyle} />
+
                 {/* ── VIC Per-seat overrides panel ── */}
                 <div style={panelStyle}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -8256,6 +8449,13 @@ export default function App() {
                   <div style={{ gridColumn: "1 / -1", background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 8, padding: "10px 14px" }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#92400E", marginBottom: 2 }}>⚠ Baseline caveat</div>
                     <div style={{ fontSize: 12, color: "#B45309", lineHeight: 1.5 }}>{caveat}</div>
+                  </div>
+                )}
+
+                {/* Upper house (Legislative Council) projection — bicameral states */}
+                {LC_CHAMBERS[selectedModelId] && (
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <LcProjectionPanel chamber={LC_CHAMBERS[selectedModelId]} prim={prim} bl={bl} panelStyle={panelStyle} />
                   </div>
                 )}
                 {/* Controls */}
@@ -8875,7 +9075,7 @@ export default function App() {
                       })}
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-3)" }}>
-                      Hare-Clark proportional model (Droop quota) · TEC 2024 official results · 7 electorates × 5 seats
+                      Hare-Clark STV count simulation (Droop quota, surplus pooling, exclusion transfers) · TEC 2024 official results · 5 electorates × 7 seats · reproduces the actual 2024 result at baseline
                     </div>
                   </div>
 
@@ -8975,7 +9175,7 @@ export default function App() {
                       })}
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-3)" }}>
-                      Hare-Clark proportional model (Droop quota) · ACT EC 2024 official results · 5 electorates × 5 seats
+                      Hare-Clark STV count simulation (Droop quota, surplus pooling, exclusion transfers) · ACT EC 2024 official results · 5 electorates × 5 seats · reproduces the actual 2024 result at baseline
                     </div>
                   </div>
 
