@@ -1,176 +1,176 @@
    ID  Name               TCP  Model2PP  Actual2PP   Offset  Note
 ---------------------------------------------------------------------------
   101  Canberra           ALP/GRN        --         --       --  skip (ALP/GRN not ALP/Coal)
-  102  Fenner             ALP/LP     73.71      72.08    -1.63   [DOP]
-  103  Banks              ALP/LP     51.84      52.39    +0.55   [DOP]
-  104  Barton             ALP/LP     65.59      66.00    +0.41   [DOP]
-  105  Bennelong          ALP/LP     59.58      59.26    -0.32   [DOP]
-  106  Berowra            LP/ALP     47.27      48.37    +1.10   [DOP]
-  107  Blaxland           ALP/LP     71.35      71.91    +0.56   [DOP]
+  102  Fenner             ALP/LP     72.87      72.08    -0.79   [DOP]
+  103  Banks              ALP/LP     51.19      52.39    +1.20   [DOP]
+  104  Barton             ALP/LP     65.39      66.00    +0.61   [DOP]
+  105  Bennelong          ALP/LP     59.65      59.26    -0.39   [DOP]
+  106  Berowra            LP/ALP     48.64      48.37    -0.27   [DOP]
+  107  Blaxland           ALP/LP     73.46      71.91    -1.55   [DOP]
   108  Bradfield          IND/LP        --         --       --  skip (IND/LP not ALP/Coal)
   109  Calare             IND/NP        --         --       --  skip (IND/NP not ALP/Coal)
-  111  Chifley            ALP/LP     69.01      69.83    +0.82   [DOP]
-  112  Cook               LP/ALP     41.28      42.80    +1.52   [DOP]
+  111  Chifley            ALP/LP     70.00      69.83    -0.17   [DOP]
+  112  Cook               LP/ALP     42.17      42.80    +0.63   [DOP]
   113  Cowper             NP/IND        --         --       --  skip (NP/IND not ALP/Coal)
-  114  Cunningham         ALP/LP     67.02      67.52    +0.50   [DOP]
-  115  Dobell             ALP/LP     57.59      59.43    +1.84   [DOP]
-  117  Eden-Monaro        ALP/LP     55.76      57.22    +1.46   [DOP]
+  114  Cunningham         ALP/LP     66.96      67.52    +0.56   [DOP]
+  115  Dobell             ALP/LP     59.72      59.43    -0.29   [DOP]
+  117  Eden-Monaro        ALP/LP     56.60      57.22    +0.62   [DOP]
   118  Farrer             LP/IND        --         --       --  skip (LP/IND not ALP/Coal)
   119  Fowler             IND/ALP        --         --       --  skip (IND/ALP not ALP/Coal)
-  120  Gilmore            ALP/LP     54.64      55.13    +0.49   [DOP]
+  120  Gilmore            ALP/LP     54.85      55.13    +0.28   [DOP]
   121  Grayndler          ALP/GRN        --         --       --  skip (ALP/GRN not ALP/Coal)
-  122  Greenway           ALP/LP     62.48      63.76    +1.28   [DOP]
-  124  Hughes             ALP/LP     51.69      53.05    +1.36   [DOP]
-  125  Hume               LP/ALP     40.95      41.95    +1.00   [DOP]
+  122  Greenway           ALP/LP     64.26      63.76    -0.50   [DOP]
+  124  Hughes             ALP/LP     52.81      53.05    +0.24   [DOP]
+  125  Hume               LP/ALP     43.04      41.95    -1.09   [DOP]
   126  Hunter             ALP/ON        --         --       --  skip (ALP/ON not ALP/Coal)
-  127  Kingsford Smith    ALP/LP     67.27      67.19    -0.08   [DOP]
-  128  Lindsay            LP/ALP     46.84      47.22    +0.38   [DOP]
-  130  Lyne               NP/ALP     35.63      40.22    +4.59   [DOP] *** LARGE
-  131  Macarthur          ALP/LP     64.30      65.61    +1.31   [DOP]
+  127  Kingsford Smith    ALP/LP     67.14      67.19    +0.05   [DOP]
+  128  Lindsay            LP/ALP     48.09      47.22    -0.87   [DOP]
+  130  Lyne               NP/ALP     39.27      40.22    +0.95   [DOP]
+  131  Macarthur          ALP/LP     65.02      65.61    +0.59   [DOP]
   132  Mackellar          IND/LP        --         --       --  skip (IND/LP not ALP/Coal)
-  133  Macquarie          ALP/LP     56.29      57.70    +1.41   [DOP]
-  134  Mitchell           LP/ALP     45.05      46.19    +1.14   [DOP]
-  135  New England        NP/ALP     32.74      32.94    +0.20   [DOP]
+  133  Macquarie          ALP/LP     57.48      57.70    +0.22   [DOP]
+  134  Mitchell           LP/ALP     46.80      46.19    -0.61   [DOP]
+  135  New England        NP/ALP     33.51      32.94    -0.57   [DOP]
   136  Newcastle          ALP/GRN        --         --       --  skip (ALP/GRN not ALP/Coal)
-  138  Page               NP/ALP     38.76      40.72    +1.96   [DOP]
-  139  Parkes             NP/ALP     35.62      37.03    +1.41   [DOP]
-  140  Parramatta         ALP/LP     62.26      62.55    +0.29   [DOP]
-  144  Reid               ALP/LP     61.30      62.01    +0.71   [DOP]
-  145  Richmond           ALP/NP     58.87      60.01    +1.14   [DOP]
-  146  Robertson          ALP/LP     57.89      59.37    +1.48   [DOP]
-  148  Shortland          ALP/LP     59.42      61.51    +2.09   [DOP]
+  138  Page               NP/ALP     40.15      40.72    +0.57   [DOP]
+  139  Parkes             NP/ALP     37.93      37.03    -0.90   [DOP]
+  140  Parramatta         ALP/LP     63.15      62.55    -0.60   [DOP]
+  144  Reid               ALP/LP     62.17      62.01    -0.16   [DOP]
+  145  Richmond           ALP/NP     60.66      60.01    -0.65   [DOP]
+  146  Robertson          ALP/LP     59.63      59.37    -0.26   [DOP]
+  148  Shortland          ALP/LP     60.86      61.51    +0.65   [DOP]
   149  Sydney             ALP/GRN        --         --       --  skip (ALP/GRN not ALP/Coal)
-  150  Whitlam            ALP/LP     53.87      56.24    +2.37   [DOP]
+  150  Whitlam            ALP/LP     56.13      56.24    +0.11   [DOP]
   151  Warringah          IND/LP        --         --       --  skip (IND/LP not ALP/Coal)
   152  Wentworth          IND/LP        --         --       --  skip (IND/LP not ALP/Coal)
-  153  Werriwa            ALP/LP     55.18      56.77    +1.59   [DOP]
-  155  Bowman             LNP/ALP     45.50      47.57    +2.07   [DOP]
-  156  Brisbane           ALP/LNP     59.69      58.96    -0.73   [DOP]
-  157  Capricornia        LNP/ALP     41.80      44.16    +2.36   [DOP]
-  158  Dawson             LNP/ALP     36.24      38.17    +1.93   [DOP]
-  159  Fadden             LNP/ALP     41.96      43.12    +1.16   [DOP]
-  160  Fairfax            LNP/ALP     44.72      46.77    +2.05   [DOP]
-  161  Fisher             LNP/ALP     42.58      43.97    +1.39   [DOP]
-  162  Forde              ALP/LNP     50.51      51.77    +1.26   [DOP]
+  153  Werriwa            ALP/LP     56.19      56.77    +0.58   [DOP]
+  155  Bowman             LNP/ALP     46.27      47.57    +1.30   [DOP]
+  156  Brisbane           ALP/LNP     60.61      58.96    -1.65   [DOP]
+  157  Capricornia        LNP/ALP     46.94      44.16    -2.78   [DOP]
+  158  Dawson             LNP/ALP     39.88      38.17    -1.71   [DOP]
+  159  Fadden             LNP/ALP     43.17      43.12    -0.05   [DOP]
+  160  Fairfax            LNP/ALP     46.09      46.77    +0.68   [DOP]
+  161  Fisher             LNP/ALP     44.69      43.97    -0.72   [DOP]
+  162  Forde              ALP/LNP     52.34      51.77    -0.57   [DOP]
   163  Griffith           ALP/GRN        --         --       --  skip (ALP/GRN not ALP/Coal)
   164  Groom              LNP/IND        --         --       --  skip (LNP/IND not ALP/Coal)
-  165  Herbert            LNP/ALP     35.16      36.59    +1.43   [DOP]
-  166  Hinkler            LNP/ALP     41.27      43.74    +2.47   [DOP]
+  165  Herbert            LNP/ALP     36.83      36.59    -0.24   [DOP]
+  166  Hinkler            LNP/ALP     44.97      43.74    -1.23   [DOP]
   167  Kennedy            KAP/LNP        --         --       --  skip (KAP/LNP not ALP/Coal)
-  168  Leichhardt         ALP/LNP     56.14      56.06    -0.08   [DOP]
-  169  Lilley             ALP/LNP     64.78      64.52    -0.26   [DOP]
+  168  Leichhardt         ALP/LNP     58.68      56.06    -2.62   [DOP]
+  169  Lilley             ALP/LNP     65.42      64.52    -0.90   [DOP]
   170  Maranoa            LNP/ON        --         --       --  skip (LNP/ON not ALP/Coal)
-  171  McPherson          LNP/ALP     44.32      45.56    +1.24   [DOP]
-  172  Moncrieff          LNP/ALP     38.25      41.20    +2.95   [DOP]
-  173  Moreton            ALP/LNP     66.56      66.09    -0.47   [DOP]
-  174  Oxley              ALP/LNP     68.15      69.19    +1.04   [DOP]
-  175  Petrie             ALP/LNP     49.46      51.17    +1.71   [DOP]
-  176  Rankin             ALP/LNP     63.01      65.56    +2.55   [DOP]
+  171  McPherson          LNP/ALP     45.77      45.56    -0.21   [DOP]
+  172  Moncrieff          LNP/ALP     40.84      41.20    +0.36   [DOP]
+  173  Moreton            ALP/LNP     67.29      66.09    -1.20   [DOP]
+  174  Oxley              ALP/LNP     69.32      69.19    -0.13   [DOP]
+  175  Petrie             ALP/LNP     51.06      51.17    +0.11   [DOP]
+  176  Rankin             ALP/LNP     66.40      65.56    -0.84   [DOP]
   177  Ryan               GRN/LNP        --         --       --  skip (GRN/LNP not ALP/Coal)
-  178  Wide Bay           LNP/ALP     40.89      42.37    +1.48   [DOP]
-  179  Adelaide           ALP/LP     69.80      69.06    -0.74   [DOP]
-  180  Barker             LP/ALP     44.10      37.02    -7.08   [DOP] *** LARGE
-  182  Boothby            ALP/LP     61.44      61.11    -0.33   [DOP]
-  183  Grey               LP/ALP     53.50      45.36    -8.14   [DOP] *** LARGE
-  185  Hindmarsh          ALP/LP     65.66      66.35    +0.69   [DOP]
-  186  Kingston           ALP/LP     69.67      70.74    +1.07   [DOP]
-  187  Makin              ALP/LP     62.20      64.66    +2.46   [DOP]
+  178  Wide Bay           LNP/ALP     44.97      42.37    -2.60   [DOP]
+  179  Adelaide           ALP/LP     69.33      69.06    -0.27   [DOP]
+  180  Barker             LP/ALP     37.48      37.02    -0.46   [DOP]
+  182  Boothby            ALP/LP     60.79      61.11    +0.32   [DOP]
+  183  Grey               LP/ALP     45.29      45.36    +0.07   [DOP]
+  185  Hindmarsh          ALP/LP     66.74      66.35    -0.39   [DOP]
+  186  Kingston           ALP/LP     70.32      70.74    +0.42   [DOP]
+  187  Makin              ALP/LP     64.78      64.66    -0.12   [DOP]
   188  Mayo               IND/ALP        --         --       --  skip (IND/ALP not ALP/Coal)
-  190  Sturt              ALP/LP     55.99      56.62    +0.63   [DOP]
-  192  Bass               ALP/LP     57.13      58.01    +0.88   [DOP]
-  193  Braddon            ALP/LP     58.63      57.20    -1.43   [DOP]
+  190  Sturt              ALP/LP     55.29      56.62    +1.33   [DOP]
+  192  Bass               ALP/LP     57.99      58.01    +0.02   [DOP]
+  193  Braddon            ALP/LP     57.67      57.20    -0.47   [DOP]
   195  Franklin           ALP/IND        --         --       --  skip (ALP/IND not ALP/Coal)
-  196  Lyons              ALP/LP     60.55      61.59    +1.04   [DOP]
-  197  Aston              ALP/LP     52.76      53.43    +0.67   [DOP]
-  198  Ballarat           ALP/LP     59.75      60.66    +0.91   [DOP]
-  200  Bendigo            ALP/NP     53.64      51.40    -2.24   [DOP]
-  201  Bruce              ALP/LP     63.59      64.61    +1.02   [DOP]
+  196  Lyons              ALP/LP     61.38      61.59    +0.21   [DOP]
+  197  Aston              ALP/LP     53.86      53.43    -0.43   [DOP]
+  198  Ballarat           ALP/LP     60.25      60.66    +0.41   [DOP]
+  200  Bendigo            ALP/NP     49.14      51.40    +2.26   [DOP]
+  201  Bruce              ALP/LP     65.41      64.61    -0.80   [DOP]
   203  Calwell            ALP/IND        --         --       --  skip (ALP/IND not ALP/Coal)
-  204  Casey              LP/ALP     45.92      47.11    +1.19   [DOP]
-  205  Chisholm           ALP/LP     55.33      55.70    +0.37   [DOP]
-  208  Corio              ALP/LP     61.18      63.23    +2.05   [DOP]
-  209  Deakin             ALP/LP     52.16      52.83    +0.67   [DOP]
-  210  Dunkley            ALP/LP     56.35      57.08    +0.73   [DOP]
+  204  Casey              LP/ALP     46.91      47.11    +0.20   [DOP]
+  205  Chisholm           ALP/LP     55.76      55.70    -0.06   [DOP]
+  208  Corio              ALP/LP     61.80      63.23    +1.43   [DOP]
+  209  Deakin             ALP/LP     53.03      52.83    -0.20   [DOP]
+  210  Dunkley            ALP/LP     56.80      57.08    +0.28   [DOP]
   211  Flinders           LP/IND        --         --       --  skip (LP/IND not ALP/Coal)
-  212  Gellibrand         ALP/LP     64.48      65.10    +0.62   [DOP]
-  213  Gippsland          NP/ALP     26.67      30.64    +3.97   [DOP] *** LARGE
+  212  Gellibrand         ALP/LP     65.00      65.10    +0.10   [DOP]
+  213  Gippsland          NP/ALP     31.23      30.64    -0.59   [DOP]
   214  Goldstein          LP/IND        --         --       --  skip (LP/IND not ALP/Coal)
-  216  Holt               ALP/LP     62.82      64.03    +1.21   [DOP]
-  217  Hotham             ALP/LP     66.75      66.86    +0.11   [DOP]
+  216  Holt               ALP/LP     62.79      64.03    +1.24   [DOP]
+  217  Hotham             ALP/LP     66.47      66.86    +0.39   [DOP]
   218  Indi               IND/LP        --         --       --  skip (IND/LP not ALP/Coal)
-  219  Isaacs             ALP/LP     63.82      64.34    +0.52   [DOP]
-  220  Jagajaga           ALP/LP     62.75      62.88    +0.13   [DOP]
+  219  Isaacs             ALP/LP     64.63      64.34    -0.29   [DOP]
+  220  Jagajaga           ALP/LP     61.67      62.88    +1.21   [DOP]
   221  Kooyong            IND/LP        --         --       --  skip (IND/LP not ALP/Coal)
-  222  Lalor              ALP/LP     62.32      63.22    +0.90   [DOP]
-  223  La Trobe           LP/ALP     45.87      47.94    +2.07   [DOP]
-  224  Mallee             NP/ALP     27.41      30.96    +3.55   [DOP] *** LARGE
-  225  Maribyrnong        ALP/LP     63.99      62.64    -1.35   [DOP]
-  226  McEwen             ALP/LP     52.96      54.76    +1.80   [DOP]
+  222  Lalor              ALP/LP     62.39      63.22    +0.83   [DOP]
+  223  La Trobe           LP/ALP     48.57      47.94    -0.63   [DOP]
+  224  Mallee             NP/ALP     30.80      30.96    +0.16   [DOP]
+  225  Maribyrnong        ALP/LP     63.83      62.64    -1.19   [DOP]
+  226  McEwen             ALP/LP     55.05      54.76    -0.29   [DOP]
   228  Melbourne          ALP/GRN        --         --       --  skip (ALP/GRN not ALP/Coal)
-  229  Menzies            ALP/LP     50.41      51.08    +0.67   [DOP]
-  232  Scullin            ALP/LP     61.84      64.30    +2.46   [DOP]
+  229  Menzies            ALP/LP     50.84      51.08    +0.24   [DOP]
+  232  Scullin            ALP/LP     64.24      64.30    +0.06   [DOP]
   233  Wannon             LP/IND        --         --       --  skip (LP/IND not ALP/Coal)
   234  Wills              ALP/GRN        --         --       --  skip (ALP/GRN not ALP/Coal)
-  235  Brand              ALP/LP     64.62      66.92    +2.30   [DOP]
-  236  Canning            LP/ALP     42.22      43.45    +1.23   [DOP]
-  237  Cowan              ALP/LP     61.79      63.63    +1.84   [DOP]
+  235  Brand              ALP/LP     64.28      66.92    +2.64   [DOP]
+  236  Canning            LP/ALP     44.59      43.45    -1.14   [DOP]
+  237  Cowan              ALP/LP     64.02      63.63    -0.39   [DOP]
   238  Curtin             IND/LP        --         --       --  skip (IND/LP not ALP/Coal)
-  239  Forrest            LP/ALP     45.72      47.77    +2.05   [DOP]
+  239  Forrest            LP/ALP     47.77      47.77    -0.00   [DOP]
   240  Fremantle          ALP/IND        --         --       --  skip (ALP/IND not ALP/Coal)
-  242  Moore              ALP/LP     52.23      52.88    +0.65   [DOP]
-  243  O'Connor           LP/ALP     34.96      36.72    +1.76   [DOP]
-  244  Pearce             ALP/LP     53.30      56.44    +3.14   [DOP] *** LARGE
-  245  Perth              ALP/LP     67.49      66.51    -0.98   [DOP]
-  247  Swan               ALP/LP     63.80      63.99    +0.19   [DOP]
-  248  Tangney            ALP/LP     55.39      56.99    +1.60   [DOP]
-  249  Paterson           ALP/LP     56.95      56.89    -0.06   [DOP]
-  250  Riverina           NP/ALP     36.87      37.38    +0.51   [DOP]
+  242  Moore              ALP/LP     53.15      52.88    -0.27   [DOP]
+  243  O'Connor           LP/ALP     37.20      36.72    -0.48   [DOP]
+  244  Pearce             ALP/LP     56.41      56.44    +0.03   [DOP]
+  245  Perth              ALP/LP     67.89      66.51    -1.38   [DOP]
+  247  Swan               ALP/LP     64.47      63.99    -0.48   [DOP]
+  248  Tangney            ALP/LP     55.56      56.99    +1.43   [DOP]
+  249  Paterson           ALP/LP     56.99      56.89    -0.10   [DOP]
+  250  Riverina           NP/ALP     38.23      37.38    -0.85   [DOP]
   251  Watson             ALP/IND        --         --       --  skip (ALP/IND not ALP/Coal)
-  252  Dickson            ALP/LNP     56.37      55.99    -0.38   [DOP]
-  302  Longman            LNP/ALP     49.22      49.89    +0.67   [DOP]
-  304  Blair              ALP/LNP     55.49      55.71    +0.22   [DOP]
-  305  Hasluck            ALP/LP     64.15      65.97    +1.82   [DOP]
-  306  Lingiari           ALP/CLP     55.92      58.12    +2.20   [DOP]
-  307  Solomon            ALP/CLP     48.56      51.31    +2.75   [DOP]
-  309  Gorton             ALP/LP     59.28      60.28    +1.00   [DOP]
-  310  Bonner             ALP/LNP     54.31      55.00    +0.69   [DOP]
-  311  Flynn              LNP/ALP     37.65      39.76    +2.11   [DOP]
-  312  Durack             LP/ALP     38.95      39.84    +0.89   [DOP]
-  315  McMahon            ALP/LP     59.86      59.02    -0.84   [DOP]
-  316  Wright             LNP/ALP     39.14      42.02    +2.88   [DOP]
-  317  Burt               ALP/LP     65.47      65.70    +0.23   [DOP]
+  252  Dickson            ALP/LNP     55.81      55.99    +0.18   [DOP]
+  302  Longman            LNP/ALP     51.34      49.89    -1.45   [DOP]
+  304  Blair              ALP/LNP     58.40      55.71    -2.69   [DOP]
+  305  Hasluck            ALP/LP     65.92      65.97    +0.05   [DOP]
+  306  Lingiari           ALP/CLP     58.66      58.12    -0.54   [DOP]
+  307  Solomon            ALP/CLP     50.18      51.31    +1.13   [DOP]
+  309  Gorton             ALP/LP     60.56      60.28    -0.28   [DOP]
+  310  Bonner             ALP/LNP     56.04      55.00    -1.04   [DOP]
+  311  Flynn              LNP/ALP     44.60      39.76    -4.84   [DOP] *** LARGE
+  312  Durack             LP/ALP     39.64      39.84    +0.20   [DOP]
+  315  McMahon            ALP/LP     61.54      59.02    -2.52   [DOP]
+  316  Wright             LNP/ALP     43.59      42.02    -1.57   [DOP]
+  317  Burt               ALP/LP     68.00      65.70    -2.30   [DOP]
   318  Bean               ALP/IND        --         --       --  skip (ALP/IND not ALP/Coal)
   319  Clark              IND/ALP        --         --       --  skip (IND/ALP not ALP/Coal)
   320  Cooper             ALP/GRN        --         --       --  skip (ALP/GRN not ALP/Coal)
   321  Fraser             ALP/GRN        --         --       --  skip (ALP/GRN not ALP/Coal)
-  322  Macnamara          ALP/LP     62.71      61.80    -0.91   [DOP]
-  323  Monash             LP/ALP     46.01      45.91    -0.10   [DOP]
-  324  Nicholls           NP/ALP     32.65      35.62    +2.97   [DOP]
-  325  Spence             ALP/LP     62.84      65.34    +2.50   [DOP]
-  326  Hawke              ALP/LP     56.22      57.63    +1.41   [DOP]
-  328  Corangamite        ALP/LP     58.32      58.05    -0.27   [DOP]
-  329  Bullwinkel         ALP/LP     50.23      50.51    +0.28   [DOP]
+  322  Macnamara          ALP/LP     64.88      61.80    -3.08   [DOP] *** LARGE
+  323  Monash             LP/ALP     45.84      45.91    +0.07   [DOP]
+  324  Nicholls           NP/ALP     35.44      35.62    +0.18   [DOP]
+  325  Spence             ALP/LP     65.46      65.34    -0.12   [DOP]
+  326  Hawke              ALP/LP     56.51      57.63    +1.12   [DOP]
+  328  Corangamite        ALP/LP     57.58      58.05    +0.47   [DOP]
+  329  Bullwinkel         ALP/LP     48.48      50.51    +2.03   [DOP]
 ---------------------------------------------------------------------------
 ALP/Coal seats with SEAT_FP_2025: 115 (115 using DOP flows), skipped: 35
-Fitted MAE (calibration applied, rounding residual only): 0.0023pp
-Leave-one-out MAE (generalisation estimate): 1.398pp
+Fitted MAE (calibration applied, rounding residual only): 0.0026pp
+Leave-one-out MAE (generalisation estimate): 0.781pp
 Note: SEAT_CALIB_2025 has one offset per seat fitted to that seat's actual,
 so holding out a seat's offset collapses the model to its uncalibrated
 primary-based prediction. The LOO MAE above is therefore the honest
 out-of-sample error of the primary model before per-seat calibration.
 
 Per-state LOO MAE (pre-calibration residual):
-   ACT  n=  1  MAE= 1.630pp  max= 1.63pp
-   NSW  n= 33  MAE= 1.114pp  max= 4.59pp
-    NT  n=  2  MAE= 2.475pp  max= 2.75pp
-   QLD  n= 25  MAE= 1.423pp  max= 2.95pp
-    SA  n=  9  MAE= 2.627pp  max= 8.14pp
-   TAS  n=  3  MAE= 1.117pp  max= 1.43pp
-   VIC  n= 28  MAE= 1.281pp  max= 3.97pp
-    WA  n= 14  MAE= 1.354pp  max= 3.14pp
+   ACT  n=  1  MAE= 0.790pp  max= 0.79pp
+   NSW  n= 33  MAE= 0.612pp  max= 2.52pp
+    NT  n=  2  MAE= 0.835pp  max= 1.13pp
+   QLD  n= 25  MAE= 1.267pp  max= 4.84pp
+    SA  n=  9  MAE= 0.389pp  max= 1.33pp
+   TAS  n=  3  MAE= 0.233pp  max= 0.47pp
+   VIC  n= 28  MAE= 0.660pp  max= 3.08pp
+    WA  n= 14  MAE= 0.916pp  max= 2.64pp
 
 Per-margin LOO MAE (pre-calibration residual):
-  <2pp (marginal)        n=  2  MAE= 0.475pp  max= 0.67pp
-  2-5pp (fairly safe)    n= 10  MAE= 1.647pp  max= 2.75pp
-  5-10pp (safe)          n= 12  MAE= 1.616pp  max= 8.14pp
-  10pp+ (very safe)      n= 91  MAE= 1.362pp  max= 7.08pp
+  <2pp (marginal)        n=  2  MAE= 1.740pp  max= 2.03pp
+  2-5pp (fairly safe)    n= 10  MAE= 0.771pp  max= 2.26pp
+  5-10pp (safe)          n= 12  MAE= 0.345pp  max= 0.87pp
+  10pp+ (very safe)      n= 91  MAE= 0.819pp  max= 4.84pp

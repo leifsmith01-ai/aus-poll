@@ -1,0 +1,1502 @@
+{
+ "318": {
+  "alp": 41.08,
+  "coal": 22.54,
+  "grn": 9.21,
+  "teal": 27.17,
+  "on": 0.0,
+  "other": 0.0,
+  "name": "Bean",
+  "state": "ACT"
+ },
+ "101": {
+  "alp": 48.55,
+  "coal": 17.75,
+  "grn": 20.08,
+  "teal": 11.02,
+  "on": 0.0,
+  "other": 2.59,
+  "name": "Canberra",
+  "state": "ACT"
+ },
+ "102": {
+  "alp": 54.27,
+  "coal": 21.47,
+  "grn": 16.48,
+  "teal": 0.0,
+  "on": 0.0,
+  "other": 7.78,
+  "name": "Fenner",
+  "state": "ACT"
+ },
+ "103": {
+  "alp": 37.6,
+  "coal": 40.05,
+  "grn": 12.32,
+  "teal": 0.0,
+  "on": 3.6,
+  "other": 6.42,
+  "name": "Banks",
+  "state": "NSW"
+ },
+ "104": {
+  "alp": 47.61,
+  "coal": 23.76,
+  "grn": 15.87,
+  "teal": 0.0,
+  "on": 5.44,
+  "other": 7.31,
+  "name": "Barton",
+  "state": "NSW"
+ },
+ "105": {
+  "alp": 47.03,
+  "coal": 35.39,
+  "grn": 12.07,
+  "teal": 0.0,
+  "on": 2.21,
+  "other": 3.3,
+  "name": "Bennelong",
+  "state": "NSW"
+ },
+ "106": {
+  "alp": 27.28,
+  "coal": 41.21,
+  "grn": 12.24,
+  "teal": 13.38,
+  "on": 4.0,
+  "other": 1.9,
+  "name": "Berowra",
+  "state": "NSW"
+ },
+ "107": {
+  "alp": 47.0,
+  "coal": 18.08,
+  "grn": 7.88,
+  "teal": 21.61,
+  "on": 3.09,
+  "other": 2.34,
+  "name": "Blaxland",
+  "state": "NSW"
+ },
+ "108": {
+  "alp": 19.99,
+  "coal": 38.16,
+  "grn": 6.51,
+  "teal": 32.7,
+  "on": 1.48,
+  "other": 1.15,
+  "name": "Bradfield",
+  "state": "NSW"
+ },
+ "109": {
+  "alp": 10.78,
+  "coal": 31.78,
+  "grn": 3.47,
+  "teal": 41.91,
+  "on": 7.97,
+  "other": 4.09,
+  "name": "Calare",
+  "state": "NSW"
+ },
+ "111": {
+  "alp": 55.21,
+  "coal": 19.89,
+  "grn": 10.36,
+  "teal": 0.0,
+  "on": 5.95,
+  "other": 8.59,
+  "name": "Chifley",
+  "state": "NSW"
+ },
+ "112": {
+  "alp": 31.68,
+  "coal": 48.12,
+  "grn": 9.9,
+  "teal": 0.0,
+  "on": 4.21,
+  "other": 6.08,
+  "name": "Cook",
+  "state": "NSW"
+ },
+ "113": {
+  "alp": 11.85,
+  "coal": 40.16,
+  "grn": 4.19,
+  "teal": 32.23,
+  "on": 6.56,
+  "other": 5.03,
+  "name": "Cowper",
+  "state": "NSW"
+ },
+ "114": {
+  "alp": 44.85,
+  "coal": 22.98,
+  "grn": 20.76,
+  "teal": 0.0,
+  "on": 7.43,
+  "other": 3.97,
+  "name": "Cunningham",
+  "state": "NSW"
+ },
+ "115": {
+  "alp": 44.33,
+  "coal": 28.3,
+  "grn": 10.61,
+  "teal": 0.0,
+  "on": 9.12,
+  "other": 7.63,
+  "name": "Dobell",
+  "state": "NSW"
+ },
+ "117": {
+  "alp": 44.13,
+  "coal": 32.58,
+  "grn": 10.17,
+  "teal": 3.88,
+  "on": 6.81,
+  "other": 2.42,
+  "name": "Eden-Monaro",
+  "state": "NSW"
+ },
+ "118": {
+  "alp": 16.14,
+  "coal": 45.9,
+  "grn": 5.11,
+  "teal": 22.39,
+  "on": 6.87,
+  "other": 3.59,
+  "name": "Farrer",
+  "state": "NSW"
+ },
+ "119": {
+  "alp": 38.52,
+  "coal": 11.91,
+  "grn": 6.47,
+  "teal": 35.38,
+  "on": 3.87,
+  "other": 3.84,
+  "name": "Fowler",
+  "state": "NSW"
+ },
+ "120": {
+  "alp": 39.65,
+  "coal": 35.88,
+  "grn": 7.27,
+  "teal": 8.3,
+  "on": 5.04,
+  "other": 3.86,
+  "name": "Gilmore",
+  "state": "NSW"
+ },
+ "121": {
+  "alp": 54.04,
+  "coal": 13.88,
+  "grn": 25.38,
+  "teal": 2.19,
+  "on": 3.02,
+  "other": 1.49,
+  "name": "Grayndler",
+  "state": "NSW"
+ },
+ "122": {
+  "alp": 52.21,
+  "coal": 27.69,
+  "grn": 10.96,
+  "teal": 2.44,
+  "on": 4.22,
+  "other": 2.48,
+  "name": "Greenway",
+  "state": "NSW"
+ },
+ "124": {
+  "alp": 40.35,
+  "coal": 37.51,
+  "grn": 11.56,
+  "teal": 0.0,
+  "on": 5.25,
+  "other": 5.33,
+  "name": "Hughes",
+  "state": "NSW"
+ },
+ "125": {
+  "alp": 28.86,
+  "coal": 45.76,
+  "grn": 8.92,
+  "teal": 4.72,
+  "on": 8.06,
+  "other": 3.67,
+  "name": "Hume",
+  "state": "NSW"
+ },
+ "126": {
+  "alp": 46.55,
+  "coal": 19.33,
+  "grn": 7.67,
+  "teal": 0.0,
+  "on": 17.37,
+  "other": 9.08,
+  "name": "Hunter",
+  "state": "NSW"
+ },
+ "127": {
+  "alp": 51.54,
+  "coal": 25.74,
+  "grn": 13.51,
+  "teal": 3.45,
+  "on": 5.76,
+  "other": 0.0,
+  "name": "Kingsford Smith",
+  "state": "NSW"
+ },
+ "128": {
+  "alp": 34.51,
+  "coal": 42.28,
+  "grn": 10.32,
+  "teal": 0.0,
+  "on": 7.13,
+  "other": 5.76,
+  "name": "Lindsay",
+  "state": "NSW"
+ },
+ "130": {
+  "alp": 21.08,
+  "coal": 40.06,
+  "grn": 6.59,
+  "teal": 17.48,
+  "on": 8.77,
+  "other": 6.02,
+  "name": "Lyne",
+  "state": "NSW"
+ },
+ "131": {
+  "alp": 49.38,
+  "coal": 23.21,
+  "grn": 13.06,
+  "teal": 0.0,
+  "on": 7.6,
+  "other": 6.76,
+  "name": "Macarthur",
+  "state": "NSW"
+ },
+ "132": {
+  "alp": 11.9,
+  "coal": 35.49,
+  "grn": 6.07,
+  "teal": 42.26,
+  "on": 2.45,
+  "other": 1.82,
+  "name": "Mackellar",
+  "state": "NSW"
+ },
+ "133": {
+  "alp": 42.99,
+  "coal": 31.52,
+  "grn": 12.5,
+  "teal": 0.0,
+  "on": 8.39,
+  "other": 4.59,
+  "name": "Macquarie",
+  "state": "NSW"
+ },
+ "315": {
+  "alp": 46.21,
+  "coal": 26.53,
+  "grn": 8.88,
+  "teal": 10.26,
+  "on": 8.13,
+  "other": 0.0,
+  "name": "McMahon",
+  "state": "NSW"
+ },
+ "134": {
+  "alp": 33.75,
+  "coal": 45.88,
+  "grn": 13.93,
+  "teal": 0.0,
+  "on": 4.08,
+  "other": 2.36,
+  "name": "Mitchell",
+  "state": "NSW"
+ },
+ "135": {
+  "alp": 21.06,
+  "coal": 53.82,
+  "grn": 7.95,
+  "teal": 3.69,
+  "on": 10.17,
+  "other": 3.3,
+  "name": "New England",
+  "state": "NSW"
+ },
+ "136": {
+  "alp": 46.19,
+  "coal": 19.26,
+  "grn": 23.47,
+  "teal": 0.0,
+  "on": 5.29,
+  "other": 5.79,
+  "name": "Newcastle",
+  "state": "NSW"
+ },
+ "138": {
+  "alp": 23.42,
+  "coal": 48.17,
+  "grn": 16.15,
+  "teal": 3.53,
+  "on": 5.84,
+  "other": 2.89,
+  "name": "Page",
+  "state": "NSW"
+ },
+ "139": {
+  "alp": 22.33,
+  "coal": 44.69,
+  "grn": 6.75,
+  "teal": 0.0,
+  "on": 15.14,
+  "other": 11.09,
+  "name": "Parkes",
+  "state": "NSW"
+ },
+ "140": {
+  "alp": 49.63,
+  "coal": 30.61,
+  "grn": 12.45,
+  "teal": 2.43,
+  "on": 2.47,
+  "other": 2.41,
+  "name": "Parramatta",
+  "state": "NSW"
+ },
+ "249": {
+  "alp": 38.71,
+  "coal": 28.67,
+  "grn": 7.96,
+  "teal": 12.88,
+  "on": 7.83,
+  "other": 3.95,
+  "name": "Paterson",
+  "state": "NSW"
+ },
+ "144": {
+  "alp": 49.76,
+  "coal": 32.03,
+  "grn": 11.51,
+  "teal": 3.0,
+  "on": 2.2,
+  "other": 1.51,
+  "name": "Reid",
+  "state": "NSW"
+ },
+ "145": {
+  "alp": 32.17,
+  "coal": 26.21,
+  "grn": 28.68,
+  "teal": 0.0,
+  "on": 5.55,
+  "other": 7.39,
+  "name": "Richmond",
+  "state": "NSW"
+ },
+ "250": {
+  "alp": 19.39,
+  "coal": 43.53,
+  "grn": 4.55,
+  "teal": 18.17,
+  "on": 10.28,
+  "other": 4.09,
+  "name": "Riverina",
+  "state": "NSW"
+ },
+ "146": {
+  "alp": 46.41,
+  "coal": 30.5,
+  "grn": 9.22,
+  "teal": 3.38,
+  "on": 7.04,
+  "other": 3.45,
+  "name": "Robertson",
+  "state": "NSW"
+ },
+ "148": {
+  "alp": 45.12,
+  "coal": 26.76,
+  "grn": 11.65,
+  "teal": 4.49,
+  "on": 9.13,
+  "other": 2.85,
+  "name": "Shortland",
+  "state": "NSW"
+ },
+ "149": {
+  "alp": 55.73,
+  "coal": 16.87,
+  "grn": 21.83,
+  "teal": 0.0,
+  "on": 3.31,
+  "other": 2.26,
+  "name": "Sydney",
+  "state": "NSW"
+ },
+ "151": {
+  "alp": 14.41,
+  "coal": 31.93,
+  "grn": 8.75,
+  "teal": 41.91,
+  "on": 1.68,
+  "other": 1.32,
+  "name": "Warringah",
+  "state": "NSW"
+ },
+ "251": {
+  "alp": 50.43,
+  "coal": 14.72,
+  "grn": 8.99,
+  "teal": 18.24,
+  "on": 2.98,
+  "other": 4.66,
+  "name": "Watson",
+  "state": "NSW"
+ },
+ "152": {
+  "alp": 13.05,
+  "coal": 35.7,
+  "grn": 10.0,
+  "teal": 38.96,
+  "on": 2.3,
+  "other": 0.0,
+  "name": "Wentworth",
+  "state": "NSW"
+ },
+ "153": {
+  "alp": 43.52,
+  "coal": 33.55,
+  "grn": 12.01,
+  "teal": 0.0,
+  "on": 3.85,
+  "other": 7.07,
+  "name": "Werriwa",
+  "state": "NSW"
+ },
+ "150": {
+  "alp": 39.52,
+  "coal": 28.61,
+  "grn": 12.53,
+  "teal": 8.88,
+  "on": 7.6,
+  "other": 2.87,
+  "name": "Whitlam",
+  "state": "NSW"
+ },
+ "306": {
+  "alp": 46.09,
+  "coal": 30.71,
+  "grn": 9.76,
+  "teal": 0.0,
+  "on": 8.64,
+  "other": 4.8,
+  "name": "Lingiari",
+  "state": "NT"
+ },
+ "307": {
+  "alp": 32.87,
+  "coal": 36.38,
+  "grn": 9.85,
+  "teal": 14.01,
+  "on": 6.34,
+  "other": 0.55,
+  "name": "Solomon",
+  "state": "NT"
+ },
+ "304": {
+  "alp": 40.3,
+  "coal": 28.96,
+  "grn": 11.5,
+  "teal": 0.0,
+  "on": 10.03,
+  "other": 9.21,
+  "name": "Blair",
+  "state": "QLD"
+ },
+ "310": {
+  "alp": 42.02,
+  "coal": 35.44,
+  "grn": 13.26,
+  "teal": 0.0,
+  "on": 3.81,
+  "other": 5.47,
+  "name": "Bonner",
+  "state": "QLD"
+ },
+ "155": {
+  "alp": 32.87,
+  "coal": 40.87,
+  "grn": 12.36,
+  "teal": 0.0,
+  "on": 6.98,
+  "other": 6.92,
+  "name": "Bowman",
+  "state": "QLD"
+ },
+ "156": {
+  "alp": 33.19,
+  "coal": 33.12,
+  "grn": 27.95,
+  "teal": 0.0,
+  "on": 2.34,
+  "other": 3.4,
+  "name": "Brisbane",
+  "state": "QLD"
+ },
+ "157": {
+  "alp": 32.7,
+  "coal": 35.76,
+  "grn": 6.26,
+  "teal": 0.0,
+  "on": 15.53,
+  "other": 9.75,
+  "name": "Capricornia",
+  "state": "QLD"
+ },
+ "158": {
+  "alp": 27.25,
+  "coal": 43.05,
+  "grn": 7.19,
+  "teal": 0.0,
+  "on": 10.55,
+  "other": 11.95,
+  "name": "Dawson",
+  "state": "QLD"
+ },
+ "252": {
+  "alp": 35.7,
+  "coal": 35.64,
+  "grn": 7.88,
+  "teal": 13.81,
+  "on": 4.05,
+  "other": 2.92,
+  "name": "Dickson",
+  "state": "QLD"
+ },
+ "159": {
+  "alp": 29.31,
+  "coal": 43.53,
+  "grn": 9.7,
+  "teal": 0.0,
+  "on": 8.42,
+  "other": 9.04,
+  "name": "Fadden",
+  "state": "QLD"
+ },
+ "160": {
+  "alp": 25.71,
+  "coal": 38.73,
+  "grn": 10.21,
+  "teal": 14.33,
+  "on": 7.38,
+  "other": 3.64,
+  "name": "Fairfax",
+  "state": "QLD"
+ },
+ "161": {
+  "alp": 23.0,
+  "coal": 38.3,
+  "grn": 9.97,
+  "teal": 18.01,
+  "on": 6.14,
+  "other": 4.58,
+  "name": "Fisher",
+  "state": "QLD"
+ },
+ "311": {
+  "alp": 28.06,
+  "coal": 38.22,
+  "grn": 6.33,
+  "teal": 5.35,
+  "on": 14.88,
+  "other": 7.15,
+  "name": "Flynn",
+  "state": "QLD"
+ },
+ "162": {
+  "alp": 35.92,
+  "coal": 31.6,
+  "grn": 11.83,
+  "teal": 0.0,
+  "on": 10.37,
+  "other": 10.29,
+  "name": "Forde",
+  "state": "QLD"
+ },
+ "163": {
+  "alp": 34.99,
+  "coal": 25.61,
+  "grn": 33.38,
+  "teal": 0.0,
+  "on": 2.26,
+  "other": 3.75,
+  "name": "Griffith",
+  "state": "QLD"
+ },
+ "164": {
+  "alp": 17.22,
+  "coal": 40.43,
+  "grn": 5.95,
+  "teal": 22.54,
+  "on": 9.7,
+  "other": 4.16,
+  "name": "Groom",
+  "state": "QLD"
+ },
+ "165": {
+  "alp": 24.29,
+  "coal": 50.63,
+  "grn": 9.82,
+  "teal": 0.0,
+  "on": 5.08,
+  "other": 10.18,
+  "name": "Herbert",
+  "state": "QLD"
+ },
+ "166": {
+  "alp": 32.37,
+  "coal": 38.61,
+  "grn": 7.62,
+  "teal": 0.0,
+  "on": 13.61,
+  "other": 7.8,
+  "name": "Hinkler",
+  "state": "QLD"
+ },
+ "167": {
+  "alp": 16.98,
+  "coal": 24.17,
+  "grn": 6.01,
+  "teal": 0.0,
+  "on": 7.79,
+  "other": 45.04,
+  "name": "Kennedy",
+  "state": "QLD"
+ },
+ "168": {
+  "alp": 39.91,
+  "coal": 28.78,
+  "grn": 9.9,
+  "teal": 0.0,
+  "on": 8.44,
+  "other": 12.97,
+  "name": "Leichhardt",
+  "state": "QLD"
+ },
+ "169": {
+  "alp": 46.7,
+  "coal": 26.93,
+  "grn": 16.74,
+  "teal": 0.0,
+  "on": 4.03,
+  "other": 5.6,
+  "name": "Lilley",
+  "state": "QLD"
+ },
+ "302": {
+  "alp": 36.18,
+  "coal": 35.82,
+  "grn": 9.81,
+  "teal": 0.0,
+  "on": 9.49,
+  "other": 8.7,
+  "name": "Longman",
+  "state": "QLD"
+ },
+ "170": {
+  "alp": 17.56,
+  "coal": 54.4,
+  "grn": 5.67,
+  "teal": 0.0,
+  "on": 12.78,
+  "other": 9.59,
+  "name": "Maranoa",
+  "state": "QLD"
+ },
+ "171": {
+  "alp": 25.6,
+  "coal": 39.25,
+  "grn": 9.09,
+  "teal": 17.71,
+  "on": 4.61,
+  "other": 3.75,
+  "name": "McPherson",
+  "state": "QLD"
+ },
+ "172": {
+  "alp": 25.73,
+  "coal": 44.07,
+  "grn": 9.88,
+  "teal": 10.24,
+  "on": 5.83,
+  "other": 4.25,
+  "name": "Moncrieff",
+  "state": "QLD"
+ },
+ "173": {
+  "alp": 43.13,
+  "coal": 25.34,
+  "grn": 23.78,
+  "teal": 0.0,
+  "on": 2.73,
+  "other": 5.03,
+  "name": "Moreton",
+  "state": "QLD"
+ },
+ "174": {
+  "alp": 54.33,
+  "coal": 21.12,
+  "grn": 13.8,
+  "teal": 0.0,
+  "on": 5.04,
+  "other": 5.71,
+  "name": "Oxley",
+  "state": "QLD"
+ },
+ "175": {
+  "alp": 37.1,
+  "coal": 37.14,
+  "grn": 12.0,
+  "teal": 0.0,
+  "on": 6.61,
+  "other": 7.15,
+  "name": "Petrie",
+  "state": "QLD"
+ },
+ "176": {
+  "alp": 53.44,
+  "coal": 19.76,
+  "grn": 11.53,
+  "teal": 0.0,
+  "on": 6.67,
+  "other": 8.6,
+  "name": "Rankin",
+  "state": "QLD"
+ },
+ "177": {
+  "alp": 28.91,
+  "coal": 34.26,
+  "grn": 30.97,
+  "teal": 0.0,
+  "on": 2.13,
+  "other": 3.73,
+  "name": "Ryan",
+  "state": "QLD"
+ },
+ "178": {
+  "alp": 27.72,
+  "coal": 40.17,
+  "grn": 9.11,
+  "teal": 4.97,
+  "on": 12.38,
+  "other": 5.65,
+  "name": "Wide Bay",
+  "state": "QLD"
+ },
+ "316": {
+  "alp": 26.32,
+  "coal": 35.46,
+  "grn": 9.83,
+  "teal": 0.0,
+  "on": 17.67,
+  "other": 10.73,
+  "name": "Wright",
+  "state": "QLD"
+ },
+ "179": {
+  "alp": 47.43,
+  "coal": 23.98,
+  "grn": 19.78,
+  "teal": 0.0,
+  "on": 3.87,
+  "other": 4.95,
+  "name": "Adelaide",
+  "state": "SA"
+ },
+ "180": {
+  "alp": 23.57,
+  "coal": 50.4,
+  "grn": 8.48,
+  "teal": 6.31,
+  "on": 8.4,
+  "other": 2.83,
+  "name": "Barker",
+  "state": "SA"
+ },
+ "182": {
+  "alp": 42.95,
+  "coal": 32.2,
+  "grn": 17.35,
+  "teal": 0.0,
+  "on": 2.85,
+  "other": 4.65,
+  "name": "Boothby",
+  "state": "SA"
+ },
+ "183": {
+  "alp": 23.7,
+  "coal": 36.23,
+  "grn": 6.15,
+  "teal": 19.64,
+  "on": 10.35,
+  "other": 3.93,
+  "name": "Grey",
+  "state": "SA"
+ },
+ "185": {
+  "alp": 50.29,
+  "coal": 23.48,
+  "grn": 14.46,
+  "teal": 0.0,
+  "on": 4.92,
+  "other": 6.85,
+  "name": "Hindmarsh",
+  "state": "SA"
+ },
+ "186": {
+  "alp": 54.19,
+  "coal": 18.52,
+  "grn": 14.05,
+  "teal": 0.0,
+  "on": 6.19,
+  "other": 7.06,
+  "name": "Kingston",
+  "state": "SA"
+ },
+ "187": {
+  "alp": 49.89,
+  "coal": 22.79,
+  "grn": 13.1,
+  "teal": 0.0,
+  "on": 6.74,
+  "other": 7.48,
+  "name": "Makin",
+  "state": "SA"
+ },
+ "188": {
+  "alp": 21.91,
+  "coal": 24.03,
+  "grn": 14.14,
+  "teal": 31.07,
+  "on": 6.03,
+  "other": 2.83,
+  "name": "Mayo",
+  "state": "SA"
+ },
+ "325": {
+  "alp": 46.93,
+  "coal": 19.46,
+  "grn": 15.32,
+  "teal": 0.0,
+  "on": 9.64,
+  "other": 8.66,
+  "name": "Spence",
+  "state": "SA"
+ },
+ "190": {
+  "alp": 35.91,
+  "coal": 34.44,
+  "grn": 16.53,
+  "teal": 7.62,
+  "on": 3.35,
+  "other": 2.15,
+  "name": "Sturt",
+  "state": "SA"
+ },
+ "192": {
+  "alp": 40.5,
+  "coal": 30.86,
+  "grn": 13.46,
+  "teal": 5.44,
+  "on": 6.49,
+  "other": 3.25,
+  "name": "Bass",
+  "state": "TAS"
+ },
+ "193": {
+  "alp": 39.78,
+  "coal": 31.64,
+  "grn": 8.21,
+  "teal": 8.21,
+  "on": 7.66,
+  "other": 4.51,
+  "name": "Braddon",
+  "state": "TAS"
+ },
+ "319": {
+  "alp": 20.17,
+  "coal": 13.3,
+  "grn": 13.52,
+  "teal": 48.98,
+  "on": 4.03,
+  "other": 0.0,
+  "name": "Clark",
+  "state": "TAS"
+ },
+ "195": {
+  "alp": 39.18,
+  "coal": 18.23,
+  "grn": 10.35,
+  "teal": 27.46,
+  "on": 4.77,
+  "other": 0.0,
+  "name": "Franklin",
+  "state": "TAS"
+ },
+ "196": {
+  "alp": 45.08,
+  "coal": 27.05,
+  "grn": 11.35,
+  "teal": 0.0,
+  "on": 7.05,
+  "other": 9.47,
+  "name": "Lyons",
+  "state": "TAS"
+ },
+ "197": {
+  "alp": 39.23,
+  "coal": 38.1,
+  "grn": 12.31,
+  "teal": 4.32,
+  "on": 3.31,
+  "other": 2.74,
+  "name": "Aston",
+  "state": "VIC"
+ },
+ "198": {
+  "alp": 43.08,
+  "coal": 29.02,
+  "grn": 14.57,
+  "teal": 2.66,
+  "on": 7.66,
+  "other": 3.02,
+  "name": "Ballarat",
+  "state": "VIC"
+ },
+ "200": {
+  "alp": 35.83,
+  "coal": 43.21,
+  "grn": 12.46,
+  "teal": 0.0,
+  "on": 4.85,
+  "other": 3.66,
+  "name": "Bendigo",
+  "state": "VIC"
+ },
+ "201": {
+  "alp": 48.69,
+  "coal": 22.53,
+  "grn": 13.24,
+  "teal": 0.0,
+  "on": 8.42,
+  "other": 7.12,
+  "name": "Bruce",
+  "state": "VIC"
+ },
+ "203": {
+  "alp": 33.04,
+  "coal": 16.36,
+  "grn": 8.58,
+  "teal": 35.54,
+  "on": 3.26,
+  "other": 3.23,
+  "name": "Calwell",
+  "state": "VIC"
+ },
+ "204": {
+  "alp": 25.85,
+  "coal": 41.66,
+  "grn": 12.08,
+  "teal": 11.75,
+  "on": 5.25,
+  "other": 3.4,
+  "name": "Casey",
+  "state": "VIC"
+ },
+ "205": {
+  "alp": 39.99,
+  "coal": 36.8,
+  "grn": 12.94,
+  "teal": 6.44,
+  "on": 1.79,
+  "other": 2.04,
+  "name": "Chisholm",
+  "state": "VIC"
+ },
+ "320": {
+  "alp": 42.02,
+  "coal": 14.19,
+  "grn": 25.77,
+  "teal": 0.0,
+  "on": 4.94,
+  "other": 13.09,
+  "name": "Cooper",
+  "state": "VIC"
+ },
+ "328": {
+  "alp": 39.36,
+  "coal": 34.44,
+  "grn": 15.58,
+  "teal": 4.5,
+  "on": 3.03,
+  "other": 3.09,
+  "name": "Corangamite",
+  "state": "VIC"
+ },
+ "208": {
+  "alp": 43.2,
+  "coal": 24.22,
+  "grn": 16.12,
+  "teal": 3.55,
+  "on": 9.84,
+  "other": 3.08,
+  "name": "Corio",
+  "state": "VIC"
+ },
+ "209": {
+  "alp": 36.67,
+  "coal": 38.17,
+  "grn": 12.82,
+  "teal": 7.98,
+  "on": 2.49,
+  "other": 1.86,
+  "name": "Deakin",
+  "state": "VIC"
+ },
+ "210": {
+  "alp": 40.26,
+  "coal": 32.67,
+  "grn": 12.51,
+  "teal": 3.0,
+  "on": 6.65,
+  "other": 4.9,
+  "name": "Dunkley",
+  "state": "VIC"
+ },
+ "211": {
+  "alp": 22.59,
+  "coal": 39.34,
+  "grn": 6.17,
+  "teal": 24.03,
+  "on": 5.36,
+  "other": 2.5,
+  "name": "Flinders",
+  "state": "VIC"
+ },
+ "321": {
+  "alp": 42.3,
+  "coal": 16.07,
+  "grn": 26.41,
+  "teal": 0.0,
+  "on": 4.24,
+  "other": 10.98,
+  "name": "Fraser",
+  "state": "VIC"
+ },
+ "212": {
+  "alp": 46.87,
+  "coal": 25.94,
+  "grn": 17.66,
+  "teal": 0.0,
+  "on": 5.49,
+  "other": 4.03,
+  "name": "Gellibrand",
+  "state": "VIC"
+ },
+ "213": {
+  "alp": 20.98,
+  "coal": 53.53,
+  "grn": 8.15,
+  "teal": 0.0,
+  "on": 14.23,
+  "other": 3.11,
+  "name": "Gippsland",
+  "state": "VIC"
+ },
+ "214": {
+  "alp": 13.44,
+  "coal": 42.75,
+  "grn": 7.21,
+  "teal": 33.27,
+  "on": 1.66,
+  "other": 1.66,
+  "name": "Goldstein",
+  "state": "VIC"
+ },
+ "309": {
+  "alp": 44.58,
+  "coal": 29.7,
+  "grn": 10.93,
+  "teal": 0.0,
+  "on": 5.65,
+  "other": 9.15,
+  "name": "Gorton",
+  "state": "VIC"
+ },
+ "326": {
+  "alp": 40.9,
+  "coal": 30.96,
+  "grn": 10.13,
+  "teal": 0.0,
+  "on": 9.15,
+  "other": 8.86,
+  "name": "Hawke",
+  "state": "VIC"
+ },
+ "216": {
+  "alp": 46.3,
+  "coal": 24.32,
+  "grn": 11.66,
+  "teal": 0.0,
+  "on": 8.26,
+  "other": 9.46,
+  "name": "Holt",
+  "state": "VIC"
+ },
+ "217": {
+  "alp": 49.89,
+  "coal": 24.9,
+  "grn": 14.97,
+  "teal": 0.0,
+  "on": 4.38,
+  "other": 5.85,
+  "name": "Hotham",
+  "state": "VIC"
+ },
+ "218": {
+  "alp": 8.26,
+  "coal": 31.69,
+  "grn": 3.48,
+  "teal": 46.38,
+  "on": 7.18,
+  "other": 3.01,
+  "name": "Indi",
+  "state": "VIC"
+ },
+ "219": {
+  "alp": 50.02,
+  "coal": 28.03,
+  "grn": 14.35,
+  "teal": 0.0,
+  "on": 4.24,
+  "other": 3.36,
+  "name": "Isaacs",
+  "state": "VIC"
+ },
+ "220": {
+  "alp": 42.88,
+  "coal": 29.04,
+  "grn": 15.95,
+  "teal": 6.16,
+  "on": 3.56,
+  "other": 2.41,
+  "name": "Jagajaga",
+  "state": "VIC"
+ },
+ "221": {
+  "alp": 11.28,
+  "coal": 42.28,
+  "grn": 7.69,
+  "teal": 36.53,
+  "on": 0.95,
+  "other": 1.26,
+  "name": "Kooyong",
+  "state": "VIC"
+ },
+ "223": {
+  "alp": 32.79,
+  "coal": 38.68,
+  "grn": 13.48,
+  "teal": 0.0,
+  "on": 7.28,
+  "other": 7.78,
+  "name": "La Trobe",
+  "state": "VIC"
+ },
+ "222": {
+  "alp": 44.59,
+  "coal": 26.63,
+  "grn": 15.5,
+  "teal": 2.08,
+  "on": 6.55,
+  "other": 4.65,
+  "name": "Lalor",
+  "state": "VIC"
+ },
+ "322": {
+  "alp": 37.23,
+  "coal": 29.37,
+  "grn": 28.07,
+  "teal": 1.59,
+  "on": 2.5,
+  "other": 1.24,
+  "name": "Macnamara",
+  "state": "VIC"
+ },
+ "224": {
+  "alp": 19.48,
+  "coal": 52.09,
+  "grn": 9.35,
+  "teal": 0.0,
+  "on": 11.29,
+  "other": 7.78,
+  "name": "Mallee",
+  "state": "VIC"
+ },
+ "225": {
+  "alp": 41.52,
+  "coal": 30.29,
+  "grn": 21.69,
+  "teal": 0.0,
+  "on": 6.5,
+  "other": 0.0,
+  "name": "Maribyrnong",
+  "state": "VIC"
+ },
+ "226": {
+  "alp": 40.16,
+  "coal": 33.6,
+  "grn": 12.33,
+  "teal": 0.0,
+  "on": 6.39,
+  "other": 7.51,
+  "name": "McEwen",
+  "state": "VIC"
+ },
+ "228": {
+  "alp": 31.35,
+  "coal": 17.75,
+  "grn": 42.14,
+  "teal": 4.65,
+  "on": 2.21,
+  "other": 1.89,
+  "name": "Melbourne",
+  "state": "VIC"
+ },
+ "229": {
+  "alp": 36.29,
+  "coal": 40.73,
+  "grn": 11.59,
+  "teal": 7.1,
+  "on": 1.84,
+  "other": 2.45,
+  "name": "Menzies",
+  "state": "VIC"
+ },
+ "323": {
+  "alp": 21.25,
+  "coal": 33.05,
+  "grn": 4.84,
+  "teal": 29.09,
+  "on": 8.17,
+  "other": 3.58,
+  "name": "Monash",
+  "state": "VIC"
+ },
+ "324": {
+  "alp": 23.82,
+  "coal": 48.39,
+  "grn": 7.44,
+  "teal": 0.0,
+  "on": 11.22,
+  "other": 9.13,
+  "name": "Nicholls",
+  "state": "VIC"
+ },
+ "232": {
+  "alp": 47.86,
+  "coal": 21.78,
+  "grn": 9.88,
+  "teal": 0.0,
+  "on": 6.83,
+  "other": 13.64,
+  "name": "Scullin",
+  "state": "VIC"
+ },
+ "233": {
+  "alp": 10.39,
+  "coal": 45.0,
+  "grn": 2.93,
+  "teal": 34.63,
+  "on": 4.16,
+  "other": 2.89,
+  "name": "Wannon",
+  "state": "VIC"
+ },
+ "234": {
+  "alp": 35.35,
+  "coal": 11.74,
+  "grn": 37.98,
+  "teal": 0.0,
+  "on": 3.22,
+  "other": 11.71,
+  "name": "Wills",
+  "state": "VIC"
+ },
+ "235": {
+  "alp": 46.33,
+  "coal": 19.48,
+  "grn": 13.08,
+  "teal": 0.0,
+  "on": 12.62,
+  "other": 8.48,
+  "name": "Brand",
+  "state": "WA"
+ },
+ "329": {
+  "alp": 33.14,
+  "coal": 41.86,
+  "grn": 11.41,
+  "teal": 0.0,
+  "on": 8.54,
+  "other": 5.04,
+  "name": "Bullwinkel",
+  "state": "WA"
+ },
+ "317": {
+  "alp": 48.81,
+  "coal": 19.21,
+  "grn": 11.46,
+  "teal": 0.0,
+  "on": 9.87,
+  "other": 10.65,
+  "name": "Burt",
+  "state": "WA"
+ },
+ "236": {
+  "alp": 29.99,
+  "coal": 42.8,
+  "grn": 8.83,
+  "teal": 0.0,
+  "on": 11.27,
+  "other": 7.11,
+  "name": "Canning",
+  "state": "WA"
+ },
+ "237": {
+  "alp": 49.99,
+  "coal": 25.54,
+  "grn": 11.17,
+  "teal": 3.89,
+  "on": 5.11,
+  "other": 4.3,
+  "name": "Cowan",
+  "state": "WA"
+ },
+ "238": {
+  "alp": 14.34,
+  "coal": 40.57,
+  "grn": 7.4,
+  "teal": 33.21,
+  "on": 2.36,
+  "other": 2.12,
+  "name": "Curtin",
+  "state": "WA"
+ },
+ "312": {
+  "alp": 25.67,
+  "coal": 48.64,
+  "grn": 8.71,
+  "teal": 0.0,
+  "on": 10.47,
+  "other": 6.51,
+  "name": "Durack",
+  "state": "WA"
+ },
+ "239": {
+  "alp": 23.95,
+  "coal": 33.38,
+  "grn": 8.02,
+  "teal": 19.83,
+  "on": 9.26,
+  "other": 5.55,
+  "name": "Forrest",
+  "state": "WA"
+ },
+ "240": {
+  "alp": 39.37,
+  "coal": 18.32,
+  "grn": 11.36,
+  "teal": 24.11,
+  "on": 5.88,
+  "other": 0.96,
+  "name": "Fremantle",
+  "state": "WA"
+ },
+ "305": {
+  "alp": 50.38,
+  "coal": 22.03,
+  "grn": 12.49,
+  "teal": 0.0,
+  "on": 7.07,
+  "other": 8.04,
+  "name": "Hasluck",
+  "state": "WA"
+ },
+ "242": {
+  "alp": 34.24,
+  "coal": 32.75,
+  "grn": 11.45,
+  "teal": 6.92,
+  "on": 4.54,
+  "other": 10.1,
+  "name": "Moore",
+  "state": "WA"
+ },
+ "243": {
+  "alp": 22.53,
+  "coal": 49.3,
+  "grn": 10.45,
+  "teal": 0.0,
+  "on": 11.89,
+  "other": 5.84,
+  "name": "O'Connor",
+  "state": "WA"
+ },
+ "244": {
+  "alp": 40.51,
+  "coal": 28.6,
+  "grn": 11.61,
+  "teal": 0.0,
+  "on": 8.94,
+  "other": 10.34,
+  "name": "Pearce",
+  "state": "WA"
+ },
+ "245": {
+  "alp": 43.57,
+  "coal": 25.71,
+  "grn": 24.74,
+  "teal": 0.0,
+  "on": 5.97,
+  "other": 0.0,
+  "name": "Perth",
+  "state": "WA"
+ },
+ "247": {
+  "alp": 43.39,
+  "coal": 26.64,
+  "grn": 17.65,
+  "teal": 0.0,
+  "on": 4.91,
+  "other": 7.41,
+  "name": "Swan",
+  "state": "WA"
+ },
+ "248": {
+  "alp": 42.92,
+  "coal": 34.32,
+  "grn": 12.86,
+  "teal": 0.0,
+  "on": 3.87,
+  "other": 6.03,
+  "name": "Tangney",
+  "state": "WA"
+ }
+}

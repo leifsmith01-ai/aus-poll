@@ -200,3 +200,80 @@ JOIN vic_districts dn
     AND dn.election_id  = d.election_id
 WHERE d.elected = 1
 GROUP BY d.election_id, d.district_id;
+
+-- ── VIC Legislative Council (upper house) ────────────────────
+-- Victoria's upper house is elected from 8 multi-member regions
+-- (5 members each, 40 MLCs total) by proportional representation
+-- with group voting tickets. Group-level first preferences only;
+-- the full surplus/exclusion count is not modelled. Schema +
+-- loaders only for now — the VEC region-level group FP downloads
+-- still need a parser (see database.load_lc_* docstrings for
+-- sources). Mirrors the `lc` block of state_schema_template.sql,
+-- with a regions table because (unlike NSW/WA/SA's statewide
+-- LC contests) VIC LC seats are contested per region.
+CREATE TABLE IF NOT EXISTS vic_lc_elections (
+    election_id   INTEGER PRIMARY KEY,  -- e.g. 202211
+    name          TEXT    NOT NULL,
+    election_date TEXT    NOT NULL,     -- ISO-8601 YYYY-MM-DD
+    jurisdiction  TEXT    NOT NULL DEFAULT 'vic_lc',
+    seats_to_fill INTEGER NOT NULL DEFAULT 40,  -- 8 regions × 5 members
+    created_at    TEXT    DEFAULT (datetime('now'))
+);
+
+-- ── VIC LC Regions (8 multi-member regions) ──────────────────
+CREATE TABLE IF NOT EXISTS vic_lc_regions (
+    region_id     INTEGER NOT NULL,
+    election_id   INTEGER NOT NULL,
+    region_name   TEXT    NOT NULL,    -- e.g. 'Northern Metropolitan'
+    enrolment     INTEGER,
+    seats_in_region INTEGER NOT NULL DEFAULT 5,
+    PRIMARY KEY (region_id, election_id),
+    FOREIGN KEY (election_id) REFERENCES vic_lc_elections(election_id)
+);
+
+-- ── VIC LC Groups (party / group tickets, per region) ────────
+CREATE TABLE IF NOT EXISTS vic_lc_groups (
+    group_id    INTEGER NOT NULL,
+    election_id INTEGER NOT NULL,
+    region_id   INTEGER NOT NULL,
+    group_label TEXT,                -- ballot group letter, e.g. 'A'
+    party_ab    TEXT,
+    party_name  TEXT,
+    PRIMARY KEY (group_id, election_id),
+    FOREIGN KEY (election_id) REFERENCES vic_lc_elections(election_id),
+    FOREIGN KEY (region_id, election_id)
+        REFERENCES vic_lc_regions(region_id, election_id)
+);
+
+-- ── VIC LC Group Votes (region-level group FP) ───────────────
+CREATE TABLE IF NOT EXISTS vic_lc_group_votes (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id INTEGER NOT NULL,
+    region_id   INTEGER NOT NULL,
+    group_id    INTEGER NOT NULL,
+    total_votes INTEGER NOT NULL DEFAULT 0,
+    vote_pct    REAL,
+    UNIQUE (election_id, region_id, group_id),
+    FOREIGN KEY (election_id) REFERENCES vic_lc_elections(election_id)
+);
+
+-- ── VIC LC Members Elected ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS vic_lc_members_elected (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    election_id   INTEGER NOT NULL,
+    region_id     INTEGER NOT NULL,
+    group_id      INTEGER,            -- NULL for ungrouped independents
+    surname       TEXT    NOT NULL,
+    given_name    TEXT,
+    party_ab      TEXT,
+    elected_order INTEGER,            -- 1 = first elected in the region
+    UNIQUE (election_id, region_id, surname, given_name),
+    FOREIGN KEY (election_id) REFERENCES vic_lc_elections(election_id),
+    FOREIGN KEY (region_id, election_id)
+        REFERENCES vic_lc_regions(region_id, election_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_vic_lc_group_votes_election
+    ON vic_lc_group_votes(election_id, region_id);
+CREATE INDEX IF NOT EXISTS idx_vic_lc_members_election
+    ON vic_lc_members_elected(election_id, region_id);

@@ -89,6 +89,23 @@ def copy_aggregated_polls() -> None:
     print(f"  ✓ aggregated.json → {dst}")
 
 
+def copy_state_polls() -> None:
+    """Copy state poll JSONs (vic/nsw/qld/wa/sa) to webapp/src/data/ for the React frontend.
+
+    The state scenario builders read these for their recent-polls lists and the
+    "apply latest polls" seeding action.
+    """
+    WEBAPP_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    for state in ["vic", "nsw", "qld", "wa", "sa"]:
+        src = BASE_DIR / "data" / "polls" / f"{state}_polls.json"
+        dst = WEBAPP_DATA_DIR / f"{state}_polls.json"
+        if not src.exists():
+            print(f"  ✗ No {state}_polls.json found at {src}")
+            continue
+        shutil.copy2(src, dst)
+        print(f"  ✓ {state}_polls.json → {dst}")
+
+
 def main():
     print("Copying pipeline exports → frontend/public/data/")
     print("=" * 50)
@@ -115,6 +132,9 @@ def main():
 
     # ── House-effect-corrected poll aggregate → webapp/src/data/ ─────────────
     copy_aggregated_polls()
+
+    # ── State poll JSONs → webapp/src/data/ ──────────────────────────────────
+    copy_state_polls()
 
     print()
     print("Done. Start the frontend with: cd webapp && npm run dev")

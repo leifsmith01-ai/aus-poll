@@ -62,14 +62,9 @@ aus-poll/
 ├── main.py                        # Pipeline orchestrator (587 lines)
 ├── requirements.txt               # Python dependencies
 ├── schema.sql                     # Federal election SQLite schema
-├── vec_schema.sql                 # Victorian election schema
-├── act_schema.sql                 # ACT schema
-├── nsw_schema.sql                 # NSW schema
-├── nt_schema.sql                  # NT schema
-├── qld_schema.sql                 # QLD schema
-├── sa_schema.sql                  # SA schema
-├── tas_schema.sql                 # TAS schema
-├── wa_schema.sql                  # WA schema
+├── vec_schema.sql                 # Victorian election schema (incl. LC region tables)
+├── state_schema_template.sql      # Parameterised template for the 7 non-VIC state schemas
+│                                  #   (rendered by pipeline.database.build_state_schema_sql)
 ├── vercel.json                    # Vercel deployment config
 ├── PLAN.md                        # Detailed development roadmap (9,000+ lines)
 ├── README.md
@@ -253,9 +248,11 @@ Tables: `elections`, `states`, `divisions`, `candidates`, `polling_places`, `fir
 - `tcp` (two-candidate preferred): booth × candidate
 - `dop` (distribution of preferences): count-by-count preference flows per division
 
-### State-specific schemas
+### State-specific schemas (`state_schema_template.sql`)
 
-Each state has its own schema file (`nsw_schema.sql`, `qld_schema.sql`, etc.) with tables prefixed by the state code: `nsw_elections`, `nsw_districts`, `nsw_candidates`, etc.
+The seven non-VIC state/territory schemas (NSW, QLD, WA, SA, TAS, ACT, NT) are rendered from the single parameterised template `state_schema_template.sql` by `pipeline.database.build_state_schema_sql(state_ab)` (the former per-state `nsw_schema.sql` etc. files have been deleted). Tables are prefixed by the state code: `nsw_elections`, `nsw_districts`, `nsw_candidates`, etc.
+
+Template conditional blocks (`-- @if <flag>` … `-- @endif`) select per-state variations: `preferential` vs `hare_clark` (TAS/ACT), NT's optional-preferential `exhausted_votes` columns, booth-level tables, and Legislative Council (`lc`) upper-house tables for the bicameral states NSW/WA/SA (`{p}_lc_elections`, `{p}_lc_groups`, `{p}_lc_group_votes`, `{p}_lc_members_elected`). `tests/test_state_schema.py` verifies rendering for all 7 states.
 
 State election IDs use YYYYMM format (e.g., `202303` for March 2023 NSW election). This avoids collision with federal event IDs.
 
@@ -263,7 +260,7 @@ State election IDs use YYYYMM format (e.g., `202303` for March 2023 NSW election
 
 Covers both chambers:
 - Lower house: 88 electorates
-- Upper house (Legislative Council): 8 regions (multi-member)
+- Upper house (Legislative Council): 8 regions × 5 members — `vic_lc_regions`, `vic_lc_groups`, `vic_lc_group_votes`, `vic_lc_members_elected`
 - VEC tables: `vic_elections`, `vic_districts`, `vic_candidates`
 
 ---

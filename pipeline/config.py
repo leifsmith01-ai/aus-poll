@@ -548,7 +548,7 @@ STATE_REGISTRY = {
         "coalition_parties": NSW_COALITION_PARTIES,
         "raw_dir":           NSW_RAW_DIR,
         "exports_dir":       NSW_EXPORTS_DIR,
-        "schema_file":       "nsw_schema.sql",
+        "schema_file":       "state_schema_template.sql",  # rendered via database.build_state_schema_sql()
         "seats":             93,
         "system":            "preferential",
         "booth_level":       True,   # NSWEC publishes booth-level results
@@ -559,7 +559,7 @@ STATE_REGISTRY = {
         "coalition_parties": QLD_COALITION_PARTIES,
         "raw_dir":           QLD_RAW_DIR,
         "exports_dir":       QLD_EXPORTS_DIR,
-        "schema_file":       "qld_schema.sql",
+        "schema_file":       "state_schema_template.sql",  # rendered via database.build_state_schema_sql()
         "seats":             93,
         "system":            "preferential",
         "booth_level":       True,   # ECQ publishes booth-level results
@@ -570,7 +570,7 @@ STATE_REGISTRY = {
         "coalition_parties": WA_COALITION_PARTIES,
         "raw_dir":           WA_RAW_DIR,
         "exports_dir":       WA_EXPORTS_DIR,
-        "schema_file":       "wa_schema.sql",
+        "schema_file":       "state_schema_template.sql",  # rendered via database.build_state_schema_sql()
         "seats":             59,
         "system":            "preferential",
         "booth_level":       True,   # WAEC publishes booth-level results
@@ -581,7 +581,7 @@ STATE_REGISTRY = {
         "coalition_parties": SA_COALITION_PARTIES,
         "raw_dir":           SA_RAW_DIR,
         "exports_dir":       SA_EXPORTS_DIR,
-        "schema_file":       "sa_schema.sql",
+        "schema_file":       "state_schema_template.sql",  # rendered via database.build_state_schema_sql()
         "seats":             47,
         "system":            "preferential",
         "booth_level":       True,   # ECSA publishes booth-level results
@@ -592,7 +592,7 @@ STATE_REGISTRY = {
         "coalition_parties": TAS_COALITION_PARTIES,
         "raw_dir":           TAS_RAW_DIR,
         "exports_dir":       TAS_EXPORTS_DIR,
-        "schema_file":       "tas_schema.sql",
+        "schema_file":       "state_schema_template.sql",  # rendered via database.build_state_schema_sql()
         "seats":             25,
         "system":            "hare-clark",
         "booth_level":       False,  # Hare-Clark: no meaningful booth-level breakdown
@@ -603,7 +603,7 @@ STATE_REGISTRY = {
         "coalition_parties": ACT_COALITION_PARTIES,
         "raw_dir":           ACT_RAW_DIR,
         "exports_dir":       ACT_EXPORTS_DIR,
-        "schema_file":       "act_schema.sql",
+        "schema_file":       "state_schema_template.sql",  # rendered via database.build_state_schema_sql()
         "seats":             25,
         "system":            "hare-clark",
         "booth_level":       False,  # Hare-Clark: no meaningful booth-level breakdown
@@ -614,7 +614,7 @@ STATE_REGISTRY = {
         "coalition_parties": NT_COALITION_PARTIES,
         "raw_dir":           NT_RAW_DIR,
         "exports_dir":       NT_EXPORTS_DIR,
-        "schema_file":       "nt_schema.sql",
+        "schema_file":       "state_schema_template.sql",  # rendered via database.build_state_schema_sql()
         "seats":             25,
         "system":            "optional-preferential",
         "booth_level":       True,   # NTEC publishes booth-level results
