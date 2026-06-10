@@ -1,0 +1,1502 @@
+[
+ [
+  318,
+  "Bean",
+  "ACT",
+  "ALP",
+  "David Smith",
+  "ALP",
+  "IND",
+  0.68
+ ],
+ [
+  101,
+  "Canberra",
+  "ACT",
+  "ALP",
+  "Alicia Payne",
+  "ALP",
+  "GRN",
+  39.04
+ ],
+ [
+  102,
+  "Fenner",
+  "ACT",
+  "ALP",
+  "Andrew Leigh",
+  "ALP",
+  "LP",
+  44.16
+ ],
+ [
+  103,
+  "Banks",
+  "NSW",
+  "ALP",
+  "Zhi Soon",
+  "ALP",
+  "LP",
+  4.78
+ ],
+ [
+  104,
+  "Barton",
+  "NSW",
+  "ALP",
+  "Ash Ambihaipahar",
+  "ALP",
+  "LP",
+  32.01
+ ],
+ [
+  105,
+  "Bennelong",
+  "NSW",
+  "ALP",
+  "Jerome Laxale",
+  "ALP",
+  "LP",
+  18.52
+ ],
+ [
+  106,
+  "Berowra",
+  "NSW",
+  "LP",
+  "Julian Leeser",
+  "LP",
+  "ALP",
+  3.27
+ ],
+ [
+  107,
+  "Blaxland",
+  "NSW",
+  "ALP",
+  "Jason Clare",
+  "ALP",
+  "LP",
+  43.81
+ ],
+ [
+  108,
+  "Bradfield",
+  "NSW",
+  "IND",
+  "Nicolette Boele",
+  "IND",
+  "LP",
+  0.02
+ ],
+ [
+  109,
+  "Calare",
+  "NSW",
+  "IND",
+  "Andrew Gee",
+  "IND",
+  "NP",
+  13.56
+ ],
+ [
+  111,
+  "Chifley",
+  "NSW",
+  "ALP",
+  "Ed Husic",
+  "ALP",
+  "LP",
+  39.66
+ ],
+ [
+  112,
+  "Cook",
+  "NSW",
+  "LP",
+  "Simon Kennedy",
+  "LP",
+  "ALP",
+  14.39
+ ],
+ [
+  113,
+  "Cowper",
+  "NSW",
+  "NP",
+  "Pat Conaghan",
+  "NP",
+  "IND",
+  5.09
+ ],
+ [
+  114,
+  "Cunningham",
+  "NSW",
+  "ALP",
+  "Alison Byrnes",
+  "ALP",
+  "LP",
+  35.04
+ ],
+ [
+  115,
+  "Dobell",
+  "NSW",
+  "ALP",
+  "Emma Mcbride",
+  "ALP",
+  "LP",
+  18.86
+ ],
+ [
+  117,
+  "Eden-Monaro",
+  "NSW",
+  "ALP",
+  "Kristy Mcbain",
+  "ALP",
+  "LP",
+  14.43
+ ],
+ [
+  118,
+  "Farrer",
+  "NSW",
+  "LP",
+  "Sussan Ley",
+  "LP",
+  "IND",
+  12.39
+ ],
+ [
+  119,
+  "Fowler",
+  "NSW",
+  "IND",
+  "Dai Le",
+  "IND",
+  "ALP",
+  5.35
+ ],
+ [
+  120,
+  "Gilmore",
+  "NSW",
+  "ALP",
+  "Fiona Phillips",
+  "ALP",
+  "LP",
+  10.26
+ ],
+ [
+  121,
+  "Grayndler",
+  "NSW",
+  "ALP",
+  "Anthony Albanese",
+  "ALP",
+  "GRN",
+  33.73
+ ],
+ [
+  122,
+  "Greenway",
+  "NSW",
+  "ALP",
+  "Michelle Rowland",
+  "ALP",
+  "LP",
+  27.52
+ ],
+ [
+  124,
+  "Hughes",
+  "NSW",
+  "ALP",
+  "David Moncrieff",
+  "ALP",
+  "LP",
+  6.11
+ ],
+ [
+  125,
+  "Hume",
+  "NSW",
+  "LP",
+  "Angus Taylor",
+  "LP",
+  "ALP",
+  16.11
+ ],
+ [
+  126,
+  "Hunter",
+  "NSW",
+  "ALP",
+  "Dan Repacholi",
+  "ALP",
+  "ON",
+  18.07
+ ],
+ [
+  127,
+  "Kingsford Smith",
+  "NSW",
+  "ALP",
+  "Matt Thistlethwaite",
+  "ALP",
+  "LP",
+  34.37
+ ],
+ [
+  128,
+  "Lindsay",
+  "NSW",
+  "LP",
+  "Melissa Mcintosh",
+  "LP",
+  "ALP",
+  5.57
+ ],
+ [
+  130,
+  "Lyne",
+  "NSW",
+  "NP",
+  "Alison Penfold",
+  "NP",
+  "ALP",
+  19.56
+ ],
+ [
+  131,
+  "Macarthur",
+  "NSW",
+  "ALP",
+  "Mike Freelander",
+  "ALP",
+  "LP",
+  31.21
+ ],
+ [
+  132,
+  "Mackellar",
+  "NSW",
+  "IND",
+  "Sophie Scamps",
+  "IND",
+  "LP",
+  11.32
+ ],
+ [
+  133,
+  "Macquarie",
+  "NSW",
+  "ALP",
+  "Susan Templeman",
+  "ALP",
+  "LP",
+  15.41
+ ],
+ [
+  315,
+  "McMahon",
+  "NSW",
+  "ALP",
+  "Chris Bowen",
+  "ALP",
+  "LP",
+  18.04
+ ],
+ [
+  134,
+  "Mitchell",
+  "NSW",
+  "LP",
+  "Alex Hawke",
+  "LP",
+  "ALP",
+  7.62
+ ],
+ [
+  135,
+  "New England",
+  "NSW",
+  "NP",
+  "Barnaby Joyce",
+  "NP",
+  "ALP",
+  34.12
+ ],
+ [
+  136,
+  "Newcastle",
+  "NSW",
+  "ALP",
+  "Sharon Claydon",
+  "ALP",
+  "GRN",
+  31.61
+ ],
+ [
+  138,
+  "Page",
+  "NSW",
+  "NP",
+  "Kevin Hogan",
+  "NP",
+  "ALP",
+  18.57
+ ],
+ [
+  139,
+  "Parkes",
+  "NSW",
+  "NP",
+  "Jamie Chaffey",
+  "NP",
+  "ALP",
+  25.94
+ ],
+ [
+  140,
+  "Parramatta",
+  "NSW",
+  "ALP",
+  "Andrew Charlton",
+  "ALP",
+  "LP",
+  25.1
+ ],
+ [
+  249,
+  "Paterson",
+  "NSW",
+  "ALP",
+  "Meryl Swanson",
+  "ALP",
+  "LP",
+  13.78
+ ],
+ [
+  144,
+  "Reid",
+  "NSW",
+  "ALP",
+  "Sally Sitou",
+  "ALP",
+  "LP",
+  24.01
+ ],
+ [
+  145,
+  "Richmond",
+  "NSW",
+  "ALP",
+  "Justine Elliot",
+  "ALP",
+  "NP",
+  20.01
+ ],
+ [
+  250,
+  "Riverina",
+  "NSW",
+  "NP",
+  "Michael Mccormack",
+  "NP",
+  "ALP",
+  25.24
+ ],
+ [
+  146,
+  "Robertson",
+  "NSW",
+  "ALP",
+  "Gordon Reid",
+  "ALP",
+  "LP",
+  18.73
+ ],
+ [
+  148,
+  "Shortland",
+  "NSW",
+  "ALP",
+  "Pat Conroy",
+  "ALP",
+  "LP",
+  23.01
+ ],
+ [
+  149,
+  "Sydney",
+  "NSW",
+  "ALP",
+  "Tanya Plibersek",
+  "ALP",
+  "GRN",
+  41.89
+ ],
+ [
+  151,
+  "Warringah",
+  "NSW",
+  "IND",
+  "Zali Steggall",
+  "IND",
+  "LP",
+  22.4
+ ],
+ [
+  251,
+  "Watson",
+  "NSW",
+  "ALP",
+  "Tony Burke",
+  "ALP",
+  "IND",
+  33.03
+ ],
+ [
+  152,
+  "Wentworth",
+  "NSW",
+  "IND",
+  "Allegra Spender",
+  "IND",
+  "LP",
+  16.69
+ ],
+ [
+  153,
+  "Werriwa",
+  "NSW",
+  "ALP",
+  "Anne Maree Stanley",
+  "ALP",
+  "LP",
+  13.55
+ ],
+ [
+  150,
+  "Whitlam",
+  "NSW",
+  "ALP",
+  "Carol Berry",
+  "ALP",
+  "LP",
+  12.49
+ ],
+ [
+  306,
+  "Lingiari",
+  "NT",
+  "ALP",
+  "Marion Scrymgour",
+  "ALP",
+  "CLP",
+  16.25
+ ],
+ [
+  307,
+  "Solomon",
+  "NT",
+  "ALP",
+  "Luke John Gosling",
+  "ALP",
+  "CLP",
+  2.62
+ ],
+ [
+  304,
+  "Blair",
+  "QLD",
+  "ALP",
+  "Shayne Neumann",
+  "ALP",
+  "LNP",
+  11.42
+ ],
+ [
+  310,
+  "Bonner",
+  "QLD",
+  "ALP",
+  "Kara Cook",
+  "ALP",
+  "LNP",
+  10.0
+ ],
+ [
+  155,
+  "Bowman",
+  "QLD",
+  "LNP",
+  "Henry Pike",
+  "LNP",
+  "ALP",
+  4.86
+ ],
+ [
+  156,
+  "Brisbane",
+  "QLD",
+  "ALP",
+  "Madonna Jarrett",
+  "ALP",
+  "LNP",
+  17.92
+ ],
+ [
+  157,
+  "Capricornia",
+  "QLD",
+  "LNP",
+  "Michelle Landry",
+  "LNP",
+  "ALP",
+  11.67
+ ],
+ [
+  158,
+  "Dawson",
+  "QLD",
+  "LNP",
+  "Andrew Willcox",
+  "LNP",
+  "ALP",
+  23.66
+ ],
+ [
+  252,
+  "Dickson",
+  "QLD",
+  "ALP",
+  "Ali France",
+  "ALP",
+  "LNP",
+  11.98
+ ],
+ [
+  159,
+  "Fadden",
+  "QLD",
+  "LNP",
+  "Cameron Caldwell",
+  "LNP",
+  "ALP",
+  13.76
+ ],
+ [
+  160,
+  "Fairfax",
+  "QLD",
+  "LNP",
+  "Ted O'brien",
+  "LNP",
+  "ALP",
+  6.46
+ ],
+ [
+  161,
+  "Fisher",
+  "QLD",
+  "LNP",
+  "Andrew Wallace",
+  "LNP",
+  "ALP",
+  12.07
+ ],
+ [
+  311,
+  "Flynn",
+  "QLD",
+  "LNP",
+  "Colin Boyce",
+  "LNP",
+  "ALP",
+  20.48
+ ],
+ [
+  162,
+  "Forde",
+  "QLD",
+  "ALP",
+  "Rowan Holzberger",
+  "ALP",
+  "LNP",
+  3.53
+ ],
+ [
+  163,
+  "Griffith",
+  "QLD",
+  "ALP",
+  "Renee Coffey",
+  "ALP",
+  "GRN",
+  21.15
+ ],
+ [
+  164,
+  "Groom",
+  "QLD",
+  "LNP",
+  "Garth Hamilton",
+  "LNP",
+  "IND",
+  11.35
+ ],
+ [
+  165,
+  "Herbert",
+  "QLD",
+  "LNP",
+  "Phillip Thompson",
+  "LNP",
+  "ALP",
+  26.83
+ ],
+ [
+  166,
+  "Hinkler",
+  "QLD",
+  "LNP",
+  "David Batt",
+  "LNP",
+  "ALP",
+  12.52
+ ],
+ [
+  167,
+  "Kennedy",
+  "QLD",
+  "KAP",
+  "Bob Katter",
+  "KAP",
+  "LNP",
+  31.51
+ ],
+ [
+  168,
+  "Leichhardt",
+  "QLD",
+  "ALP",
+  "Matt Smith",
+  "ALP",
+  "LNP",
+  12.12
+ ],
+ [
+  169,
+  "Lilley",
+  "QLD",
+  "ALP",
+  "Anika Wells",
+  "ALP",
+  "LNP",
+  29.04
+ ],
+ [
+  302,
+  "Longman",
+  "QLD",
+  "LNP",
+  "Terry Young",
+  "LNP",
+  "ALP",
+  0.22
+ ],
+ [
+  170,
+  "Maranoa",
+  "QLD",
+  "LNP",
+  "David Littleproud",
+  "LNP",
+  "ON",
+  40.19
+ ],
+ [
+  171,
+  "McPherson",
+  "QLD",
+  "LNP",
+  "Leon Rebello",
+  "LNP",
+  "ALP",
+  8.87
+ ],
+ [
+  172,
+  "Moncrieff",
+  "QLD",
+  "LNP",
+  "Angie Bell",
+  "LNP",
+  "ALP",
+  17.6
+ ],
+ [
+  173,
+  "Moreton",
+  "QLD",
+  "ALP",
+  "Julie-ann Campbell",
+  "ALP",
+  "LNP",
+  32.18
+ ],
+ [
+  174,
+  "Oxley",
+  "QLD",
+  "ALP",
+  "Milton Dick",
+  "ALP",
+  "LNP",
+  38.38
+ ],
+ [
+  175,
+  "Petrie",
+  "QLD",
+  "ALP",
+  "Emma Comer",
+  "ALP",
+  "LNP",
+  2.34
+ ],
+ [
+  176,
+  "Rankin",
+  "QLD",
+  "ALP",
+  "Jim Chalmers",
+  "ALP",
+  "LNP",
+  31.11
+ ],
+ [
+  177,
+  "Ryan",
+  "QLD",
+  "GRN",
+  "Elizabeth Watson-brown",
+  "GRN",
+  "LNP",
+  6.54
+ ],
+ [
+  178,
+  "Wide Bay",
+  "QLD",
+  "LNP",
+  "Llew O'brien",
+  "LNP",
+  "ALP",
+  15.26
+ ],
+ [
+  316,
+  "Wright",
+  "QLD",
+  "LNP",
+  "Scott Buchholz",
+  "LNP",
+  "ALP",
+  15.95
+ ],
+ [
+  179,
+  "Adelaide",
+  "SA",
+  "ALP",
+  "Steve Georganas",
+  "ALP",
+  "LP",
+  38.13
+ ],
+ [
+  180,
+  "Barker",
+  "SA",
+  "LP",
+  "Tony Pasin",
+  "LP",
+  "ALP",
+  25.95
+ ],
+ [
+  182,
+  "Boothby",
+  "SA",
+  "ALP",
+  "Louise Miller-frost",
+  "ALP",
+  "LP",
+  22.21
+ ],
+ [
+  183,
+  "Grey",
+  "SA",
+  "LP",
+  "Tom Venning",
+  "LP",
+  "ALP",
+  9.28
+ ],
+ [
+  185,
+  "Hindmarsh",
+  "SA",
+  "ALP",
+  "Mark Butler",
+  "ALP",
+  "LP",
+  32.7
+ ],
+ [
+  186,
+  "Kingston",
+  "SA",
+  "ALP",
+  "Amanda Rishworth",
+  "ALP",
+  "LP",
+  41.48
+ ],
+ [
+  187,
+  "Makin",
+  "SA",
+  "ALP",
+  "Tony Zappia",
+  "ALP",
+  "LP",
+  29.32
+ ],
+ [
+  188,
+  "Mayo",
+  "SA",
+  "IND",
+  "Rebekha Sharkie",
+  "IND",
+  "ALP",
+  29.78
+ ],
+ [
+  325,
+  "Spence",
+  "SA",
+  "ALP",
+  "Matt Burnell",
+  "ALP",
+  "LP",
+  30.67
+ ],
+ [
+  190,
+  "Sturt",
+  "SA",
+  "ALP",
+  "Claire Clutterham",
+  "ALP",
+  "LP",
+  13.25
+ ],
+ [
+  192,
+  "Bass",
+  "TAS",
+  "ALP",
+  "Jess Teesdale",
+  "ALP",
+  "LP",
+  16.02
+ ],
+ [
+  193,
+  "Braddon",
+  "TAS",
+  "ALP",
+  "Anne Urquhart",
+  "ALP",
+  "LP",
+  14.4
+ ],
+ [
+  319,
+  "Clark",
+  "TAS",
+  "IND",
+  "Andrew Wilkie",
+  "IND",
+  "ALP",
+  40.77
+ ],
+ [
+  195,
+  "Franklin",
+  "TAS",
+  "ALP",
+  "Julie Collins",
+  "ALP",
+  "IND",
+  15.56
+ ],
+ [
+  196,
+  "Lyons",
+  "TAS",
+  "ALP",
+  "Rebecca White",
+  "ALP",
+  "LP",
+  23.17
+ ],
+ [
+  197,
+  "Aston",
+  "VIC",
+  "ALP",
+  "Mary Doyle",
+  "ALP",
+  "LP",
+  6.86
+ ],
+ [
+  198,
+  "Ballarat",
+  "VIC",
+  "ALP",
+  "Catherine King",
+  "ALP",
+  "LP",
+  21.33
+ ],
+ [
+  200,
+  "Bendigo",
+  "VIC",
+  "ALP",
+  "Lisa Chesters",
+  "ALP",
+  "NP",
+  2.8
+ ],
+ [
+  201,
+  "Bruce",
+  "VIC",
+  "ALP",
+  "Julian Hill",
+  "ALP",
+  "LP",
+  29.23
+ ],
+ [
+  203,
+  "Calwell",
+  "VIC",
+  "ALP",
+  "Basem Abdo",
+  "ALP",
+  "IND",
+  10.16
+ ],
+ [
+  204,
+  "Casey",
+  "VIC",
+  "LP",
+  "Aaron Violi",
+  "LP",
+  "ALP",
+  5.78
+ ],
+ [
+  205,
+  "Chisholm",
+  "VIC",
+  "ALP",
+  "Carina Garland",
+  "ALP",
+  "LP",
+  11.4
+ ],
+ [
+  320,
+  "Cooper",
+  "VIC",
+  "ALP",
+  "Ged Kearney",
+  "ALP",
+  "GRN",
+  19.43
+ ],
+ [
+  328,
+  "Corangamite",
+  "VIC",
+  "ALP",
+  "Libby Coker",
+  "ALP",
+  "LP",
+  16.09
+ ],
+ [
+  208,
+  "Corio",
+  "VIC",
+  "ALP",
+  "Richard Marles",
+  "ALP",
+  "LP",
+  26.46
+ ],
+ [
+  209,
+  "Deakin",
+  "VIC",
+  "ALP",
+  "Matt Gregg",
+  "ALP",
+  "LP",
+  5.65
+ ],
+ [
+  210,
+  "Dunkley",
+  "VIC",
+  "ALP",
+  "Jodie Belyea",
+  "ALP",
+  "LP",
+  14.16
+ ],
+ [
+  211,
+  "Flinders",
+  "VIC",
+  "LP",
+  "Zoe Mckenzie",
+  "LP",
+  "IND",
+  4.57
+ ],
+ [
+  321,
+  "Fraser",
+  "VIC",
+  "ALP",
+  "Daniel Mulino",
+  "ALP",
+  "GRN",
+  18.45
+ ],
+ [
+  212,
+  "Gellibrand",
+  "VIC",
+  "ALP",
+  "Tim Watts",
+  "ALP",
+  "LP",
+  30.2
+ ],
+ [
+  213,
+  "Gippsland",
+  "VIC",
+  "NP",
+  "Darren Chester",
+  "NP",
+  "ALP",
+  38.71
+ ],
+ [
+  214,
+  "Goldstein",
+  "VIC",
+  "LP",
+  "Tim Wilson",
+  "LP",
+  "IND",
+  0.15
+ ],
+ [
+  309,
+  "Gorton",
+  "VIC",
+  "ALP",
+  "Alice Jordan-baird",
+  "ALP",
+  "LP",
+  20.57
+ ],
+ [
+  326,
+  "Hawke",
+  "VIC",
+  "ALP",
+  "Sam Rae",
+  "ALP",
+  "LP",
+  15.26
+ ],
+ [
+  216,
+  "Holt",
+  "VIC",
+  "ALP",
+  "Cassandra Fernando",
+  "ALP",
+  "LP",
+  28.06
+ ],
+ [
+  217,
+  "Hotham",
+  "VIC",
+  "ALP",
+  "Clare O'neil",
+  "ALP",
+  "LP",
+  33.72
+ ],
+ [
+  218,
+  "Indi",
+  "VIC",
+  "IND",
+  "Helen Haines",
+  "IND",
+  "LP",
+  17.27
+ ],
+ [
+  219,
+  "Isaacs",
+  "VIC",
+  "ALP",
+  "Mark Dreyfus",
+  "ALP",
+  "LP",
+  28.68
+ ],
+ [
+  220,
+  "Jagajaga",
+  "VIC",
+  "ALP",
+  "Kate Thwaites",
+  "ALP",
+  "LP",
+  25.76
+ ],
+ [
+  221,
+  "Kooyong",
+  "VIC",
+  "IND",
+  "Monique Ryan",
+  "IND",
+  "LP",
+  1.33
+ ],
+ [
+  223,
+  "La Trobe",
+  "VIC",
+  "LP",
+  "Jason Wood",
+  "LP",
+  "ALP",
+  4.12
+ ],
+ [
+  222,
+  "Lalor",
+  "VIC",
+  "ALP",
+  "Joanne Ryan",
+  "ALP",
+  "LP",
+  26.43
+ ],
+ [
+  322,
+  "Macnamara",
+  "VIC",
+  "ALP",
+  "Josh Burns",
+  "ALP",
+  "LP",
+  23.59
+ ],
+ [
+  224,
+  "Mallee",
+  "VIC",
+  "NP",
+  "Anne Webster",
+  "NP",
+  "ALP",
+  38.08
+ ],
+ [
+  225,
+  "Maribyrnong",
+  "VIC",
+  "ALP",
+  "Jo Briskey",
+  "ALP",
+  "LP",
+  25.29
+ ],
+ [
+  226,
+  "McEwen",
+  "VIC",
+  "ALP",
+  "Rob Mitchell",
+  "ALP",
+  "LP",
+  9.52
+ ],
+ [
+  228,
+  "Melbourne",
+  "VIC",
+  "ALP",
+  "Sarah Witty",
+  "ALP",
+  "GRN",
+  6.03
+ ],
+ [
+  229,
+  "Menzies",
+  "VIC",
+  "ALP",
+  "Gabriel Ng",
+  "ALP",
+  "LP",
+  2.15
+ ],
+ [
+  323,
+  "Monash",
+  "VIC",
+  "LP",
+  "Mary Aldred",
+  "LP",
+  "ALP",
+  8.18
+ ],
+ [
+  324,
+  "Nicholls",
+  "VIC",
+  "NP",
+  "Sam Birrell",
+  "NP",
+  "ALP",
+  28.76
+ ],
+ [
+  232,
+  "Scullin",
+  "VIC",
+  "ALP",
+  "Andrew Giles",
+  "ALP",
+  "LP",
+  28.59
+ ],
+ [
+  233,
+  "Wannon",
+  "VIC",
+  "LP",
+  "Dan Tehan",
+  "LP",
+  "IND",
+  6.55
+ ],
+ [
+  234,
+  "Wills",
+  "VIC",
+  "ALP",
+  "Peter Khalil",
+  "ALP",
+  "GRN",
+  2.86
+ ],
+ [
+  235,
+  "Brand",
+  "WA",
+  "ALP",
+  "Madeleine King",
+  "ALP",
+  "LP",
+  33.84
+ ],
+ [
+  329,
+  "Bullwinkel",
+  "WA",
+  "ALP",
+  "Trish Cook",
+  "ALP",
+  "LP",
+  1.02
+ ],
+ [
+  317,
+  "Burt",
+  "WA",
+  "ALP",
+  "Matt Keogh",
+  "ALP",
+  "LP",
+  31.41
+ ],
+ [
+  236,
+  "Canning",
+  "WA",
+  "LP",
+  "Andrew Hastie",
+  "LP",
+  "ALP",
+  13.1
+ ],
+ [
+  237,
+  "Cowan",
+  "WA",
+  "ALP",
+  "Anne Aly",
+  "ALP",
+  "LP",
+  27.27
+ ],
+ [
+  238,
+  "Curtin",
+  "WA",
+  "IND",
+  "Kate Chaney",
+  "IND",
+  "LP",
+  6.54
+ ],
+ [
+  312,
+  "Durack",
+  "WA",
+  "LP",
+  "Melissa Price",
+  "LP",
+  "ALP",
+  20.31
+ ],
+ [
+  239,
+  "Forrest",
+  "WA",
+  "LP",
+  "Ben Small",
+  "LP",
+  "ALP",
+  4.47
+ ],
+ [
+  240,
+  "Fremantle",
+  "WA",
+  "ALP",
+  "Josh Wilson",
+  "ALP",
+  "IND",
+  1.37
+ ],
+ [
+  305,
+  "Hasluck",
+  "WA",
+  "ALP",
+  "Tania Lawrence",
+  "ALP",
+  "LP",
+  31.95
+ ],
+ [
+  242,
+  "Moore",
+  "WA",
+  "ALP",
+  "Tom French",
+  "ALP",
+  "LP",
+  5.77
+ ],
+ [
+  243,
+  "O'Connor",
+  "WA",
+  "LP",
+  "Rick Wilson",
+  "LP",
+  "ALP",
+  26.57
+ ],
+ [
+  244,
+  "Pearce",
+  "WA",
+  "ALP",
+  "Tracey Roberts",
+  "ALP",
+  "LP",
+  12.87
+ ],
+ [
+  245,
+  "Perth",
+  "WA",
+  "ALP",
+  "Patrick Gorman",
+  "ALP",
+  "LP",
+  33.02
+ ],
+ [
+  247,
+  "Swan",
+  "WA",
+  "ALP",
+  "Zaneta Mascarenhas",
+  "ALP",
+  "LP",
+  27.98
+ ],
+ [
+  248,
+  "Tangney",
+  "WA",
+  "ALP",
+  "Sam Lim",
+  "ALP",
+  "LP",
+  13.98
+ ]
+]

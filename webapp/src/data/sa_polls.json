@@ -1,0 +1,28 @@
+{
+  "source": "SA state-level polls (manual collection)",
+  "jurisdiction": "sa_state",
+  "election_date": "2026-03-21",
+  "note": "SA state polls. Schema mirrors data/polls/vic_polls.json. Populate with Newspoll SA state breakdowns, YouGov/Essential SA sub-national estimates, and dedicated SA state polls as they are collected. tpp = ALP 2-party-preferred vs Liberals. n = sample size. Last election result (2022-03-19) used as baseline.",
+  "party_keys": {
+    "alp":  "Australian Labor Party (SA Branch)",
+    "lp":   "Liberal Party of Australia (SA Division)",
+    "grn":  "The Greens (SA)",
+    "ind":  "Independents and other minor parties",
+    "on":   "Pauline Hanson's One Nation"
+  },
+  "polls": [
+    {
+      "scope": "SA",
+      "pollster": "2022 Election Result",
+      "date": "2022-03-19",
+      "alp": null,
+      "lp": null,
+      "grn": null,
+      "ind": null,
+      "on": null,
+      "tpp": null,
+      "n": null,
+      "note": "ECSA 2022 baseline placeholder — fill in primary votes and tpp from the official declaration when available."
+    }
+  ]
+}

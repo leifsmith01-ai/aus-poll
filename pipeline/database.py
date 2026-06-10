@@ -72,6 +72,104 @@ def init_vec_schema(db_path: str = None) -> None:
     logger.info("VEC schema initialised at %s", db_path or DB_PATH)
 
 
+# ── Per-state schema generation ───────────────────────────────────────────────
+#
+# The seven non-VIC state/territory extension schemas are generated from a
+# single parameterised template (state_schema_template.sql) instead of seven
+# near-identical .sql files. The rendered DDL is byte-identical to the former
+# per-state files (verified against sqlite_master dumps when the files were
+# unified). VIC keeps its own vec_schema.sql because it is genuinely
+# different (DOP table, margins view, booth index naming, LC regions).
+
+_STATE_SCHEMA_TEMPLATE_FILE = Path(__file__).parent.parent / "state_schema_template.sql"
+
+# Hare-Clark candidates carry an election-order comment on the elected column.
+_HARE_CLARK_ELECTED_COMMENT = "  -- 0 = not elected; 1–5 = election order"
+
+# Per-state template parameters. `example_id` only feeds DDL comments;
+# flags select the conditional blocks of state_schema_template.sql.
+_STATE_SCHEMA_PARAMS = {
+    "nsw": {"example_id": "202303",
+            "flags": {"preferential", "std_2cp", "booth_level", "std_booth_2cp", "lc"}},
+    "qld": {"example_id": "202410",
+            "flags": {"preferential", "std_2cp", "booth_level", "std_booth_2cp"}},
+    "wa":  {"example_id": "202503",
+            "flags": {"preferential", "std_2cp", "booth_level", "std_booth_2cp", "lc"}},
+    "sa":  {"example_id": "202203",
+            "flags": {"preferential", "std_2cp", "booth_level", "std_booth_2cp", "lc"}},
+    "tas": {"example_id": "202403", "flags": {"hare_clark"}},
+    "act": {"example_id": "202410", "flags": {"hare_clark"}},
+    "nt":  {"example_id": "202408",
+            "flags": {"preferential", "nt_2cp", "booth_level", "nt_booth_2cp"}},
+}
+
+
+def _render_schema_template(template: str, flags: set[str],
+                            substitutions: dict[str, str]) -> str:
+    """
+    Render the conditional schema template.
+
+    Lines between `-- @if <flag>` and `-- @endif` are kept only when <flag>
+    is in `flags` (no nesting). Placeholders like {p} are then substituted.
+    """
+    out_lines = []
+    keeping = True
+    in_block = False
+    for line in template.splitlines(keepends=True):
+        stripped = line.strip()
+        if stripped.startswith("-- @if "):
+            if in_block:
+                raise ValueError("Nested -- @if blocks are not supported")
+            in_block = True
+            keeping = stripped[len("-- @if "):].strip() in flags
+            continue
+        if stripped == "-- @endif":
+            if not in_block:
+                raise ValueError("-- @endif without matching -- @if")
+            in_block = False
+            keeping = True
+            continue
+        if keeping:
+            out_lines.append(line)
+
+    if in_block:
+        raise ValueError("Unterminated -- @if block in schema template")
+
+    rendered = "".join(out_lines)
+    for key, value in substitutions.items():
+        rendered = rendered.replace("{" + key + "}", value)
+    return rendered
+
+
+def build_state_schema_sql(state_ab: str) -> str:
+    """
+    Return the full extension DDL for a non-VIC state/territory, rendered
+    from state_schema_template.sql.
+
+    Raises ValueError for unknown states; 'vic' is served from vec_schema.sql
+    via init_vec_schema() and is rejected here.
+    """
+    ab = state_ab.lower()
+    if ab not in _STATE_SCHEMA_PARAMS:
+        raise ValueError(
+            f"No schema template parameters for '{state_ab}'. "
+            f"Valid states: {sorted(_STATE_SCHEMA_PARAMS)} (VIC uses vec_schema.sql)"
+        )
+    params = _STATE_SCHEMA_PARAMS[ab]
+    flags = params["flags"]
+    jurisdiction = f"{ab}_territory" if ab in ("act", "nt") else f"{ab}_state"
+    substitutions = {
+        "p": ab,
+        "P": ab.upper(),
+        "jurisdiction": jurisdiction,
+        "example_id": params["example_id"],
+        "elected_comment": (_HARE_CLARK_ELECTED_COMMENT
+                            if "hare_clark" in flags else ""),
+    }
+    template = _STATE_SCHEMA_TEMPLATE_FILE.read_text(encoding="utf-8")
+    return _render_schema_template(template, flags, substitutions)
+
+
 # ── Election metadata ─────────────────────────────────────────────────────────
 
 def upsert_election(election_id: int, db_path: str = None) -> None:
@@ -730,14 +828,25 @@ def _validate_state(state_ab: str) -> dict:
 
 
 def init_state_schema(state_ab: str, db_path: str = None) -> None:
-    """Apply the {state_ab}_schema.sql extension to the database."""
+    """
+    Apply the state's extension schema to the database.
+
+    For the seven non-VIC states/territories the DDL is rendered from
+    state_schema_template.sql via build_state_schema_sql(). VIC keeps its own
+    vec_schema.sql (genuinely different: DOP table, margins view, LC regions)
+    and falls back to the schema_file configured in its registry entry.
+    """
     cfg = _validate_state(state_ab)
-    schema_file = Path(__file__).parent.parent / cfg["schema_file"]
-    if not schema_file.exists():
-        raise FileNotFoundError(
-            f"{cfg['schema_file']} not found at {schema_file}"
-        )
-    sql = schema_file.read_text(encoding="utf-8")
+    ab = state_ab.lower()
+    if ab in _STATE_SCHEMA_PARAMS:
+        sql = build_state_schema_sql(ab)
+    else:
+        schema_file = Path(__file__).parent.parent / cfg["schema_file"]
+        if not schema_file.exists():
+            raise FileNotFoundError(
+                f"{cfg['schema_file']} not found at {schema_file}"
+            )
+        sql = schema_file.read_text(encoding="utf-8")
     with transaction(db_path) as conn:
         conn.executescript(sql)
     logger.info("%s schema initialised at %s", state_ab.upper(), db_path or DB_PATH)
@@ -890,6 +999,112 @@ def load_state_party_seats(state_ab: str, records: list[dict],
     with transaction(db_path) as conn:
         n = _bulk_insert(conn, table, rows, "OR REPLACE")
         logger.info("Loaded %d %s party-seats rows", n, state_ab.upper())
+
+
+# ── Legislative Council (upper house) loaders ─────────────────────────────────
+#
+# Schema-only for now: the electoral commissions' LC downloads still need
+# parsers. Data sources to wire up later:
+#   NSW — NSWEC virtual tally room, LC group first-preference CSVs
+#         (vtr.elections.nsw.gov.au → Legislative Council → group totals)
+#   WA  — WAEC Legislative Council region results (elections.wa.gov.au);
+#         note WA moved to a single statewide electorate from 2025
+#   SA  — ECSA Legislative Council results (ecsa.sa.gov.au), group totals
+#   VIC — VEC Legislative Council per-region Excel downloads
+#         (vec.vic.gov.au → results → Legislative Council region results);
+#         vic_lc tables additionally carry region_id (8 regions × 5 members)
+
+_LC_STATES = {"nsw", "wa", "sa", "vic"}
+
+
+def _validate_lc_state(state_ab: str) -> str:
+    ab = state_ab.lower()
+    if ab not in _LC_STATES:
+        raise ValueError(
+            f"{state_ab.upper()} has no Legislative Council tables. "
+            f"Valid states: {sorted(_LC_STATES)}"
+        )
+    return ab
+
+
+def upsert_lc_election(state_ab: str, election_id: int, name: str,
+                       election_date: str, seats_to_fill: int,
+                       db_path: str = None) -> None:
+    """Insert or update an upper-house election row in {state_ab}_lc_elections."""
+    ab = _validate_lc_state(state_ab)
+    with transaction(db_path) as conn:
+        conn.execute(
+            f"""
+            INSERT OR REPLACE INTO {ab}_lc_elections
+                (election_id, name, election_date, seats_to_fill)
+            VALUES (?, ?, ?, ?)
+            """,
+            (election_id, name, election_date, seats_to_fill),
+        )
+    logger.info("Upserted %s LC election %d", ab.upper(), election_id)
+
+
+def load_lc_groups(state_ab: str, records: list[dict],
+                   db_path: str = None) -> None:
+    """Load group/party ticket records into {state_ab}_lc_groups.
+
+    Record keys: group_id, election_id, group_label, party_ab, party_name
+    (+ region_id for VIC). See the LC data-source notes above — parsers for
+    the commissions' group downloads are not implemented yet.
+    """
+    ab = _validate_lc_state(state_ab)
+    if not records:
+        return
+    table = f"{ab}_lc_groups"
+    allowed = {"group_id", "election_id", "group_label", "party_ab", "party_name"}
+    if ab == "vic":
+        allowed.add("region_id")
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s LC groups", n, ab.upper())
+
+
+def load_lc_group_votes(state_ab: str, records: list[dict],
+                        db_path: str = None) -> None:
+    """Load group-level first-preference totals into {state_ab}_lc_group_votes.
+
+    Record keys: election_id, group_id, total_votes, vote_pct
+    (+ region_id for VIC). See the LC data-source notes above.
+    """
+    ab = _validate_lc_state(state_ab)
+    if not records:
+        return
+    table = f"{ab}_lc_group_votes"
+    allowed = {"election_id", "group_id", "total_votes", "vote_pct"}
+    if ab == "vic":
+        allowed.add("region_id")
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s LC group-vote rows", n, ab.upper())
+
+
+def load_lc_members_elected(state_ab: str, records: list[dict],
+                            db_path: str = None) -> None:
+    """Load elected members into {state_ab}_lc_members_elected.
+
+    Record keys: election_id, group_id (NULL for ungrouped independents),
+    surname, given_name, party_ab, elected_order (+ region_id for VIC).
+    See the LC data-source notes above.
+    """
+    ab = _validate_lc_state(state_ab)
+    if not records:
+        return
+    table = f"{ab}_lc_members_elected"
+    allowed = {"election_id", "group_id", "surname", "given_name",
+               "party_ab", "elected_order"}
+    if ab == "vic":
+        allowed.add("region_id")
+    rows = [{k: v for k, v in r.items() if k in allowed} for r in records]
+    with transaction(db_path) as conn:
+        n = _bulk_insert(conn, table, rows, "OR REPLACE")
+        logger.info("Loaded %d %s LC members", n, ab.upper())
 
 
 # ── Generic state query helpers ───────────────────────────────────────────────

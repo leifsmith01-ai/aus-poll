@@ -159,7 +159,9 @@ def export_divisions_list(election_id: int, db_path: str = None,
             ).fetchall()
 
             # First preference totals per party (from first_preferences table if available,
-            # otherwise fall back to booth-level ordinary votes from tcp_votes)
+            # otherwise fall back to the DOP count-1 'Preference Count' rows, which
+            # equal each candidate's first-preference total — booth-level FP data is
+            # only loaded for some elections, but DOP covers all of them)
             fp_rows = conn.execute(
                 """
                 SELECT c.party_ab, SUM(fp.total_votes) AS total_votes
@@ -172,6 +174,22 @@ def export_divisions_list(election_id: int, db_path: str = None,
                 """,
                 (election_id, div_id),
             ).fetchall()
+            if not fp_rows:
+                fp_rows = conn.execute(
+                    """
+                    SELECT c.party_ab,
+                           CAST(SUM(d.calculation_value) AS INTEGER) AS total_votes
+                    FROM distribution_of_preferences d
+                    JOIN candidates c ON c.candidate_id = d.candidate_id
+                                      AND c.election_id = d.election_id
+                    WHERE d.election_id = ? AND d.division_id = ?
+                      AND d.calculation_type = 'Preference Count'
+                      AND d.count_number = 1
+                    GROUP BY c.party_ab
+                    ORDER BY total_votes DESC
+                    """,
+                    (election_id, div_id),
+                ).fetchall()
 
             fp_total = sum(r["total_votes"] for r in fp_rows) or 1
             tcp_total = sum(r["total_votes"] for r in tcp_rows) or 1
@@ -410,7 +428,13 @@ def _compute_division_pref_flows(conn, election_id: int, div_id: int) -> dict | 
     aggregate for parties not individually tracked.  Returns None if the seat
     does not have an ALP vs Coalition TCP final or if no usable DOP data exists.
     """
-    # Identify the ALP and Coalition TCP finalists from the final DOP count.
+    # Identify the actual final-two candidates from the final DOP count.
+    # Excluded candidates still have 'Preference Count' rows at the final count
+    # (with 0 votes), so restrict to candidates with a positive progressive
+    # total — those are the true TCP finalists.  Without this filter a
+    # non-finalist Coalition candidate (e.g. an early-excluded NP candidate in
+    # a seat whose final was LP vs ALP) could be mistaken for the finalist,
+    # producing bogus alp_share=1.0 flows (2025: Barker, Grey).
     finalists = conn.execute(
         """
         SELECT c.candidate_id, c.party_ab
@@ -420,6 +444,7 @@ def _compute_division_pref_flows(conn, election_id: int, div_id: int) -> dict | 
         WHERE d.election_id = ?
           AND d.division_id = ?
           AND d.calculation_type = 'Preference Count'
+          AND d.calculation_value > 0
           AND d.count_number = (
               SELECT MAX(d2.count_number)
               FROM distribution_of_preferences d2
@@ -429,6 +454,16 @@ def _compute_division_pref_flows(conn, election_id: int, div_id: int) -> dict | 
         """,
         (election_id, div_id, election_id, div_id),
     ).fetchall()
+
+    finalist_parties = {r["party_ab"] for r in finalists}
+    if "ALP" not in finalist_parties:
+        # Final two does not include ALP (e.g. LP vs IND, LNP vs ON): skip this
+        # division entirely — the frontend falls back to national flows.
+        logger.debug(
+            "Division %d election %d: ALP not a TCP finalist (%s); skipping pref flows",
+            div_id, election_id, sorted(finalist_parties),
+        )
+        return None
 
     alp_id = next((r["candidate_id"] for r in finalists if r["party_ab"] == "ALP"), None)
     coal_id = next(
@@ -463,6 +498,7 @@ def _compute_division_pref_flows(conn, election_id: int, div_id: int) -> dict | 
     # For each count (after the first), identify the excluded party and tally
     # how many preferences went to the ALP vs Coalition finalist.
     party_flows: dict[str, dict[str, float]] = {}
+    multi_party_exclusions = 0
 
     for cn, rows in sorted(by_count.items()):
         if cn == 1:
@@ -477,6 +513,7 @@ def _compute_division_pref_flows(conn, election_id: int, div_id: int) -> dict | 
         # Only handle single-party exclusions to avoid attribution ambiguity.
         excluded_parties = {r["party_ab"] for r in losing}
         if len(excluded_parties) != 1:
+            multi_party_exclusions += 1
             continue
 
         from_party = next(iter(excluded_parties))
@@ -489,6 +526,13 @@ def _compute_division_pref_flows(conn, election_id: int, div_id: int) -> dict | 
         entry = party_flows.setdefault(from_party, {"to_alp": 0.0, "to_coal": 0.0})
         entry["to_alp"] += to_alp
         entry["to_coal"] += to_coal
+
+    if multi_party_exclusions:
+        logger.warning(
+            "Division %d election %d: skipped %d DOP count(s) with multi-party "
+            "exclusions (cannot attribute transfers to a single source party)",
+            div_id, election_id, multi_party_exclusions,
+        )
 
     # Convert to alp_share fractions; aggregate unknown parties into "OTHER".
     result: dict[str, dict] = {}
@@ -972,6 +1016,134 @@ def export_state_summary(state_ab: str, election_id: int,
     out = Path(exports_dir or cfg["exports_dir"]) / str(election_id) / "summary.json"
     _write_json(summary, out)
     logger.info("Exported %s %d summary → %s", state_ab.upper(), election_id, out)
+
+
+def export_lc_summary(state_ab: str, election_id: int,
+                      db_path: str = None, exports_dir: str = None) -> None:
+    """
+    Export {state_ab}/{election_id}/lc_summary.json — Legislative Council
+    (upper house) summary: group/party vote shares, the quota
+    (total_votes / (seats + 1)), and seats won per group when
+    {state_ab}_lc_members_elected is populated.
+
+    NSW/WA/SA contests are statewide; VIC is per-region (8 regions × 5
+    members), so the VIC output carries a "regions" list instead of a single
+    statewide group table.
+
+    The lc tables are schema-only for now — parsers for the electoral
+    commissions' LC downloads still need to be wired up (NSWEC virtual tally
+    room LC group CSVs; WAEC LC region/statewide results; ECSA LC group
+    totals; VEC LC per-region Excel downloads). See the load_lc_* docstrings
+    in pipeline/database.py for the source URLs.
+    """
+    ab = state_ab.lower()
+    cfg = STATE_REGISTRY[ab]
+    conn = get_connection(db_path)
+    try:
+        try:
+            elec = conn.execute(
+                f"SELECT * FROM {ab}_lc_elections WHERE election_id = ?",
+                (election_id,),
+            ).fetchone()
+        except sqlite3.OperationalError as exc:
+            logger.info("No %s_lc tables in DB (%s); skipping LC export", ab, exc)
+            return
+        if elec is None:
+            logger.info("No %s LC election %d loaded; skipping LC export",
+                        ab.upper(), election_id)
+            return
+
+        # Seats won per group (empty when members_elected not yet populated).
+        seats_by_group: dict = {}
+        for r in conn.execute(
+            f"""
+            SELECT group_id, COUNT(*) AS seats
+            FROM {ab}_lc_members_elected
+            WHERE election_id = ? AND group_id IS NOT NULL
+            GROUP BY group_id
+            """,
+            (election_id,),
+        ):
+            seats_by_group[r["group_id"]] = r["seats"]
+
+        def _group_rows(region_id=None):
+            where = "v.election_id = ?"
+            params: list = [election_id]
+            if region_id is not None:
+                where += " AND v.region_id = ?"
+                params.append(region_id)
+            rows = conn.execute(
+                f"""
+                SELECT v.group_id, v.total_votes, v.vote_pct,
+                       g.group_label, g.party_ab, g.party_name
+                FROM {ab}_lc_group_votes v
+                LEFT JOIN {ab}_lc_groups g ON g.group_id = v.group_id
+                                           AND g.election_id = v.election_id
+                WHERE {where}
+                ORDER BY v.total_votes DESC
+                """,
+                params,
+            ).fetchall()
+            total = sum(r["total_votes"] for r in rows)
+            return rows, total
+
+        def _format_groups(rows, total):
+            return [
+                {
+                    "group_id":    r["group_id"],
+                    "group_label": r["group_label"],
+                    "party_ab":    r["party_ab"],
+                    "party_name":  r["party_name"],
+                    "total_votes": r["total_votes"],
+                    "vote_pct":    _round2(r["total_votes"] / total * 100) if total else None,
+                    "quotas":      (round(r["total_votes"] / (total / (seats + 1)), 3)
+                                    if total else None),
+                    "seats_won":   seats_by_group.get(r["group_id"], 0),
+                }
+                for r in rows
+            ]
+
+        summary = {
+            "election_id":   election_id,
+            "state":         ab.upper(),
+            "name":          elec["name"],
+            "election_date": elec["election_date"],
+            "seats_to_fill": elec["seats_to_fill"],
+        }
+
+        if ab == "vic":
+            regions_out = []
+            for reg in conn.execute(
+                f"""
+                SELECT region_id, region_name, seats_in_region
+                FROM vic_lc_regions WHERE election_id = ?
+                ORDER BY region_name
+                """,
+                (election_id,),
+            ):
+                seats = reg["seats_in_region"]
+                rows, total = _group_rows(reg["region_id"])
+                regions_out.append({
+                    "region_id":   reg["region_id"],
+                    "region_name": reg["region_name"],
+                    "seats":       seats,
+                    "total_votes": total,
+                    "quota":       round(total / (seats + 1), 1) if total else None,
+                    "groups":      _format_groups(rows, total),
+                })
+            summary["regions"] = regions_out
+        else:
+            seats = elec["seats_to_fill"]
+            rows, total = _group_rows()
+            summary["total_votes"] = total
+            summary["quota"] = round(total / (seats + 1), 1) if total else None
+            summary["groups"] = _format_groups(rows, total)
+    finally:
+        conn.close()
+
+    out = Path(exports_dir or cfg["exports_dir"]) / str(election_id) / "lc_summary.json"
+    _write_json(summary, out)
+    logger.info("Exported %s %d LC summary → %s", ab.upper(), election_id, out)
 
 
 def export_state_districts_list(state_ab: str, election_id: int,

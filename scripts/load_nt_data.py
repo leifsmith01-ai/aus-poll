@@ -150,9 +150,11 @@ def main() -> None:
     conn.execute("PRAGMA foreign_keys = OFF")  # allow inserts without strict FK checks
 
     # Apply NT schema
-    nt_schema_path = ROOT / "nt_schema.sql"
-    print(f"Applying schema from {nt_schema_path.name} ...")
-    conn.executescript(nt_schema_path.read_text())
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from pipeline.database import build_state_schema_sql
+    print("Applying rendered nt schema (state_schema_template.sql) ...")
+    conn.executescript(build_state_schema_sql("nt"))
 
     c = conn.cursor()
 

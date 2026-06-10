@@ -26,6 +26,42 @@ aggregator with house effects. The main risks are not in the core methodology bu
 5. Several constants flow from pipeline to frontend by **manual copy-paste**, with stale
    examples already present (the data-copy script doesn't know about 2025).
 
+### Implementation status (June 2026)
+
+All sixteen roadmap items below have since been implemented on this branch. Key empirical
+results from that work, which update several of this review's open questions:
+
+- **Primary-based vs UNS (item 2, resolved):** backtested head-to-head on held-out cycles
+  (`python -m pipeline.backtest --compare`), **UNS + elasticity beats the raw primary-based
+  model** — 2019→2022 MAE 3.44pp vs 4.19pp, 2022→2025 MAE 3.21pp vs 3.77pp, with higher
+  winner accuracy. The live model's accuracy near baseline therefore rests on its per-seat
+  zero-swing calibration, not on the primary mechanics; PLAN.md's premise that the primary
+  approach is inherently more accurate is not supported out-of-sample.
+- **Probabilistic calibration (item 4):** Monte Carlo win probabilities score Brier 0.056
+  with a near-monotone calibration table; 50%/90% seat-count intervals covered the actual
+  result in all three test elections. Mild overconfidence at the extremes ("sure losers"
+  still win ~5% of the time).
+- **Demographic multipliers (item 7, negative result):** the demographic regression FAILED
+  leave-one-pair-out cross-validation (CV RMSE 1.77 vs 1.68 for always-predict-1.0), so
+  `SEAT_DEMO_MULT` is intentionally left empty. The margin-based elasticity curve *did*
+  validate and was refit on 2022→2025 (0.593 + 0.856/(1+e^(0.35(m−8.725)))).
+- **Seat residuals:** empirical per-seat sigmas (3 cycles) average 1.69pp — the old uniform
+  1.0pp assumption understated per-seat uncertainty; `SEAT_RESIDUAL_MAP` is now populated.
+- **Barker/Grey flows (item 1):** root cause was deeper than stale constants — the export's
+  finalist detection picked up zero-vote excluded candidates at the final DOP count. Fixed;
+  both seats turn out to be genuine ALP/Coalition finals with sane flows now exported.
+- **Hare-Clark (item 8):** replaced with a party-aggregated STV count simulation that
+  reproduces the actual TAS 2024 result in all five electorates (including Braddon's second
+  JLN seat) and the exact ACT 2024 result, without the Franklin calibration fudge. Also
+  fixed: the Hare-Clark Monte Carlo previously perturbed an ignored argument, making all
+  simulations identical.
+- **Upper houses (item 14):** LC projection panels (NSW/WA/SA/VIC) using the same STV
+  engine, ±1–2 seats vs declared compositions at baseline, clearly labelled indicative;
+  LC schema tables, loaders, and an `lc_summary` export added to the pipeline.
+- Five scripts referenced a database filename (`data/elections.db`) the pipeline never
+  writes (`data/aec_elections.db`), and two more had drifted from the export schema — none
+  of the "run X to regenerate" paths documented in the codebase had been runnable.
+
 ### Top 10 improvements (priority / effort / impact)
 
 | # | Improvement | Priority | Effort | Impact |

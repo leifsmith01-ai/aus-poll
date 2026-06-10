@@ -10,9 +10,14 @@ Outputs to stdout (ready to paste into App.jsx):
   - SEAT_FP_2025      All-party first-preference % by seat (Phase 2 calibration)
   - SEAT_PREF_FLOWS_2025  Per-seat preference flows from AEC DOP data (Phase 3 calibration)
 
+Also writes machine-readable JSON copies of each constant to
+data/model_constants/ (s25.json, seat_fp_2025.json, seat_pref_flows_2025.json,
+seat_fp_2022.json) for consumption by scripts/inject_model_constants.py.
+
 Requires:
   - data/exports/2025/divisions.json     (from: python main.py --year 2025)
   - data/exports/2025/preference_flows.json  (from: python main.py --year 2025)
+  - data/exports/2022/divisions.json     (optional, for SEAT_FP_2022)
 """
 
 import json
@@ -24,6 +29,8 @@ BASE_DIR = Path(__file__).parent.parent
 DIVISIONS_FILE    = BASE_DIR / "data" / "exports" / "2025" / "divisions.json"
 DIVISIONS_DIR     = BASE_DIR / "data" / "exports" / "2025" / "divisions"
 PREF_FLOWS_FILE   = BASE_DIR / "data" / "exports" / "2025" / "preference_flows.json"
+DIVISIONS_2022_FILE = BASE_DIR / "data" / "exports" / "2022" / "divisions.json"
+MODEL_CONSTANTS_DIR = BASE_DIR / "data" / "model_constants"
 
 
 # Map AEC party_ab → canonical abbreviation used in App.jsx
@@ -147,6 +154,41 @@ def _build_pref_flows(pref_data: dict, div_id: int) -> dict | None:
     return result if result else None
 
 
+def _write_model_constant(filename: str, data) -> None:
+    """Write one constant as JSON into data/model_constants/."""
+    MODEL_CONSTANTS_DIR.mkdir(parents=True, exist_ok=True)
+    out = MODEL_CONSTANTS_DIR / filename
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=1, sort_keys=False)
+        f.write("\n")
+    print(f"Wrote {out}", file=sys.stderr)
+
+
+def build_seat_fp_2022() -> dict[int, dict]:
+    """
+    Build SEAT_FP_2022 ({division_id: grouped FP %}) from the 2022 exports,
+    same shape as SEAT_FP_2025.
+    """
+    if not DIVISIONS_2022_FILE.exists():
+        print(
+            f"Note: {DIVISIONS_2022_FILE} not found — seat_fp_2022.json skipped.\n"
+            "Run: python main.py --year 2022  to generate 2022 exports.",
+            file=sys.stderr,
+        )
+        return {}
+    with open(DIVISIONS_2022_FILE, encoding="utf-8") as f:
+        divisions = json.load(f)
+    divisions.sort(key=lambda d: (d["state_ab"], d["division_name"]))
+    out: dict[int, dict] = {}
+    for d in divisions:
+        seat_fp = _build_seat_fp(d.get("first_prefs") or [])
+        if seat_fp:
+            seat_fp["name"] = d["division_name"]
+            seat_fp["state"] = d["state_ab"]
+            out[d["division_id"]] = seat_fp
+    return out
+
+
 def main():
     if not DIVISIONS_FILE.exists():
         print(
@@ -179,6 +221,11 @@ def main():
     seat_fp_lines_by_state: dict[str, list[str]] = {}
     pref_flow_lines_by_state: dict[str, list[str]] = {}
 
+    # Machine-readable copies for data/model_constants/ (inject_model_constants.py)
+    s25_rows: list[list] = []
+    seat_fp_json: dict[int, dict] = {}
+    pref_flows_json: dict[int, dict] = {}
+
     for d in divisions:
         div_id   = d["division_id"]
         name     = d["division_name"]
@@ -207,6 +254,7 @@ def main():
             f'  [{div_id},"{name}","{state}","{winner_party}","{winner_name}",'
             f'"{tcp1}","{tcp2}",{margin}],'
         )
+        s25_rows.append([div_id, name, state, winner_party, winner_name, tcp1, tcp2, margin])
 
         # ON first preferences for this seat
         on_fp = next((fp["pct"] for fp in fps if fp["party_ab"] in ("ON", "PHON")), None)
@@ -222,6 +270,7 @@ def main():
                 f"on: {seat_fp['on']:.1f}, other: {seat_fp['other']:.1f} }},  // {name}"
             )
             seat_fp_lines_by_state.setdefault(state, []).append(fp_str)
+            seat_fp_json[div_id] = {**seat_fp, "name": name, "state": state}
 
         # Phase 3: Per-seat preference flows (SEAT_PREF_FLOWS_2025)
         pref_flows = _build_pref_flows(pref_data, div_id)
@@ -233,6 +282,14 @@ def main():
                 f"other_alp: {pref_flows.get('other_alp', 0.50):.4f} }},  // {name}"
             )
             pref_flow_lines_by_state.setdefault(state, []).append(pf_str)
+            pref_flows_json[div_id] = {
+                "grn_alp":   round(pref_flows.get("grn_alp", 0.81), 4),
+                "teal_alp":  round(pref_flows.get("teal_alp", 0.62), 4),
+                "on_alp":    round(pref_flows.get("on_alp", 0.43), 4),
+                "other_alp": round(pref_flows.get("other_alp", 0.50), 4),
+                "name":      name,
+                "state":     state,
+            }
 
     # ── Output _S25 ───────────────────────────────────────────────────────────
     print("// ── 2025 seat data from AEC final results (event_id=31496) ─────────────────")
@@ -280,6 +337,14 @@ def main():
         print("  // No per-seat preference flow data available yet.")
         print("  // Run: python main.py --year 2025  then re-run this script.")
     print("};")
+
+    # ── Write machine-readable JSON copies for inject_model_constants.py ─────
+    _write_model_constant("s25.json", s25_rows)
+    _write_model_constant("seat_fp_2025.json", seat_fp_json)
+    _write_model_constant("seat_pref_flows_2025.json", pref_flows_json)
+    seat_fp_2022 = build_seat_fp_2022()
+    if seat_fp_2022:
+        _write_model_constant("seat_fp_2022.json", seat_fp_2022)
 
 
 if __name__ == "__main__":

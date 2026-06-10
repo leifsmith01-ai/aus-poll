@@ -1,0 +1,577 @@
+{
+ "102": {
+  "offset": -0.79,
+  "name": "Fenner",
+  "state": "ACT"
+ },
+ "103": {
+  "offset": 1.2,
+  "name": "Banks",
+  "state": "NSW"
+ },
+ "104": {
+  "offset": 0.61,
+  "name": "Barton",
+  "state": "NSW"
+ },
+ "105": {
+  "offset": -0.39,
+  "name": "Bennelong",
+  "state": "NSW"
+ },
+ "106": {
+  "offset": -0.27,
+  "name": "Berowra",
+  "state": "NSW"
+ },
+ "107": {
+  "offset": -1.55,
+  "name": "Blaxland",
+  "state": "NSW"
+ },
+ "111": {
+  "offset": -0.17,
+  "name": "Chifley",
+  "state": "NSW"
+ },
+ "112": {
+  "offset": 0.63,
+  "name": "Cook",
+  "state": "NSW"
+ },
+ "114": {
+  "offset": 0.56,
+  "name": "Cunningham",
+  "state": "NSW"
+ },
+ "115": {
+  "offset": -0.29,
+  "name": "Dobell",
+  "state": "NSW"
+ },
+ "117": {
+  "offset": 0.62,
+  "name": "Eden-Monaro",
+  "state": "NSW"
+ },
+ "120": {
+  "offset": 0.28,
+  "name": "Gilmore",
+  "state": "NSW"
+ },
+ "122": {
+  "offset": -0.5,
+  "name": "Greenway",
+  "state": "NSW"
+ },
+ "124": {
+  "offset": 0.24,
+  "name": "Hughes",
+  "state": "NSW"
+ },
+ "125": {
+  "offset": -1.09,
+  "name": "Hume",
+  "state": "NSW"
+ },
+ "127": {
+  "offset": 0.05,
+  "name": "Kingsford Smith",
+  "state": "NSW"
+ },
+ "128": {
+  "offset": -0.87,
+  "name": "Lindsay",
+  "state": "NSW"
+ },
+ "130": {
+  "offset": 0.95,
+  "name": "Lyne",
+  "state": "NSW"
+ },
+ "131": {
+  "offset": 0.59,
+  "name": "Macarthur",
+  "state": "NSW"
+ },
+ "133": {
+  "offset": 0.22,
+  "name": "Macquarie",
+  "state": "NSW"
+ },
+ "134": {
+  "offset": -0.61,
+  "name": "Mitchell",
+  "state": "NSW"
+ },
+ "135": {
+  "offset": -0.57,
+  "name": "New England",
+  "state": "NSW"
+ },
+ "138": {
+  "offset": 0.57,
+  "name": "Page",
+  "state": "NSW"
+ },
+ "139": {
+  "offset": -0.9,
+  "name": "Parkes",
+  "state": "NSW"
+ },
+ "140": {
+  "offset": -0.6,
+  "name": "Parramatta",
+  "state": "NSW"
+ },
+ "144": {
+  "offset": -0.16,
+  "name": "Reid",
+  "state": "NSW"
+ },
+ "145": {
+  "offset": -0.65,
+  "name": "Richmond",
+  "state": "NSW"
+ },
+ "146": {
+  "offset": -0.26,
+  "name": "Robertson",
+  "state": "NSW"
+ },
+ "148": {
+  "offset": 0.65,
+  "name": "Shortland",
+  "state": "NSW"
+ },
+ "150": {
+  "offset": 0.11,
+  "name": "Whitlam",
+  "state": "NSW"
+ },
+ "153": {
+  "offset": 0.58,
+  "name": "Werriwa",
+  "state": "NSW"
+ },
+ "155": {
+  "offset": 1.3,
+  "name": "Bowman",
+  "state": "QLD"
+ },
+ "156": {
+  "offset": -1.65,
+  "name": "Brisbane",
+  "state": "QLD"
+ },
+ "157": {
+  "offset": -2.78,
+  "name": "Capricornia",
+  "state": "QLD"
+ },
+ "158": {
+  "offset": -1.71,
+  "name": "Dawson",
+  "state": "QLD"
+ },
+ "159": {
+  "offset": -0.05,
+  "name": "Fadden",
+  "state": "QLD"
+ },
+ "160": {
+  "offset": 0.68,
+  "name": "Fairfax",
+  "state": "QLD"
+ },
+ "161": {
+  "offset": -0.72,
+  "name": "Fisher",
+  "state": "QLD"
+ },
+ "162": {
+  "offset": -0.57,
+  "name": "Forde",
+  "state": "QLD"
+ },
+ "165": {
+  "offset": -0.24,
+  "name": "Herbert",
+  "state": "QLD"
+ },
+ "166": {
+  "offset": -1.23,
+  "name": "Hinkler",
+  "state": "QLD"
+ },
+ "168": {
+  "offset": -2.62,
+  "name": "Leichhardt",
+  "state": "QLD"
+ },
+ "169": {
+  "offset": -0.9,
+  "name": "Lilley",
+  "state": "QLD"
+ },
+ "171": {
+  "offset": -0.21,
+  "name": "McPherson",
+  "state": "QLD"
+ },
+ "172": {
+  "offset": 0.36,
+  "name": "Moncrieff",
+  "state": "QLD"
+ },
+ "173": {
+  "offset": -1.2,
+  "name": "Moreton",
+  "state": "QLD"
+ },
+ "174": {
+  "offset": -0.13,
+  "name": "Oxley",
+  "state": "QLD"
+ },
+ "175": {
+  "offset": 0.11,
+  "name": "Petrie",
+  "state": "QLD"
+ },
+ "176": {
+  "offset": -0.84,
+  "name": "Rankin",
+  "state": "QLD"
+ },
+ "178": {
+  "offset": -2.6,
+  "name": "Wide Bay",
+  "state": "QLD"
+ },
+ "179": {
+  "offset": -0.27,
+  "name": "Adelaide",
+  "state": "SA"
+ },
+ "180": {
+  "offset": -0.46,
+  "name": "Barker",
+  "state": "SA"
+ },
+ "182": {
+  "offset": 0.32,
+  "name": "Boothby",
+  "state": "SA"
+ },
+ "183": {
+  "offset": 0.07,
+  "name": "Grey",
+  "state": "SA"
+ },
+ "185": {
+  "offset": -0.39,
+  "name": "Hindmarsh",
+  "state": "SA"
+ },
+ "186": {
+  "offset": 0.42,
+  "name": "Kingston",
+  "state": "SA"
+ },
+ "187": {
+  "offset": -0.12,
+  "name": "Makin",
+  "state": "SA"
+ },
+ "190": {
+  "offset": 1.33,
+  "name": "Sturt",
+  "state": "SA"
+ },
+ "192": {
+  "offset": 0.02,
+  "name": "Bass",
+  "state": "TAS"
+ },
+ "193": {
+  "offset": -0.47,
+  "name": "Braddon",
+  "state": "TAS"
+ },
+ "196": {
+  "offset": 0.21,
+  "name": "Lyons",
+  "state": "TAS"
+ },
+ "197": {
+  "offset": -0.43,
+  "name": "Aston",
+  "state": "VIC"
+ },
+ "198": {
+  "offset": 0.41,
+  "name": "Ballarat",
+  "state": "VIC"
+ },
+ "200": {
+  "offset": 2.26,
+  "name": "Bendigo",
+  "state": "VIC"
+ },
+ "201": {
+  "offset": -0.8,
+  "name": "Bruce",
+  "state": "VIC"
+ },
+ "204": {
+  "offset": 0.2,
+  "name": "Casey",
+  "state": "VIC"
+ },
+ "205": {
+  "offset": -0.06,
+  "name": "Chisholm",
+  "state": "VIC"
+ },
+ "208": {
+  "offset": 1.43,
+  "name": "Corio",
+  "state": "VIC"
+ },
+ "209": {
+  "offset": -0.2,
+  "name": "Deakin",
+  "state": "VIC"
+ },
+ "210": {
+  "offset": 0.28,
+  "name": "Dunkley",
+  "state": "VIC"
+ },
+ "212": {
+  "offset": 0.1,
+  "name": "Gellibrand",
+  "state": "VIC"
+ },
+ "213": {
+  "offset": -0.59,
+  "name": "Gippsland",
+  "state": "VIC"
+ },
+ "216": {
+  "offset": 1.24,
+  "name": "Holt",
+  "state": "VIC"
+ },
+ "217": {
+  "offset": 0.39,
+  "name": "Hotham",
+  "state": "VIC"
+ },
+ "219": {
+  "offset": -0.29,
+  "name": "Isaacs",
+  "state": "VIC"
+ },
+ "220": {
+  "offset": 1.21,
+  "name": "Jagajaga",
+  "state": "VIC"
+ },
+ "222": {
+  "offset": 0.83,
+  "name": "Lalor",
+  "state": "VIC"
+ },
+ "223": {
+  "offset": -0.63,
+  "name": "La Trobe",
+  "state": "VIC"
+ },
+ "224": {
+  "offset": 0.16,
+  "name": "Mallee",
+  "state": "VIC"
+ },
+ "225": {
+  "offset": -1.19,
+  "name": "Maribyrnong",
+  "state": "VIC"
+ },
+ "226": {
+  "offset": -0.29,
+  "name": "McEwen",
+  "state": "VIC"
+ },
+ "229": {
+  "offset": 0.24,
+  "name": "Menzies",
+  "state": "VIC"
+ },
+ "232": {
+  "offset": 0.06,
+  "name": "Scullin",
+  "state": "VIC"
+ },
+ "235": {
+  "offset": 2.64,
+  "name": "Brand",
+  "state": "WA"
+ },
+ "236": {
+  "offset": -1.14,
+  "name": "Canning",
+  "state": "WA"
+ },
+ "237": {
+  "offset": -0.39,
+  "name": "Cowan",
+  "state": "WA"
+ },
+ "239": {
+  "offset": -0.0,
+  "name": "Forrest",
+  "state": "WA"
+ },
+ "242": {
+  "offset": -0.27,
+  "name": "Moore",
+  "state": "WA"
+ },
+ "243": {
+  "offset": -0.48,
+  "name": "O'Connor",
+  "state": "WA"
+ },
+ "244": {
+  "offset": 0.03,
+  "name": "Pearce",
+  "state": "WA"
+ },
+ "245": {
+  "offset": -1.38,
+  "name": "Perth",
+  "state": "WA"
+ },
+ "247": {
+  "offset": -0.48,
+  "name": "Swan",
+  "state": "WA"
+ },
+ "248": {
+  "offset": 1.43,
+  "name": "Tangney",
+  "state": "WA"
+ },
+ "249": {
+  "offset": -0.1,
+  "name": "Paterson",
+  "state": "NSW"
+ },
+ "250": {
+  "offset": -0.85,
+  "name": "Riverina",
+  "state": "NSW"
+ },
+ "252": {
+  "offset": 0.18,
+  "name": "Dickson",
+  "state": "QLD"
+ },
+ "302": {
+  "offset": -1.45,
+  "name": "Longman",
+  "state": "QLD"
+ },
+ "304": {
+  "offset": -2.69,
+  "name": "Blair",
+  "state": "QLD"
+ },
+ "305": {
+  "offset": 0.05,
+  "name": "Hasluck",
+  "state": "WA"
+ },
+ "306": {
+  "offset": -0.54,
+  "name": "Lingiari",
+  "state": "NT"
+ },
+ "307": {
+  "offset": 1.13,
+  "name": "Solomon",
+  "state": "NT"
+ },
+ "309": {
+  "offset": -0.28,
+  "name": "Gorton",
+  "state": "VIC"
+ },
+ "310": {
+  "offset": -1.04,
+  "name": "Bonner",
+  "state": "QLD"
+ },
+ "311": {
+  "offset": -4.84,
+  "name": "Flynn",
+  "state": "QLD"
+ },
+ "312": {
+  "offset": 0.2,
+  "name": "Durack",
+  "state": "WA"
+ },
+ "315": {
+  "offset": -2.52,
+  "name": "McMahon",
+  "state": "NSW"
+ },
+ "316": {
+  "offset": -1.57,
+  "name": "Wright",
+  "state": "QLD"
+ },
+ "317": {
+  "offset": -2.3,
+  "name": "Burt",
+  "state": "WA"
+ },
+ "322": {
+  "offset": -3.08,
+  "name": "Macnamara",
+  "state": "VIC"
+ },
+ "323": {
+  "offset": 0.07,
+  "name": "Monash",
+  "state": "VIC"
+ },
+ "324": {
+  "offset": 0.18,
+  "name": "Nicholls",
+  "state": "VIC"
+ },
+ "325": {
+  "offset": -0.12,
+  "name": "Spence",
+  "state": "SA"
+ },
+ "326": {
+  "offset": 1.12,
+  "name": "Hawke",
+  "state": "VIC"
+ },
+ "328": {
+  "offset": 0.47,
+  "name": "Corangamite",
+  "state": "VIC"
+ },
+ "329": {
+  "offset": 2.03,
+  "name": "Bullwinkel",
+  "state": "WA"
+ }
+}

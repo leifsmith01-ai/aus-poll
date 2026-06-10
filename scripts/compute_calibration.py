@@ -15,17 +15,25 @@ Usage:
 
 Outputs SEAT_CALIB_2025 JavaScript constant to stdout, ready to paste into App.jsx.
 
-Also writes a calibration report to data/calibration_report.txt.
+Inputs are read from data/model_constants/ (s25.json, seat_fp_2025.json,
+seat_pref_flows_2025.json — produced by scripts/update_s25_from_exports.py)
+when present, falling back to parsing the constants out of App.jsx.
+
+Also writes a calibration report to data/calibration_report.txt and the
+machine-readable offsets to data/model_constants/seat_calib_2025.json
+(consumed by scripts/inject_model_constants.py).
 """
 
 from __future__ import annotations
 
+import json
 import math
 import re
 import sys
 from pathlib import Path
 
 APP_JSX = Path(__file__).parent.parent / "webapp" / "src" / "App.jsx"
+MODEL_CONSTANTS_DIR = Path(__file__).parent.parent / "data" / "model_constants"
 
 # ── Default preference flows (2025 AEC national) ────────────────────────────
 PREF_FLOWS = {
@@ -174,12 +182,65 @@ def compute_primary_2pp(fp: dict, pref_overrides: dict | None = None) -> float:
     return a2 / (a2 + c2) * 100
 
 
-def main() -> None:
-    src = APP_JSX.read_text(encoding="utf-8")
+def _load_model_constant(filename: str):
+    path = MODEL_CONSTANTS_DIR / filename
+    if not path.exists():
+        return None
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
 
-    seat_fp = parse_seat_fp_2025(src)
-    seat_pref_flows = parse_seat_pref_flows_2025(src)
-    s25 = parse_s25(src)
+
+def load_inputs() -> tuple[dict[int, dict], dict[int, dict], list[dict]]:
+    """
+    Load SEAT_FP_2025, SEAT_PREF_FLOWS_2025 and _S25 from
+    data/model_constants/*.json when available (the canonical pipeline
+    outputs), otherwise parse them out of App.jsx.
+    """
+    fp_json = _load_model_constant("seat_fp_2025.json")
+    flows_json = _load_model_constant("seat_pref_flows_2025.json")
+    s25_json = _load_model_constant("s25.json")
+
+    src = None
+    if fp_json is None or flows_json is None or s25_json is None:
+        src = APP_JSX.read_text(encoding="utf-8")
+
+    if fp_json is not None:
+        seat_fp = {
+            int(sid): {k: v for k, v in entry.items() if k not in ("name", "state")}
+            for sid, entry in fp_json.items()
+        }
+        print("Loaded SEAT_FP_2025 from data/model_constants/seat_fp_2025.json")
+    else:
+        seat_fp = parse_seat_fp_2025(src)
+
+    if flows_json is not None:
+        seat_pref_flows = {
+            int(sid): {k: v for k, v in entry.items() if k not in ("name", "state")}
+            for sid, entry in flows_json.items()
+        }
+        print("Loaded SEAT_PREF_FLOWS_2025 from data/model_constants/seat_pref_flows_2025.json")
+    else:
+        seat_pref_flows = parse_seat_pref_flows_2025(src)
+
+    if s25_json is not None:
+        s25 = []
+        for row in s25_json:
+            div_id, name, state, winner, _wname, t1, t2, margin = row
+            s25.append({
+                "id": div_id, "name": name, "state": state, "winner": winner,
+                "t1": t1, "t2": t2, "margin": margin,
+                "t1_pct": round(50 + margin / 2, 2),
+                "t2_pct": round(50 - margin / 2, 2),
+            })
+        print("Loaded _S25 from data/model_constants/s25.json")
+    else:
+        s25 = parse_s25(src)
+
+    return seat_fp, seat_pref_flows, s25
+
+
+def main() -> None:
+    seat_fp, seat_pref_flows, s25 = load_inputs()
 
     # Build lookup: seat_id -> S25 data
     s25_map = {s["id"]: s for s in s25}
@@ -330,6 +391,22 @@ def main() -> None:
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
     print(f"\nCalibration report written to {report_path}")
+
+    # Write machine-readable offsets for inject_model_constants.py
+    MODEL_CONSTANTS_DIR.mkdir(parents=True, exist_ok=True)
+    calib_path = MODEL_CONSTANTS_DIR / "seat_calib_2025.json"
+    calib_json = {
+        str(sid): {
+            "offset": off,
+            "name":  s25_map[sid]["name"] if sid in s25_map else "",
+            "state": s25_map[sid]["state"] if sid in s25_map else "",
+        }
+        for sid, off in sorted(offsets.items())
+    }
+    with open(calib_path, "w", encoding="utf-8") as f:
+        json.dump(calib_json, f, indent=1)
+        f.write("\n")
+    print(f"Calibration offsets written to {calib_path}")
 
     # Output JavaScript constant
     print("\n" + "=" * 60)

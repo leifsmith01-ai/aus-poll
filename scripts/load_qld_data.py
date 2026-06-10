@@ -327,9 +327,11 @@ def main() -> None:
     conn.execute("PRAGMA foreign_keys = OFF")
 
     # Apply QLD schema
-    qld_schema_path = ROOT / "qld_schema.sql"
-    print(f"Applying schema from {qld_schema_path.name} ...")
-    conn.executescript(qld_schema_path.read_text())
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from pipeline.database import build_state_schema_sql
+    print("Applying rendered qld schema (state_schema_template.sql) ...")
+    conn.executescript(build_state_schema_sql("qld"))
 
     c = conn.cursor()
 

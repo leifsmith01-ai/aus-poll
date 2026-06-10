@@ -17,6 +17,10 @@ import BETTING_ODDS from "./data/betting_odds.json";
 import ECONOMICS_DATA from "./data/economics.json";
 import LEADERS_DATA from "./data/leaders.json";
 import AGGREGATED_POLLS from "./data/aggregated.json";
+import NSW_STATE_POLLS from "./data/nsw_polls.json";
+import QLD_STATE_POLLS from "./data/qld_polls.json";
+import WA_STATE_POLLS from "./data/wa_polls.json";
+import SA_STATE_POLLS from "./data/sa_polls.json";
 import * as STATE_SEAT_FP from "./data/state_seat_fp.js";
 import { useLiveResults } from "./live/useLiveResults.js";
 import { projectSeats } from "./live/project.js";
@@ -317,170 +321,314 @@ const ON_FP_2025 = {
 // Minor party redistributions in newly created/altered seats (e.g., Bullwinkel)
 // are rough estimates and require formal SA1-to-division mapping.
 const SEAT_FP_2025 = {
-  // ── ACT ──
-  318: { alp: 40.0, coal: 10.5, grn: 16.0, teal: 28.0, on: 2.5, other: 3.0 }, // Bean
-  101: { alp: 38.0, coal: 6.0, grn: 33.0, teal: 9.0, on: 1.5, other: 12.5 }, // Canberra (ALP/GRN)
-  102: { alp: 54.0, coal: 22.0, grn: 20.0, teal: 0.0, on: 2.0, other: 2.0 }, // Fenner
-  // ── NSW ──
-  103: { alp: 41.0, coal: 42.5, grn: 11.0, teal: 0.0, on: 3.5, other: 2.0 }, // Banks
-  104: { alp: 52.2, coal: 27.4, grn: 13.0, teal: 0.0, on: 5.4, other: 2.0 }, // Barton
-  105: { alp: 46.8, coal: 36.0, grn: 13.0, teal: 0.0, on: 2.2, other: 2.0 }, // Bennelong
-  106: { alp: 35.9, coal: 46.1, grn: 12.0, teal: 0.0, on: 4.0, other: 2.0 }, // Berowra
-  107: { alp: 63.1, coal: 23.9, grn: 8.0, teal: 0.0, on: 3.0, other: 2.0 }, // Blaxland
-  108: { alp: 15.0, coal: 40.0, grn: 10.0, teal: 30.0, on: 1.5, other: 3.5 }, // Bradfield (IND/LP)
-  109: { alp: 18.0, coal: 30.0, grn: 6.0, teal: 38.0, on: 7.6, other: 0.4 }, // Calare (IND/NP)
-  111: { alp: 59.9, coal: 24.3, grn: 8.0, teal: 0.0, on: 5.8, other: 2.0 }, // Chifley
-  112: { alp: 31.9, coal: 51.9, grn: 10.0, teal: 0.0, on: 4.2, other: 2.0 }, // Cook
-  113: { alp: 18.0, coal: 37.0, grn: 7.0, teal: 31.0, on: 6.3, other: 0.7 }, // Cowper (NP/IND)
-  114: { alp: 52.8, coal: 24.8, grn: 13.0, teal: 0.0, on: 7.4, other: 2.0 }, // Cunningham
-  115: { alp: 47.3, coal: 32.8, grn: 9.0, teal: 0.0, on: 8.9, other: 2.0 }, // Dobell
-  117: { alp: 46.0, coal: 36.3, grn: 9.0, teal: 0.0, on: 6.7, other: 2.0 }, // Eden-Monaro
-  118: { alp: 16.0, coal: 43.0, grn: 5.0, teal: 24.0, on: 6.4, other: 5.6 }, // Farrer (LP/IND)
-  119: { alp: 38.0, coal: 12.0, grn: 5.0, teal: 38.0, on: 3.8, other: 3.2 }, // Fowler (IND/ALP)
-  120: { alp: 44.8, coal: 39.4, grn: 9.0, teal: 0.0, on: 4.8, other: 2.0 }, // Gilmore
-  121: { alp: 49.0, coal: 5.0, grn: 33.0, teal: 4.0, on: 3.0, other: 6.0 }, // Grayndler (ALP/GRN)
-  122: { alp: 51.2, coal: 30.6, grn: 12.0, teal: 0.0, on: 4.2, other: 2.0 }, // Greenway
-  124: { alp: 42.6, coal: 41.3, grn: 9.0, teal: 0.0, on: 5.1, other: 2.0 }, // Hughes
-  125: { alp: 31.2, coal: 51.1, grn: 8.0, teal: 0.0, on: 7.7, other: 2.0 }, // Hume
-  126: { alp: 47.0, coal: 18.0, grn: 7.0, teal: 0.0, on: 16.4, other: 11.6 }, // Hunter (ALP/ON)
-  127: { alp: 51.5, coal: 25.7, grn: 15.0, teal: 0.0, on: 5.8, other: 2.0 }, // Kingsford Smith
-  128: { alp: 35.2, coal: 46.1, grn: 10.0, teal: 0.0, on: 6.7, other: 2.0 }, // Lindsay
-  130: { alp: 20.0, coal: 47.0, grn: 7.0, teal: 12.0, on: 8.1, other: 5.9 }, // Lyne (NP/ALP)
-  131: { alp: 53.3, coal: 27.2, grn: 10.0, teal: 0.0, on: 7.5, other: 2.0 }, // Macarthur
-  132: { alp: 17.0, coal: 36.0, grn: 9.0, teal: 33.0, on: 2.4, other: 2.6 }, // Mackellar (IND/LP)
-  133: { alp: 43.4, coal: 34.2, grn: 12.0, teal: 0.0, on: 8.4, other: 2.0 }, // Macquarie
-  315: { alp: 44.8, coal: 33.1, grn: 12.0, teal: 0.0, on: 8.1, other: 2.0 }, // McMahon
-  134: { alp: 34.5, coal: 48.4, grn: 11.0, teal: 0.0, on: 4.1, other: 2.0 }, // Mitchell
-  135: { alp: 20.0, coal: 53.0, grn: 5.0, teal: 8.0, on: 9.9, other: 4.1 }, // New England (NP)
-  136: { alp: 45.0, coal: 12.0, grn: 19.0, teal: 3.0, on: 5.2, other: 15.8 }, // Newcastle (ALP/GRN)
-  138: { alp: 30.9, coal: 53.6, grn: 8.0, teal: 0.0, on: 5.5, other: 2.0 }, // Page
-  139: { alp: 26.1, coal: 53.3, grn: 5.0, teal: 0.0, on: 13.6, other: 2.0 }, // Parkes
-  140: { alp: 50.8, coal: 32.8, grn: 12.0, teal: 0.0, on: 2.4, other: 2.0 }, // Parramatta
-  249: { alp: 45.4, coal: 36.1, grn: 9.0, teal: 0.0, on: 7.5, other: 2.0 }, // Paterson
-  144: { alp: 50.3, coal: 33.5, grn: 12.0, teal: 0.0, on: 2.2, other: 2.0 }, // Reid
-  145: { alp: 47.0, coal: 33.8, grn: 12.0, teal: 0.0, on: 5.2, other: 2.0 }, // Richmond
-  250: { alp: 28.2, coal: 55.2, grn: 5.0, teal: 0.0, on: 9.6, other: 2.0 }, // Riverina
-  146: { alp: 47.3, coal: 33.8, grn: 10.0, teal: 0.0, on: 6.9, other: 2.0 }, // Robertson
-  148: { alp: 49.3, coal: 30.7, grn: 9.0, teal: 0.0, on: 9.0, other: 2.0 }, // Shortland
-  149: { alp: 46.0, coal: 5.0, grn: 31.0, teal: 10.0, on: 3.3, other: 4.7 }, // Sydney (ALP/GRN)
-  151: { alp: 12.0, coal: 28.0, grn: 10.0, teal: 44.0, on: 1.7, other: 4.3 }, // Warringah (IND/LP)
-  251: { alp: 52.0, coal: 12.0, grn: 6.0, teal: 21.0, on: 2.9, other: 6.1 }, // Watson (ALP/IND)
-  152: { alp: 14.0, coal: 33.0, grn: 13.0, teal: 37.0, on: 2.3, other: 0.7 }, // Wentworth (IND/LP)
-  153: { alp: 46.9, coal: 38.5, grn: 9.0, teal: 0.0, on: 3.6, other: 2.0 }, // Werriwa
-  150: { alp: 43.9, coal: 36.6, grn: 10.0, teal: 0.0, on: 7.5, other: 2.0 }, // Whitlam
-  // ── NT ──
-  306: { alp: 46.1, coal: 34.3, grn: 9.0, teal: 0.0, on: 8.6, other: 2.0 }, // Lingiari
-  307: { alp: 40.3, coal: 42.4, grn: 9.0, teal: 0.0, on: 6.3, other: 2.0 }, // Solomon
-  // ── QLD ──
-  304: { alp: 42.6, coal: 36.1, grn: 10.0, teal: 0.0, on: 9.3, other: 2.0 }, // Blair
-  310: { alp: 42.7, coal: 39.6, grn: 12.0, teal: 0.0, on: 3.7, other: 2.0 }, // Bonner
-  155: { alp: 37.2, coal: 46.0, grn: 8.0, teal: 0.0, on: 6.8, other: 2.0 }, // Bowman
-  156: { alp: 45.6, coal: 36.1, grn: 14.0, teal: 0.0, on: 2.3, other: 2.0 }, // Brisbane
-  157: { alp: 31.6, coal: 44.9, grn: 6.0, teal: 0.0, on: 15.5, other: 2.0 }, // Capricornia
-  158: { alp: 28.7, coal: 54.1, grn: 5.0, teal: 0.0, on: 10.2, other: 2.0 }, // Dawson
-  252: { alp: 43.6, coal: 38.5, grn: 12.0, teal: 0.0, on: 3.9, other: 2.0 }, // Dickson
-  159: { alp: 31.4, coal: 49.6, grn: 9.0, teal: 0.0, on: 8.0, other: 2.0 }, // Fadden
-  160: { alp: 36.2, coal: 46.6, grn: 8.0, teal: 0.0, on: 7.2, other: 2.0 }, // Fairfax
-  161: { alp: 33.1, coal: 50.0, grn: 9.0, teal: 0.0, on: 5.9, other: 2.0 }, // Fisher
-  311: { alp: 27.9, coal: 50.2, grn: 6.0, teal: 0.0, on: 13.9, other: 2.0 }, // Flynn
-  162: { alp: 39.2, coal: 39.8, grn: 9.0, teal: 0.0, on: 10.0, other: 2.0 }, // Forde
-  163: { alp: 44.0, coal: 12.0, grn: 24.0, teal: 5.0, on: 2.2, other: 12.8 }, // Griffith (ALP/GRN)
-  164: { alp: 18.0, coal: 43.0, grn: 8.0, teal: 20.0, on: 9.4, other: 1.6 }, // Groom (LNP/IND)
-  165: { alp: 28.6, coal: 58.5, grn: 6.0, teal: 0.0, on: 4.9, other: 2.0 }, // Herbert
-  166: { alp: 33.0, coal: 46.8, grn: 5.0, teal: 0.0, on: 13.2, other: 2.0 }, // Hinkler
-  167: { alp: 15.0, coal: 30.0, grn: 4.0, teal: 43.0, on: 7.5, other: 0.5 }, // Kennedy (KAP/LNP)
-  168: { alp: 43.6, coal: 36.5, grn: 10.0, teal: 0.0, on: 7.9, other: 2.0 }, // Leichhardt
-  169: { alp: 50.5, coal: 29.5, grn: 14.0, teal: 0.0, on: 4.0, other: 2.0 }, // Lilley
-  302: { alp: 37.5, coal: 42.0, grn: 9.0, teal: 0.0, on: 9.5, other: 2.0 }, // Longman
-  170: { alp: 15.0, coal: 60.0, grn: 3.0, teal: 0.0, on: 12.1, other: 9.9 }, // Maranoa (LNP/ON)
-  171: { alp: 34.7, coal: 49.1, grn: 10.0, teal: 0.0, on: 4.2, other: 2.0 }, // McPherson
-  172: { alp: 29.7, coal: 52.8, grn: 10.0, teal: 0.0, on: 5.5, other: 2.0 }, // Moncrieff
-  173: { alp: 52.6, coal: 28.7, grn: 14.0, teal: 0.0, on: 2.7, other: 2.0 }, // Moreton
-  174: { alp: 55.5, coal: 24.5, grn: 13.0, teal: 0.0, on: 5.0, other: 2.0 }, // Oxley
-  175: { alp: 38.4, coal: 42.0, grn: 11.0, teal: 0.0, on: 6.6, other: 2.0 }, // Petrie
-  176: { alp: 52.1, coal: 27.6, grn: 12.0, teal: 0.0, on: 6.3, other: 2.0 }, // Rankin
-  177: { alp: 22.0, coal: 32.0, grn: 37.0, teal: 4.0, on: 2.1, other: 2.9 }, // Ryan (GRN/LNP)
-  178: { alp: 31.4, coal: 48.8, grn: 6.0, teal: 0.0, on: 11.8, other: 2.0 }, // Wide Bay
-  316: { alp: 28.9, coal: 46.2, grn: 6.0, teal: 0.0, on: 16.9, other: 2.0 }, // Wright
-  // ── SA ──
-  179: { alp: 55.1, coal: 25.1, grn: 14.0, teal: 0.0, on: 3.8, other: 2.0 }, // Adelaide
-  180: { alp: 26.1, coal: 55.9, grn: 8.0, teal: 0.0, on: 8.0, other: 2.0 }, // Barker
-  182: { alp: 47.5, coal: 33.6, grn: 14.0, teal: 0.0, on: 2.9, other: 2.0 }, // Boothby
-  183: { alp: 33.7, coal: 46.5, grn: 8.0, teal: 0.0, on: 9.8, other: 2.0 }, // Grey
-  185: { alp: 51.9, coal: 27.3, grn: 14.0, teal: 0.0, on: 4.8, other: 2.0 }, // Hindmarsh
-  186: { alp: 56.6, coal: 22.3, grn: 13.0, teal: 0.0, on: 6.1, other: 2.0 }, // Kingston
-  187: { alp: 50.3, coal: 28.2, grn: 13.0, teal: 0.0, on: 6.5, other: 2.0 }, // Makin
-  188: { alp: 27.0, coal: 15.0, grn: 10.0, teal: 41.0, on: 5.9, other: 1.1 }, // Mayo (IND/ALP)
-  325: { alp: 49.8, coal: 26.0, grn: 13.0, teal: 0.0, on: 9.2, other: 2.0 }, // Spence
-  190: { alp: 42.9, coal: 37.8, grn: 14.0, teal: 0.0, on: 3.3, other: 2.0 }, // Sturt
-  // ── TAS ──
-  192: { alp: 44.5, coal: 35.1, grn: 12.0, teal: 0.0, on: 6.4, other: 2.0 }, // Bass
-  193: { alp: 43.2, coal: 35.1, grn: 12.0, teal: 0.0, on: 7.7, other: 2.0 }, // Braddon
-  319: { alp: 27.0, coal: 5.0, grn: 10.0, teal: 54.0, on: 4.0, other: 0.0 }, // Clark (IND/ALP)
-  195: { alp: 42.0, coal: 18.0, grn: 14.0, teal: 18.0, on: 4.8, other: 3.2 }, // Franklin (ALP/IND)
-  196: { alp: 47.1, coal: 31.1, grn: 13.0, teal: 0.0, on: 6.8, other: 2.0 }, // Lyons
-  // ── VIC ──
-  197: { alp: 40.5, coal: 41.3, grn: 13.0, teal: 0.0, on: 3.2, other: 2.0 }, // Aston
-  198: { alp: 45.1, coal: 31.3, grn: 14.0, teal: 0.0, on: 7.6, other: 2.0 }, // Ballarat
-  200: { alp: 38.7, coal: 42.8, grn: 12.0, teal: 0.0, on: 4.5, other: 2.0 }, // Bendigo
-  201: { alp: 49.6, coal: 27.3, grn: 13.0, teal: 0.0, on: 8.1, other: 2.0 }, // Bruce
-  203: { alp: 45.0, coal: 12.0, grn: 9.0, teal: 30.0, on: 3.0, other: 1.0 }, // Calwell (ALP/IND)
-  204: { alp: 35.1, coal: 46.9, grn: 11.0, teal: 0.0, on: 5.0, other: 2.0 }, // Casey
-  205: { alp: 42.6, coal: 39.6, grn: 14.0, teal: 0.0, on: 1.8, other: 2.0 }, // Chisholm
-  320: { alp: 40.0, coal: 7.0, grn: 34.0, teal: 6.0, on: 4.9, other: 8.1 }, // Cooper (ALP/GRN)
-  328: { alp: 45.3, coal: 36.8, grn: 13.0, teal: 0.0, on: 2.9, other: 2.0 }, // Corangamite
-  208: { alp: 48.3, coal: 27.9, grn: 12.0, teal: 0.0, on: 9.8, other: 2.0 }, // Corio
-  209: { alp: 39.5, coal: 42.1, grn: 14.0, teal: 0.0, on: 2.4, other: 2.0 }, // Deakin
-  210: { alp: 42.8, coal: 35.8, grn: 13.0, teal: 0.0, on: 6.4, other: 2.0 }, // Dunkley
-  211: { alp: 13.0, coal: 46.0, grn: 7.0, teal: 28.0, on: 5.4, other: 0.6 }, // Flinders (LP/IND)
-  321: { alp: 41.0, coal: 9.0, grn: 28.0, teal: 8.0, on: 4.2, other: 9.8 }, // Fraser (ALP/GRN)
-  212: { alp: 50.4, coal: 28.1, grn: 14.0, teal: 0.0, on: 5.5, other: 2.0 }, // Gellibrand
-  213: { alp: 18.7, coal: 59.1, grn: 6.0, teal: 0.0, on: 14.2, other: 2.0 }, // Gippsland
-  214: { alp: 10.0, coal: 43.0, grn: 7.0, teal: 36.0, on: 1.6, other: 2.4 }, // Goldstein (LP/IND)
-  309: { alp: 47.2, coal: 33.2, grn: 12.0, teal: 0.0, on: 5.6, other: 2.0 }, // Gorton
-  326: { alp: 43.0, coal: 34.0, grn: 12.0, teal: 0.0, on: 9.0, other: 2.0 }, // Hawke
-  216: { alp: 49.7, coal: 28.0, grn: 12.0, teal: 0.0, on: 8.3, other: 2.0 }, // Holt
-  217: { alp: 51.8, coal: 26.8, grn: 15.0, teal: 0.0, on: 4.4, other: 2.0 }, // Hotham
-  218: { alp: 14.0, coal: 30.0, grn: 7.0, teal: 42.0, on: 6.9, other: 0.1 }, // Indi (IND/LP)
-  219: { alp: 50.2, coal: 29.6, grn: 14.0, teal: 0.0, on: 4.2, other: 2.0 }, // Isaacs
-  220: { alp: 48.2, coal: 31.2, grn: 15.0, teal: 0.0, on: 3.6, other: 2.0 }, // Jagajaga
-  221: { alp: 13.0, coal: 42.0, grn: 8.0, teal: 35.0, on: 0.9, other: 1.1 }, // Kooyong (IND/LP)
-  223: { alp: 34.9, coal: 44.8, grn: 11.0, teal: 0.0, on: 7.3, other: 2.0 }, // La Trobe
-  222: { alp: 49.7, coal: 29.8, grn: 12.0, teal: 0.0, on: 6.5, other: 2.0 }, // Lalor
-  322: { alp: 48.4, coal: 33.1, grn: 14.0, teal: 0.0, on: 2.5, other: 2.0 }, // Macnamara
-  224: { alp: 19.6, coal: 60.5, grn: 7.0, teal: 0.0, on: 10.9, other: 2.0 }, // Mallee
-  225: { alp: 46.7, coal: 29.8, grn: 15.0, teal: 0.0, on: 6.5, other: 2.0 }, // Maribyrnong
-  226: { alp: 41.4, coal: 38.5, grn: 12.0, teal: 0.0, on: 6.1, other: 2.0 }, // McEwen
-  228: { alp: 35.0, coal: 7.0, grn: 36.0, teal: 10.0, on: 2.2, other: 9.8 }, // Melbourne (ALP/GRN)
-  229: { alp: 37.2, coal: 44.0, grn: 15.0, teal: 0.0, on: 1.8, other: 2.0 }, // Menzies
-  323: { alp: 31.8, coal: 46.4, grn: 12.0, teal: 0.0, on: 7.8, other: 2.0 }, // Monash
-  324: { alp: 24.2, coal: 55.7, grn: 7.0, teal: 0.0, on: 11.1, other: 2.0 }, // Nicholls
-  232: { alp: 50.0, coal: 28.6, grn: 13.0, teal: 0.0, on: 6.4, other: 2.0 }, // Scullin
-  233: { alp: 15.0, coal: 44.0, grn: 6.0, teal: 29.0, on: 4.0, other: 2.0 }, // Wannon (LP/IND)
-  234: { alp: 35.0, coal: 7.0, grn: 37.0, teal: 8.0, on: 3.2, other: 9.8 }, // Wills (ALP/GRN)
-  // ── WA ──
-  235: { alp: 49.2, coal: 22.2, grn: 14.0, teal: 0.0, on: 12.6, other: 2.0 }, // Brand
-  329: { alp: 35.4, coal: 41.3, grn: 13.0, teal: 0.0, on: 8.3, other: 2.0 }, // Bullwinkel
-  317: { alp: 49.2, coal: 25.1, grn: 14.0, teal: 0.0, on: 9.7, other: 2.0 }, // Burt
-  236: { alp: 28.7, coal: 47.0, grn: 11.0, teal: 0.0, on: 11.3, other: 2.0 }, // Canning
-  237: { alp: 49.2, coal: 30.0, grn: 14.0, teal: 0.0, on: 4.8, other: 2.0 }, // Cowan
-  238: { alp: 14.0, coal: 36.0, grn: 14.0, teal: 32.0, on: 2.4, other: 1.6 }, // Curtin (IND/LP)
-  312: { alp: 29.0, coal: 52.2, grn: 7.0, teal: 0.0, on: 9.8, other: 2.0 }, // Durack
-  239: { alp: 34.9, coal: 44.4, grn: 10.0, teal: 0.0, on: 8.7, other: 2.0 }, // Forrest
-  240: { alp: 42.0, coal: 10.0, grn: 18.0, teal: 23.0, on: 5.8, other: 1.2 }, // Fremantle (ALP/IND)
-  305: { alp: 50.6, coal: 26.4, grn: 14.0, teal: 0.0, on: 7.0, other: 2.0 }, // Hasluck
-  242: { alp: 38.7, coal: 41.0, grn: 14.0, teal: 0.0, on: 4.3, other: 2.0 }, // Moore
-  243: { alp: 25.2, coal: 54.6, grn: 7.0, teal: 0.0, on: 11.2, other: 2.0 }, // O'Connor
-  244: { alp: 41.9, coal: 35.2, grn: 12.0, teal: 0.0, on: 8.9, other: 2.0 }, // Pearce
-  245: { alp: 51.6, coal: 26.4, grn: 14.0, teal: 0.0, on: 6.0, other: 2.0 }, // Perth
-  247: { alp: 49.5, coal: 29.6, grn: 14.0, teal: 0.0, on: 4.9, other: 2.0 }, // Swan
-  248: { alp: 43.0, coal: 37.1, grn: 14.0, teal: 0.0, on: 3.9, other: 2.0 }, // Tangney
-};
+  101: { alp: 48.5, coal: 17.8, grn: 20.1, teal: 11.0, on: 0.0, other: 2.6 },  // Canberra
+  102: { alp: 54.3, coal: 21.5, grn: 16.5, teal: 0.0, on: 0.0, other: 7.8 },  // Fenner
+  103: { alp: 37.6, coal: 40.0, grn: 12.3, teal: 0.0, on: 3.6, other: 6.4 },  // Banks
+  104: { alp: 47.6, coal: 23.8, grn: 15.9, teal: 0.0, on: 5.4, other: 7.3 },  // Barton
+  105: { alp: 47.0, coal: 35.4, grn: 12.1, teal: 0.0, on: 2.2, other: 3.3 },  // Bennelong
+  106: { alp: 27.3, coal: 41.2, grn: 12.2, teal: 13.4, on: 4.0, other: 1.9 },  // Berowra
+  107: { alp: 47.0, coal: 18.1, grn: 7.9, teal: 21.6, on: 3.1, other: 2.3 },  // Blaxland
+  108: { alp: 20.0, coal: 38.2, grn: 6.5, teal: 32.7, on: 1.5, other: 1.1 },  // Bradfield
+  109: { alp: 10.8, coal: 31.8, grn: 3.5, teal: 41.9, on: 8.0, other: 4.1 },  // Calare
+  111: { alp: 55.2, coal: 19.9, grn: 10.4, teal: 0.0, on: 6.0, other: 8.6 },  // Chifley
+  112: { alp: 31.7, coal: 48.1, grn: 9.9, teal: 0.0, on: 4.2, other: 6.1 },  // Cook
+  113: { alp: 11.8, coal: 40.2, grn: 4.2, teal: 32.2, on: 6.6, other: 5.0 },  // Cowper
+  114: { alp: 44.9, coal: 23.0, grn: 20.8, teal: 0.0, on: 7.4, other: 4.0 },  // Cunningham
+  115: { alp: 44.3, coal: 28.3, grn: 10.6, teal: 0.0, on: 9.1, other: 7.6 },  // Dobell
+  117: { alp: 44.1, coal: 32.6, grn: 10.2, teal: 3.9, on: 6.8, other: 2.4 },  // Eden-Monaro
+  118: { alp: 16.1, coal: 45.9, grn: 5.1, teal: 22.4, on: 6.9, other: 3.6 },  // Farrer
+  119: { alp: 38.5, coal: 11.9, grn: 6.5, teal: 35.4, on: 3.9, other: 3.8 },  // Fowler
+  120: { alp: 39.6, coal: 35.9, grn: 7.3, teal: 8.3, on: 5.0, other: 3.9 },  // Gilmore
+  121: { alp: 54.0, coal: 13.9, grn: 25.4, teal: 2.2, on: 3.0, other: 1.5 },  // Grayndler
+  122: { alp: 52.2, coal: 27.7, grn: 11.0, teal: 2.4, on: 4.2, other: 2.5 },  // Greenway
+  124: { alp: 40.4, coal: 37.5, grn: 11.6, teal: 0.0, on: 5.2, other: 5.3 },  // Hughes
+  125: { alp: 28.9, coal: 45.8, grn: 8.9, teal: 4.7, on: 8.1, other: 3.7 },  // Hume
+  126: { alp: 46.5, coal: 19.3, grn: 7.7, teal: 0.0, on: 17.4, other: 9.1 },  // Hunter
+  127: { alp: 51.5, coal: 25.7, grn: 13.5, teal: 3.5, on: 5.8, other: 0.0 },  // Kingsford Smith
+  128: { alp: 34.5, coal: 42.3, grn: 10.3, teal: 0.0, on: 7.1, other: 5.8 },  // Lindsay
+  130: { alp: 21.1, coal: 40.1, grn: 6.6, teal: 17.5, on: 8.8, other: 6.0 },  // Lyne
+  131: { alp: 49.4, coal: 23.2, grn: 13.1, teal: 0.0, on: 7.6, other: 6.8 },  // Macarthur
+  132: { alp: 11.9, coal: 35.5, grn: 6.1, teal: 42.3, on: 2.5, other: 1.8 },  // Mackellar
+  133: { alp: 43.0, coal: 31.5, grn: 12.5, teal: 0.0, on: 8.4, other: 4.6 },  // Macquarie
+  134: { alp: 33.8, coal: 45.9, grn: 13.9, teal: 0.0, on: 4.1, other: 2.4 },  // Mitchell
+  135: { alp: 21.1, coal: 53.8, grn: 8.0, teal: 3.7, on: 10.2, other: 3.3 },  // New England
+  136: { alp: 46.2, coal: 19.3, grn: 23.5, teal: 0.0, on: 5.3, other: 5.8 },  // Newcastle
+  138: { alp: 23.4, coal: 48.2, grn: 16.1, teal: 3.5, on: 5.8, other: 2.9 },  // Page
+  139: { alp: 22.3, coal: 44.7, grn: 6.8, teal: 0.0, on: 15.1, other: 11.1 },  // Parkes
+  140: { alp: 49.6, coal: 30.6, grn: 12.4, teal: 2.4, on: 2.5, other: 2.4 },  // Parramatta
+  144: { alp: 49.8, coal: 32.0, grn: 11.5, teal: 3.0, on: 2.2, other: 1.5 },  // Reid
+  145: { alp: 32.2, coal: 26.2, grn: 28.7, teal: 0.0, on: 5.5, other: 7.4 },  // Richmond
+  146: { alp: 46.4, coal: 30.5, grn: 9.2, teal: 3.4, on: 7.0, other: 3.5 },  // Robertson
+  148: { alp: 45.1, coal: 26.8, grn: 11.7, teal: 4.5, on: 9.1, other: 2.9 },  // Shortland
+  149: { alp: 55.7, coal: 16.9, grn: 21.8, teal: 0.0, on: 3.3, other: 2.3 },  // Sydney
+  150: { alp: 39.5, coal: 28.6, grn: 12.5, teal: 8.9, on: 7.6, other: 2.9 },  // Whitlam
+  151: { alp: 14.4, coal: 31.9, grn: 8.8, teal: 41.9, on: 1.7, other: 1.3 },  // Warringah
+  152: { alp: 13.1, coal: 35.7, grn: 10.0, teal: 39.0, on: 2.3, other: 0.0 },  // Wentworth
+  153: { alp: 43.5, coal: 33.5, grn: 12.0, teal: 0.0, on: 3.9, other: 7.1 },  // Werriwa
+  155: { alp: 32.9, coal: 40.9, grn: 12.4, teal: 0.0, on: 7.0, other: 6.9 },  // Bowman
+  156: { alp: 33.2, coal: 33.1, grn: 27.9, teal: 0.0, on: 2.3, other: 3.4 },  // Brisbane
+  157: { alp: 32.7, coal: 35.8, grn: 6.3, teal: 0.0, on: 15.5, other: 9.8 },  // Capricornia
+  158: { alp: 27.2, coal: 43.0, grn: 7.2, teal: 0.0, on: 10.6, other: 11.9 },  // Dawson
+  159: { alp: 29.3, coal: 43.5, grn: 9.7, teal: 0.0, on: 8.4, other: 9.0 },  // Fadden
+  160: { alp: 25.7, coal: 38.7, grn: 10.2, teal: 14.3, on: 7.4, other: 3.6 },  // Fairfax
+  161: { alp: 23.0, coal: 38.3, grn: 10.0, teal: 18.0, on: 6.1, other: 4.6 },  // Fisher
+  162: { alp: 35.9, coal: 31.6, grn: 11.8, teal: 0.0, on: 10.4, other: 10.3 },  // Forde
+  163: { alp: 35.0, coal: 25.6, grn: 33.4, teal: 0.0, on: 2.3, other: 3.8 },  // Griffith
+  164: { alp: 17.2, coal: 40.4, grn: 6.0, teal: 22.5, on: 9.7, other: 4.2 },  // Groom
+  165: { alp: 24.3, coal: 50.6, grn: 9.8, teal: 0.0, on: 5.1, other: 10.2 },  // Herbert
+  166: { alp: 32.4, coal: 38.6, grn: 7.6, teal: 0.0, on: 13.6, other: 7.8 },  // Hinkler
+  167: { alp: 17.0, coal: 24.2, grn: 6.0, teal: 0.0, on: 7.8, other: 45.0 },  // Kennedy
+  168: { alp: 39.9, coal: 28.8, grn: 9.9, teal: 0.0, on: 8.4, other: 13.0 },  // Leichhardt
+  169: { alp: 46.7, coal: 26.9, grn: 16.7, teal: 0.0, on: 4.0, other: 5.6 },  // Lilley
+  170: { alp: 17.6, coal: 54.4, grn: 5.7, teal: 0.0, on: 12.8, other: 9.6 },  // Maranoa
+  171: { alp: 25.6, coal: 39.2, grn: 9.1, teal: 17.7, on: 4.6, other: 3.8 },  // McPherson
+  172: { alp: 25.7, coal: 44.1, grn: 9.9, teal: 10.2, on: 5.8, other: 4.2 },  // Moncrieff
+  173: { alp: 43.1, coal: 25.3, grn: 23.8, teal: 0.0, on: 2.7, other: 5.0 },  // Moreton
+  174: { alp: 54.3, coal: 21.1, grn: 13.8, teal: 0.0, on: 5.0, other: 5.7 },  // Oxley
+  175: { alp: 37.1, coal: 37.1, grn: 12.0, teal: 0.0, on: 6.6, other: 7.2 },  // Petrie
+  176: { alp: 53.4, coal: 19.8, grn: 11.5, teal: 0.0, on: 6.7, other: 8.6 },  // Rankin
+  177: { alp: 28.9, coal: 34.3, grn: 31.0, teal: 0.0, on: 2.1, other: 3.7 },  // Ryan
+  178: { alp: 27.7, coal: 40.2, grn: 9.1, teal: 5.0, on: 12.4, other: 5.7 },  // Wide Bay
+  179: { alp: 47.4, coal: 24.0, grn: 19.8, teal: 0.0, on: 3.9, other: 5.0 },  // Adelaide
+  180: { alp: 23.6, coal: 50.4, grn: 8.5, teal: 6.3, on: 8.4, other: 2.8 },  // Barker
+  182: { alp: 43.0, coal: 32.2, grn: 17.4, teal: 0.0, on: 2.9, other: 4.7 },  // Boothby
+  183: { alp: 23.7, coal: 36.2, grn: 6.2, teal: 19.6, on: 10.3, other: 3.9 },  // Grey
+  185: { alp: 50.3, coal: 23.5, grn: 14.5, teal: 0.0, on: 4.9, other: 6.8 },  // Hindmarsh
+  186: { alp: 54.2, coal: 18.5, grn: 14.1, teal: 0.0, on: 6.2, other: 7.1 },  // Kingston
+  187: { alp: 49.9, coal: 22.8, grn: 13.1, teal: 0.0, on: 6.7, other: 7.5 },  // Makin
+  188: { alp: 21.9, coal: 24.0, grn: 14.1, teal: 31.1, on: 6.0, other: 2.8 },  // Mayo
+  190: { alp: 35.9, coal: 34.4, grn: 16.5, teal: 7.6, on: 3.4, other: 2.1 },  // Sturt
+  192: { alp: 40.5, coal: 30.9, grn: 13.5, teal: 5.4, on: 6.5, other: 3.2 },  // Bass
+  193: { alp: 39.8, coal: 31.6, grn: 8.2, teal: 8.2, on: 7.7, other: 4.5 },  // Braddon
+  195: { alp: 39.2, coal: 18.2, grn: 10.3, teal: 27.5, on: 4.8, other: 0.0 },  // Franklin
+  196: { alp: 45.1, coal: 27.1, grn: 11.3, teal: 0.0, on: 7.0, other: 9.5 },  // Lyons
+  197: { alp: 39.2, coal: 38.1, grn: 12.3, teal: 4.3, on: 3.3, other: 2.7 },  // Aston
+  198: { alp: 43.1, coal: 29.0, grn: 14.6, teal: 2.7, on: 7.7, other: 3.0 },  // Ballarat
+  200: { alp: 35.8, coal: 43.2, grn: 12.5, teal: 0.0, on: 4.8, other: 3.7 },  // Bendigo
+  201: { alp: 48.7, coal: 22.5, grn: 13.2, teal: 0.0, on: 8.4, other: 7.1 },  // Bruce
+  203: { alp: 33.0, coal: 16.4, grn: 8.6, teal: 35.5, on: 3.3, other: 3.2 },  // Calwell
+  204: { alp: 25.9, coal: 41.7, grn: 12.1, teal: 11.8, on: 5.2, other: 3.4 },  // Casey
+  205: { alp: 40.0, coal: 36.8, grn: 12.9, teal: 6.4, on: 1.8, other: 2.0 },  // Chisholm
+  208: { alp: 43.2, coal: 24.2, grn: 16.1, teal: 3.5, on: 9.8, other: 3.1 },  // Corio
+  209: { alp: 36.7, coal: 38.2, grn: 12.8, teal: 8.0, on: 2.5, other: 1.9 },  // Deakin
+  210: { alp: 40.3, coal: 32.7, grn: 12.5, teal: 3.0, on: 6.7, other: 4.9 },  // Dunkley
+  211: { alp: 22.6, coal: 39.3, grn: 6.2, teal: 24.0, on: 5.4, other: 2.5 },  // Flinders
+  212: { alp: 46.9, coal: 25.9, grn: 17.7, teal: 0.0, on: 5.5, other: 4.0 },  // Gellibrand
+  213: { alp: 21.0, coal: 53.5, grn: 8.2, teal: 0.0, on: 14.2, other: 3.1 },  // Gippsland
+  214: { alp: 13.4, coal: 42.8, grn: 7.2, teal: 33.3, on: 1.7, other: 1.7 },  // Goldstein
+  216: { alp: 46.3, coal: 24.3, grn: 11.7, teal: 0.0, on: 8.3, other: 9.5 },  // Holt
+  217: { alp: 49.9, coal: 24.9, grn: 15.0, teal: 0.0, on: 4.4, other: 5.8 },  // Hotham
+  218: { alp: 8.3, coal: 31.7, grn: 3.5, teal: 46.4, on: 7.2, other: 3.0 },  // Indi
+  219: { alp: 50.0, coal: 28.0, grn: 14.3, teal: 0.0, on: 4.2, other: 3.4 },  // Isaacs
+  220: { alp: 42.9, coal: 29.0, grn: 15.9, teal: 6.2, on: 3.6, other: 2.4 },  // Jagajaga
+  221: { alp: 11.3, coal: 42.3, grn: 7.7, teal: 36.5, on: 0.9, other: 1.3 },  // Kooyong
+  222: { alp: 44.6, coal: 26.6, grn: 15.5, teal: 2.1, on: 6.5, other: 4.7 },  // Lalor
+  223: { alp: 32.8, coal: 38.7, grn: 13.5, teal: 0.0, on: 7.3, other: 7.8 },  // La Trobe
+  224: { alp: 19.5, coal: 52.1, grn: 9.3, teal: 0.0, on: 11.3, other: 7.8 },  // Mallee
+  225: { alp: 41.5, coal: 30.3, grn: 21.7, teal: 0.0, on: 6.5, other: 0.0 },  // Maribyrnong
+  226: { alp: 40.2, coal: 33.6, grn: 12.3, teal: 0.0, on: 6.4, other: 7.5 },  // McEwen
+  228: { alp: 31.4, coal: 17.8, grn: 42.1, teal: 4.7, on: 2.2, other: 1.9 },  // Melbourne
+  229: { alp: 36.3, coal: 40.7, grn: 11.6, teal: 7.1, on: 1.8, other: 2.5 },  // Menzies
+  232: { alp: 47.9, coal: 21.8, grn: 9.9, teal: 0.0, on: 6.8, other: 13.6 },  // Scullin
+  233: { alp: 10.4, coal: 45.0, grn: 2.9, teal: 34.6, on: 4.2, other: 2.9 },  // Wannon
+  234: { alp: 35.4, coal: 11.7, grn: 38.0, teal: 0.0, on: 3.2, other: 11.7 },  // Wills
+  235: { alp: 46.3, coal: 19.5, grn: 13.1, teal: 0.0, on: 12.6, other: 8.5 },  // Brand
+  236: { alp: 30.0, coal: 42.8, grn: 8.8, teal: 0.0, on: 11.3, other: 7.1 },  // Canning
+  237: { alp: 50.0, coal: 25.5, grn: 11.2, teal: 3.9, on: 5.1, other: 4.3 },  // Cowan
+  238: { alp: 14.3, coal: 40.6, grn: 7.4, teal: 33.2, on: 2.4, other: 2.1 },  // Curtin
+  239: { alp: 23.9, coal: 33.4, grn: 8.0, teal: 19.8, on: 9.3, other: 5.5 },  // Forrest
+  240: { alp: 39.4, coal: 18.3, grn: 11.4, teal: 24.1, on: 5.9, other: 1.0 },  // Fremantle
+  242: { alp: 34.2, coal: 32.8, grn: 11.4, teal: 6.9, on: 4.5, other: 10.1 },  // Moore
+  243: { alp: 22.5, coal: 49.3, grn: 10.4, teal: 0.0, on: 11.9, other: 5.8 },  // O'Connor
+  244: { alp: 40.5, coal: 28.6, grn: 11.6, teal: 0.0, on: 8.9, other: 10.3 },  // Pearce
+  245: { alp: 43.6, coal: 25.7, grn: 24.7, teal: 0.0, on: 6.0, other: 0.0 },  // Perth
+  247: { alp: 43.4, coal: 26.6, grn: 17.6, teal: 0.0, on: 4.9, other: 7.4 },  // Swan
+  248: { alp: 42.9, coal: 34.3, grn: 12.9, teal: 0.0, on: 3.9, other: 6.0 },  // Tangney
+  249: { alp: 38.7, coal: 28.7, grn: 8.0, teal: 12.9, on: 7.8, other: 4.0 },  // Paterson
+  250: { alp: 19.4, coal: 43.5, grn: 4.5, teal: 18.2, on: 10.3, other: 4.1 },  // Riverina
+  251: { alp: 50.4, coal: 14.7, grn: 9.0, teal: 18.2, on: 3.0, other: 4.7 },  // Watson
+  252: { alp: 35.7, coal: 35.6, grn: 7.9, teal: 13.8, on: 4.0, other: 2.9 },  // Dickson
+  302: { alp: 36.2, coal: 35.8, grn: 9.8, teal: 0.0, on: 9.5, other: 8.7 },  // Longman
+  304: { alp: 40.3, coal: 29.0, grn: 11.5, teal: 0.0, on: 10.0, other: 9.2 },  // Blair
+  305: { alp: 50.4, coal: 22.0, grn: 12.5, teal: 0.0, on: 7.1, other: 8.0 },  // Hasluck
+  306: { alp: 46.1, coal: 30.7, grn: 9.8, teal: 0.0, on: 8.6, other: 4.8 },  // Lingiari
+  307: { alp: 32.9, coal: 36.4, grn: 9.8, teal: 14.0, on: 6.3, other: 0.6 },  // Solomon
+  309: { alp: 44.6, coal: 29.7, grn: 10.9, teal: 0.0, on: 5.7, other: 9.2 },  // Gorton
+  310: { alp: 42.0, coal: 35.4, grn: 13.3, teal: 0.0, on: 3.8, other: 5.5 },  // Bonner
+  311: { alp: 28.1, coal: 38.2, grn: 6.3, teal: 5.3, on: 14.9, other: 7.2 },  // Flynn
+  312: { alp: 25.7, coal: 48.6, grn: 8.7, teal: 0.0, on: 10.5, other: 6.5 },  // Durack
+  315: { alp: 46.2, coal: 26.5, grn: 8.9, teal: 10.3, on: 8.1, other: 0.0 },  // McMahon
+  316: { alp: 26.3, coal: 35.5, grn: 9.8, teal: 0.0, on: 17.7, other: 10.7 },  // Wright
+  317: { alp: 48.8, coal: 19.2, grn: 11.5, teal: 0.0, on: 9.9, other: 10.7 },  // Burt
+  318: { alp: 41.1, coal: 22.5, grn: 9.2, teal: 27.2, on: 0.0, other: 0.0 },  // Bean
+  319: { alp: 20.2, coal: 13.3, grn: 13.5, teal: 49.0, on: 4.0, other: 0.0 },  // Clark
+  320: { alp: 42.0, coal: 14.2, grn: 25.8, teal: 0.0, on: 4.9, other: 13.1 },  // Cooper
+  321: { alp: 42.3, coal: 16.1, grn: 26.4, teal: 0.0, on: 4.2, other: 11.0 },  // Fraser
+  322: { alp: 37.2, coal: 29.4, grn: 28.1, teal: 1.6, on: 2.5, other: 1.2 },  // Macnamara
+  323: { alp: 21.2, coal: 33.0, grn: 4.8, teal: 29.1, on: 8.2, other: 3.6 },  // Monash
+  324: { alp: 23.8, coal: 48.4, grn: 7.4, teal: 0.0, on: 11.2, other: 9.1 },  // Nicholls
+  325: { alp: 46.9, coal: 19.5, grn: 15.3, teal: 0.0, on: 9.6, other: 8.7 },  // Spence
+  326: { alp: 40.9, coal: 31.0, grn: 10.1, teal: 0.0, on: 9.2, other: 8.9 },  // Hawke
+  328: { alp: 39.4, coal: 34.4, grn: 15.6, teal: 4.5, on: 3.0, other: 3.1 },  // Corangamite
+  329: { alp: 33.1, coal: 41.9, grn: 11.4, teal: 0.0, on: 8.5, other: 5.0 },  // Bullwinkel
+};  // auto-injected by inject_model_constants.py
 
 // ── 2022 seat-level first preferences ──────────────────────────────────────────
 // #14 Data Quality Note: Placeholder for 2022 AEC final results (event_id=27966).
 // Requires population for full primary-based backtesting of the 2019->2022 cycle.
-const SEAT_FP_2022 = {};
+const SEAT_FP_2022 = {
+  101: { alp: 45.0, coal: 22.1, grn: 24.8, teal: 5.4, on: 0.0, other: 2.8 },  // Canberra
+  102: { alp: 48.6, coal: 28.6, grn: 17.0, teal: 0.0, on: 3.0, other: 2.8 },  // Fenner
+  103: { alp: 35.5, coal: 45.4, grn: 9.0, teal: 0.0, on: 3.0, other: 7.1 },  // Banks
+  104: { alp: 50.9, coal: 27.1, grn: 12.8, teal: 0.0, on: 0.0, other: 9.2 },  // Barton
+  105: { alp: 38.7, coal: 42.3, grn: 11.9, teal: 0.0, on: 1.8, other: 5.4 },  // Bennelong
+  106: { alp: 23.2, coal: 51.3, grn: 16.3, teal: 3.1, on: 3.4, other: 2.7 },  // Berowra
+  107: { alp: 55.5, coal: 29.1, grn: 6.9, teal: 0.0, on: 0.0, other: 8.6 },  // Blaxland
+  108: { alp: 17.5, coal: 45.5, grn: 9.3, teal: 24.2, on: 0.0, other: 3.5 },  // Bradfield
+  109: { alp: 15.4, coal: 48.5, grn: 4.7, teal: 21.0, on: 10.3, other: 0.0 },  // Calare
+  111: { alp: 53.2, coal: 25.0, grn: 6.1, teal: 0.0, on: 6.5, other: 9.2 },  // Chifley
+  112: { alp: 25.4, coal: 56.2, grn: 10.4, teal: 0.0, on: 7.9, other: 0.0 },  // Cook
+  113: { alp: 14.1, coal: 39.7, grn: 6.1, teal: 26.6, on: 9.2, other: 4.3 },  // Cowper
+  114: { alp: 40.3, coal: 25.1, grn: 21.9, teal: 0.0, on: 5.3, other: 7.4 },  // Cunningham
+  115: { alp: 43.1, coal: 34.2, grn: 8.6, teal: 0.0, on: 7.8, other: 6.2 },  // Dobell
+  117: { alp: 45.1, coal: 35.0, grn: 9.9, teal: 0.0, on: 4.5, other: 5.5 },  // Eden-Monaro
+  118: { alp: 19.7, coal: 54.4, grn: 9.5, teal: 0.0, on: 7.0, other: 9.3 },  // Farrer
+  119: { alp: 36.5, coal: 18.1, grn: 5.0, teal: 29.9, on: 3.7, other: 6.7 },  // Fowler
+  120: { alp: 36.1, coal: 42.2, grn: 10.3, teal: 4.3, on: 4.2, other: 2.9 },  // Gilmore
+  121: { alp: 54.6, coal: 16.3, grn: 23.0, teal: 2.2, on: 1.6, other: 2.3 },  // Grayndler
+  122: { alp: 50.1, coal: 31.0, grn: 7.4, teal: 3.8, on: 0.0, other: 7.7 },  // Greenway
+  124: { alp: 22.8, coal: 44.0, grn: 6.4, teal: 18.2, on: 0.0, other: 8.6 },  // Hughes
+  125: { alp: 20.6, coal: 44.7, grn: 5.1, teal: 17.0, on: 7.7, other: 4.8 },  // Hume
+  126: { alp: 39.6, coal: 28.2, grn: 9.2, teal: 8.2, on: 10.4, other: 4.3 },  // Hunter
+  127: { alp: 48.2, coal: 29.1, grn: 17.1, teal: 0.0, on: 0.0, other: 5.5 },  // Kingsford Smith
+  128: { alp: 31.9, coal: 47.3, grn: 8.1, teal: 0.0, on: 6.1, other: 6.6 },  // Lindsay
+  130: { alp: 23.0, coal: 46.2, grn: 8.6, teal: 7.0, on: 8.5, other: 6.8 },  // Lyne
+  131: { alp: 46.2, coal: 31.3, grn: 7.9, teal: 0.0, on: 8.4, other: 6.2 },  // Macarthur
+  132: { alp: 8.3, coal: 41.5, grn: 6.2, teal: 38.3, on: 2.9, other: 2.9 },  // Mackellar
+  133: { alp: 43.8, coal: 35.5, grn: 9.8, teal: 0.0, on: 5.5, other: 5.4 },  // Macquarie
+  134: { alp: 25.7, coal: 53.2, grn: 12.0, teal: 0.0, on: 0.0, other: 9.0 },  // Mitchell
+  135: { alp: 18.8, coal: 52.9, grn: 7.8, teal: 11.3, on: 5.6, other: 3.6 },  // New England
+  136: { alp: 44.7, coal: 24.8, grn: 20.7, teal: 0.0, on: 4.7, other: 5.1 },  // Newcastle
+  137: { alp: 22.2, coal: 39.5, grn: 8.9, teal: 26.1, on: 1.3, other: 1.9 },  // North Sydney
+  138: { alp: 19.6, coal: 47.9, grn: 8.9, teal: 13.9, on: 5.7, other: 3.9 },  // Page
+  139: { alp: 21.6, coal: 52.3, grn: 5.2, teal: 0.0, on: 8.2, other: 12.7 },  // Parkes
+  140: { alp: 41.9, coal: 36.5, grn: 9.3, teal: 3.8, on: 0.0, other: 8.5 },  // Parramatta
+  144: { alp: 42.8, coal: 38.7, grn: 10.3, teal: 3.4, on: 2.1, other: 2.7 },  // Reid
+  145: { alp: 30.4, coal: 24.7, grn: 26.7, teal: 5.6, on: 4.3, other: 8.2 },  // Richmond
+  146: { alp: 39.0, coal: 41.4, grn: 10.4, teal: 0.0, on: 4.0, other: 5.1 },  // Robertson
+  148: { alp: 41.9, coal: 33.5, grn: 10.6, teal: 0.0, on: 6.9, other: 7.0 },  // Shortland
+  149: { alp: 51.1, coal: 19.8, grn: 23.3, teal: 0.0, on: 1.9, other: 3.9 },  // Sydney
+  150: { alp: 45.7, coal: 29.8, grn: 11.0, teal: 0.0, on: 7.6, other: 6.0 },  // Whitlam
+  151: { alp: 8.6, coal: 33.6, grn: 7.9, teal: 45.3, on: 2.2, other: 2.5 },  // Warringah
+  152: { alp: 10.9, coal: 40.6, grn: 8.4, teal: 35.9, on: 0.0, other: 4.2 },  // Wentworth
+  153: { alp: 40.5, coal: 31.7, grn: 7.3, teal: 0.0, on: 0.0, other: 20.6 },  // Werriwa
+  155: { alp: 29.5, coal: 42.6, grn: 13.4, teal: 0.0, on: 7.9, other: 6.7 },  // Bowman
+  156: { alp: 27.4, coal: 38.3, grn: 27.4, teal: 0.0, on: 2.6, other: 4.3 },  // Brisbane
+  157: { alp: 29.3, coal: 41.1, grn: 6.3, teal: 3.7, on: 15.5, other: 4.2 },  // Capricornia
+  158: { alp: 24.7, coal: 43.5, grn: 7.3, teal: 0.0, on: 13.8, other: 10.7 },  // Dawson
+  159: { alp: 22.6, coal: 45.7, grn: 11.1, teal: 4.5, on: 9.1, other: 7.0 },  // Fadden
+  160: { alp: 23.1, coal: 47.3, grn: 14.2, teal: 0.0, on: 7.0, other: 8.5 },  // Fairfax
+  161: { alp: 23.6, coal: 44.5, grn: 15.0, teal: 0.0, on: 9.8, other: 7.1 },  // Fisher
+  162: { alp: 29.8, coal: 39.1, grn: 10.6, teal: 3.5, on: 8.6, other: 8.4 },  // Forde
+  163: { alp: 29.1, coal: 31.2, grn: 34.9, teal: 0.0, on: 4.8, other: 0.0 },  // Griffith
+  164: { alp: 18.8, coal: 43.8, grn: 6.0, teal: 15.7, on: 10.3, other: 5.4 },  // Groom
+  165: { alp: 23.1, coal: 50.2, grn: 8.8, teal: 4.7, on: 5.7, other: 7.5 },  // Herbert
+  166: { alp: 25.7, coal: 42.5, grn: 0.0, teal: 15.1, on: 9.1, other: 7.6 },  // Hinkler
+  167: { alp: 16.4, coal: 28.6, grn: 7.1, teal: 0.0, on: 0.0, other: 47.9 },  // Kennedy
+  168: { alp: 30.2, coal: 40.1, grn: 10.9, teal: 0.0, on: 8.2, other: 10.7 },  // Leichhardt
+  169: { alp: 42.0, coal: 30.0, grn: 17.4, teal: 0.0, on: 4.4, other: 6.3 },  // Lilley
+  170: { alp: 15.4, coal: 56.4, grn: 5.0, teal: 0.0, on: 12.3, other: 11.0 },  // Maranoa
+  171: { alp: 22.5, coal: 44.6, grn: 15.9, teal: 0.0, on: 7.5, other: 9.5 },  // McPherson
+  172: { alp: 21.6, coal: 47.8, grn: 12.6, teal: 0.0, on: 7.5, other: 10.4 },  // Moncrieff
+  173: { alp: 37.7, coal: 33.5, grn: 21.0, teal: 0.0, on: 4.3, other: 3.5 },  // Moreton
+  174: { alp: 46.6, coal: 29.5, grn: 15.4, teal: 0.0, on: 8.4, other: 0.0 },  // Oxley
+  175: { alp: 30.3, coal: 44.1, grn: 11.7, teal: 0.0, on: 5.7, other: 8.2 },  // Petrie
+  176: { alp: 44.5, coal: 29.3, grn: 11.6, teal: 0.0, on: 8.5, other: 6.1 },  // Rankin
+  177: { alp: 22.7, coal: 39.3, grn: 30.8, teal: 0.0, on: 2.4, other: 4.9 },  // Ryan
+  178: { alp: 22.0, coal: 45.1, grn: 9.9, teal: 7.6, on: 10.7, other: 4.8 },  // Wide Bay
+  179: { alp: 40.0, coal: 32.1, grn: 20.2, teal: 0.0, on: 3.3, other: 4.5 },  // Adelaide
+  180: { alp: 21.5, coal: 54.6, grn: 7.7, teal: 5.1, on: 6.9, other: 4.2 },  // Barker
+  182: { alp: 33.1, coal: 39.0, grn: 15.6, teal: 7.7, on: 2.2, other: 2.4 },  // Boothby
+  183: { alp: 21.8, coal: 46.1, grn: 6.9, teal: 12.9, on: 6.5, other: 5.8 },  // Grey
+  185: { alp: 42.8, coal: 33.1, grn: 14.1, teal: 0.0, on: 4.1, other: 5.9 },  // Hindmarsh
+  186: { alp: 49.3, coal: 25.9, grn: 12.5, teal: 2.9, on: 5.2, other: 4.2 },  // Kingston
+  187: { alp: 46.8, coal: 31.7, grn: 11.6, teal: 0.0, on: 5.2, other: 4.7 },  // Makin
+  188: { alp: 18.7, coal: 28.0, grn: 12.2, teal: 32.5, on: 4.7, other: 3.9 },  // Mayo
+  190: { alp: 31.7, coal: 44.5, grn: 17.0, teal: 0.0, on: 2.7, other: 4.2 },  // Sturt
+  192: { alp: 29.7, coal: 41.4, grn: 11.5, teal: 5.3, on: 5.1, other: 7.0 },  // Bass
+  193: { alp: 23.5, coal: 45.9, grn: 7.2, teal: 8.3, on: 4.6, other: 10.5 },  // Braddon
+  195: { alp: 38.4, coal: 28.1, grn: 18.7, teal: 0.0, on: 3.0, other: 11.8 },  // Franklin
+  196: { alp: 29.8, coal: 38.7, grn: 11.7, teal: 0.0, on: 5.7, other: 14.2 },  // Lyons
+  197: { alp: 32.7, coal: 43.2, grn: 12.4, teal: 0.0, on: 3.2, other: 8.5 },  // Aston
+  198: { alp: 45.8, coal: 27.8, grn: 15.0, teal: 0.0, on: 3.8, other: 7.6 },  // Ballarat
+  200: { alp: 43.1, coal: 27.2, grn: 14.2, teal: 4.6, on: 6.1, other: 4.7 },  // Bendigo
+  201: { alp: 42.0, coal: 30.8, grn: 10.1, teal: 0.0, on: 0.0, other: 17.1 },  // Bruce
+  203: { alp: 45.0, coal: 23.8, grn: 9.9, teal: 0.0, on: 7.4, other: 13.8 },  // Calwell
+  204: { alp: 26.3, coal: 38.6, grn: 13.7, teal: 12.6, on: 3.6, other: 5.3 },  // Casey
+  205: { alp: 42.0, coal: 38.0, grn: 13.2, teal: 2.6, on: 0.0, other: 4.3 },  // Chisholm
+  208: { alp: 44.6, coal: 26.1, grn: 15.9, teal: 0.0, on: 4.3, other: 9.2 },  // Corio
+  209: { alp: 34.3, coal: 43.4, grn: 14.5, teal: 0.0, on: 2.5, other: 5.2 },  // Deakin
+  210: { alp: 42.3, coal: 34.2, grn: 10.9, teal: 4.2, on: 3.0, other: 5.4 },  // Dunkley
+  211: { alp: 22.8, coal: 45.6, grn: 9.9, teal: 13.2, on: 3.7, other: 4.8 },  // Flinders
+  212: { alp: 43.6, coal: 27.7, grn: 17.0, teal: 0.0, on: 3.2, other: 8.5 },  // Gellibrand
+  213: { alp: 19.8, coal: 55.8, grn: 8.8, teal: 0.0, on: 10.4, other: 5.1 },  // Gippsland
+  214: { alp: 11.3, coal: 41.2, grn: 8.1, teal: 35.2, on: 0.0, other: 4.1 },  // Goldstein
+  215: { alp: 28.9, coal: 41.3, grn: 23.0, teal: 0.0, on: 0.0, other: 6.7 },  // Higgins
+  216: { alp: 42.2, coal: 30.5, grn: 8.8, teal: 3.2, on: 5.2, other: 10.1 },  // Holt
+  217: { alp: 47.3, coal: 25.6, grn: 12.6, teal: 0.0, on: 0.0, other: 14.5 },  // Hotham
+  218: { alp: 9.3, coal: 37.0, grn: 3.9, teal: 43.9, on: 6.0, other: 0.0 },  // Indi
+  219: { alp: 40.3, coal: 32.1, grn: 14.0, teal: 0.0, on: 3.4, other: 10.2 },  // Isaacs
+  220: { alp: 42.0, coal: 29.9, grn: 17.1, teal: 3.3, on: 0.0, other: 7.6 },  // Jagajaga
+  221: { alp: 7.0, coal: 43.3, grn: 6.4, teal: 41.1, on: 0.0, other: 2.1 },  // Kooyong
+  222: { alp: 46.5, coal: 26.3, grn: 11.0, teal: 0.0, on: 4.3, other: 11.9 },  // Lalor
+  223: { alp: 26.8, coal: 46.8, grn: 11.2, teal: 0.0, on: 5.3, other: 9.9 },  // La Trobe
+  224: { alp: 16.9, coal: 49.2, grn: 5.4, teal: 12.5, on: 6.8, other: 9.2 },  // Mallee
+  225: { alp: 44.2, coal: 28.3, grn: 17.0, teal: 0.0, on: 2.5, other: 8.0 },  // Maribyrnong
+  226: { alp: 37.0, coal: 33.4, grn: 14.3, teal: 0.0, on: 6.3, other: 9.1 },  // McEwen
+  228: { alp: 25.8, coal: 15.7, grn: 51.0, teal: 0.0, on: 0.0, other: 7.5 },  // Melbourne
+  229: { alp: 33.5, coal: 42.2, grn: 14.3, teal: 0.0, on: 2.5, other: 7.6 },  // Menzies
+  232: { alp: 46.7, coal: 22.0, grn: 12.2, teal: 0.0, on: 6.7, other: 12.3 },  // Scullin
+  233: { alp: 19.3, coal: 44.9, grn: 6.4, teal: 22.0, on: 3.6, other: 3.8 },  // Wannon
+  234: { alp: 41.0, coal: 18.3, grn: 29.8, teal: 0.0, on: 3.2, other: 7.7 },  // Wills
+  235: { alp: 53.0, coal: 23.3, grn: 12.0, teal: 0.0, on: 5.7, other: 6.0 },  // Brand
+  236: { alp: 34.7, coal: 46.4, grn: 8.6, teal: 0.0, on: 4.8, other: 5.4 },  // Canning
+  237: { alp: 49.5, coal: 32.2, grn: 10.4, teal: 0.0, on: 3.2, other: 4.7 },  // Cowan
+  238: { alp: 14.1, coal: 41.9, grn: 10.5, teal: 29.9, on: 1.6, other: 2.0 },  // Curtin
+  239: { alp: 28.7, coal: 45.0, grn: 14.2, teal: 0.0, on: 5.7, other: 6.5 },  // Forrest
+  240: { alp: 46.4, coal: 25.5, grn: 19.8, teal: 0.0, on: 3.3, other: 5.0 },  // Fremantle
+  242: { alp: 33.5, coal: 42.8, grn: 14.6, teal: 0.0, on: 3.6, other: 5.6 },  // Moore
+  243: { alp: 28.0, coal: 46.9, grn: 11.3, teal: 0.0, on: 7.6, other: 6.2 },  // O'Connor
+  244: { alp: 45.7, coal: 32.0, grn: 11.8, teal: 0.0, on: 5.0, other: 5.5 },  // Pearce
+  245: { alp: 41.5, coal: 28.3, grn: 23.4, teal: 0.0, on: 3.0, other: 3.8 },  // Perth
+  247: { alp: 41.7, coal: 34.2, grn: 15.9, teal: 0.0, on: 2.9, other: 5.3 },  // Swan
+  248: { alp: 39.3, coal: 41.3, grn: 12.4, teal: 0.0, on: 2.4, other: 4.6 },  // Tangney
+  249: { alp: 40.8, coal: 37.1, grn: 7.7, teal: 0.0, on: 8.4, other: 6.0 },  // Paterson
+  250: { alp: 21.4, coal: 48.4, grn: 6.7, teal: 0.0, on: 9.4, other: 14.1 },  // Riverina
+  251: { alp: 52.5, coal: 27.4, grn: 10.0, teal: 0.0, on: 0.0, other: 10.1 },  // Watson
+  252: { alp: 31.8, coal: 42.5, grn: 13.1, teal: 4.2, on: 5.6, other: 2.9 },  // Dickson
+  302: { alp: 32.4, coal: 39.6, grn: 7.5, teal: 0.0, on: 8.8, other: 11.7 },  // Longman
+  304: { alp: 36.3, coal: 30.1, grn: 13.2, teal: 0.0, on: 10.7, other: 9.7 },  // Blair
+  305: { alp: 41.9, coal: 35.3, grn: 11.6, teal: 3.6, on: 4.2, other: 3.4 },  // Hasluck
+  306: { alp: 38.0, coal: 36.1, grn: 11.4, teal: 0.0, on: 5.7, other: 8.8 },  // Lingiari
+  307: { alp: 40.0, coal: 25.5, grn: 15.3, teal: 0.0, on: 7.8, other: 11.3 },  // Solomon
+  309: { alp: 43.1, coal: 28.7, grn: 9.4, teal: 2.8, on: 7.8, other: 8.1 },  // Gorton
+  310: { alp: 29.9, coal: 45.5, grn: 17.1, teal: 0.0, on: 7.5, other: 0.0 },  // Bonner
+  311: { alp: 33.7, coal: 37.0, grn: 4.5, teal: 4.5, on: 13.1, other: 7.2 },  // Flynn
+  312: { alp: 30.9, coal: 47.9, grn: 10.0, teal: 0.0, on: 7.4, other: 3.7 },  // Durack
+  315: { alp: 48.4, coal: 29.4, grn: 6.2, teal: 0.0, on: 6.3, other: 9.7 },  // McMahon
+  316: { alp: 21.6, coal: 43.4, grn: 11.7, teal: 0.0, on: 14.8, other: 8.6 },  // Wright
+  317: { alp: 53.2, coal: 23.7, grn: 10.2, teal: 0.0, on: 5.9, other: 6.9 },  // Burt
+  318: { alp: 42.0, coal: 30.2, grn: 14.9, teal: 8.6, on: 0.0, other: 4.3 },  // Bean
+  319: { alp: 19.1, coal: 16.5, grn: 13.7, teal: 46.3, on: 2.8, other: 1.6 },  // Clark
+  320: { alp: 42.7, coal: 16.9, grn: 28.8, teal: 0.0, on: 3.1, other: 8.5 },  // Cooper
+  321: { alp: 42.5, coal: 25.4, grn: 18.8, teal: 0.0, on: 3.4, other: 9.9 },  // Fraser
+  322: { alp: 32.5, coal: 29.7, grn: 30.3, teal: 2.2, on: 0.0, other: 5.3 },  // Macnamara
+  323: { alp: 26.7, coal: 39.4, grn: 10.3, teal: 11.3, on: 8.0, other: 4.4 },  // Monash
+  324: { alp: 12.5, coal: 48.1, grn: 0.0, teal: 27.8, on: 7.2, other: 4.4 },  // Nicholls
+  325: { alp: 44.1, coal: 25.7, grn: 11.7, teal: 0.0, on: 11.4, other: 7.1 },  // Spence
+  326: { alp: 39.6, coal: 28.4, grn: 9.7, teal: 8.6, on: 6.1, other: 7.6 },  // Hawke
+  328: { alp: 39.7, coal: 35.4, grn: 16.1, teal: 0.0, on: 2.7, other: 6.1 },  // Corangamite
+};  // auto-injected by inject_model_constants.py
 
 // ── Per-seat FP baselines for state elections ─────────────────────────────────
 // Sourced from webapp/src/data/state_seat_fp.js, which is regenerated by
@@ -516,132 +664,122 @@ const NT_SEAT_FP_2024  = STATE_SEAT_FP.NT_SEAT_FP_2024  ?? {};
 // scenarios. Covers ALP vs Coalition seats that have SEAT_FP_2025 data.
 // Recompute via: python scripts/compute_calibration.py
 const SEAT_CALIB_2025 = {
-  // ── ACT ──
-  102: +0.02,  // Fenner
-  // ── NSW ──
-  103: -0.02,  // Banks
-  104: -0.05,  // Barton
-  105: -0.02,  // Bennelong
-  106: +0.03,  // Berowra
-  107: +0.04,  // Blaxland
-  111: -0.04,  // Chifley
-  112: -0.01,  // Cook
-  114: +0.01,  // Cunningham
-  115: +0.01,  // Dobell
-  117: +0.05,  // Eden-Monaro
-  120: -0.02,  // Gilmore
-  122: +0.03,  // Greenway
-  124: -0.03,  // Hughes
-  125: -0.04,  // Hume
+  102: -0.79,  // Fenner
+  103: +1.20,  // Banks
+  104: +0.61,  // Barton
+  105: -0.39,  // Bennelong
+  106: -0.27,  // Berowra
+  107: -1.55,  // Blaxland
+  111: -0.17,  // Chifley
+  112: +0.63,  // Cook
+  114: +0.56,  // Cunningham
+  115: -0.29,  // Dobell
+  117: +0.62,  // Eden-Monaro
+  120: +0.28,  // Gilmore
+  122: -0.50,  // Greenway
+  124: +0.24,  // Hughes
+  125: -1.09,  // Hume
   127: +0.05,  // Kingsford Smith
-  128: +0.04,  // Lindsay
-  130: +0.68,  // Lyne
-  131: -0.02,  // Macarthur
-  133: -0.03,  // Macquarie
-  134: +0.02,  // Mitchell
-  135: -2.38,  // New England
-  138: -0.02,  // Page
-  139: +0.03,  // Parkes
-  140: -0.00,  // Parramatta
-  144: +0.04,  // Reid
-  145: +0.05,  // Richmond
-  146: +0.00,  // Robertson
-  148: +0.05,  // Shortland
-  150: +0.02,  // Whitlam
-  153: +0.03,  // Werriwa
-  249: -0.03,  // Paterson
-  250: +0.00,  // Riverina
-  315: +0.02,  // McMahon
-  // ── NT ──
-  306: +0.03,  // Lingiari
-  307: +0.01,  // Solomon
-  // ── QLD ──
-  155: -0.03,  // Bowman
-  156: +0.03,  // Brisbane
-  157: +0.03,  // Capricornia
-  158: +0.03,  // Dawson
-  159: -0.01,  // Fadden
-  160: +0.01,  // Fairfax
-  161: +0.02,  // Fisher
-  162: -0.01,  // Forde
-  164: -0.03,  // Groom
-  165: +0.02,  // Herbert
-  166: +0.03,  // Hinkler
-  168: +0.05,  // Leichhardt
-  169: +0.01,  // Lilley
-  170: -0.03,  // Maranoa
-  171: +0.03,  // McPherson
-  172: +0.04,  // Moncrieff
-  173: +0.00,  // Moreton
-  174: -0.01,  // Oxley
-  175: +0.02,  // Petrie
-  176: +0.02,  // Rankin
-  178: +0.02,  // Wide Bay
-  252: +0.04,  // Dickson
-  302: +0.04,  // Longman
-  304: +0.03,  // Blair
-  311: +0.02,  // Flynn
-  316: +0.04,  // Wright
-  310: +0.03,  // Bonner
-  // ── SA ──
-  179: -0.03,  // Adelaide
-  180: +0.00,  // Barker
-  182: +0.02,  // Boothby
-  183: -0.03,  // Grey
-  185: +0.05,  // Hindmarsh
-  186: -0.01,  // Kingston
-  187: +0.03,  // Makin
-  190: -0.04,  // Sturt
-  325: +0.05,  // Spence
-  // ── TAS ──
-  192: +0.04,  // Bass
-  193: -0.03,  // Braddon
-  196: +0.04,  // Lyons
-  // ── VIC ──
-  197: +0.02,  // Aston
-  198: -0.05,  // Ballarat
-  200: +0.04,  // Bendigo
-  201: -0.00,  // Bruce
-  204: -0.05,  // Casey
-  205: -0.01,  // Chisholm
-  208: -0.00,  // Corio
-  209: -0.04,  // Deakin
-  210: -0.00,  // Dunkley
-  212: -0.00,  // Gellibrand
-  213: -0.03,  // Gippsland
-  216: +0.04,  // Holt
-  217: +0.02,  // Hotham
-  219: -0.01,  // Isaacs
-  220: -0.02,  // Jagajaga
-  222: +0.01,  // Lalor
-  223: -0.01,  // La Trobe
-  224: +0.00,  // Mallee
-  225: -0.01,  // Maribyrnong
-  226: +0.02,  // McEwen
-  229: -0.04,  // Menzies
-  232: +0.02,  // Scullin
-  309: -0.05,  // Gorton
-  322: -0.02,  // Macnamara
-  323: +0.04,  // Monash
-  324: -0.02,  // Nicholls
-  326: +0.04,  // Hawke
-  328: -0.03,  // Corangamite
-  // ── WA ──
-  235: -0.04,  // Brand
-  236: -0.02,  // Canning
-  237: +0.03,  // Cowan
-  239: +0.03,  // Forrest
-  242: -0.01,  // Moore
-  243: +0.03,  // O'Connor
-  244: -0.01,  // Pearce
-  245: -0.01,  // Perth
-  247: +0.04,  // Swan
-  248: -0.03,  // Tangney
-  305: +0.02,  // Hasluck
-  312: -0.04,  // Durack
-  317: -0.01,  // Burt
-  329: +0.01,  // Bullwinkel
-};
+  128: -0.87,  // Lindsay
+  130: +0.95,  // Lyne
+  131: +0.59,  // Macarthur
+  133: +0.22,  // Macquarie
+  134: -0.61,  // Mitchell
+  135: -0.57,  // New England
+  138: +0.57,  // Page
+  139: -0.90,  // Parkes
+  140: -0.60,  // Parramatta
+  144: -0.16,  // Reid
+  145: -0.65,  // Richmond
+  146: -0.26,  // Robertson
+  148: +0.65,  // Shortland
+  150: +0.11,  // Whitlam
+  153: +0.58,  // Werriwa
+  155: +1.30,  // Bowman
+  156: -1.65,  // Brisbane
+  157: -2.78,  // Capricornia
+  158: -1.71,  // Dawson
+  159: -0.05,  // Fadden
+  160: +0.68,  // Fairfax
+  161: -0.72,  // Fisher
+  162: -0.57,  // Forde
+  165: -0.24,  // Herbert
+  166: -1.23,  // Hinkler
+  168: -2.62,  // Leichhardt
+  169: -0.90,  // Lilley
+  171: -0.21,  // McPherson
+  172: +0.36,  // Moncrieff
+  173: -1.20,  // Moreton
+  174: -0.13,  // Oxley
+  175: +0.11,  // Petrie
+  176: -0.84,  // Rankin
+  178: -2.60,  // Wide Bay
+  179: -0.27,  // Adelaide
+  180: -0.46,  // Barker
+  182: +0.32,  // Boothby
+  183: +0.07,  // Grey
+  185: -0.39,  // Hindmarsh
+  186: +0.42,  // Kingston
+  187: -0.12,  // Makin
+  190: +1.33,  // Sturt
+  192: +0.02,  // Bass
+  193: -0.47,  // Braddon
+  196: +0.21,  // Lyons
+  197: -0.43,  // Aston
+  198: +0.41,  // Ballarat
+  200: +2.26,  // Bendigo
+  201: -0.80,  // Bruce
+  204: +0.20,  // Casey
+  205: -0.06,  // Chisholm
+  208: +1.43,  // Corio
+  209: -0.20,  // Deakin
+  210: +0.28,  // Dunkley
+  212: +0.10,  // Gellibrand
+  213: -0.59,  // Gippsland
+  216: +1.24,  // Holt
+  217: +0.39,  // Hotham
+  219: -0.29,  // Isaacs
+  220: +1.21,  // Jagajaga
+  222: +0.83,  // Lalor
+  223: -0.63,  // La Trobe
+  224: +0.16,  // Mallee
+  225: -1.19,  // Maribyrnong
+  226: -0.29,  // McEwen
+  229: +0.24,  // Menzies
+  232: +0.06,  // Scullin
+  235: +2.64,  // Brand
+  236: -1.14,  // Canning
+  237: -0.39,  // Cowan
+  239: -0.00,  // Forrest
+  242: -0.27,  // Moore
+  243: -0.48,  // O'Connor
+  244: +0.03,  // Pearce
+  245: -1.38,  // Perth
+  247: -0.48,  // Swan
+  248: +1.43,  // Tangney
+  249: -0.10,  // Paterson
+  250: -0.85,  // Riverina
+  252: +0.18,  // Dickson
+  302: -1.45,  // Longman
+  304: -2.69,  // Blair
+  305: +0.05,  // Hasluck
+  306: -0.54,  // Lingiari
+  307: +1.13,  // Solomon
+  309: -0.28,  // Gorton
+  310: -1.04,  // Bonner
+  311: -4.84,  // Flynn
+  312: +0.20,  // Durack
+  315: -2.52,  // McMahon
+  316: -1.57,  // Wright
+  317: -2.30,  // Burt
+  322: -3.08,  // Macnamara
+  323: +0.07,  // Monash
+  324: +0.18,  // Nicholls
+  325: -0.12,  // Spence
+  326: +1.12,  // Hawke
+  328: +0.47,  // Corangamite
+  329: +2.03,  // Bullwinkel
+};  // auto-injected by inject_model_constants.py
 
 // ── 2025 per-seat preference flows from AEC Distribution of Preferences ────────
 // Sourced from data/exports/2025/preference_flows.json (populated after running the
@@ -650,165 +788,122 @@ const SEAT_CALIB_2025 = {
 // Populate via: python scripts/update_s25_from_exports.py (after running the pipeline)
 // Format: { seatId: { grn_alp, teal_alp, on_alp, other_alp } }
 const SEAT_PREF_FLOWS_2025 = {
-  // ΓöÇΓöÇ ACT ΓöÇΓöÇ
-  101: { grn_alp: 0.8100, teal_alp: 0.6231, on_alp: 0.2550, other_alp: 0.7074 },  // Canberra
-  102: { grn_alp: 0.8926, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5000 },  // Fenner
-  // ΓöÇΓöÇ NSW ΓöÇΓöÇ
+  102: { grn_alp: 0.8926, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Fenner
   103: { grn_alp: 0.8563, teal_alp: 0.5748, on_alp: 0.1977, other_alp: 0.3620 },  // Banks
   104: { grn_alp: 0.8329, teal_alp: 0.6200, on_alp: 0.3361, other_alp: 0.3735 },  // Barton
   105: { grn_alp: 0.8772, teal_alp: 0.6200, on_alp: 0.1712, other_alp: 0.5002 },  // Bennelong
   106: { grn_alp: 0.8793, teal_alp: 0.7328, on_alp: 0.1233, other_alp: 0.1620 },  // Berowra
   107: { grn_alp: 0.8609, teal_alp: 0.8408, on_alp: 0.2010, other_alp: 0.3801 },  // Blaxland
-  108: { grn_alp: 0.8711, teal_alp: 0.5693, on_alp: 0.0935, other_alp: 0.2476 },  // Bradfield
-  109: { grn_alp: 0.8805, teal_alp: 0.0000, on_alp: 0.1240, other_alp: 0.4570 },  // Calare
   111: { grn_alp: 0.7912, teal_alp: 0.6200, on_alp: 0.2828, other_alp: 0.5721 },  // Chifley
   112: { grn_alp: 0.8167, teal_alp: 0.6200, on_alp: 0.1525, other_alp: 0.2886 },  // Cook
-  113: { grn_alp: 0.8133, teal_alp: 0.5398, on_alp: 0.1401, other_alp: 0.4508 },  // Cowper
   114: { grn_alp: 0.8521, teal_alp: 0.6200, on_alp: 0.2502, other_alp: 0.6434 },  // Cunningham
   115: { grn_alp: 0.7429, teal_alp: 0.6200, on_alp: 0.2512, other_alp: 0.6834 },  // Dobell
   117: { grn_alp: 0.8537, teal_alp: 0.3956, on_alp: 0.1983, other_alp: 0.3721 },  // Eden-Monaro
-  118: { grn_alp: 0.8145, teal_alp: 0.6200, on_alp: 0.1515, other_alp: 0.2958 },  // Farrer
-  119: { grn_alp: 0.8542, teal_alp: 0.6200, on_alp: 0.3533, other_alp: 0.4645 },  // Fowler
   120: { grn_alp: 0.8784, teal_alp: 0.6991, on_alp: 0.1730, other_alp: 0.5531 },  // Gilmore
-  121: { grn_alp: 0.8100, teal_alp: 0.6585, on_alp: 0.1459, other_alp: 0.5000 },  // Grayndler
   122: { grn_alp: 0.7577, teal_alp: 0.5429, on_alp: 0.3050, other_alp: 0.4557 },  // Greenway
   124: { grn_alp: 0.8252, teal_alp: 0.6200, on_alp: 0.1797, other_alp: 0.3719 },  // Hughes
   125: { grn_alp: 0.8315, teal_alp: 0.6390, on_alp: 0.3207, other_alp: 0.3158 },  // Hume
-  126: { grn_alp: 0.8399, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5779 },  // Hunter (national-default fallback; ex-Labor ON vote here may flow more evenly — candidate for per-seat refinement)
   127: { grn_alp: 0.8709, teal_alp: 0.6200, on_alp: 0.2944, other_alp: 0.5000 },  // Kingsford Smith
   128: { grn_alp: 0.8597, teal_alp: 0.6200, on_alp: 0.3327, other_alp: 0.4059 },  // Lindsay
   130: { grn_alp: 0.8700, teal_alp: 0.5041, on_alp: 0.1774, other_alp: 0.3473 },  // Lyne
   131: { grn_alp: 0.8195, teal_alp: 0.6200, on_alp: 0.2556, other_alp: 0.4438 },  // Macarthur
-  132: { grn_alp: 0.6012, teal_alp: 0.3170, on_alp: 0.0874, other_alp: 0.1669 },  // Mackellar
   133: { grn_alp: 0.8695, teal_alp: 0.6200, on_alp: 0.1866, other_alp: 0.4460 },  // Macquarie
-  315: { grn_alp: 0.8817, teal_alp: 0.3912, on_alp: 0.2550, other_alp: 0.5000 },  // McMahon
   134: { grn_alp: 0.7933, teal_alp: 0.6200, on_alp: 0.2011, other_alp: 0.5000 },  // Mitchell
   135: { grn_alp: 0.7977, teal_alp: 0.5565, on_alp: 0.2664, other_alp: 0.4056 },  // New England
-  136: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.2720, other_alp: 0.4960 },  // Newcastle
   138: { grn_alp: 0.7768, teal_alp: 0.6031, on_alp: 0.1499, other_alp: 0.4082 },  // Page
   139: { grn_alp: 0.8135, teal_alp: 0.4936, on_alp: 0.3342, other_alp: 0.4550 },  // Parkes
   140: { grn_alp: 0.8527, teal_alp: 0.6166, on_alp: 0.1719, other_alp: 0.4081 },  // Parramatta
-  249: { grn_alp: 0.9143, teal_alp: 0.5099, on_alp: 0.3046, other_alp: 0.5193 },  // Paterson
   144: { grn_alp: 0.8321, teal_alp: 0.6562, on_alp: 0.1969, other_alp: 0.2896 },  // Reid
   145: { grn_alp: 0.8599, teal_alp: 0.4154, on_alp: 0.1389, other_alp: 0.4139 },  // Richmond
-  250: { grn_alp: 0.8621, teal_alp: 0.5167, on_alp: 0.3628, other_alp: 0.4405 },  // Riverina
   146: { grn_alp: 0.7862, teal_alp: 0.6784, on_alp: 0.2116, other_alp: 0.6352 },  // Robertson
   148: { grn_alp: 0.7800, teal_alp: 0.7143, on_alp: 0.2631, other_alp: 0.3657 },  // Shortland
-  149: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.1772, other_alp: 0.5000 },  // Sydney
-  151: { grn_alp: 0.8008, teal_alp: 0.6200, on_alp: 0.0904, other_alp: 0.2603 },  // Warringah
-  251: { grn_alp: 0.8097, teal_alp: 0.6200, on_alp: 0.2797, other_alp: 0.4195 },  // Watson
-  152: { grn_alp: 0.8481, teal_alp: 0.6200, on_alp: 0.0947, other_alp: 0.5000 },  // Wentworth
-  153: { grn_alp: 0.7268, teal_alp: 0.5342, on_alp: 0.2461, other_alp: 0.4241 },  // Werriwa
   150: { grn_alp: 0.7114, teal_alp: 0.5037, on_alp: 0.2780, other_alp: 0.3879 },  // Whitlam
-  // ΓöÇΓöÇ NT ΓöÇΓöÇ
-  306: { grn_alp: 0.7635, teal_alp: 0.6200, on_alp: 0.1632, other_alp: 0.7733 },  // Lingiari
-  307: { grn_alp: 0.7194, teal_alp: 0.6536, on_alp: 0.1245, other_alp: 0.5000 },  // Solomon
-  // ΓöÇΓöÇ QLD ΓöÇΓöÇ
-  304: { grn_alp: 0.8773, teal_alp: 0.6200, on_alp: 0.3337, other_alp: 0.5061 },  // Blair
-  310: { grn_alp: 0.8434, teal_alp: 0.6200, on_alp: 0.1946, other_alp: 0.3833 },  // Bonner
+  153: { grn_alp: 0.7268, teal_alp: 0.5342, on_alp: 0.2461, other_alp: 0.4241 },  // Werriwa
   155: { grn_alp: 0.7701, teal_alp: 0.6657, on_alp: 0.2118, other_alp: 0.3473 },  // Bowman
   156: { grn_alp: 0.9141, teal_alp: 0.6200, on_alp: 0.2093, other_alp: 0.4049 },  // Brisbane
   157: { grn_alp: 0.8377, teal_alp: 0.6200, on_alp: 0.2705, other_alp: 0.4923 },  // Capricornia
   158: { grn_alp: 0.8646, teal_alp: 0.6200, on_alp: 0.2545, other_alp: 0.3113 },  // Dawson
-  252: { grn_alp: 0.9244, teal_alp: 0.7697, on_alp: 0.1500, other_alp: 0.5449 },  // Dickson
   159: { grn_alp: 0.8259, teal_alp: 0.6426, on_alp: 0.2984, other_alp: 0.3689 },  // Fadden
   160: { grn_alp: 0.8711, teal_alp: 0.6629, on_alp: 0.1455, other_alp: 0.2521 },  // Fairfax
   161: { grn_alp: 0.8583, teal_alp: 0.5800, on_alp: 0.1794, other_alp: 0.3466 },  // Fisher
-  311: { grn_alp: 0.8707, teal_alp: 0.7395, on_alp: 0.2619, other_alp: 0.4428 },  // Flynn
   162: { grn_alp: 0.8223, teal_alp: 0.6295, on_alp: 0.3260, other_alp: 0.3222 },  // Forde
-  163: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.1754, other_alp: 0.2639 },  // Griffith
-  164: { grn_alp: 0.8465, teal_alp: 0.4613, on_alp: 0.1181, other_alp: 0.2248 },  // Groom
   165: { grn_alp: 0.8462, teal_alp: 0.6200, on_alp: 0.1677, other_alp: 0.3317 },  // Herbert
   166: { grn_alp: 0.6901, teal_alp: 0.6200, on_alp: 0.3027, other_alp: 0.4136 },  // Hinkler
-  167: { grn_alp: 0.8423, teal_alp: 0.6200, on_alp: 0.2926, other_alp: 0.4211 },  // Kennedy
   168: { grn_alp: 0.8587, teal_alp: 0.5071, on_alp: 0.3590, other_alp: 0.5581 },  // Leichhardt
   169: { grn_alp: 0.8842, teal_alp: 0.6200, on_alp: 0.1951, other_alp: 0.5591 },  // Lilley
-  302: { grn_alp: 0.8547, teal_alp: 0.6200, on_alp: 0.3375, other_alp: 0.4105 },  // Longman
-  170: { grn_alp: 0.7976, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.3215 },  // Maranoa
   171: { grn_alp: 0.8212, teal_alp: 0.5903, on_alp: 0.1188, other_alp: 0.4550 },  // McPherson
   172: { grn_alp: 0.6728, teal_alp: 0.5477, on_alp: 0.1744, other_alp: 0.4322 },  // Moncrieff
   173: { grn_alp: 0.8856, teal_alp: 0.6200, on_alp: 0.2001, other_alp: 0.5101 },  // Moreton
   174: { grn_alp: 0.7977, teal_alp: 0.6200, on_alp: 0.2754, other_alp: 0.4537 },  // Oxley
   175: { grn_alp: 0.7749, teal_alp: 0.6200, on_alp: 0.2589, other_alp: 0.4132 },  // Petrie
   176: { grn_alp: 0.7129, teal_alp: 0.6200, on_alp: 0.2646, other_alp: 0.3455 },  // Rankin
-  177: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.1611, other_alp: 0.3926 },  // Ryan
   178: { grn_alp: 0.8177, teal_alp: 0.6022, on_alp: 0.2926, other_alp: 0.5636 },  // Wide Bay
-  316: { grn_alp: 0.8520, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.4090 },  // Wright
-  // ΓöÇΓöÇ SA ΓöÇΓöÇ
   179: { grn_alp: 0.8917, teal_alp: 0.6200, on_alp: 0.2210, other_alp: 0.6906 },  // Adelaide
-  // Barker (180) and Grey (183) omitted: the export produced placeholder flows of 1.0
-  // (impossible). They fall back to national PREF_FLOWS_2025 until real DOP values are
-  // regenerated via scripts/update_s25_from_exports.py (then re-run compute_calibration.py).
+  180: { grn_alp: 0.8074, teal_alp: 0.4725, on_alp: 0.3815, other_alp: 0.3093 },  // Barker
   182: { grn_alp: 0.8809, teal_alp: 0.6200, on_alp: 0.3014, other_alp: 0.3659 },  // Boothby
+  183: { grn_alp: 0.8066, teal_alp: 0.5685, on_alp: 0.3555, other_alp: 0.4536 },  // Grey
   185: { grn_alp: 0.8415, teal_alp: 0.6353, on_alp: 0.2179, other_alp: 0.4685 },  // Hindmarsh
   186: { grn_alp: 0.8217, teal_alp: 0.6200, on_alp: 0.2493, other_alp: 0.4323 },  // Kingston
   187: { grn_alp: 0.7122, teal_alp: 0.6200, on_alp: 0.2452, other_alp: 0.5218 },  // Makin
-  188: { grn_alp: 0.8901, teal_alp: 0.6200, on_alp: 0.1977, other_alp: 0.2637 },  // Mayo
-  325: { grn_alp: 0.6698, teal_alp: 0.6620, on_alp: 0.3470, other_alp: 0.5698 },  // Spence
   190: { grn_alp: 0.8559, teal_alp: 0.5344, on_alp: 0.1398, other_alp: 0.3234 },  // Sturt
-  // ΓöÇΓöÇ TAS ΓöÇΓöÇ
   192: { grn_alp: 0.8180, teal_alp: 0.5629, on_alp: 0.2949, other_alp: 0.4626 },  // Bass
   193: { grn_alp: 0.9074, teal_alp: 0.5682, on_alp: 0.4603, other_alp: 0.5000 },  // Braddon
-  319: { grn_alp: 0.8857, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5000 },  // Clark
-  195: { grn_alp: 0.9176, teal_alp: 0.3903, on_alp: 0.2550, other_alp: 0.5000 },  // Franklin
   196: { grn_alp: 0.7680, teal_alp: 0.6746, on_alp: 0.3504, other_alp: 0.5395 },  // Lyons
-  // ΓöÇΓöÇ VIC ΓöÇΓöÇ
   197: { grn_alp: 0.8449, teal_alp: 0.6252, on_alp: 0.1941, other_alp: 0.3259 },  // Aston
   198: { grn_alp: 0.8441, teal_alp: 0.5953, on_alp: 0.2557, other_alp: 0.4438 },  // Ballarat
-  200: { grn_alp: 1.0000, teal_alp: 0.7280, on_alp: 0.3883, other_alp: 0.5972 },  // Bendigo
+  200: { grn_alp: 0.8248, teal_alp: 0.6084, on_alp: 0.2101, other_alp: 0.5506 },  // Bendigo
   201: { grn_alp: 0.8402, teal_alp: 0.6200, on_alp: 0.2616, other_alp: 0.4759 },  // Bruce
-  203: { grn_alp: 0.9121, teal_alp: 0.5410, on_alp: 0.2831, other_alp: 0.6240 },  // Calwell
   204: { grn_alp: 0.8769, teal_alp: 0.7613, on_alp: 0.1471, other_alp: 0.2192 },  // Casey
   205: { grn_alp: 0.8513, teal_alp: 0.6106, on_alp: 0.1068, other_alp: 0.3096 },  // Chisholm
-  320: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.2927, other_alp: 0.6046 },  // Cooper
-  328: { grn_alp: 0.8812, teal_alp: 0.5190, on_alp: 0.1821, other_alp: 0.5205 },  // Corangamite
   208: { grn_alp: 0.7719, teal_alp: 0.5624, on_alp: 0.2674, other_alp: 0.5000 },  // Corio
   209: { grn_alp: 0.8573, teal_alp: 0.5924, on_alp: 0.1001, other_alp: 0.2088 },  // Deakin
   210: { grn_alp: 0.8409, teal_alp: 0.5309, on_alp: 0.2208, other_alp: 0.6025 },  // Dunkley
-  211: { grn_alp: 0.8604, teal_alp: 0.6200, on_alp: 0.1300, other_alp: 0.2184 },  // Flinders
-  321: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.2074, other_alp: 0.6286 },  // Fraser
   212: { grn_alp: 0.8293, teal_alp: 0.6200, on_alp: 0.2664, other_alp: 0.5000 },  // Gellibrand
   213: { grn_alp: 0.8001, teal_alp: 0.6200, on_alp: 0.1527, other_alp: 0.5000 },  // Gippsland
-  214: { grn_alp: 0.8572, teal_alp: 0.6200, on_alp: 0.0916, other_alp: 0.4364 },  // Goldstein
-  309: { grn_alp: 0.7613, teal_alp: 0.6200, on_alp: 0.2901, other_alp: 0.6591 },  // Gorton
-  326: { grn_alp: 0.8177, teal_alp: 0.6200, on_alp: 0.2536, other_alp: 0.5647 },  // Hawke
   216: { grn_alp: 0.8263, teal_alp: 0.6200, on_alp: 0.2682, other_alp: 0.4903 },  // Holt
   217: { grn_alp: 0.8766, teal_alp: 0.6200, on_alp: 0.2138, other_alp: 0.4294 },  // Hotham
-  218: { grn_alp: 0.8048, teal_alp: 0.6200, on_alp: 0.0000, other_alp: 0.3114 },  // Indi
   219: { grn_alp: 0.8473, teal_alp: 0.6200, on_alp: 0.1809, other_alp: 0.5000 },  // Isaacs
   220: { grn_alp: 0.9023, teal_alp: 0.5370, on_alp: 0.1764, other_alp: 0.1927 },  // Jagajaga
-  221: { grn_alp: 0.7588, teal_alp: 0.6200, on_alp: 0.0864, other_alp: 0.1243 },  // Kooyong
-  223: { grn_alp: 0.7693, teal_alp: 0.6200, on_alp: 0.2050, other_alp: 0.5046 },  // La Trobe
   222: { grn_alp: 0.8249, teal_alp: 0.4994, on_alp: 0.2736, other_alp: 0.4701 },  // Lalor
-  322: { grn_alp: 0.9188, teal_alp: 0.4961, on_alp: 0.1782, other_alp: 0.5000 },  // Macnamara
+  223: { grn_alp: 0.7693, teal_alp: 0.6200, on_alp: 0.2050, other_alp: 0.5046 },  // La Trobe
   224: { grn_alp: 0.6492, teal_alp: 0.6200, on_alp: 0.2399, other_alp: 0.3260 },  // Mallee
-  225: { grn_alp: 0.8995, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5000 },  // Maribyrnong
+  225: { grn_alp: 0.8995, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Maribyrnong
   226: { grn_alp: 0.7558, teal_alp: 0.6200, on_alp: 0.2286, other_alp: 0.5463 },  // McEwen
-  228: { grn_alp: 0.8100, teal_alp: 0.4066, on_alp: 0.3474, other_alp: 0.6646 },  // Melbourne
   229: { grn_alp: 0.8317, teal_alp: 0.5722, on_alp: 0.1364, other_alp: 0.2443 },  // Menzies
-  323: { grn_alp: 0.8794, teal_alp: 0.5415, on_alp: 0.3396, other_alp: 0.5027 },  // Monash
-  324: { grn_alp: 0.7543, teal_alp: 0.6200, on_alp: 0.2142, other_alp: 0.3947 },  // Nicholls
   232: { grn_alp: 0.6939, teal_alp: 0.6200, on_alp: 0.2639, other_alp: 0.5657 },  // Scullin
-  233: { grn_alp: 0.7843, teal_alp: 0.6200, on_alp: 0.1880, other_alp: 0.3567 },  // Wannon
-  234: { grn_alp: 0.8100, teal_alp: 0.6200, on_alp: 0.2034, other_alp: 0.7178 },  // Wills
-  // ΓöÇΓöÇ WA ΓöÇΓöÇ
   235: { grn_alp: 0.7811, teal_alp: 0.6200, on_alp: 0.2764, other_alp: 0.5000 },  // Brand
-  329: { grn_alp: 0.9080, teal_alp: 0.6200, on_alp: 0.2144, other_alp: 0.6229 },  // Bullwinkel
-  317: { grn_alp: 0.8745, teal_alp: 0.6200, on_alp: 0.2933, other_alp: 0.5886 },  // Burt
   236: { grn_alp: 0.8438, teal_alp: 0.6200, on_alp: 0.2737, other_alp: 0.5722 },  // Canning
   237: { grn_alp: 0.7526, teal_alp: 0.6342, on_alp: 0.2411, other_alp: 0.4483 },  // Cowan
-  238: { grn_alp: 0.8642, teal_alp: 0.6200, on_alp: 0.1145, other_alp: 0.5000 },  // Curtin
-  312: { grn_alp: 0.8706, teal_alp: 0.6200, on_alp: 0.2870, other_alp: 0.5200 },  // Durack
   239: { grn_alp: 0.8606, teal_alp: 0.6558, on_alp: 0.1507, other_alp: 0.4534 },  // Forrest
-  240: { grn_alp: 0.8939, teal_alp: 0.6200, on_alp: 0.1507, other_alp: 0.8101 },  // Fremantle
-  305: { grn_alp: 0.7701, teal_alp: 0.6200, on_alp: 0.2462, other_alp: 0.5212 },  // Hasluck
   242: { grn_alp: 0.8682, teal_alp: 0.5716, on_alp: 0.1134, other_alp: 0.4457 },  // Moore
   243: { grn_alp: 0.8855, teal_alp: 0.6200, on_alp: 0.2387, other_alp: 0.4425 },  // O'Connor
   244: { grn_alp: 0.6869, teal_alp: 0.6200, on_alp: 0.2265, other_alp: 0.5709 },  // Pearce
-  245: { grn_alp: 0.8790, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.5000 },  // Perth
+  245: { grn_alp: 0.8790, teal_alp: 0.6200, on_alp: 0.4300, other_alp: 0.5000 },  // Perth
   247: { grn_alp: 0.8596, teal_alp: 0.6200, on_alp: 0.1875, other_alp: 0.6728 },  // Swan
   248: { grn_alp: 0.7921, teal_alp: 0.6200, on_alp: 0.1850, other_alp: 0.2888 },  // Tangney
-};
+  249: { grn_alp: 0.9143, teal_alp: 0.5099, on_alp: 0.3046, other_alp: 0.5193 },  // Paterson
+  250: { grn_alp: 0.8621, teal_alp: 0.5167, on_alp: 0.3628, other_alp: 0.4405 },  // Riverina
+  252: { grn_alp: 0.9244, teal_alp: 0.7697, on_alp: 0.1500, other_alp: 0.5449 },  // Dickson
+  302: { grn_alp: 0.8547, teal_alp: 0.6200, on_alp: 0.3375, other_alp: 0.4105 },  // Longman
+  304: { grn_alp: 0.8773, teal_alp: 0.6200, on_alp: 0.3337, other_alp: 0.5061 },  // Blair
+  305: { grn_alp: 0.7701, teal_alp: 0.6200, on_alp: 0.2462, other_alp: 0.5212 },  // Hasluck
+  306: { grn_alp: 0.7635, teal_alp: 0.6200, on_alp: 0.1632, other_alp: 0.7733 },  // Lingiari
+  307: { grn_alp: 0.7194, teal_alp: 0.6536, on_alp: 0.1245, other_alp: 0.5000 },  // Solomon
+  309: { grn_alp: 0.7613, teal_alp: 0.6200, on_alp: 0.2901, other_alp: 0.6591 },  // Gorton
+  310: { grn_alp: 0.8434, teal_alp: 0.6200, on_alp: 0.1946, other_alp: 0.3833 },  // Bonner
+  311: { grn_alp: 0.8707, teal_alp: 0.7395, on_alp: 0.2619, other_alp: 0.4428 },  // Flynn
+  312: { grn_alp: 0.8706, teal_alp: 0.6200, on_alp: 0.2870, other_alp: 0.5200 },  // Durack
+  315: { grn_alp: 0.8817, teal_alp: 0.3912, on_alp: 0.4300, other_alp: 0.5000 },  // McMahon
+  316: { grn_alp: 0.8520, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.4090 },  // Wright
+  317: { grn_alp: 0.8745, teal_alp: 0.6200, on_alp: 0.2933, other_alp: 0.5886 },  // Burt
+  322: { grn_alp: 0.9188, teal_alp: 0.4961, on_alp: 0.1782, other_alp: 0.5000 },  // Macnamara
+  323: { grn_alp: 0.8794, teal_alp: 0.5415, on_alp: 0.3396, other_alp: 0.5027 },  // Monash
+  324: { grn_alp: 0.7543, teal_alp: 0.6200, on_alp: 0.2142, other_alp: 0.3947 },  // Nicholls
+  325: { grn_alp: 0.6698, teal_alp: 0.6620, on_alp: 0.3470, other_alp: 0.5698 },  // Spence
+  326: { grn_alp: 0.8177, teal_alp: 0.6200, on_alp: 0.2536, other_alp: 0.5647 },  // Hawke
+  328: { grn_alp: 0.8812, teal_alp: 0.5190, on_alp: 0.1821, other_alp: 0.5205 },  // Corangamite
+  329: { grn_alp: 0.9080, teal_alp: 0.6200, on_alp: 0.2144, other_alp: 0.6229 },  // Bullwinkel
+};  // auto-injected by inject_model_constants.py
 
 
 // ── 2025 national-average preference flows (AEC DOP) ──────────────────────────
@@ -834,14 +929,19 @@ const PREF_FLOWS_2025 = {
 };
 
 // ── Per-seat ON-race preference flows (2025 AEC DOP) ──────────────────────────
-// Overrides the national ON-race flows for seats where ON actually reached the final
-// two in 2025, so high-ON regional seats are not modelled on national averages. Only
-// the keys present here override; the rest fall back to the national/slider flows.
-//   Hunter (126): ALP-vs-ON in 2025. The Nationals directed 83% of preferences to ON
-//   (AEC 2025 DOP), i.e. Coal→ALP = 0.17 vs the 0.10 national default — its ex-Labor
-//   ON base flows a little more evenly. (Antony Green: Hunter NP→ON 83%.)
+// Overrides the national ON-race flows for the two seats where ON actually reached
+// the final two in 2025, so high-ON regional seats are not modelled on national
+// averages. Values are the actual 2025 AEC Distribution of Preferences flows for
+// each excluded candidate group; "other" entries are vote-weighted across the
+// seat's minor candidates. Only the keys present here override; the rest fall back
+// to the national/slider flows.
 const SEAT_ON_RACE_FLOWS = {
-  126: { coal_alp_v_on: 0.17 }, // Hunter (NSW) — Nationals → ON 83% (AEC 2025 DOP)
+  // Hunter (NSW) — ALP-vs-ON 2025 final (AEC DOP): NP→ALP 19.9% (→ON 80.1%),
+  // GRN→ALP 87.1%, other minors→ALP 38.7% (vote-weighted AJP/ASP/CYA/FFPA/HMP).
+  126: { coal_alp_v_on: 0.199, grn_alp_v_on: 0.871, other_alp_v_on: 0.387 },
+  // Maranoa (QLD) — LNP-vs-ON 2025 final (AEC DOP): ALP→ON 41.1%, GRN→ON 37.9%,
+  // other minors→ON 69.7% (vote-weighted CYA/FFPA/GRPF/LTP).
+  170: { alp_on_v_coal: 0.411, grn_on_v_coal: 0.379, other_on_v_coal: 0.697 },
 };
 
 // Apply the national slider delta on top of a per-seat AEC flow baseline.
@@ -898,19 +998,18 @@ function getSeatFpBaseline(seatId) {
 }
 
 // ── Demographic swing elasticity multipliers ──────────────────────────────────
-// Per-seat swing multipliers derived from ABS 2021 Census demographic regression.
-// Generated by: python scripts/compute_demographic_regression.py --output-js
-// When populated, replaces the generic margin-based seatElasticityMult() for
-// federal ALP/Coalition seats. Keyed by AEC division_id.
-//
-// Usage: const eps = SEAT_DEMO_MULT[seat.id] ?? seatElasticityMult(alp2pp);
-//
-// To regenerate after a new election cycle:
-//   1. python main.py --year 2025  (or latest year)
-//   2. python scripts/compute_demographic_regression.py --validate
-//   3. python scripts/compute_demographic_regression.py --output-js
-//      → paste the SEAT_DEMO_MULT constant here
-const SEAT_DEMO_MULT = {};  // populate via compute_demographic_regression.py
+// INTENTIONALLY EMPTY — negative result, kept as documentation.
+// scripts/compute_demographic_regression.py was run (June 2026) across three swing
+// cycles (2016→2019, 2019→2022, 2022→2025) regressing per-seat swing deviation on
+// ABS 2021 Census features. It FAILED leave-one-pair-out cross-validation:
+// CV RMSE 1.77pp vs 1.68pp for the trivial always-predict-1.0 baseline, i.e. the
+// demographic multipliers predict swing deviation *worse* than assuming uniform
+// elasticity. The constant is therefore deliberately left empty; the margin-based
+// seatElasticityMult() (validated on 2022→2025 actuals via fit_elasticity.py)
+// remains the elasticity model in use. The `SEAT_DEMO_MULT[seat.id] ?? ...` lookups
+// are kept so a future regression that passes CV can be dropped in without code
+// changes — do not populate this unless it beats the baseline out-of-sample.
+const SEAT_DEMO_MULT = {};  // intentionally empty — see negative result above
 
 // ── Per-seat swing residual standard deviations ───────────────────────────────
 // Replaces the uniform SEAT_RESIDUAL_STD = 1.0 constant in computeUncertainty().
@@ -919,12 +1018,180 @@ const SEAT_DEMO_MULT = {};  // populate via compute_demographic_regression.py
 //
 // Usage in computeUncertainty():
 //   const seatSigma = SEAT_RESIDUAL_MAP[seat.id] ?? SEAT_RESIDUAL_STD;
-const SEAT_RESIDUAL_MAP = {};  // populate via compute_seat_residuals.py
+const SEAT_RESIDUAL_MAP = {
+  101: 2.0,
+  102: 2.0,
+  103: 2.0,
+  104: 2.0,
+  105: 0.81,
+  106: 1.18,
+  107: 2.0,
+  108: 2.0,
+  109: 0.5,
+  111: 2.0,
+  112: 2.0,
+  113: 0.8,
+  114: 1.53,
+  115: 1.3,
+  117: 2.0,
+  118: 0.85,
+  119: 2.0,
+  120: 2.0,
+  121: 1.18,
+  122: 2.0,
+  124: 2.0,
+  125: 1.63,
+  126: 2.0,
+  127: 1.04,
+  128: 2.0,
+  130: 1.21,
+  131: 2.0,
+  132: 2.0,
+  133: 2.0,
+  134: 1.61,
+  135: 2.0,
+  136: 0.5,
+  137: 2.0,
+  138: 1.53,
+  139: 2.0,
+  140: 2.0,
+  144: 1.03,
+  145: 0.71,
+  146: 2.0,
+  148: 2.0,
+  149: 2.0,
+  150: 1.67,
+  151: 0.99,
+  152: 1.15,
+  153: 0.86,
+  155: 1.06,
+  156: 2.0,
+  157: 2.0,
+  158: 2.0,
+  159: 1.27,
+  160: 1.55,
+  161: 1.07,
+  162: 2.0,
+  163: 2.0,
+  164: 2.0,
+  165: 1.52,
+  166: 2.0,
+  167: 0.9,
+  168: 2.0,
+  169: 2.0,
+  170: 0.83,
+  171: 1.19,
+  172: 0.5,
+  173: 2.0,
+  174: 2.0,
+  175: 2.0,
+  176: 2.0,
+  177: 2.0,
+  178: 1.39,
+  179: 2.0,
+  180: 0.92,
+  182: 1.56,
+  183: 1.29,
+  185: 2.0,
+  186: 2.0,
+  187: 1.6,
+  188: 0.7,
+  190: 1.56,
+  192: 2.0,
+  193: 2.0,
+  195: 1.95,
+  196: 2.0,
+  197: 1.56,
+  198: 2.0,
+  200: 2.0,
+  201: 2.0,
+  203: 2.0,
+  204: 2.0,
+  205: 2.0,
+  207: 2.0,
+  208: 1.57,
+  209: 0.63,
+  210: 2.0,
+  211: 2.0,
+  212: 2.0,
+  213: 2.0,
+  214: 2.0,
+  215: 2.0,
+  216: 2.0,
+  217: 2.0,
+  218: 0.75,
+  219: 2.0,
+  220: 1.87,
+  221: 0.93,
+  222: 1.6,
+  223: 2.0,
+  224: 2.0,
+  225: 1.18,
+  226: 1.62,
+  228: 1.4,
+  229: 1.81,
+  232: 2.0,
+  233: 0.5,
+  234: 1.13,
+  235: 2.0,
+  236: 2.0,
+  237: 2.0,
+  238: 2.0,
+  239: 2.0,
+  240: 2.0,
+  242: 2.0,
+  243: 2.0,
+  244: 2.0,
+  245: 2.0,
+  246: 2.0,
+  247: 2.0,
+  248: 2.0,
+  249: 2.0,
+  250: 0.98,
+  251: 0.5,
+  252: 2.0,
+  302: 1.6,
+  304: 2.0,
+  305: 2.0,
+  306: 2.0,
+  307: 2.0,
+  309: 2.0,
+  310: 2.0,
+  311: 2.0,
+  312: 2.0,
+  315: 1.5,
+  316: 1.55,
+  317: 2.0,
+  318: 2.0,
+  319: 1.05,
+  320: 1.1,
+  321: 2.0,
+  322: 2.0,
+  323: 1.62,
+  324: 0.8,
+  325: 2.0,
+  326: 2.0,
+  328: 2.0
+};  // auto-injected by inject_model_constants.py
 
-// Estimate seat-level ON first preference using 2025 seat baseline + national swing.
+// Estimate seat-level ON first preference using the 2025 seat baseline plus the
+// national ON swing applied on the log-odds (logit) scale rather than linearly.
+// The national swing is converted to a logit shift at the national base and that
+// shift is applied to each seat's own base: low-base seats move less in pp terms
+// (a +7pp national surge does not add 7pp to a 2% inner-city seat) while high-base
+// seats gain more absolute points without blowing through natural ceilings as the
+// share saturates. Bases are clamped to [0.1, 60]% before the logit so degenerate
+// inputs can't produce ±Infinity/NaN. Zero swing returns the baseline exactly.
 function estimateSeatOnFp(seatId, swings) {
   const base = SEAT_FP_2025[seatId]?.on ?? ON_FP_2025[seatId] ?? BASELINE_2025.on;
-  return Math.max(0, base + swings.on);
+  const onSwing = swings.on ?? 0;
+  if (onSwing === 0) return base;
+  const clampPct = (v) => Math.min(60, Math.max(0.1, v));
+  const logit = (p) => Math.log(p / (100 - p));
+  const invlogit = (x) => 100 / (1 + Math.exp(-x));
+  const shift = logit(clampPct(BASELINE_2025.on + onSwing)) - logit(clampPct(BASELINE_2025.on));
+  const est = invlogit(logit(clampPct(base)) + shift);
+  return Number.isFinite(est) ? est : base;
 }
 
 // Estimate ON first preference for a state seat given a per-state ON FP lookup and swing.
@@ -935,159 +1202,201 @@ function estimateStateOnFp(seatId, onSwing, onFpLookup) {
   return Math.max(0, base + (onSwing ?? 0));
 }
 
+// ── State poll helpers (data/polls/{state}_polls.json → state scenario builders) ──
+// Normalise one poll entry to the state-builder primary keys ({alp, coal, grn, ind,
+// on}); coalKeys lists the file's Coalition component keys (["lp","np"] NSW, ["lnp"]
+// QLD, ["lp","nat"] WA, ["lp"] SA). Returns null for entries missing primaries and
+// for the election-result baseline rows — election results remain the model defaults,
+// polls are only applied on explicit user action.
+function normalizeStatePoll(p, coalKeys) {
+  if (!p || /election result/i.test(p.pollster ?? "")) return null;
+  const coalVals = coalKeys.map(k => p[k]).filter(v => v != null && Number.isFinite(v));
+  if (p.alp == null || !Number.isFinite(p.alp) || coalVals.length === 0 || p.grn == null || !Number.isFinite(p.grn)) return null;
+  return {
+    pollster: p.pollster, date: p.date,
+    alp: p.alp, coal: +coalVals.reduce((s, v) => s + v, 0).toFixed(1),
+    grn: p.grn, ind: Number.isFinite(p.ind) ? p.ind : null, on: Number.isFinite(p.on) ? p.on : 0,
+    tpp: Number.isFinite(p.tpp) ? p.tpp : null, n: p.n ?? null,
+  };
+}
+
+// Recency-weighted average of normalised state polls: exponential decay with a
+// 60-day half-life anchored to the most recent poll, so a 60-day-old poll counts
+// half as much as today's. Returns null when no usable polls exist.
+const STATE_POLL_HALF_LIFE_DAYS = 60;
+function statePollAverage(polls) {
+  const usable = (polls ?? []).filter(p => p && p.date && Number.isFinite(new Date(p.date).getTime()));
+  if (usable.length === 0) return null;
+  const t0 = Math.max(...usable.map(p => new Date(p.date).getTime()));
+  const keys = ["alp", "coal", "grn", "ind", "on"];
+  const sums = {}, wts = {};
+  usable.forEach(p => {
+    const ageDays = (t0 - new Date(p.date).getTime()) / 86400000;
+    const w = Math.pow(0.5, ageDays / STATE_POLL_HALF_LIFE_DAYS);
+    keys.forEach(k => {
+      if (p[k] == null || !Number.isFinite(p[k])) return;
+      sums[k] = (sums[k] ?? 0) + w * p[k];
+      wts[k] = (wts[k] ?? 0) + w;
+    });
+  });
+  const avg = {};
+  keys.forEach(k => { if ((wts[k] ?? 0) > 0) avg[k] = +(sums[k] / wts[k]).toFixed(1); });
+  return (avg.alp != null && avg.coal != null) ? avg : null;
+}
+
 // ── 2025 seat data from AEC final results (event_id=31496) ────────────────────
 const _S25 = [
-  [318, "Bean", "ACT", "ALP", "David Smith", "ALP", "IND", 0.68],
-  [101, "Canberra", "ACT", "ALP", "Alicia Payne", "ALP", "GRN", 39.04],
-  [102, "Fenner", "ACT", "ALP", "Andrew Leigh", "ALP", "LP", 44.16],
-  [103, "Banks", "NSW", "ALP", "Zhi Soon", "ALP", "LP", 4.78],
-  [104, "Barton", "NSW", "ALP", "Ash Ambihaipahar", "ALP", "LP", 32.01],
-  [105, "Bennelong", "NSW", "ALP", "Jerome Laxale", "ALP", "LP", 18.52],
-  [106, "Berowra", "NSW", "LP", "Julian Leeser", "LP", "ALP", 3.27],
-  [107, "Blaxland", "NSW", "ALP", "Jason Clare", "ALP", "LP", 43.81],
-  [108, "Bradfield", "NSW", "IND", "Nicolette Boele", "IND", "LP", 0.02],
-  [109, "Calare", "NSW", "IND", "Andrew Gee", "IND", "NP", 13.56],
-  [111, "Chifley", "NSW", "ALP", "Ed Husic", "ALP", "LP", 39.66],
-  [112, "Cook", "NSW", "LP", "Simon Kennedy", "LP", "ALP", 14.39],
-  [113, "Cowper", "NSW", "NP", "Pat Conaghan", "NP", "IND", 5.09],
-  [114, "Cunningham", "NSW", "ALP", "Alison Byrnes", "ALP", "LP", 35.04],
-  [115, "Dobell", "NSW", "ALP", "Emma McBride", "ALP", "LP", 18.86],
-  [117, "Eden-Monaro", "NSW", "ALP", "Kristy McBain", "ALP", "LP", 14.43],
-  [118, "Farrer", "NSW", "LP", "Vacant (by-election)", "LP", "IND", 12.39],
-  [119, "Fowler", "NSW", "IND", "Dai Le", "IND", "ALP", 5.35],
-  [120, "Gilmore", "NSW", "ALP", "Fiona Phillips", "ALP", "LP", 10.26],
-  [121, "Grayndler", "NSW", "ALP", "Anthony Albanese", "ALP", "GRN", 33.73],
-  [122, "Greenway", "NSW", "ALP", "Michelle Rowland", "ALP", "LP", 27.52],
-  [124, "Hughes", "NSW", "ALP", "David Moncrieff", "ALP", "LP", 6.11],
-  [125, "Hume", "NSW", "LP", "Angus Taylor", "LP", "ALP", 16.11],
-  [126, "Hunter", "NSW", "ALP", "Dan Repacholi", "ALP", "ON", 18.07],
-  [127, "Kingsford Smith", "NSW", "ALP", "Matt Thistlethwaite", "ALP", "LP", 34.37],
-  [128, "Lindsay", "NSW", "LP", "Melissa McIntosh", "LP", "ALP", 5.57],
-  [130, "Lyne", "NSW", "NP", "Alison Penfold", "NP", "ALP", 19.56],
-  [131, "Macarthur", "NSW", "ALP", "Mike Freelander", "ALP", "LP", 31.21],
-  [132, "Mackellar", "NSW", "IND", "Sophie Scamps", "IND", "LP", 11.32],
-  [133, "Macquarie", "NSW", "ALP", "Susan Templeman", "ALP", "LP", 15.41],
-  [315, "McMahon", "NSW", "ALP", "Chris Bowen", "ALP", "LP", 18.04],
-  [134, "Mitchell", "NSW", "LP", "Alex Hawke", "LP", "ALP", 7.62],
-  [135, "New England", "NSW", "NP", "Barnaby Joyce", "NP", "ALP", 34.12],
-  [136, "Newcastle", "NSW", "ALP", "Sharon Claydon", "ALP", "GRN", 31.61],
-  [138, "Page", "NSW", "NP", "Kevin Hogan", "NP", "ALP", 18.57],
-  [139, "Parkes", "NSW", "NP", "Jamie Chaffey", "NP", "ALP", 25.94],
-  [140, "Parramatta", "NSW", "ALP", "Andrew Charlton", "ALP", "LP", 25.1],
-  [249, "Paterson", "NSW", "ALP", "Meryl Swanson", "ALP", "LP", 13.78],
-  [144, "Reid", "NSW", "ALP", "Sally Sitou", "ALP", "LP", 24.01],
-  [145, "Richmond", "NSW", "ALP", "Justine Elliot", "ALP", "NP", 20.01],
-  [250, "Riverina", "NSW", "NP", "Michael McCormack", "NP", "ALP", 25.24],
-  [146, "Robertson", "NSW", "ALP", "Gordon Reid", "ALP", "LP", 18.73],
-  [148, "Shortland", "NSW", "ALP", "Pat Conroy", "ALP", "LP", 23.01],
-  [149, "Sydney", "NSW", "ALP", "Tanya Plibersek", "ALP", "GRN", 41.89],
-  [151, "Warringah", "NSW", "IND", "Zali Steggall", "IND", "LP", 22.4],
-  [251, "Watson", "NSW", "ALP", "Tony Burke", "ALP", "IND", 33.03],
-  [152, "Wentworth", "NSW", "IND", "Allegra Spender", "IND", "LP", 16.69],
-  [153, "Werriwa", "NSW", "ALP", "Anne Maree Stanley", "ALP", "LP", 13.55],
-  [150, "Whitlam", "NSW", "ALP", "Carol Berry", "ALP", "LP", 12.49],
-  [306, "Lingiari", "NT", "ALP", "Marion Scrymgour", "ALP", "CLP", 16.25],
-  [307, "Solomon", "NT", "ALP", "Luke John Gosling", "ALP", "CLP", 2.62],
-  [304, "Blair", "QLD", "ALP", "Shayne Neumann", "ALP", "LNP", 11.42],
-  [310, "Bonner", "QLD", "ALP", "Kara Cook", "ALP", "LNP", 10.0],
-  [155, "Bowman", "QLD", "LNP", "Henry Pike", "LNP", "ALP", 4.86],
-  [156, "Brisbane", "QLD", "ALP", "Madonna Jarrett", "ALP", "LNP", 17.92],
-  [157, "Capricornia", "QLD", "LNP", "Michelle Landry", "LNP", "ALP", 11.67],
-  [158, "Dawson", "QLD", "LNP", "Andrew Willcox", "LNP", "ALP", 23.66],
-  [252, "Dickson", "QLD", "ALP", "Ali France", "ALP", "LNP", 11.98],
-  [159, "Fadden", "QLD", "LNP", "Cameron Caldwell", "LNP", "ALP", 13.76],
-  [160, "Fairfax", "QLD", "LNP", "Ted O'Brien", "LNP", "ALP", 6.46],
-  [161, "Fisher", "QLD", "LNP", "Andrew Wallace", "LNP", "ALP", 12.07],
-  [311, "Flynn", "QLD", "LNP", "Colin Boyce", "LNP", "ALP", 20.48],
-  [162, "Forde", "QLD", "ALP", "Rowan Holzberger", "ALP", "LNP", 3.53],
-  [163, "Griffith", "QLD", "ALP", "Renee Coffey", "ALP", "GRN", 21.15],
-  [164, "Groom", "QLD", "LNP", "Garth Hamilton", "LNP", "IND", 11.35],
-  [165, "Herbert", "QLD", "LNP", "Phillip Thompson", "LNP", "ALP", 26.83],
-  [166, "Hinkler", "QLD", "LNP", "David Batt", "LNP", "ALP", 12.52],
-  [167, "Kennedy", "QLD", "KAP", "Bob Katter", "KAP", "LNP", 31.51],
-  [168, "Leichhardt", "QLD", "ALP", "Matt Smith", "ALP", "LNP", 12.12],
-  [169, "Lilley", "QLD", "ALP", "Anika Wells", "ALP", "LNP", 29.04],
-  [302, "Longman", "QLD", "LNP", "Terry Young", "LNP", "ALP", 0.22],
-  [170, "Maranoa", "QLD", "LNP", "David Littleproud", "LNP", "ON", 40.19],
-  [171, "McPherson", "QLD", "LNP", "Leon Rebello", "LNP", "ALP", 8.87],
-  [172, "Moncrieff", "QLD", "LNP", "Angie Bell", "LNP", "ALP", 17.6],
-  [173, "Moreton", "QLD", "ALP", "Julie-Ann Campbell", "ALP", "LNP", 32.18],
-  [174, "Oxley", "QLD", "ALP", "Milton Dick", "ALP", "LNP", 38.38],
-  [175, "Petrie", "QLD", "ALP", "Emma Comer", "ALP", "LNP", 2.34],
-  [176, "Rankin", "QLD", "ALP", "Jim Chalmers", "ALP", "LNP", 31.11],
-  [177, "Ryan", "QLD", "GRN", "Elizabeth Watson-Brown", "GRN", "LNP", 6.54],
-  [178, "Wide Bay", "QLD", "LNP", "Llew O'Brien", "LNP", "ALP", 15.26],
-  [316, "Wright", "QLD", "LNP", "Scott Buchholz", "LNP", "ALP", 15.95],
-  [179, "Adelaide", "SA", "ALP", "Steve Georganas", "ALP", "LP", 38.13],
-  [180, "Barker", "SA", "LP", "Tony Pasin", "LP", "ALP", 25.95],
-  [182, "Boothby", "SA", "ALP", "Louise Miller-Frost", "ALP", "LP", 22.21],
-  [183, "Grey", "SA", "LP", "Tom Venning", "LP", "ALP", 9.28],
-  [185, "Hindmarsh", "SA", "ALP", "Mark Butler", "ALP", "LP", 32.7],
-  [186, "Kingston", "SA", "ALP", "Amanda Rishworth", "ALP", "LP", 41.48],
-  [187, "Makin", "SA", "ALP", "Tony Zappia", "ALP", "LP", 29.32],
-  [188, "Mayo", "SA", "IND", "Rebekha Sharkie", "IND", "ALP", 29.78],
-  [325, "Spence", "SA", "ALP", "Matt Burnell", "ALP", "LP", 30.67],
-  [190, "Sturt", "SA", "ALP", "Claire Clutterham", "ALP", "LP", 13.25],
-  [192, "Bass", "TAS", "ALP", "Jess Teesdale", "ALP", "LP", 16.02],
-  [193, "Braddon", "TAS", "ALP", "Anne Urquhart", "ALP", "LP", 14.4],
-  [319, "Clark", "TAS", "IND", "Andrew Wilkie", "IND", "ALP", 40.77],
-  [195, "Franklin", "TAS", "ALP", "Julie Collins", "ALP", "IND", 15.56],
-  [196, "Lyons", "TAS", "ALP", "Rebecca White", "ALP", "LP", 23.17],
-  [197, "Aston", "VIC", "ALP", "Mary Doyle", "ALP", "LP", 6.86],
-  [198, "Ballarat", "VIC", "ALP", "Catherine King", "ALP", "LP", 21.33],
-  [200, "Bendigo", "VIC", "ALP", "Lisa Chesters", "ALP", "NP", 2.8],
-  [201, "Bruce", "VIC", "ALP", "Julian Hill", "ALP", "LP", 29.23],
-  [203, "Calwell", "VIC", "ALP", "Basem Abdo", "ALP", "IND", 10.16],
-  [204, "Casey", "VIC", "LP", "Aaron Violi", "LP", "ALP", 5.78],
-  [205, "Chisholm", "VIC", "ALP", "Carina Garland", "ALP", "LP", 11.4],
-  [320, "Cooper", "VIC", "ALP", "Ged Kearney", "ALP", "GRN", 19.43],
-  [328, "Corangamite", "VIC", "ALP", "Libby Coker", "ALP", "LP", 16.09],
-  [208, "Corio", "VIC", "ALP", "Richard Marles", "ALP", "LP", 26.46],
-  [209, "Deakin", "VIC", "ALP", "Matt Gregg", "ALP", "LP", 5.65],
-  [210, "Dunkley", "VIC", "ALP", "Jodie Belyea", "ALP", "LP", 14.16],
-  [211, "Flinders", "VIC", "LP", "Zoe McKenzie", "LP", "IND", 4.57],
-  [321, "Fraser", "VIC", "ALP", "Daniel Mulino", "ALP", "GRN", 18.45],
-  [212, "Gellibrand", "VIC", "ALP", "Tim Watts", "ALP", "LP", 30.2],
-  [213, "Gippsland", "VIC", "NP", "Darren Chester", "NP", "ALP", 38.71],
-  [214, "Goldstein", "VIC", "LP", "Tim Wilson", "LP", "IND", 0.15],
-  [309, "Gorton", "VIC", "ALP", "Alice Jordan-Baird", "ALP", "LP", 20.57],
-  [326, "Hawke", "VIC", "ALP", "Sam Rae", "ALP", "LP", 15.26],
-  [216, "Holt", "VIC", "ALP", "Cassandra Fernando", "ALP", "LP", 28.06],
-  [217, "Hotham", "VIC", "ALP", "Clare O'Neil", "ALP", "LP", 33.72],
-  [218, "Indi", "VIC", "IND", "Helen Haines", "IND", "LP", 17.27],
-  [219, "Isaacs", "VIC", "ALP", "Mark Dreyfus", "ALP", "LP", 28.68],
-  [220, "Jagajaga", "VIC", "ALP", "Kate Thwaites", "ALP", "LP", 25.76],
-  [221, "Kooyong", "VIC", "IND", "Monique Ryan", "IND", "LP", 1.33],
-  [223, "La Trobe", "VIC", "LP", "Jason Wood", "LP", "ALP", 4.12],
-  [222, "Lalor", "VIC", "ALP", "Joanne Ryan", "ALP", "LP", 26.43],
-  [322, "Macnamara", "VIC", "ALP", "Josh Burns", "ALP", "LP", 23.59],
-  [224, "Mallee", "VIC", "NP", "Anne Webster", "NP", "ALP", 38.08],
-  [225, "Maribyrnong", "VIC", "ALP", "Jo Briskey", "ALP", "LP", 25.29],
-  [226, "McEwen", "VIC", "ALP", "Rob Mitchell", "ALP", "LP", 9.52],
-  [228, "Melbourne", "VIC", "ALP", "Sarah Witty", "ALP", "GRN", 6.03],
-  [229, "Menzies", "VIC", "ALP", "Gabriel Ng", "ALP", "LP", 2.15],
-  [323, "Monash", "VIC", "LP", "Mary Aldred", "LP", "ALP", 8.18],
-  [324, "Nicholls", "VIC", "NP", "Sam Birrell", "NP", "ALP", 28.76],
-  [232, "Scullin", "VIC", "ALP", "Andrew Giles", "ALP", "LP", 28.59],
-  [233, "Wannon", "VIC", "LP", "Dan Tehan", "LP", "IND", 6.55],
-  [234, "Wills", "VIC", "ALP", "Peter Khalil", "ALP", "GRN", 2.86],
-  [235, "Brand", "WA", "ALP", "Madeleine King", "ALP", "LP", 33.84],
-  [329, "Bullwinkel", "WA", "ALP", "Trish Cook", "ALP", "LP", 1.02],
-  [317, "Burt", "WA", "ALP", "Matt Keogh", "ALP", "LP", 31.41],
-  [236, "Canning", "WA", "LP", "Andrew Hastie", "LP", "ALP", 13.1],
-  [237, "Cowan", "WA", "ALP", "Anne Aly", "ALP", "LP", 27.27],
-  [238, "Curtin", "WA", "IND", "Kate Chaney", "IND", "LP", 6.54],
-  [312, "Durack", "WA", "LP", "Melissa Price", "LP", "ALP", 20.31],
-  [239, "Forrest", "WA", "LP", "Ben Small", "LP", "ALP", 4.47],
-  [240, "Fremantle", "WA", "ALP", "Josh Wilson", "ALP", "IND", 1.37],
-  [305, "Hasluck", "WA", "ALP", "Tania Lawrence", "ALP", "LP", 31.95],
-  [242, "Moore", "WA", "ALP", "Tom French", "ALP", "LP", 5.77],
-  [243, "O'Connor", "WA", "LP", "Rick Wilson", "LP", "ALP", 26.57],
-  [244, "Pearce", "WA", "ALP", "Tracey Roberts", "ALP", "LP", 12.87],
-  [245, "Perth", "WA", "ALP", "Patrick Gorman", "ALP", "LP", 33.02],
-  [247, "Swan", "WA", "ALP", "Zaneta Mascarenhas", "ALP", "LP", 27.98],
-  [248, "Tangney", "WA", "ALP", "Sam Lim", "ALP", "LP", 13.98],
-];
+  [318,"Bean","ACT","ALP","David Smith","ALP","IND",0.68],
+  [101,"Canberra","ACT","ALP","Alicia Payne","ALP","GRN",39.04],
+  [102,"Fenner","ACT","ALP","Andrew Leigh","ALP","LP",44.16],
+  [103,"Banks","NSW","ALP","Zhi Soon","ALP","LP",4.78],
+  [104,"Barton","NSW","ALP","Ash Ambihaipahar","ALP","LP",32.01],
+  [105,"Bennelong","NSW","ALP","Jerome Laxale","ALP","LP",18.52],
+  [106,"Berowra","NSW","LP","Julian Leeser","LP","ALP",3.27],
+  [107,"Blaxland","NSW","ALP","Jason Clare","ALP","LP",43.81],
+  [108,"Bradfield","NSW","IND","Nicolette Boele","IND","LP",0.02],
+  [109,"Calare","NSW","IND","Andrew Gee","IND","NP",13.56],
+  [111,"Chifley","NSW","ALP","Ed Husic","ALP","LP",39.66],
+  [112,"Cook","NSW","LP","Simon Kennedy","LP","ALP",14.39],
+  [113,"Cowper","NSW","NP","Pat Conaghan","NP","IND",5.09],
+  [114,"Cunningham","NSW","ALP","Alison Byrnes","ALP","LP",35.04],
+  [115,"Dobell","NSW","ALP","Emma Mcbride","ALP","LP",18.86],
+  [117,"Eden-Monaro","NSW","ALP","Kristy Mcbain","ALP","LP",14.43],
+  [118,"Farrer","NSW","LP","Sussan Ley","LP","IND",12.39],
+  [119,"Fowler","NSW","IND","Dai Le","IND","ALP",5.35],
+  [120,"Gilmore","NSW","ALP","Fiona Phillips","ALP","LP",10.26],
+  [121,"Grayndler","NSW","ALP","Anthony Albanese","ALP","GRN",33.73],
+  [122,"Greenway","NSW","ALP","Michelle Rowland","ALP","LP",27.52],
+  [124,"Hughes","NSW","ALP","David Moncrieff","ALP","LP",6.11],
+  [125,"Hume","NSW","LP","Angus Taylor","LP","ALP",16.11],
+  [126,"Hunter","NSW","ALP","Dan Repacholi","ALP","ON",18.07],
+  [127,"Kingsford Smith","NSW","ALP","Matt Thistlethwaite","ALP","LP",34.37],
+  [128,"Lindsay","NSW","LP","Melissa Mcintosh","LP","ALP",5.57],
+  [130,"Lyne","NSW","NP","Alison Penfold","NP","ALP",19.56],
+  [131,"Macarthur","NSW","ALP","Mike Freelander","ALP","LP",31.21],
+  [132,"Mackellar","NSW","IND","Sophie Scamps","IND","LP",11.32],
+  [133,"Macquarie","NSW","ALP","Susan Templeman","ALP","LP",15.41],
+  [315,"McMahon","NSW","ALP","Chris Bowen","ALP","LP",18.04],
+  [134,"Mitchell","NSW","LP","Alex Hawke","LP","ALP",7.62],
+  [135,"New England","NSW","NP","Barnaby Joyce","NP","ALP",34.12],
+  [136,"Newcastle","NSW","ALP","Sharon Claydon","ALP","GRN",31.61],
+  [138,"Page","NSW","NP","Kevin Hogan","NP","ALP",18.57],
+  [139,"Parkes","NSW","NP","Jamie Chaffey","NP","ALP",25.94],
+  [140,"Parramatta","NSW","ALP","Andrew Charlton","ALP","LP",25.1],
+  [249,"Paterson","NSW","ALP","Meryl Swanson","ALP","LP",13.78],
+  [144,"Reid","NSW","ALP","Sally Sitou","ALP","LP",24.01],
+  [145,"Richmond","NSW","ALP","Justine Elliot","ALP","NP",20.01],
+  [250,"Riverina","NSW","NP","Michael Mccormack","NP","ALP",25.24],
+  [146,"Robertson","NSW","ALP","Gordon Reid","ALP","LP",18.73],
+  [148,"Shortland","NSW","ALP","Pat Conroy","ALP","LP",23.01],
+  [149,"Sydney","NSW","ALP","Tanya Plibersek","ALP","GRN",41.89],
+  [151,"Warringah","NSW","IND","Zali Steggall","IND","LP",22.4],
+  [251,"Watson","NSW","ALP","Tony Burke","ALP","IND",33.03],
+  [152,"Wentworth","NSW","IND","Allegra Spender","IND","LP",16.69],
+  [153,"Werriwa","NSW","ALP","Anne Maree Stanley","ALP","LP",13.55],
+  [150,"Whitlam","NSW","ALP","Carol Berry","ALP","LP",12.49],
+  [306,"Lingiari","NT","ALP","Marion Scrymgour","ALP","CLP",16.25],
+  [307,"Solomon","NT","ALP","Luke John Gosling","ALP","CLP",2.62],
+  [304,"Blair","QLD","ALP","Shayne Neumann","ALP","LNP",11.42],
+  [310,"Bonner","QLD","ALP","Kara Cook","ALP","LNP",10.0],
+  [155,"Bowman","QLD","LNP","Henry Pike","LNP","ALP",4.86],
+  [156,"Brisbane","QLD","ALP","Madonna Jarrett","ALP","LNP",17.92],
+  [157,"Capricornia","QLD","LNP","Michelle Landry","LNP","ALP",11.67],
+  [158,"Dawson","QLD","LNP","Andrew Willcox","LNP","ALP",23.66],
+  [252,"Dickson","QLD","ALP","Ali France","ALP","LNP",11.98],
+  [159,"Fadden","QLD","LNP","Cameron Caldwell","LNP","ALP",13.76],
+  [160,"Fairfax","QLD","LNP","Ted O'brien","LNP","ALP",6.46],
+  [161,"Fisher","QLD","LNP","Andrew Wallace","LNP","ALP",12.07],
+  [311,"Flynn","QLD","LNP","Colin Boyce","LNP","ALP",20.48],
+  [162,"Forde","QLD","ALP","Rowan Holzberger","ALP","LNP",3.53],
+  [163,"Griffith","QLD","ALP","Renee Coffey","ALP","GRN",21.15],
+  [164,"Groom","QLD","LNP","Garth Hamilton","LNP","IND",11.35],
+  [165,"Herbert","QLD","LNP","Phillip Thompson","LNP","ALP",26.83],
+  [166,"Hinkler","QLD","LNP","David Batt","LNP","ALP",12.52],
+  [167,"Kennedy","QLD","KAP","Bob Katter","KAP","LNP",31.51],
+  [168,"Leichhardt","QLD","ALP","Matt Smith","ALP","LNP",12.12],
+  [169,"Lilley","QLD","ALP","Anika Wells","ALP","LNP",29.04],
+  [302,"Longman","QLD","LNP","Terry Young","LNP","ALP",0.22],
+  [170,"Maranoa","QLD","LNP","David Littleproud","LNP","ON",40.19],
+  [171,"McPherson","QLD","LNP","Leon Rebello","LNP","ALP",8.87],
+  [172,"Moncrieff","QLD","LNP","Angie Bell","LNP","ALP",17.6],
+  [173,"Moreton","QLD","ALP","Julie-ann Campbell","ALP","LNP",32.18],
+  [174,"Oxley","QLD","ALP","Milton Dick","ALP","LNP",38.38],
+  [175,"Petrie","QLD","ALP","Emma Comer","ALP","LNP",2.34],
+  [176,"Rankin","QLD","ALP","Jim Chalmers","ALP","LNP",31.11],
+  [177,"Ryan","QLD","GRN","Elizabeth Watson-brown","GRN","LNP",6.54],
+  [178,"Wide Bay","QLD","LNP","Llew O'brien","LNP","ALP",15.26],
+  [316,"Wright","QLD","LNP","Scott Buchholz","LNP","ALP",15.95],
+  [179,"Adelaide","SA","ALP","Steve Georganas","ALP","LP",38.13],
+  [180,"Barker","SA","LP","Tony Pasin","LP","ALP",25.95],
+  [182,"Boothby","SA","ALP","Louise Miller-frost","ALP","LP",22.21],
+  [183,"Grey","SA","LP","Tom Venning","LP","ALP",9.28],
+  [185,"Hindmarsh","SA","ALP","Mark Butler","ALP","LP",32.7],
+  [186,"Kingston","SA","ALP","Amanda Rishworth","ALP","LP",41.48],
+  [187,"Makin","SA","ALP","Tony Zappia","ALP","LP",29.32],
+  [188,"Mayo","SA","IND","Rebekha Sharkie","IND","ALP",29.78],
+  [325,"Spence","SA","ALP","Matt Burnell","ALP","LP",30.67],
+  [190,"Sturt","SA","ALP","Claire Clutterham","ALP","LP",13.25],
+  [192,"Bass","TAS","ALP","Jess Teesdale","ALP","LP",16.02],
+  [193,"Braddon","TAS","ALP","Anne Urquhart","ALP","LP",14.4],
+  [319,"Clark","TAS","IND","Andrew Wilkie","IND","ALP",40.77],
+  [195,"Franklin","TAS","ALP","Julie Collins","ALP","IND",15.56],
+  [196,"Lyons","TAS","ALP","Rebecca White","ALP","LP",23.17],
+  [197,"Aston","VIC","ALP","Mary Doyle","ALP","LP",6.86],
+  [198,"Ballarat","VIC","ALP","Catherine King","ALP","LP",21.33],
+  [200,"Bendigo","VIC","ALP","Lisa Chesters","ALP","NP",2.8],
+  [201,"Bruce","VIC","ALP","Julian Hill","ALP","LP",29.23],
+  [203,"Calwell","VIC","ALP","Basem Abdo","ALP","IND",10.16],
+  [204,"Casey","VIC","LP","Aaron Violi","LP","ALP",5.78],
+  [205,"Chisholm","VIC","ALP","Carina Garland","ALP","LP",11.4],
+  [320,"Cooper","VIC","ALP","Ged Kearney","ALP","GRN",19.43],
+  [328,"Corangamite","VIC","ALP","Libby Coker","ALP","LP",16.09],
+  [208,"Corio","VIC","ALP","Richard Marles","ALP","LP",26.46],
+  [209,"Deakin","VIC","ALP","Matt Gregg","ALP","LP",5.65],
+  [210,"Dunkley","VIC","ALP","Jodie Belyea","ALP","LP",14.16],
+  [211,"Flinders","VIC","LP","Zoe Mckenzie","LP","IND",4.57],
+  [321,"Fraser","VIC","ALP","Daniel Mulino","ALP","GRN",18.45],
+  [212,"Gellibrand","VIC","ALP","Tim Watts","ALP","LP",30.2],
+  [213,"Gippsland","VIC","NP","Darren Chester","NP","ALP",38.71],
+  [214,"Goldstein","VIC","LP","Tim Wilson","LP","IND",0.15],
+  [309,"Gorton","VIC","ALP","Alice Jordan-baird","ALP","LP",20.57],
+  [326,"Hawke","VIC","ALP","Sam Rae","ALP","LP",15.26],
+  [216,"Holt","VIC","ALP","Cassandra Fernando","ALP","LP",28.06],
+  [217,"Hotham","VIC","ALP","Clare O'neil","ALP","LP",33.72],
+  [218,"Indi","VIC","IND","Helen Haines","IND","LP",17.27],
+  [219,"Isaacs","VIC","ALP","Mark Dreyfus","ALP","LP",28.68],
+  [220,"Jagajaga","VIC","ALP","Kate Thwaites","ALP","LP",25.76],
+  [221,"Kooyong","VIC","IND","Monique Ryan","IND","LP",1.33],
+  [223,"La Trobe","VIC","LP","Jason Wood","LP","ALP",4.12],
+  [222,"Lalor","VIC","ALP","Joanne Ryan","ALP","LP",26.43],
+  [322,"Macnamara","VIC","ALP","Josh Burns","ALP","LP",23.59],
+  [224,"Mallee","VIC","NP","Anne Webster","NP","ALP",38.08],
+  [225,"Maribyrnong","VIC","ALP","Jo Briskey","ALP","LP",25.29],
+  [226,"McEwen","VIC","ALP","Rob Mitchell","ALP","LP",9.52],
+  [228,"Melbourne","VIC","ALP","Sarah Witty","ALP","GRN",6.03],
+  [229,"Menzies","VIC","ALP","Gabriel Ng","ALP","LP",2.15],
+  [323,"Monash","VIC","LP","Mary Aldred","LP","ALP",8.18],
+  [324,"Nicholls","VIC","NP","Sam Birrell","NP","ALP",28.76],
+  [232,"Scullin","VIC","ALP","Andrew Giles","ALP","LP",28.59],
+  [233,"Wannon","VIC","LP","Dan Tehan","LP","IND",6.55],
+  [234,"Wills","VIC","ALP","Peter Khalil","ALP","GRN",2.86],
+  [235,"Brand","WA","ALP","Madeleine King","ALP","LP",33.84],
+  [329,"Bullwinkel","WA","ALP","Trish Cook","ALP","LP",1.02],
+  [317,"Burt","WA","ALP","Matt Keogh","ALP","LP",31.41],
+  [236,"Canning","WA","LP","Andrew Hastie","LP","ALP",13.1],
+  [237,"Cowan","WA","ALP","Anne Aly","ALP","LP",27.27],
+  [238,"Curtin","WA","IND","Kate Chaney","IND","LP",6.54],
+  [312,"Durack","WA","LP","Melissa Price","LP","ALP",20.31],
+  [239,"Forrest","WA","LP","Ben Small","LP","ALP",4.47],
+  [240,"Fremantle","WA","ALP","Josh Wilson","ALP","IND",1.37],
+  [305,"Hasluck","WA","ALP","Tania Lawrence","ALP","LP",31.95],
+  [242,"Moore","WA","ALP","Tom French","ALP","LP",5.77],
+  [243,"O'Connor","WA","LP","Rick Wilson","LP","ALP",26.57],
+  [244,"Pearce","WA","ALP","Tracey Roberts","ALP","LP",12.87],
+  [245,"Perth","WA","ALP","Patrick Gorman","ALP","LP",33.02],
+  [247,"Swan","WA","ALP","Zaneta Mascarenhas","ALP","LP",27.98],
+  [248,"Tangney","WA","ALP","Sam Lim","ALP","LP",13.98],
+];  // auto-injected by inject_model_constants.py
 const SEATS = _S25.map(([id, name, state, wp, wn, t1, t2, m]) => ({
   id, name, state, margin: m, swing: 0, fp: [],
   winner: { party: wp, name: wn },
@@ -1573,12 +1882,13 @@ const NT_SEATS = fillStateSeats(_NT.map(r => mkSS(...r)),
 
 // ── TAS 2024 ─ Hare-Clark (5 electorates × 7 seats = 35) ─────────────────────
 // Lib 14, ALP 10, GRN 5, JLN 3, IND 3  (source: Tasmanian Electoral Commission 2024)
-// Model approach: quota-based proportional allocation per electorate.
+// Model approach: party-aggregated STV count simulation per electorate
+// (allocateHareClark — quota, surplus pooling, iterative exclusion transfers).
 // Droop quota = 100/(7+1) = 12.5%.  JLN + other independents are grouped as "ind".
-// Primary votes are actual TASEC first-preference percentages, except Franklin where
-// preference flows in the full Hare-Clark count give Lib an extra seat not predicted
-// by first preferences alone; Franklin primaries are calibration-adjusted to reproduce
-// the actual seat outcome (Lib 3, ALP 2, GRN 1, IND 1).
+// Primary votes are actual TASEC first-preference percentages except Franklin,
+// whose values were nudged when the old largest-remainder heuristic could not
+// reproduce its outcome; the STV simulation reproduces the actual 2024 seat
+// result in all five electorates (incl. Franklin Lib 3, ALP 2, GRN 1, IND 1).
 // Source: TASEC 2024 final results; electorate figures verified via Antony Green / Wikipedia.
 const TAS_ELECTORATES = [
   { name: "Bass",     seats: 7, coal: 39.7, alp: 28.6, grn: 11.1, ind: 20.6 }, // Lib=3,ALP=2,GRN=1,ind=1
@@ -1829,13 +2139,17 @@ function getFpGroups(seat) {
 //     mult(m) = L + (H - L) / (1 + exp(k * (m - m0)))
 //
 // where m = |alp_2pp - 50|. L is the safe-seat asymptote, H the knife-edge
-// asymptote, m0 the midpoint, k the steepness. Defaults below are hand-tuned
-// references against 2016→2019 and 2019→2022 swings; re-fit against 2022→2025
-// (or later) actuals via `python scripts/fit_elasticity.py` and paste the
-// reported values here and in pipeline/backtest.py:apply_swing_with_elasticity.
+// asymptote, m0 the midpoint, k the steepness. Coefficients fitted via
+// scripts/fit_elasticity.py on 2022→2025 actual seat swings (112 paired
+// ALP/Coalition seats; k capped at 0.35 — the curve shape is weakly identified,
+// MAE is nearly flat in k). Compared with the old hand-tuned curve
+// (0.80 + 0.50/(1 + exp(0.20·(m − 8)))), the fitted curve damps safe-seat
+// swings more (~0.60× vs ~0.80×) and amplifies knife-edge seats slightly more.
+// Re-fit after each cycle and keep pipeline/backtest.py:apply_swing_with_elasticity
+// in sync.
 function seatElasticityMult(alp2pp) {
   const m = Math.abs(alp2pp - 50);
-  return 0.80 + 0.50 / (1 + Math.exp(0.20 * (m - 8)));
+  return 0.593 + 0.856 / (1 + Math.exp(0.350 * (m - 8.725)));
 }
 
 // ── Uncertainty quantification ────────────────────────────────────────────────
@@ -1852,8 +2166,11 @@ function normCDF(x) {
 //   1. National 2PP swing uncertainty (swingStd pp) — correlated across all seats
 //   2. Seat-level residual uncertainty (SEAT_RESIDUAL_STD pp) — independent per seat
 //   3. Preference flow uncertainty (PREF_FLOW_STD pp) — contributes to seat-level noise
+//   4. State-correlated shock (STATE_SHOCK_STD pp) — shared by all seats in a state;
+//      enters each seat's marginal σ and adds within-state covariance to the
+//      seat-count variance (no extra grid dimension; see the block in the grid loop)
 //
-// The combined per-seat uncertainty is: σ_seat = √(ε²·σ_nat² + ε²·σ_pf_corr² + σ_residual² + σ_pf_ind²)
+// The combined per-seat uncertainty is: σ_seat = √(ε²·σ_nat² + ε²·σ_pf_corr² + σ_state² + σ_residual² + σ_pf_ind²)
 // Preference flow uncertainty is split into correlated (national shift, enters the grid)
 // and independent (per-seat residual) components, producing realistic tail-risk estimates.
 //
@@ -1875,6 +2192,16 @@ const SEAT_RESIDUAL_STD = 1.0;
 // risk when pref flows shift uniformly (campaign-driven or demographic effects).
 const PREF_FLOW_CORR_STD = 0.6; // correlated across all seats
 const PREF_FLOW_IND_STD  = 0.5; // independent per-seat residual
+
+// State-correlated swing error: a shared shock per state, on top of the national
+// swing. Historical per-state 2PP swings routinely deviate from the national swing
+// by ~1–2pp (e.g. QLD 2019, WA 2022 — state polling misses are shared by every seat
+// in that state, not independent per-seat noise). σ = 1.2pp sits in the middle of
+// that historical range. Implemented without adding a grid dimension: each seat's
+// marginal win probability uses the total σ (state shock ⊕ independent residual),
+// and the seat-count variance gains the within-state covariance induced by the
+// shared shock (see the covariance block inside computeUncertainty()).
+const STATE_SHOCK_STD = 1.2;
 
 // Non-ALP/Coalition seat uncertainty: teal/Greens/independent seats are not
 // modelled via 2PP, so we apply a wider residual here based on historical margin
@@ -1925,6 +2252,7 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
     const seatSigma = Math.sqrt(
       eps * eps * swingStd * swingStd +
       eps * eps * PREF_FLOW_CORR_STD * PREF_FLOW_CORR_STD +
+      STATE_SHOCK_STD ** 2 +
       seatResidualSigma ** 2 +
       PREF_FLOW_IND_STD ** 2
     );
@@ -1976,11 +2304,27 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
     seatIndepSigmas[seat.id] = Math.sqrt(rSigma ** 2 + PREF_FLOW_IND_STD ** 2);
   });
 
+  // Standard normal pdf (state-shock sensitivity terms below).
+  const normPdf = (x) => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+
+  // ── State-correlated shock (no extra grid dimension) ─────────────────────────
+  // Each state carries a shared N(0, STATE_SHOCK_STD²) shock on top of the grid's
+  // national swing. Within a grid cell:
+  //   - a seat's marginal win probability uses σ_tot = √(σ_state² + σ_ind²);
+  //   - the shock induces covariance between same-state seats. Linearising Φ around
+  //     the cell margin m_i, seat i's sensitivity to the shared shock (in probability
+  //     units) is s_i = φ(m_i/σ_tot)·σ_state/σ_tot, so cov_ij ≈ s_i·s_j for seats i,j
+  //     in the same state. The seat-count variance gains 2·Σ_{i<j} s_i·s_j per state,
+  //     computed cheaply as (Σ s_i)² − Σ s_i². This captures e.g. a QLD-wide polling
+  //     miss moving every QLD marginal together — previously treated as independent
+  //     per-seat noise, understating seat-count spread.
   const seatCountCdf = {};
+  let stateCovVar = 0; // grid-weighted within-state covariance → added to count variance
   gridDeltas.forEach((delta, gi) => {
     gridPfDeltas.forEach((pfDelta, pi) => {
       const w = swingPdfs[gi] * pfPdfs[pi] / totalPdf;
       let expectedCount = 0;
+      const stateShockSums = {}; // per state: Σ s_i and Σ s_i²
       // ALP/Coal seats: shift by national swing + correlated pref-flow
       alpCoalSeats.forEach(seat => {
         const rawBase = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
@@ -1990,8 +2334,16 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
           : 1.0;
         const seatBase = base + eps * (delta - nat2ppSwing) + pfDelta;
         const sig = seatIndepSigmas[seat.id] ?? 0;
-        const pWin = sig > 0 ? normCDF((seatBase - 50) / sig) : (seatBase >= 50 ? 1 : 0);
+        const sigTot = Math.sqrt(sig * sig + STATE_SHOCK_STD * STATE_SHOCK_STD);
+        const m = seatBase - 50;
+        const pWin = sigTot > 0 ? normCDF(m / sigTot) : (m >= 0 ? 1 : 0);
         expectedCount += pWin;
+        if (sigTot > 0) {
+          const s = normPdf(m / sigTot) * STATE_SHOCK_STD / sigTot;
+          const grp = stateShockSums[seat.state ?? "?"] ?? (stateShockSums[seat.state ?? "?"] = { sum: 0, sumSq: 0 });
+          grp.sum += s;
+          grp.sumSq += s * s;
+        }
       });
       // Non-ALP/Coal seats: apply correlated pref-flow shift, independent residual only
       nonAlpCoalSeats.forEach(seat => {
@@ -2006,6 +2358,12 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
       });
       const count = Math.round(expectedCount);
       seatCountCdf[count] = (seatCountCdf[count] ?? 0) + w;
+      // Within-state covariance from the shared shock: 2·Σ_{i<j} s_i·s_j = (Σs)² − Σs².
+      let cellCov = 0;
+      Object.values(stateShockSums).forEach(({ sum, sumSq }) => {
+        cellCov += Math.max(0, sum * sum - sumSq);
+      });
+      stateCovVar += w * cellCov;
     });
   });
 
@@ -2021,7 +2379,10 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
   // seat-count spread than the Bernoulli-independence formula sqrt(sum(p*(1-p))).
   const cdfMean = sorted.reduce((s, c) => s + c * seatCountCdf[c], 0);
   const cdfVar = sorted.reduce((s, c) => s + c * c * seatCountCdf[c], 0) - cdfMean ** 2;
-  const cdfStd = Math.sqrt(Math.max(0, cdfVar));
+  // Total variance = grid (national + pref-flow) variance + the state-shock
+  // within-state covariance accumulated above. Both terms are clamped at 0 so the
+  // square root can never produce NaN.
+  const cdfStd = Math.sqrt(Math.max(0, cdfVar) + Math.max(0, stateCovVar));
 
   return {
     alpMean: Math.round(cdfMean * 10) / 10,
@@ -3241,40 +3602,99 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
   });
 }
 
-// ── Hare-Clark proportional model (TAS, ACT) ─────────────────────────────────
-// Each electorate allocates seats using the Droop quota: quota = votes/(seats+1).
-// Simplified: seats_i ≈ floor(pct_i / quota) + remainder allocation.
-// newPcts: { alp, coal, grn, ind, on } — must sum to ~100
-function allocateHareClark(electorates, newPcts) {
+// ── Hare-Clark STV count simulation (TAS, ACT) ───────────────────────────────
+// Party-aggregated single transferable vote count per electorate:
+//   1. Droop quota = 100 / (seats + 1) (held fixed at the first-count total).
+//   2. Groups elect a member for each full quota; surpluses stay with the
+//      group's next candidate (scaled by a pooling efficiency, below).
+//   3. The weakest continuing group is excluded and its votes transfer to the
+//      continuing groups via HARE_CLARK_TRANSFERS; the unlisted remainder
+//      exhausts. Repeat until all seats fill (or continuing groups = vacancies).
+// This replaces the old floor(pct/quota) + largest-remainder heuristic, which
+// ignored exclusions entirely and needed Franklin's primaries calibration-
+// adjusted to reproduce the actual 2024 outcome. The simulation reproduces the
+// actual TAS 2024 (Lib 14, ALP 10, GRN 5, JLN+IND 6 — correct in all five
+// electorates incl. Braddon's 2nd JLN seat) and ACT 2024 (ALP 9, Lib 9, GRN 7)
+// results from first preferences with the default transfer matrix.
+
+// Inter-group preference transfer shares on exclusion. Rows: excluded group →
+// share of its votes flowing to each continuing group; the remainder exhausts
+// (TAS/ACT Hare-Clark has no group ticket voting and substantial exhaustion).
+// Approximate party-aggregated rates from TEC / Elections ACT 2024
+// distribution reports.
+const HARE_CLARK_TRANSFERS = {
+  grn:  { alp: 0.45, ind: 0.20, coal: 0.10 },  // 25% exhausts
+  on:   { coal: 0.40, ind: 0.25, alp: 0.10 },  // 25% exhausts
+  ind:  { coal: 0.25, alp: 0.25, grn: 0.15 },  // 35% exhausts
+  alp:  { grn: 0.30, ind: 0.25, coal: 0.10 },  // 35% exhausts
+  coal: { ind: 0.30, on: 0.20, alp: 0.10 },    // 40% exhausts
+};
+
+// Within-group vote-pooling efficiency applied to a group's surplus after each
+// seat won (1.0 = perfect ticket pooling). "ind" pools imperfectly — it is a
+// mix of party-like tickets (JLN in TAS) and unrelated independents whose
+// mutual flows leak — 0.85 reproduces Braddon 2024 (JLN 2nd seat) while
+// stopping loose-independent pools from over-winning.
+const HARE_CLARK_POOLING = { ind: 0.85 };
+
+// electorates: [{ name, seats, coal, alp, grn, ind, on }] — swing pre-applied
+// by callers; values renormalised to 100 internally. Returns statewide seat
+// totals { coal, alp, grn, ind, on }.
+function allocateHareClark(electorates, _newPcts, transfers = HARE_CLARK_TRANSFERS, pooling = HARE_CLARK_POOLING) {
   const groups = ["coal", "alp", "grn", "ind", "on"];
   const totals = Object.fromEntries(groups.map(g => [g, 0]));
 
   electorates.forEach(el => {
     const seats = el.seats;
-    const quota = 100 / (seats + 1);   // Droop quota as a %
-    // Electorates are pre-adjusted by callers (swing already applied to el.*).
-    // Use el.* values directly; renormalise to 100 below.
-    const pcts = {
-      coal: Math.max(0, el.coal),
-      alp:  Math.max(0, el.alp),
-      grn:  Math.max(0, el.grn),
-      ind:  Math.max(0, el.ind ?? 0),
-      on:   Math.max(0, el.on ?? 0),
+    const quota = 100 / (seats + 1);   // Droop quota as a % of first-count total
+    const v = {};
+    groups.forEach(g => { v[g] = Math.max(0, el[g] ?? 0); });
+    const tot = groups.reduce((a, g) => a + v[g], 0) || 1;
+    groups.forEach(g => { v[g] = v[g] / tot * 100; });
+
+    const elected = Object.fromEntries(groups.map(g => [g, 0]));
+    let filled = 0;
+    const excluded = new Set(groups.filter(g => v[g] <= 0));
+
+    // Elect every group sitting on a full quota (strongest first), retaining
+    // the pooled surplus for its next candidate.
+    const electSurpluses = () => {
+      for (;;) {
+        if (filled >= seats) return;
+        const over = groups
+          .filter(g => !excluded.has(g) && v[g] >= quota)
+          .sort((a, b) => v[b] - v[a]);
+        if (!over.length) return;
+        const g = over[0];
+        elected[g] += 1; filled += 1;
+        v[g] = (v[g] - quota) * (pooling[g] ?? 1.0);
+      }
     };
-    // Renormalise to 100
-    const tot = Object.values(pcts).reduce((a, b) => a + b, 0);
-    Object.keys(pcts).forEach(k => { pcts[k] = pcts[k] / tot * 100; });
 
-    // Droop quota allocation
-    const floor_seats = Object.fromEntries(groups.map(g => [g, Math.floor(pcts[g] / quota)]));
-    const remainders = Object.fromEntries(groups.map(g => [g, pcts[g] / quota - floor_seats[g]]));
-    const allocated = Object.values(floor_seats).reduce((a, b) => a + b, 0);
-    const remaining = seats - allocated;
+    electSurpluses();
+    while (filled < seats) {
+      const continuing = groups.filter(g => !excluded.has(g) && v[g] > 0);
+      if (!continuing.length) break;  // everything exhausted (degenerate input)
+      if (continuing.length <= seats - filled) {
+        // Continuing groups = vacancies: remaining seats fill without a quota.
+        continuing.sort((a, b) => v[b] - v[a]);
+        for (const g of continuing) {
+          if (filled < seats) { elected[g] += 1; filled += 1; }
+        }
+        break;
+      }
+      // Exclude the weakest continuing group and distribute its preferences.
+      const excl = continuing.sort((a, b) => v[a] - v[b])[0];
+      excluded.add(excl);
+      const t = transfers[excl] ?? {};
+      for (const [to, share] of Object.entries(t)) {
+        if (!excluded.has(to)) v[to] += v[excl] * share;
+      }
+      v[excl] = 0;
+      electSurpluses();
+    }
 
-    // Allocate remaining seats by largest remainder
-    const order = [...groups].sort((a, b) => remainders[b] - remainders[a]);
-    order.slice(0, remaining).forEach(g => { floor_seats[g]++; });
-    groups.forEach(g => { totals[g] += floor_seats[g]; });
+    groups.forEach(g => { totals[g] += elected[g]; });
   });
 
   return totals;  // { coal, alp, grn, ind, on }
@@ -3287,17 +3707,23 @@ function gaussRandom() {
 }
 
 // Monte Carlo uncertainty for Hare-Clark proportional systems.
-// Perturbs the statewide primary votes N times with Gaussian noise (swingStd),
-// runs allocateHareClark each time, and returns per-party seat-count statistics.
+// Draws a statewide Gaussian shock per party each simulation (swingStd) and
+// applies it to every electorate's primaries before running the STV count.
+// (allocateHareClark reads electorate values, so the shock must be applied to
+// the electorates themselves — an earlier version perturbed an ignored
+// argument, making all N simulations identical.)
 function computeHareClarkUncertainty(electorates, basePcts, swingStd, majority, N = 500) {
   const parties = ["coal", "alp", "grn", "ind", "on"];
   const tallies = Object.fromEntries(parties.map(p => [p, []]));
 
   for (let i = 0; i < N; i++) {
-    const perturbed = Object.fromEntries(parties.map(p => [
-      p, Math.max(0, (basePcts[p] ?? 0) + gaussRandom() * swingStd)
-    ]));
-    const result = allocateHareClark(electorates, perturbed);
+    const shock = Object.fromEntries(parties.map(p => [p, gaussRandom() * swingStd]));
+    const perturbedElectorates = electorates.map(el => {
+      const out = { ...el };
+      parties.forEach(p => { out[p] = Math.max(0, (el[p] ?? 0) + shock[p]); });
+      return out;
+    });
+    const result = allocateHareClark(perturbedElectorates, basePcts);
     parties.forEach(p => tallies[p].push(result[p] ?? 0));
   }
 
@@ -3316,6 +3742,130 @@ function computeHareClarkUncertainty(electorates, basePcts, swingStd, majority, 
     };
   });
   return stats;
+}
+
+// ── Legislative Council (upper house) projections ────────────────────────────
+// The four bicameral states' upper houses are statewide (NSW since always, WA
+// since the 2021 reform, SA) or regional (VIC, 8 regions × 5) proportional
+// chambers. Seats are projected with the same party-aggregated STV engine as
+// Hare-Clark (allocateHareClark): Droop quota on the chamber's elected seats,
+// surplus pooling, iterative exclusion with an LC-specific transfer matrix.
+// "ind" here pools all micro-parties/others (LCP, SFF, AJP, …), which is why
+// its pooling efficiency is below 1 — unrelated tickets don't exchange
+// preferences efficiently and optional preferential ballots exhaust heavily.
+// Projections are indicative: deltas are anchored to the model's own baseline
+// allocation (±1–2 seats vs declared results at baseline), not to the actual
+// composition, to avoid false precision.
+const LC_TRANSFERS = {
+  grn:  { alp: 0.45, ind: 0.15, coal: 0.05 },
+  on:   { coal: 0.35, ind: 0.20, alp: 0.10 },
+  ind:  { alp: 0.20, coal: 0.20, grn: 0.10, on: 0.10 },
+  alp:  { grn: 0.30, ind: 0.20 },
+  coal: { ind: 0.25, on: 0.20 },
+};
+const LC_POOLING = { ind: 0.70 };
+
+// Per-chamber config. `base` is the chamber's own first-preference baseline
+// (upper-house votes differ from lower-house primaries — minor parties run
+// well ahead); null means seed from the lower-house primaries (SA 2026: the
+// ECSA LC count was still provisional at capture). Keyed by state model id.
+const LC_CHAMBERS = {
+  nsw_2023: {
+    label: "NSW Legislative Council", electedSeats: 21,
+    base: { alp: 37.1, coal: 29.9, grn: 9.7, on: 5.9 },
+    note: "21 of 42 seats elected statewide each election (8-year terms; quota 4.5%). " +
+      "2023 declared: ALP 8 · Coalition 6 · GRN 2 · ON 1 · others 4 (NSWEC, approx. baseline shares).",
+  },
+  wa_2025: {
+    label: "WA Legislative Council", electedSeats: 37,
+    base: { alp: 36.4, coal: 31.3, grn: 10.8, on: 4.5 },
+    note: "Whole-of-state chamber since the 2021 reform (37 seats, quota 2.6%). " +
+      "2025 declared: ALP 16 · Coalition 12 · GRN 4 · ON 2 · others 3 (WAEC, approx. baseline shares).",
+  },
+  sa_2026: {
+    label: "SA Legislative Council", electedSeats: 11,
+    base: null,
+    note: "11 of 22 seats elected statewide each election (quota 8.3%). LC shares seeded from " +
+      "the lower-house primaries — the ECSA 2026 LC count was provisional at capture; treat as indicative.",
+  },
+  vic_2022: {
+    label: "VIC Legislative Council", electedSeats: 40,
+    base: { alp: 33.0, coal: 29.5, grn: 11.5, on: 2.5 },
+    note: "Approximation: the real chamber elects 5 members in each of 8 regions, and the 2022 " +
+      "count ran on group-ticket preference deals that materially boosted micro-parties; a statewide " +
+      "allocation is indicative only. 2022 declared: ALP 15 · Coalition 14 · GRN 4 · ON 1 · others 6 (VEC).",
+  },
+};
+
+// Project an upper-house composition: chamber baseline shares shifted by the
+// user's lower-house primary swings (alp/coal/grn/on; everything else pools
+// into "ind"/others), then allocated by the STV engine.
+function projectLcSeats(chamber, prim, bl) {
+  const base = chamber.base ?? { alp: bl.alp, coal: bl.coal, grn: bl.grn, on: bl.on ?? 0 };
+  const sw = (k) => (prim?.[k] ?? bl?.[k] ?? 0) - (bl?.[k] ?? 0);
+  const shares = {
+    alp:  Math.max(0, base.alp  + sw("alp")),
+    coal: Math.max(0, base.coal + sw("coal")),
+    grn:  Math.max(0, base.grn  + sw("grn")),
+    on:   Math.max(0, (base.on ?? 0) + sw("on")),
+  };
+  const major = shares.alp + shares.coal + shares.grn + shares.on;
+  shares.ind = Math.max(0, 100 - major);   // micro-parties / others pool
+  const el = { seats: chamber.electedSeats, ...shares };
+  const projected = allocateHareClark([el], null, LC_TRANSFERS, LC_POOLING);
+  const baseShares = {
+    alp: base.alp, coal: base.coal, grn: base.grn, on: base.on ?? 0,
+    ind: Math.max(0, 100 - (base.alp + base.coal + base.grn + (base.on ?? 0))),
+  };
+  const baseline = allocateHareClark(
+    [{ seats: chamber.electedSeats, ...baseShares }], null, LC_TRANSFERS, LC_POOLING);
+  return { projected, baseline, shares };
+}
+
+// Compact upper-house projection panel rendered inside the state views.
+function LcProjectionPanel({ chamber, prim, bl, panelStyle }) {
+  if (!chamber) return null;
+  const { projected, baseline } = projectLcSeats(chamber, prim, bl);
+  const rows = [
+    { k: "alp", l: "ALP", c: "#DC2626" },
+    { k: "coal", l: "Coalition", c: "#1D4ED8" },
+    { k: "grn", l: "Greens", c: "#059669" },
+    { k: "on", l: "One Nation", c: "#B45309" },
+    { k: "ind", l: "Others / micro", c: "#6B7280" },
+  ];
+  return (
+    <div style={panelStyle}>
+      <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>
+        {chamber.label} <span style={{ fontWeight: 400, color: "var(--text-3)", fontSize: 12 }}>
+          — {chamber.electedSeats} seats this election
+        </span>
+      </div>
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", margin: "8px 0" }}>
+        {rows.map(({ k, l, c }) => {
+          const seats = projected[k] ?? 0;
+          const delta = seats - (baseline[k] ?? 0);
+          return (
+            <div key={k} style={{ minWidth: 86 }}>
+              <div style={{ fontSize: 11, color: c, fontWeight: 700 }}>{l}</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: "var(--text-1)" }}>
+                {seats}
+                {delta !== 0 && (
+                  <span style={{ fontSize: 12, fontWeight: 700, marginLeft: 5, color: delta > 0 ? "#059669" : "#DC2626" }}>
+                    {delta > 0 ? "+" : ""}{delta}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-4)", lineHeight: 1.5 }}>
+        {chamber.note} Projection: party-aggregated STV (quota, surplus pooling, exclusion
+        transfers); lower-house primary swings applied to the chamber baseline; deltas vs the
+        model's own baseline allocation. Indicative only.
+      </div>
+    </div>
+  );
 }
 
 // ─── Small reusable components ────────────────────────────────────────────────
@@ -3882,6 +4432,11 @@ export default function App() {
   const [useEconomicAdj, setUseEconomicAdj] = useState(false); // apply Cameron & Crosby economic structural adjustment
   const [swingStd, setSwingStd] = useState(1.5);   // polling uncertainty (pp std dev)
   const [showAdvancedFlows, setShowAdvancedFlows] = useState(false); // show/hide advanced ON race flows
+  // Per-state 2PP swing deltas (pp relative to the national swing) for the federal
+  // model — power-user controls feeding computeModelledSeats(stateSwings). 0 = the
+  // state tracks the national swing exactly (the default for every state).
+  const [fedStateDeltas, setFedStateDeltas] = useState({ NSW: 0, VIC: 0, QLD: 0, WA: 0, SA: 0, TAS: 0 });
+  const [showStateSwings, setShowStateSwings] = useState(false); // show/hide per-state swing controls
 
   // ── Seat-at-risk table state ──
   const [riskFilter, setRiskFilter] = useState("all"); // "all" | "changing" | "marginal"
@@ -4022,9 +4577,27 @@ export default function App() {
     computeNat2pp(econAdjPrimaries, prefFlows) - computeNat2pp(BASELINE_2025, prefFlows),
     [econAdjPrimaries, prefFlows]);
 
+  // Build the stateSwings overlay for computeModelledSeats()/blendSwings() from the
+  // per-state 2PP deltas. A delta d (pp relative to national) is expressed as a
+  // primary-vote transfer on top of the national swing (ALP +d, Coalition −d), which
+  // shifts that state's seats' 2PP by ≈ d pp. alpha = 1 because the delta is an
+  // explicit user-specified deviation, not a noisy state-poll estimate to be blended
+  // (unset parties still fall back to the national swing inside blendSwings()).
+  // States at 0 are omitted, and when every delta is 0 this is null — so the default
+  // model path is bit-identical to the previous no-state-swings behaviour.
+  const stateSwings = useMemo(() => {
+    const active = Object.entries(fedStateDeltas).filter(([, d]) => Number.isFinite(d) && d !== 0);
+    if (active.length === 0) return null;
+    const out = {};
+    active.forEach(([st, d]) => {
+      out[st] = { alp: adjSwings.alp + d, coal: adjSwings.coal - d, alpha: 1 };
+    });
+    return out;
+  }, [fedStateDeltas, adjSwings]);
+
   const modelledSeats = useMemo(() =>
-    computeModelledSeats(SEATS, adjSwings, prefFlows, seatOverrides, nat2ppSwing, onThreshold, useElasticity),
-    [adjSwings, prefFlows, seatOverrides, nat2ppSwing, onThreshold, useElasticity]);
+    computeModelledSeats(SEATS, adjSwings, prefFlows, seatOverrides, nat2ppSwing, onThreshold, useElasticity, stateSwings),
+    [adjSwings, prefFlows, seatOverrides, nat2ppSwing, onThreshold, useElasticity, stateSwings]);
 
   // Scale polling uncertainty upward when there is a large undecided pool —
   // more undecided voters means the electorate is more volatile.
@@ -4671,13 +5244,18 @@ export default function App() {
   // ── NT 2024 model state ───────────────────────────────────────────────────
   // Baselines: ALP 30.5  Coalition (CLP) 40.5  GRN 5.5  IND 12.5  ON 1.5  other 9.5
   //
-  // NT uses optional-preferential voting: voters may mark preferences for as few or as many
-  // candidates as they wish. In practice ~25% of minor-party votes exhaust before reaching
-  // the final 2CP count. This reduces the effective preference contribution from Greens/IND/ON
-  // voters compared to compulsory-preference states (NSW, QLD, VIC, SA, WA).
-  // Applied to the compute2pp function below via (1 - NT_EXHAUST_RATE) scaling of minor flows.
-  // Source: NTEC 2024 DOP data — exhaustion rate estimated from minor candidate distributions.
-  const NT_EXHAUST_RATE = 0.25;
+  // NT uses optional-preferential voting (OPV): voters may mark preferences for as few or
+  // as many candidates as they wish, so a share of minor-party ballots exhausts before
+  // reaching the final 2CP count. This reduces the effective preference contribution from
+  // Greens/IND/ON voters compared to compulsory-preference states (NSW, QLD, VIC, SA, WA).
+  // Applied in compute2pp below: each non-final-two source's preference contribution is
+  // scaled by (1 - exhaust rate) and the final 2CP is a/(a+c) over surviving votes only.
+  // Default 25%: estimated from NTEC 2024 distribution-of-preferences data (the pipeline's
+  // nt_district_2cp table captures exhausted_votes per district; no exhaustion file ships
+  // with the frontend, so the statewide estimate is documented here). Setting the rate to
+  // 0% reproduces full-preferential arithmetic exactly. User-adjustable in the NT view.
+  const NT_EXHAUST_DEFAULT = 0.25;
+  const [ntExhaustRate, setNtExhaustRate] = useState(NT_EXHAUST_DEFAULT);
 
   const NT_BL = { alp: 30.5, coal: 40.5, grn: 5.5, ind: 12.5, on: 1.5 };
   const NT_2PP = 45.0;  // approximate (NT doesn't publish official 2PP)
@@ -4697,9 +5275,9 @@ export default function App() {
     const compute2pp = (p, f) => {
       const onV = p.on ?? 0;
       const other = Math.max(0, 100 - p.alp - p.coal - p.grn - ntPrim.ind - onV);
-      // Optional-preferential exhaustion: ~25% of minor-party votes never reach the final 2CP.
-      // Scale all minor-party flows by (1 - NT_EXHAUST_RATE) to account for this.
-      const ef = NT_EXHAUST_RATE;
+      // Optional-preferential exhaustion: a share of minor-party votes never reaches the
+      // final 2CP. Scale all minor-party flows by (1 - exhaust rate); 0 = full preferential.
+      const ef = ntExhaustRate;
       if (ntOnTcp === "on_v_alp") {
         const a = p.alp + (1 - ef) * (p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + ntPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on);
         const on = onV + (1 - ef) * (p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + ntPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on));
@@ -4722,16 +5300,16 @@ export default function App() {
       null, 6.5, ntSeatOverrides,
       useElasticity, null, NT_BL, NT_SEAT_FP_2024,
     );
-  }, [ntPrim, ntFlows, ntOnTcp, useNtRegionalSwing, ntSeatOverrides, useElasticity]);
+  }, [ntPrim, ntFlows, ntOnTcp, ntExhaustRate, useNtRegionalSwing, ntSeatOverrides, useElasticity]);
   const ntProjCounts = useMemo(() => { const c = {}; ntModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [ntModelledSeats]);
   const ntBaseCounts = useMemo(() => { const c = {}; NT_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
   const ntChanged = useMemo(() => ntModelledSeats.filter(s => s.modelled.changed), [ntModelledSeats]);
-  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null || !useNtRegionalSwing || Object.keys(ntSeatOverrides).length > 0 || (ntFlows.onCoalOriginFactor ?? 0) !== 0;
+  const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null || !useNtRegionalSwing || Object.keys(ntSeatOverrides).length > 0 || (ntFlows.onCoalOriginFactor ?? 0) !== 0 || ntExhaustRate !== NT_EXHAUST_DEFAULT;
 
   const ntNat2ppSwing = useMemo(() => {
     const onV = ntPrim.on ?? 0;
     const other = Math.max(0, 100 - ntPrim.alp - ntPrim.coal - ntPrim.grn - ntPrim.ind - onV);
-    const ef = NT_EXHAUST_RATE;
+    const ef = ntExhaustRate;
     if (ntOnTcp === "on_v_alp") {
       const a = ntPrim.alp + (1 - ef) * (ntPrim.coal * ntFlows.coal_alp_v_on + ntPrim.grn * ntFlows.grn_alp_v_on + ntPrim.ind * ntFlows.ind_alp_v_on + other * ntFlows.other_alp_v_on);
       const on = onV + (1 - ef) * (ntPrim.coal * (1 - ntFlows.coal_alp_v_on) + ntPrim.grn * (1 - ntFlows.grn_alp_v_on) + ntPrim.ind * (1 - ntFlows.ind_alp_v_on) + other * (1 - ntFlows.other_alp_v_on));
@@ -4754,7 +5332,7 @@ export default function App() {
     const a = ntPrim.alp + (1 - ef) * (ntPrim.ind * ntFlows.ind_alp + ntPrim.grn * ntFlows.grn_alp + onV * ntEffOnAlp + other * ntFlows.other_alp);
     const c = ntPrim.coal + (1 - ef) * (ntPrim.ind * (1 - ntFlows.ind_alp) + ntPrim.grn * (1 - ntFlows.grn_alp) + onV * (1 - ntEffOnAlp) + other * (1 - ntFlows.other_alp));
     return a / (a + c) * 100 - NT_2PP;
-  }, [ntPrim, ntFlows, ntOnTcp]);
+  }, [ntPrim, ntFlows, ntOnTcp, ntExhaustRate]);
   const ntUncertainty = useMemo(
     () => computeUncertainty(ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity, 13),
     [ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity]
@@ -4824,12 +5402,14 @@ export default function App() {
     primaries.alp !== BASELINE_2025.alp || primaries.coal !== BASELINE_2025.coal ||
     primaries.grn !== BASELINE_2025.grn || primaries.teal !== BASELINE_2025.teal || primaries.on !== BASELINE_2025.on ||
     (primaries.undecided || 0) > 0 ||
-    prefFlows.grn_alp !== 0.81 || prefFlows.teal_alp !== 0.62 || prefFlows.on_alp !== 0.43 || prefFlows.other_alp !== 0.50 ||
+    prefFlows.grn_alp !== PREF_FLOWS_2025.grn_alp || prefFlows.teal_alp !== PREF_FLOWS_2025.teal_alp ||
+    prefFlows.on_alp !== PREF_FLOWS_2025.on_alp || prefFlows.other_alp !== PREF_FLOWS_2025.other_alp ||
     prefFlows.coal_alp_v_on !== 0.10 || prefFlows.grn_alp_v_on !== 0.90 ||
     prefFlows.teal_alp_v_on !== 0.75 || prefFlows.other_alp_v_on !== 0.60 ||
     prefFlows.alp_on_v_coal !== 0.20 || prefFlows.grn_on_v_coal !== 0.08 ||
     prefFlows.teal_on_v_coal !== 0.12 || prefFlows.other_on_v_coal !== 0.25 ||
     onThreshold !== MODEL_PARAMS.onThresholdDefault ||
+    Object.values(fedStateDeltas).some(d => d !== 0) ||
     Object.keys(seatOverrides).length > 0;
 
   const getModelledMargin = (s) => {
@@ -5082,6 +5662,7 @@ export default function App() {
     setPrimaries({ alp: BASELINE_2025.alp, coal: BASELINE_2025.coal, grn: BASELINE_2025.grn, teal: BASELINE_2025.teal, on: BASELINE_2025.on, undecided: 0 });
     setPrefFlows(PREF_FLOWS_2025);
     setOnThreshold(MODEL_PARAMS.onThresholdDefault);
+    setFedStateDeltas({ NSW: 0, VIC: 0, QLD: 0, WA: 0, SA: 0, TAS: 0 });
     setSeatOverrides({});
   };
 
@@ -6545,8 +7126,8 @@ export default function App() {
                   <PrefInput label="Other → ALP" value={prefFlows.other_alp} onChange={v => setPrefFlows(f => ({ ...f, other_alp: v }))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_alp} />
                   <div style={{ fontSize: 11, color: "var(--text-4)", borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 4 }}>
                     {Object.keys(SEAT_PREF_FLOWS_2025).length > 0
-                      ? "2025 national averages: Grn 81% · Ind 62% · ON 43% · Other 50%. Per-seat AEC DOP flows active — sliders shift all seats by the same delta."
-                      : "Defaults: Grn 81% (2025) · Ind 62% (2025) · ON 27% (avg 2022…15%, 2025…43%) · Other 50%. Use \"↺ Reset to 2025\" to restore 2025 actuals."}
+                      ? "2025 AEC DOP defaults: Grn 81% · Ind 62% · ON 25.5% · Other 50%. Per-seat AEC DOP flows active — sliders shift all seats by the same delta. ON→ALP history: 2016 ~49.6% · 2019 34.7% · 2022 35.7% · 2025 25.5%."
+                      : "Defaults: Grn 81% (2025) · Ind 62% (2025) · ON 25.5% (2025; history 2016 ~49.6%, 2019 34.7%, 2022 35.7%) · Other 50%. Use \"↺ Reset to 2025\" to restore 2025 actuals."}
                   </div>
                 </div>
 
@@ -6575,7 +7156,7 @@ export default function App() {
                         <PrefInput label="Other → ALP" value={prefFlows.other_alp_v_on} onChange={v => setPrefFlows(f => ({ ...f, other_alp_v_on: v }))} color="#7C3AED" historicalRange={PREF_FLOW_RANGES.other_alp_v_on} />
                         <PrefInput label="Coalition → ALP" value={prefFlows.coal_alp_v_on} onChange={v => setPrefFlows(f => ({ ...f, coal_alp_v_on: v }))} color="#1D4ED8" historicalRange={PREF_FLOW_RANGES.coal_alp_v_on} />
                         <div style={{ fontSize: 11, color: "var(--text-4)", borderTop: "1px solid #FDE68A", paddingTop: 6, marginTop: 2 }}>
-                          Defaults: Grn 90% · Ind 75% · Other 60% · Coal 15% (2025 AEC)
+                          Defaults: Grn 90% · Ind 75% · Other 60% · Coal 10% (2025 AEC)
                         </div>
                       </div>
                       {/* ON vs Coal final flows */}
@@ -6600,6 +7181,49 @@ export default function App() {
                             Share of each seat's ON gain taken from the Coalition primary (rest from "other"). A rising ON vote is mostly ex-Coalition defection; higher values lower the Coalition's seat 2PP. No effect when ON is flat or falling.
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Advanced: per-state swing deltas — collapsed by default */}
+                <div style={panelStyle}>
+                  <button
+                    onClick={() => setShowStateSwings(v => !v)}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: showStateSwings ? 12 : 0 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-2)" }}>
+                      Advanced: state swing deltas
+                      {Object.values(fedStateDeltas).some(d => d !== 0) && (
+                        <span style={{ marginLeft: 8, fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>active</span>
+                      )}
+                    </span>
+                    <span style={{ fontSize: 13, color: "var(--text-4)" }}>{showStateSwings ? "▲" : "▼"}</span>
+                  </button>
+                  {showStateSwings && (
+                    <div>
+                      <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 8 }}>
+                        Per-state 2PP swing relative to the national swing (pp). Positive = ALP does better in that state than nationally (e.g. QLD −2 models a QLD-specific swing to the Coalition). 0 = the state tracks the national swing exactly. ACT/NT always use the national swing.
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+                        {["NSW", "VIC", "QLD", "WA", "SA", "TAS"].map(st => (
+                          <div key={st} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                            <span style={{ fontSize: 10, fontWeight: 700, color: fedStateDeltas[st] !== 0 ? "#92400E" : "var(--text-3)" }}>{st}</span>
+                            <input type="number" min={-10} max={10} step={0.5}
+                              value={fedStateDeltas[st]}
+                              onChange={e => { const v = e.target.value === "" ? 0 : +e.target.value; setFedStateDeltas(d => ({ ...d, [st]: Number.isFinite(v) ? v : 0 })); }}
+                              style={{ width: "100%", border: "1px solid var(--border-2)", borderRadius: 4, padding: "3px 4px", fontSize: 11, textAlign: "right", boxSizing: "border-box" }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      {Object.values(fedStateDeltas).some(d => d !== 0) && (
+                        <button onClick={() => setFedStateDeltas({ NSW: 0, VIC: 0, QLD: 0, WA: 0, SA: 0, TAS: 0 })}
+                          style={{ fontSize: 11, color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline", marginTop: 8 }}>
+                          ↺ Reset all to 0
+                        </button>
+                      )}
+                      <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 8, lineHeight: 1.4 }}>
+                        Applied as a primary-vote transfer (ALP +δ, Coalition −δ) on top of the national swing for every seat in the state; seat table and uncertainty bands update accordingly. Historically QLD/WA deviate from the national 2PP swing by ±2–4pp.
                       </div>
                     </div>
                   )}
@@ -6776,7 +7400,7 @@ export default function App() {
                       <input type="checkbox" checked={useElasticity} onChange={e => setUseElasticity(e.target.checked)} />
                       Seat elasticity (marginal seats swing more)
                       <span style={{ fontSize: 11, color: "var(--text-4)" }}>
-                        {useElasticity ? "ON — ≤5pp: 1.3×, 6–10pp: 1.15×, >20pp: 0.8×" : "OFF — uniform swing"}
+                        {useElasticity ? "ON — knife-edge ~1.4×, ~9pp ~1.0×, >20pp ~0.6×" : "OFF — uniform swing"}
                       </span>
                     </label>
                     <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)", cursor: "pointer", marginBottom: 8 }}>
@@ -7640,6 +8264,9 @@ export default function App() {
                   );
                 })()}
 
+                {/* ── VIC Legislative Council (upper house) projection ── */}
+                <LcProjectionPanel chamber={LC_CHAMBERS.vic_2022} prim={vicPrimaries} bl={VIC_BASELINE_2022} panelStyle={panelStyle} />
+
                 {/* ── VIC Per-seat overrides panel ── */}
                 <div style={panelStyle}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -7772,15 +8399,34 @@ export default function App() {
             {/* ── Reusable state builder (NSW, QLD, WA, SA, NT) ── */}
             {(() => {
               const cfgs = {
-                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, seatOverrides: nswSeatOverrides, setSeatOverrides: setNswSeatOverrides, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80" },
-                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, seatOverrides: qldSeatOverrides, setSeatOverrides: setQldSeatOverrides, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75" },
-                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, seatOverrides: waSeatOverrides, setSeatOverrides: setWaSeatOverrides, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: WA_SEATS, uncertainty: waUncertainty, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75" },
-                sa_2026: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, seatOverrides: saSeatOverrides, setSeatOverrides: setSaSeatOverrides, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2026 provisional results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: SA_SEATS, uncertainty: saUncertainty, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80" },
-                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, seatOverrides: ntSeatOverrides, setSeatOverrides: setNtSeatOverrides, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70" },
+                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, seatOverrides: nswSeatOverrides, setSeatOverrides: setNswSeatOverrides, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80", pollsJson: NSW_STATE_POLLS, pollCoalKeys: ["lp", "np"] },
+                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, seatOverrides: qldSeatOverrides, setSeatOverrides: setQldSeatOverrides, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75", pollsJson: QLD_STATE_POLLS, pollCoalKeys: ["lnp"] },
+                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, seatOverrides: waSeatOverrides, setSeatOverrides: setWaSeatOverrides, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: WA_SEATS, uncertainty: waUncertainty, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75", pollsJson: WA_STATE_POLLS, pollCoalKeys: ["lp", "nat"] },
+                sa_2026: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, seatOverrides: saSeatOverrides, setSeatOverrides: setSaSeatOverrides, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2026 provisional results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: SA_SEATS, uncertainty: saUncertainty, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80", pollsJson: SA_STATE_POLLS, pollCoalKeys: ["lp"], caveat: "Provisional baseline: this model is built on the 21 March 2026 provisional ECSA count (6 seats were still in doubt at capture). Statewide primaries, 2PP, per-seat ON figures and seat winners may shift at the final declaration — refresh the SA constants once ECSA publishes the declared result (see docs/ELECTION_UPDATE_CHECKLIST.md)." },
+                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, seatOverrides: ntSeatOverrides, setSeatOverrides: setNtSeatOverrides, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70", exhaust: { rate: ntExhaustRate, set: setNtExhaustRate, def: NT_EXHAUST_DEFAULT } },
               };
               const cfg = cfgs[selectedModelId];
               if (!el.modelEnabled || !cfg) return null;
-              const { prim, setPrim, flows, setFlows, onTcp, setOnTcp, seatOverrides, setSeatOverrides, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty, useRegionalSwing, setUseRegionalSwing, regionLabel } = cfg;
+              const { prim, setPrim, flows, setFlows, onTcp, setOnTcp, seatOverrides, setSeatOverrides, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty, useRegionalSwing, setUseRegionalSwing, regionLabel, pollsJson, pollCoalKeys, caveat, exhaust } = cfg;
+              // Recent state polls (election-result baseline rows excluded) and the
+              // recency-weighted average used by the "Apply latest polls" action.
+              const statePollList = (pollsJson?.polls ?? [])
+                .map(p => normalizeStatePoll(p, pollCoalKeys ?? ["lp"]))
+                .filter(Boolean)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+              const statePollAvg = statePollAverage(statePollList);
+              const applyStatePolls = () => {
+                if (!statePollAvg) return;
+                setPrim(pr => ({
+                  ...pr,
+                  alp: statePollAvg.alp,
+                  coal: statePollAvg.coal,
+                  grn: statePollAvg.grn ?? pr.grn,
+                  ind: statePollAvg.ind ?? pr.ind,
+                  on: statePollAvg.on ?? pr.on,
+                  undecided: 0,
+                }));
+              };
               const entered = parties.reduce((s, p) => s + (prim[p.k] ?? 0), 0);
               const undecided = +(prim.undecided ?? 0);
               const other = +(100 - entered - undecided).toFixed(1);
@@ -7798,6 +8444,20 @@ export default function App() {
               })();
 
               return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "320px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
+                {/* Baseline caveat (e.g. SA provisional count) */}
+                {caveat && (
+                  <div style={{ gridColumn: "1 / -1", background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 8, padding: "10px 14px" }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#92400E", marginBottom: 2 }}>⚠ Baseline caveat</div>
+                    <div style={{ fontSize: 12, color: "#B45309", lineHeight: 1.5 }}>{caveat}</div>
+                  </div>
+                )}
+
+                {/* Upper house (Legislative Council) projection — bicameral states */}
+                {LC_CHAMBERS[selectedModelId] && (
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <LcProjectionPanel chamber={LC_CHAMBERS[selectedModelId]} prim={prim} bl={bl} panelStyle={panelStyle} />
+                  </div>
+                )}
                 {/* Controls */}
                 <div>
                   <div style={panelStyle}>
@@ -7820,6 +8480,40 @@ export default function App() {
                       {parties.map(p => `${p.l} ${bl[p.k] ?? 0}%`).join(" · ")}
                     </div>
                   </div>
+                  {/* Recent state polls — list + apply action (defaults stay at the election result) */}
+                  {pollsJson && (
+                    <div style={panelStyle}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                        <div style={sectionHead}>Recent polls</div>
+                        {statePollAvg && (
+                          <button onClick={applyStatePolls}
+                            style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline", whiteSpace: "nowrap" }}>
+                            Apply latest polls
+                          </button>
+                        )}
+                      </div>
+                      {statePollList.length > 0 ? (
+                        <>
+                          {statePollList.slice(0, 6).map((p, i) => (
+                            <div key={`${p.pollster}-${p.date}-${i}`} style={{ display: "flex", alignItems: "baseline", gap: 6, padding: "4px 0", borderBottom: i < Math.min(statePollList.length, 6) - 1 ? "1px solid var(--border-3)" : "none" }}>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-2)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.pollster}</span>
+                              <span style={{ fontSize: 10, color: "var(--text-4)", whiteSpace: "nowrap" }}>{p.date}</span>
+                              <span style={{ fontSize: 10, color: "var(--text-3)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                                ALP {p.alp} · Coal {p.coal} · Grn {p.grn}{p.on > 0 ? ` · ON ${p.on}` : ""}{p.tpp != null ? ` · 2PP ${p.tpp}` : ""}
+                              </span>
+                            </div>
+                          ))}
+                          <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 6, lineHeight: 1.4 }}>
+                            "Apply latest polls" seeds the primary inputs from a recency-weighted average (exponential decay, 60-day half-life); polls missing primaries are skipped. Defaults remain the election result until applied.
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ fontSize: 11, color: "var(--text-4)" }}>
+                          No published state polls collected yet — the model baseline is the election result.
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div style={panelStyle}>
                     <div style={sectionHead}>Preference flows to ALP</div>
                     <PrefInput label="Greens → ALP" value={flows.grn_alp} onChange={v => setFlows(f => ({ ...f, grn_alp: v }))} color="#059669" />
@@ -7882,9 +8576,24 @@ export default function App() {
                         )}
                       </span>
                     </label>
+                    {exhaust && (
+                      <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 8, marginTop: 8 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)" }}>
+                          <label style={{ minWidth: 130, fontWeight: 600 }}>Preference exhaustion:</label>
+                          <input type="number" min={0} max={60} step={1}
+                            value={Math.round(exhaust.rate * 100)}
+                            onChange={e => { const v = e.target.value === "" ? 0 : +e.target.value; exhaust.set(Number.isFinite(v) ? Math.max(0, Math.min(0.6, v / 100)) : exhaust.def); }}
+                            style={{ width: 56, border: "1px solid var(--border-2)", borderRadius: 6, padding: "3px 6px", fontSize: 12, textAlign: "center", outline: "none" }} />
+                          <span style={{ fontSize: 11, color: "var(--text-3)" }}>% of minor-party ballots</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4, lineHeight: 1.4 }}>
+                          NT uses optional preferential voting (OPV): ballots that mark no preference between the final two exhaust instead of transferring. Default 25% (NTEC 2024 estimate); 0% reproduces full-preferential arithmetic.
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {hasChanges && (
-                    <button onClick={() => { setPrim({ ...bl, undecided: 0 }); setFlows({ ...resetFlows }); setOnTcp(null); setUseRegionalSwing(true); if (setSeatOverrides) setSeatOverrides({}); }}
+                    <button onClick={() => { setPrim({ ...bl, undecided: 0 }); setFlows({ ...resetFlows }); setOnTcp(null); setUseRegionalSwing(true); if (setSeatOverrides) setSeatOverrides({}); if (exhaust) exhaust.set(exhaust.def); }}
                       style={{ ...STYLES.btnDanger, width: "100%", padding: "8px", marginBottom: 16 }}>
                       Reset model
                     </button>
@@ -8366,7 +9075,7 @@ export default function App() {
                       })}
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-3)" }}>
-                      Hare-Clark proportional model (Droop quota) · TEC 2024 official results · 7 electorates × 5 seats
+                      Hare-Clark STV count simulation (Droop quota, surplus pooling, exclusion transfers) · TEC 2024 official results · 5 electorates × 7 seats · reproduces the actual 2024 result at baseline
                     </div>
                   </div>
 
@@ -8466,7 +9175,7 @@ export default function App() {
                       })}
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, paddingTop: 8, borderTop: "1px solid var(--border-3)" }}>
-                      Hare-Clark proportional model (Droop quota) · ACT EC 2024 official results · 5 electorates × 5 seats
+                      Hare-Clark STV count simulation (Droop quota, surplus pooling, exclusion transfers) · ACT EC 2024 official results · 5 electorates × 5 seats · reproduces the actual 2024 result at baseline
                     </div>
                   </div>
 
@@ -9323,8 +10032,14 @@ FP_OTH(i) = max(0, 100 − FP_ALP − FP_COAL − FP_GRN − FP_TEAL − FP_ON)`
                 reflecting the empirical observation that marginal seats tend to swing more than safe seats:
               </p>
               <pre style={codeBlock}>{
-`ε(i) = 0.80 + 0.50 / (1 + exp(0.20 · (|2PP_ALP(i) − 50| − 8)))`
+`ε(i) = 0.593 + 0.856 / (1 + exp(0.350 · (|2PP_ALP(i) − 50| − 8.725)))`
               }</pre>
+              <p style={prose}>
+                Coefficients fitted on 2022→2025 actual seat swings (112 paired ALP/Coalition seats,
+                scripts/fit_elasticity.py; steepness capped at 0.35 because the curve shape is weakly
+                identified — MAE is nearly flat in k). Safe seats damp swings more than the previous
+                hand-tuned curve.
+              </p>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginBottom: 0 }}>
                 <thead>
                   <tr>
@@ -9335,10 +10050,10 @@ FP_OTH(i) = max(0, 100 − FP_ALP − FP_COAL − FP_GRN − FP_TEAL − FP_ON)`
                 </thead>
                 <tbody>
                   {[
-                    ["0  (knife-edge)", "~1.30×", "Swing amplified"],
-                    ["8  (marginal)",   "~1.05×", "Near neutral"],
-                    ["15 (competitive)","~0.90×", "Slightly dampened"],
-                    ["25+ (safe)",      "~0.80×", "Swing dampened"],
+                    ["0  (knife-edge)", "~1.41×", "Swing amplified"],
+                    ["9  (marginal)",   "~1.01×", "Near neutral"],
+                    ["15 (competitive)","~0.68×", "Dampened"],
+                    ["25+ (safe)",      "~0.60×", "Swing dampened"],
                   ].map(([m, e, fx]) => (
                     <tr key={m}>
                       <td style={tblCell}>{m}</td>
@@ -9377,11 +10092,11 @@ if ON > COAL and ALP  ≥ COAL  →  Coalition eliminated  →  ON vs ALP final`
               <div style={secHead}>5. Uncertainty quantification</div>
               <h2 style={secTitle}>Seat-level win probabilities</h2>
               <p style={prose}>
-                The model integrates three sources of uncertainty to produce a seat-count distribution rather than a point
+                The model integrates four sources of uncertainty to produce a seat-count distribution rather than a point
                 estimate:
               </p>
               <pre style={codeBlock}>{
-`σ_seat(i) = √( ε(i)² · σ_nat² + σ_res² + σ_pref² )
+`σ_seat(i) = √( ε(i)² · σ_nat² + σ_state² + σ_res² + σ_pref² )
 
 P(ALP wins seat i) = Φ( (2PP_ALP(i) − 50) / σ_seat(i) )`
               }</pre>
@@ -9396,6 +10111,7 @@ P(ALP wins seat i) = Φ( (2PP_ALP(i) − 50) / σ_seat(i) )`
                 <tbody>
                   {[
                     ["σ_nat", "from poll CI", "National 2PP swing uncertainty; correlated across all seats"],
+                    ["σ_state", "1.2 pp", "Shared per-state shock — historical state 2PP swings deviate from the national swing by ~1–2pp (e.g. QLD 2019, WA 2022)"],
                     ["σ_res", "1.0 pp", "Seat-level deviation from national swing — calibrated from 2019→2022 RMSE"],
                     ["σ_pref", "0.8 pp", "Historical inter-election preference flow variation (e.g. ON→ALP: 35.7% in 2022, 25.5% in 2025)"],
                     ["Φ", "Normal CDF", "Abramowitz & Stegun 26.2.17 polynomial approximation, max error 7.5×10⁻⁸"],
@@ -9409,9 +10125,11 @@ P(ALP wins seat i) = Φ( (2PP_ALP(i) − 50) / σ_seat(i) )`
                 </tbody>
               </table>
               <p style={{ ...prose, marginBottom: 0, color: "var(--text-3)", fontSize: 12 }}>
-                σ_nat is correlated across seats (a polling error moves all seats together); σ_res and σ_pref are
-                independent per seat. The seat-count CDF is computed by integrating over a 100-point grid of ±3σ_nat
-                national swing values, summing per-seat win probabilities at each grid point.
+                σ_nat is correlated across seats (a polling error moves all seats together); σ_state is shared by all
+                seats in a state (its within-state covariance — each seat's shock sensitivity φ(m/σ_tot)·σ_state/σ_tot,
+                summed pairwise per state — is added to the seat-count variance); σ_res and σ_pref are independent per
+                seat. The seat-count CDF is computed by integrating over a swing × preference-flow grid, summing
+                per-seat win probabilities at each grid point.
               </p>
             </div>
 
@@ -9608,7 +10326,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                   {[
                     ["Greens → ALP", "81%", "73 – 86%"],
                     ["Independents → ALP", "62%", "43 – 75%"],
-                    ["One Nation → ALP", "43%", "14 – 43%"],
+                    ["One Nation → ALP", "25.5%", "25.5 – 49.6%"],
                     ["Other → ALP", "50%", "40 – 60%"],
                   ].map(([flow, def, hist]) => (
                     <tr key={flow}>
@@ -9623,7 +10341,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                 The <strong>↺ Reset to 2025</strong> button restores all four sliders to the 2025 AEC Distribution of Preferences values.
               </p>
               <div style={tip}>
-                <strong>Context:</strong> One Nation preferences swung significantly between 2019 (~15% to ALP) and 2025 (~43%). Adjusting this slider is the single biggest lever for testing One Nation preference scenarios.
+                <strong>Context:</strong> One Nation → ALP has shifted every election (AEC DOP): 2016 ~49.6%, 2019 34.7%, 2022 35.7%, 2025 25.5% — the highest-ever flow to the Coalition. (A 43% figure appears only as the frozen calibration basis, CALIB_BASIS_FLOWS, that SEAT_CALIB_2025 was fitted against — it is not the 2025 actual.) Adjusting this slider is the single biggest lever for testing One Nation preference scenarios.
               </div>
             </div>
 

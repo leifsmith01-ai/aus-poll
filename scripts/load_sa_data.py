@@ -189,9 +189,11 @@ def main() -> None:
     conn.execute("PRAGMA foreign_keys = OFF")
 
     # Apply SA schema
-    sa_schema_path = ROOT / "sa_schema.sql"
-    print(f"Applying schema from {sa_schema_path.name} ...")
-    conn.executescript(sa_schema_path.read_text())
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from pipeline.database import build_state_schema_sql
+    print("Applying rendered sa schema (state_schema_template.sql) ...")
+    conn.executescript(build_state_schema_sql("sa"))
 
     c = conn.cursor()
 

@@ -769,7 +769,7 @@ def _derive_party_seats(election_id: int,
     Used for Hare-Clark states (TAS, ACT) where individual candidates can be
     elected multiple times up to seats_in_district. Writes into the
     identically-named `tas_district_party_seats` / `act_district_party_seats`
-    tables defined in tas_schema.sql and act_schema.sql.
+    tables defined by the hare_clark blocks of state_schema_template.sql (TAS/ACT).
 
     When `fp` rows are supplied, aggregates FP totals per (district, party)
     to populate `total_fp_votes`. Otherwise that column is left NULL.
