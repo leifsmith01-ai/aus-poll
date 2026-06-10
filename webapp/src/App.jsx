@@ -2,7 +2,7 @@
 // Tabs: Overview · Seats · Polls · Model
 // All data, config and logic inlined — no external local imports.
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ReferenceLine, ResponsiveContainer,
@@ -49,7 +49,7 @@ const PARTY = {
   CA: { short: "Centre All.", color: "#7C3AED", bg: "#EDE9FE", group: "teal" },
   ON: { short: "One Nation", color: "#B45309", bg: "#FEF3C7", group: "one_nation" },
 };
-const getParty = (ab) => PARTY[ab] ?? { short: ab || "?", color: "var(--text-3)", bg: "#F3F4F6", group: "crossbench" };
+const getParty = (ab) => PARTY[ab] ?? { short: ab || "?", color: "var(--text-3)", bg: "var(--subtle-bg)", group: "crossbench" };
 
 // Named "teal" independent seats (climate-focused progressive independents).
 // All other IND/CA seats are classified as "ind" (Other Independent).
@@ -78,7 +78,7 @@ const GROUP_ORDER = ["alp", "coalition", "greens", "teal", "ind", "one_nation", 
 const STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
 const MARGINS = ["very_marginal", "marginal", "fairly_safe", "safe"];
 const MARGIN_LABEL = { very_marginal: "Very marginal (<2%)", marginal: "Marginal (2–5%)", fairly_safe: "Fairly safe (5–10%)", safe: "Safe (>10%)" };
-const MARGIN_COLOR = { very_marginal: "#DC2626", marginal: "#F59E0B", fairly_safe: "#10B981", safe: "#6B7280" };
+const MARGIN_COLOR = { very_marginal: "#DC2626", marginal: "#F59E0B", fairly_safe: "#10B981", safe: "var(--text-3)" };
 
 // 2022 actual national primary vote % (baseline for swing calculations)
 const BASELINE_2022 = { alp: 32.6, coal: 35.7, grn: 12.2, teal: 5.1, on: 4.7 };
@@ -3831,7 +3831,7 @@ function LcProjectionPanel({ chamber, prim, bl, panelStyle }) {
     { k: "coal", l: "Coalition", c: "#1D4ED8" },
     { k: "grn", l: "Greens", c: "#059669" },
     { k: "on", l: "One Nation", c: "#B45309" },
-    { k: "ind", l: "Others / micro", c: "#6B7280" },
+    { k: "ind", l: "Others / micro", c: "var(--text-3)" },
   ];
   return (
     <div style={panelStyle}>
@@ -3871,7 +3871,12 @@ function LcProjectionPanel({ chamber, prim, bl, panelStyle }) {
 // ─── Small reusable components ────────────────────────────────────────────────
 function PartyBadge({ party }) {
   const p = getParty(party);
-  return <span style={{ background: p.color + "28", color: p.color, fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, border: "1px solid " + p.color + "40" }}>{p.short}</span>;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "var(--subtle-bg)", color: "var(--text-1)", fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 2, border: "1px solid var(--border-1)", whiteSpace: "nowrap" }}>
+      <span style={{ width: 7, height: 7, borderRadius: "50%", background: p.color, display: "inline-block", flexShrink: 0 }} />
+      {p.short}
+    </span>
+  );
 }
 
 function MarginDot({ margin }) {
@@ -3897,12 +3902,41 @@ function TcpBar({ tcp, winnerParty }) {
   const p = getParty(winnerParty);
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-      <span style={{ width: 64, height: 6, background: "#E5E7EB", borderRadius: 3, overflow: "hidden", display: "inline-block" }}>
-        <span style={{ display: "block", width: `${Math.min(winner.pct, 100)}%`, height: "100%", background: p.color, borderRadius: 3 }} />
+      <span style={{ width: 64, height: 6, background: "var(--border-3)", borderRadius: 1, overflow: "hidden", display: "inline-block" }}>
+        <span style={{ display: "block", width: `${Math.min(winner.pct, 100)}%`, height: "100%", background: p.color, borderRadius: 1 }} />
       </span>
       <span style={{ fontWeight: 600, fontSize: 13 }}>{winner.pct.toFixed(1)}%</span>
     </span>
   );
+}
+
+// Animated number roll-up for the hero. Animates from the previously displayed
+// value (not 0) so projection changes roll smoothly; respects reduced motion.
+function useCountUp(target, duration = 900) {
+  const [value, setValue] = useState(0);
+  const shownRef = useRef(0); // last value actually displayed — animation start point
+  useEffect(() => {
+    const from = shownRef.current;
+    if (from === target) return;
+    if (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      shownRef.current = target;
+      setValue(target);
+      return;
+    }
+    let raf;
+    const start = performance.now();
+    const step = now => {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const v = t >= 1 ? target : from + (target - from) * eased;
+      shownRef.current = v;
+      setValue(v);
+      if (t < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return value;
 }
 
 function useIsMobile(breakpoint = 768) {
@@ -3918,19 +3952,29 @@ function useIsMobile(breakpoint = 768) {
 }
 
 const STYLES = {
-  panel:        { background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "18px 22px", marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)" },
-  sectionHead:  { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-4)", marginBottom: 10 },
-  panelTitle:   { fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 12 },
-  sectionTitle: { fontSize: 21, fontWeight: 800, color: "var(--text-dark)", margin: 0, letterSpacing: "-0.02em" },
-  statCard:     { background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05)" },
-  metricCard:   { background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "14px 16px", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" },
-  tableHead:    { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--text-3)", background: "var(--table-head-bg)", padding: "10px 12px", textAlign: "left" },
-  tableCell:    { padding: "11px 14px" },
-  input:        { border: "1px solid var(--border-2)", borderRadius: 6, padding: "6px 10px", fontSize: 13, outline: "none", background: "var(--panel-bg)", color: "var(--text-1)" },
-  btnPrimary:   { padding: "7px 16px", background: "#1D4ED8", color: "#fff",    borderRadius: 6, fontSize: 13, fontWeight: 600, border: "none",                             cursor: "pointer", letterSpacing: "0.01em" },
-  btnSecondary: { padding: "7px 16px", background: "var(--metric-bg)", color: "var(--text-2)", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid var(--border-2)", cursor: "pointer", letterSpacing: "0.01em" },
-  btnDanger:    { padding: "7px 16px", background: "#FEF2F2", color: "#DC2626", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #FECACA",    cursor: "pointer", letterSpacing: "0.01em" },
-  btnInfo:      { padding: "7px 16px", background: "#F0F9FF", color: "#0369A1", borderRadius: 6, fontSize: 13, fontWeight: 600, border: "1px solid #BAE6FD",    cursor: "pointer", letterSpacing: "0.01em" },
+  panel:        { background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 3, padding: "18px 22px", marginBottom: 16 },
+  sectionHead:  { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-3)", marginBottom: 10 },
+  panelTitle:   { fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, color: "var(--text-1)", marginBottom: 12 },
+  sectionTitle: { fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 600, color: "var(--text-dark)", margin: 0, letterSpacing: "-0.01em" },
+  statCard:     { background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 3, padding: "14px 16px" },
+  metricCard:   { background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 3, padding: "14px 16px" },
+  tableHead:    { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--text-3)", background: "var(--table-head-bg)", padding: "10px 12px", textAlign: "left", borderBottom: "2px solid var(--text-1)" },
+  tableCell:    { padding: "11px 14px", fontVariantNumeric: "tabular-nums" },
+  input:        { border: "1px solid var(--border-2)", borderRadius: 3, padding: "6px 10px", fontSize: 13, outline: "none", background: "var(--panel-bg)", color: "var(--text-1)" },
+  btnPrimary:   { padding: "7px 16px", background: "var(--text-1)", color: "var(--page-bg)", borderRadius: 3, fontSize: 13, fontWeight: 600, border: "none",                             cursor: "pointer", letterSpacing: "0.01em", transition: "background 0.12s, border-color 0.12s" },
+  btnSecondary: { padding: "7px 16px", background: "var(--metric-bg)", color: "var(--text-2)", borderRadius: 3, fontSize: 13, fontWeight: 600, border: "1px solid var(--border-2)", cursor: "pointer", letterSpacing: "0.01em", transition: "background 0.12s, border-color 0.12s" },
+  btnDanger:    { padding: "7px 16px", background: "var(--subtle-bg)", color: "#DC2626", borderRadius: 3, fontSize: 13, fontWeight: 600, border: "1px solid #DC262655",    cursor: "pointer", letterSpacing: "0.01em", transition: "background 0.12s, border-color 0.12s" },
+  btnInfo:      { padding: "7px 16px", background: "var(--subtle-bg)", color: "var(--text-2)", borderRadius: 3, fontSize: 13, fontWeight: 600, border: "1px solid var(--border-2)",    cursor: "pointer", letterSpacing: "0.01em", transition: "background 0.12s, border-color 0.12s" },
+  kicker:       { fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-3)" },
+  num:          { fontVariantNumeric: "tabular-nums" },
+  rule:         { borderTop: "1px solid var(--border-1)" },
+};
+
+// Shared recharts theming — keep at module scope (same constraint as STYLES).
+const CHART = {
+  grid:    { vertical: false, stroke: "var(--border-3)" },
+  tick:    { fontSize: 11, fill: "var(--text-3)" },
+  tooltip: { fontSize: 12, borderRadius: 3, border: "1px solid var(--border-2)", boxShadow: "none", background: "var(--panel-bg)", color: "var(--text-1)" },
 };
 
 function TallyBar({ seats, useModelled = false }) {
@@ -3973,15 +4017,98 @@ function TallyBar({ seats, useModelled = false }) {
   );
 }
 
+// Hero projection banner under the header. Pure render over App()'s projCounts /
+// seatAvg2pp; stays at module scope (same constraint as STYLES).
+function HeroBanner({ counts, avg2pp, isMobile }) {
+  const alp = counts.alp ?? 0;
+  const coalition = counts.coalition ?? 0;
+  const greens = counts.greens ?? 0;
+  const crossbench = (counts.teal ?? 0) + (counts.ind ?? 0) + (counts.one_nation ?? 0) + (counts.crossbench ?? 0);
+  const total = GROUP_ORDER.reduce((sum, g) => sum + (counts[g] || 0), 0);
+  const majorityPct = total > 0 ? (76 / total) * 100 : 50;
+  const alpAnim = Math.round(useCountUp(alp));
+  const coalAnim = Math.round(useCountUp(coalition));
+  const bigNum = {
+    fontFamily: "var(--font-display)",
+    fontSize: isMobile ? 30 : 44,
+    fontWeight: 600,
+    lineHeight: 1,
+    fontVariantNumeric: "tabular-nums",
+    minWidth: "1.6ch",
+  };
+  const bigLabel = { fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--header-muted)" };
+  return (
+    <div style={{ background: "var(--header-bg)", color: "var(--header-fg)", padding: isMobile ? "12px 16px 0" : "16px 24px 0" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+        {/* Kicker row */}
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: isMobile ? 8 : 10 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--header-muted)" }}>
+            2025 Federal Projection
+          </span>
+          <span style={{ fontSize: 10, color: "var(--header-muted)", whiteSpace: "nowrap" }}>
+            Data: 3 May 2025 final
+          </span>
+        </div>
+        {/* Headline numbers */}
+        <div style={{ display: "flex", alignItems: "flex-end", gap: isMobile ? 16 : 28, flexWrap: "wrap", marginBottom: isMobile ? 10 : 12 }}>
+          <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <span style={{ ...bigNum, color: "#E5484D" }}>{alpAnim}</span>
+            <span style={bigLabel}>Labor</span>
+          </span>
+          <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <span style={{ ...bigNum, color: "#5B8DEF" }}>{coalAnim}</span>
+            <span style={bigLabel}>Coalition</span>
+          </span>
+          <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? 17 : 22, fontWeight: 600, lineHeight: 1, color: "#34B27B", fontVariantNumeric: "tabular-nums" }}>{greens}</span>
+            <span style={bigLabel}>Greens</span>
+          </span>
+          <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? 17 : 22, fontWeight: 600, lineHeight: 1, color: "var(--header-fg)", fontVariantNumeric: "tabular-nums" }}>{crossbench}</span>
+            <span style={bigLabel}>Crossbench</span>
+          </span>
+          {avg2pp != null && (
+            <span style={{ marginLeft: "auto", display: "flex", alignItems: "baseline", gap: 6, whiteSpace: "nowrap" }}>
+              <span style={bigLabel}>2PP</span>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? 17 : 22, fontWeight: 600, lineHeight: 1, color: avg2pp.avg >= 50 ? "#E5484D" : "#5B8DEF", fontVariantNumeric: "tabular-nums" }}>
+                {avg2pp.avg.toFixed(1)}%
+              </span>
+              <span style={bigLabel}>ALP</span>
+            </span>
+          )}
+        </div>
+        {/* Seat bar with majority marker */}
+        <div style={{ position: "relative", marginTop: 18 }}>
+          <div style={{ display: "flex", height: isMobile ? 12 : 14, gap: 1, animation: "growBar 0.7s ease-out", transformOrigin: "left" }}>
+            {GROUP_ORDER.filter(g => counts[g]).map(g => (
+              <div key={g} style={{ flex: counts[g], background: GROUP_CONFIG[g].color }} />
+            ))}
+          </div>
+          <div style={{ position: "absolute", top: -3, bottom: -3, left: `${majorityPct}%`, width: 1, background: "var(--header-fg)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", top: -16, left: `${majorityPct}%`, transform: "translateX(-50%)", fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: "var(--header-muted)", whiteSpace: "nowrap" }}>
+            76 FOR MAJORITY
+          </div>
+        </div>
+        {/* Newspaper double rule */}
+        <div style={{ marginTop: isMobile ? 10 : 12 }}>
+          <div style={{ height: 3, background: "rgba(255,255,255,0.28)" }} />
+          <div style={{ height: 2 }} />
+          <div style={{ height: 1, background: "rgba(255,255,255,0.28)" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Live Results page ────────────────────────────────────────────────────────
 // Presentational component for the Live tab. All data is computed in App() (the
 // useLiveResults hook + projection/confidence memos) and passed in as props, so this
 // stays a pure render that closes over module-scope STYLES / GROUP_CONFIG.
 const LIVE_STATUS_STYLE = {
-  called:      { label: "Called",   bg: "#DCFCE7", fg: "#166534" },
-  likely:      { label: "Likely",   bg: "#FEF9C3", fg: "#854D0E" },
-  in_doubt:    { label: "In doubt", bg: "#FEE2E2", fg: "#991B1B" },
-  not_started: { label: "Not started", bg: "#F1F5F9", fg: "#64748B" },
+  called:      { label: "Called",   bg: "rgba(22,163,74,0.14)",  fg: "#16A34A" },
+  likely:      { label: "Likely",   bg: "rgba(217,119,6,0.14)",  fg: "#D97706" },
+  in_doubt:    { label: "In doubt", bg: "rgba(220,38,38,0.14)",  fg: "#DC2626" },
+  not_started: { label: "Not started", bg: "var(--subtle-bg)", fg: "var(--text-3)" },
 };
 
 function fmtTime(iso) {
@@ -4164,13 +4291,13 @@ function LivePage({
         <div style={STYLES.panelTitle}>Labor seat total — probability distribution</div>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={distData} margin={{ top: 8, right: 10, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+            <CartesianGrid {...CHART.grid} />
             <XAxis dataKey="seats" tick={{ fontSize: 10 }} interval={isMobile ? 4 : 2} />
             <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} />
             <Tooltip formatter={(v) => [`${v}%`, "probability"]}
               labelFormatter={(l) => `${l} seats`}
-              contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-            <ReferenceLine x={majority} stroke="#0F172A" strokeDasharray="4 2"
+              contentStyle={CHART.tooltip} />
+            <ReferenceLine x={majority} stroke="var(--text-2)" strokeDasharray="4 2"
               label={{ value: `maj ${majority}`, fontSize: 10, position: "top" }} />
             <Bar dataKey="prob">
               {distData.map((d) => (
@@ -4253,7 +4380,7 @@ function LivePage({
 }
 
 // ─── Primary vote % input ─────────────────────────────────────────────────────
-function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
+function PrimaryInput({ label, value, onChange, color = "var(--text-3)", baseline }) {
   const [raw, setRaw] = useState(String(value));
 
   // Sync display when parent resets value (e.g. Reset button)
@@ -4289,7 +4416,7 @@ function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
           style={{
             width: 68, border: "1px solid var(--border-2)", borderRadius: 6, padding: "6px 9px",
             fontSize: 14, fontWeight: 700, textAlign: "right", outline: "none",
-            borderColor: delta !== 0 ? color : "#D1D5DB"
+            borderColor: delta !== 0 ? color : "var(--border-2)"
           }}
         />
         <span style={{ fontSize: 13, color: "var(--text-3)" }}>%</span>
@@ -4297,7 +4424,7 @@ function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
       <span style={{
         fontSize: 12, fontWeight: 600, width: 58, flexShrink: 0,
         display: "inline-flex", justifyContent: "flex-end", alignItems: "center",
-        color: delta > 0 ? "#059669" : delta < 0 ? "#DC2626" : "#9CA3AF"
+        color: delta > 0 ? "#059669" : delta < 0 ? "#DC2626" : "var(--text-4)"
       }}>
         {delta === 0 ? "±0" : `${delta > 0 ? "+" : ""}${delta} pp`}
       </span>
@@ -4305,7 +4432,7 @@ function PrimaryInput({ label, value, onChange, color = "#6B7280", baseline }) {
   );
 }
 
-function PrefInput({ label, value, onChange, color = "#6B7280", historicalRange }) {
+function PrefInput({ label, value, onChange, color = "var(--text-3)", historicalRange }) {
   const pct = Math.round(value * 200) / 2;  // round to nearest 0.5
   return (
     <div style={{ marginBottom: 12 }}>
@@ -5765,7 +5892,7 @@ export default function App() {
 
   const SortTh = ({ k, children }) => (
     <th onClick={() => handleSort(k)} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-3)", background: "var(--table-head-bg)", cursor: "pointer", userSelect: "none", whiteSpace: "nowrap" }}>
-      {children}{" "}<span style={{ color: sortKey === k ? "#374151" : "#D1D5DB" }}>{sortKey === k ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+      {children}{" "}<span style={{ color: sortKey === k ? "var(--text-2)" : "var(--border-2)" }}>{sortKey === k ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
     </th>
   );
 
@@ -5782,7 +5909,7 @@ export default function App() {
 
   const panelStyle = isMobile ? { ...STYLES.panel, padding: "14px 14px" } : STYLES.panel;
   const sectionHead = STYLES.sectionHead;
-  const chartTickColor = darkMode ? "#8B949E" : "#6B7280";
+  const chartTickColor = darkMode ? "#8B949E" : "var(--text-3)";
 
   // Shared filter controls used in both desktop sidebar and mobile bottom sheet
   const seatFilterPanel = (
@@ -5858,14 +5985,22 @@ export default function App() {
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: "var(--page-bg)", minHeight: "100vh", overflowX: "hidden" }}>
+    <div style={{ fontFamily: "var(--font-sans)", background: "var(--page-bg)", minHeight: "100vh", overflowX: "hidden" }}>
 
       {/* ── Header ── */}
-      <div style={{ background: "#0F172A", color: "#fff", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div style={{ background: "var(--header-bg)", color: "var(--header-fg)", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         {/* Title row */}
         <div style={{ padding: isMobile ? "0 16px" : "0 24px", display: "flex", alignItems: "center", gap: 4, height: isMobile ? 44 : 56 }}>
-          <span style={{ fontSize: isMobile ? 13 : 15, fontWeight: 800, letterSpacing: "-0.02em", marginRight: isMobile ? 0 : 16, whiteSpace: "nowrap", color: "#F8FAFC", flex: isMobile ? 1 : "none" }}>
-            🇦🇺 aus poll
+          <span style={{ display: "flex", alignItems: "baseline", gap: 8, marginRight: isMobile ? 0 : 20, whiteSpace: "nowrap", flex: isMobile ? 1 : "none" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: isMobile ? 16 : 20, fontWeight: 640, letterSpacing: "-0.01em", color: "var(--header-fg)", lineHeight: 1 }}>
+              Aus Poll
+            </span>
+            <span aria-hidden="true" style={{ width: 7, height: 7, background: "var(--accent)", transform: "rotate(45deg)", display: "inline-block", flexShrink: 0, alignSelf: "center" }} />
+            {!isMobile && (
+              <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--header-muted)" }}>
+                Australian election modelling
+              </span>
+            )}
           </span>
           {/* Desktop: tabs in title row — scrollable to handle many tabs */}
           {!isMobile && (
@@ -5873,18 +6008,19 @@ export default function App() {
               {tabs.map(t => (
                 <button key={t.id} onClick={() => setActiveTab(t.id)}
                   style={{
-                    background: activeTab === t.id ? "rgba(59,130,246,0.10)" : "transparent",
-                    color: activeTab === t.id ? "#fff" : "#94A3B8",
+                    background: "transparent",
+                    color: activeTab === t.id ? "var(--header-fg)" : "var(--header-muted)",
                     border: "none",
-                    borderBottom: activeTab === t.id ? "3px solid #3B82F6" : "3px solid transparent",
-                    padding: "0 14px",
+                    borderBottom: activeTab === t.id ? "2px solid var(--accent)" : "2px solid transparent",
+                    padding: "0 13px",
                     height: 56,
                     cursor: "pointer",
-                    fontSize: 13,
-                    fontWeight: activeTab === t.id ? 600 : 500,
-                    transition: "color 0.15s, border-color 0.15s, background 0.15s",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    transition: "color 0.15s, border-color 0.15s",
                     borderRadius: 0,
-                    letterSpacing: "0.01em",
                     whiteSpace: "nowrap",
                     flexShrink: 0,
                   }}>
@@ -5893,26 +6029,21 @@ export default function App() {
               ))}
             </div>
           )}
-          {/* Data freshness label */}
-          {!isMobile && (
-            <span style={{ fontSize: 11, color: "var(--text-3)", marginRight: 12, whiteSpace: "nowrap", flexShrink: 0 }}>
-              Data: 3 May 2025 final
-            </span>
-          )}
           {/* Dark mode toggle */}
           <button
             onClick={() => setDarkMode(d => !d)}
             title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: 6,
-              color: "var(--text-4)",
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.18)",
+              borderRadius: 3,
+              color: "var(--header-muted)",
               cursor: "pointer",
               fontSize: isMobile ? 14 : 15,
               padding: isMobile ? "4px 7px" : "5px 9px",
               lineHeight: 1,
               flexShrink: 0,
+              transition: "border-color 0.15s, color 0.15s",
             }}
           >
             {darkMode ? "☀" : "🌙"}
@@ -5923,22 +6054,26 @@ export default function App() {
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              marginLeft: isMobile ? "auto" : 0,
+              marginLeft: isMobile ? "auto" : 6,
               display: "flex",
               alignItems: "center",
               gap: 6,
-              background: "#FBBF24",
-              color: "#1C1917",
-              borderRadius: 6,
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.25)",
+              color: "var(--header-fg)",
+              borderRadius: 3,
               padding: isMobile ? "4px 8px" : "5px 12px",
-              fontSize: isMobile ? 11 : 12,
-              fontWeight: 700,
+              fontSize: isMobile ? 10 : 11,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
               textDecoration: "none",
               whiteSpace: "nowrap",
               flexShrink: 0,
+              transition: "border-color 0.15s",
             }}
           >
-            ☕ {isMobile ? "" : "Buy me a coffee"}
+            {isMobile ? "☕" : "Support"}
           </a>
         </div>
         {/* Mobile: tabs row below title */}
@@ -5950,14 +6085,16 @@ export default function App() {
                   flex: "none",
                   minWidth: 72,
                   background: "transparent",
-                  color: activeTab === t.id ? "#fff" : "#94A3B8",
+                  color: activeTab === t.id ? "var(--header-fg)" : "var(--header-muted)",
                   border: "none",
-                  borderBottom: activeTab === t.id ? "2px solid #3B82F6" : "2px solid transparent",
+                  borderBottom: activeTab === t.id ? "2px solid var(--accent)" : "2px solid transparent",
                   padding: "0 10px",
                   height: 42,
                   cursor: "pointer",
-                  fontSize: 12,
-                  fontWeight: activeTab === t.id ? 600 : 500,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.07em",
                   transition: "color 0.15s, border-color 0.15s",
                   borderRadius: 0,
                   whiteSpace: "nowrap",
@@ -5969,42 +6106,11 @@ export default function App() {
         )}
       </div>
 
-      {/* ── Projection headline strip ── */}
-      <div style={{ background: "#0F172A", borderBottom: "1px solid rgba(255,255,255,0.06)", padding: isMobile ? "6px 16px" : "7px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 20, maxWidth: 1400, margin: "0 auto", flexWrap: "wrap" }}>
-          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#475569", whiteSpace: "nowrap" }}>
-            2025 Federal projection
-          </span>
-          <div style={{ display: "flex", gap: isMobile ? 10 : 18, alignItems: "center" }}>
-            <span style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: "#DC2626", lineHeight: 1 }}>{projCounts.alp ?? 0}</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#DC262680", textTransform: "uppercase" }}>ALP</span>
-            </span>
-            <span style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: "#3B82F6", lineHeight: 1 }}>{(projCounts.coalition ?? 0) + (projCounts.lnp ?? 0)}</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#3B82F680", textTransform: "uppercase" }}>Coal</span>
-            </span>
-            <span style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: "#059669", lineHeight: 1 }}>{projCounts.greens ?? 0}</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#05966980", textTransform: "uppercase" }}>GRN</span>
-            </span>
-            <span style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontSize: isMobile ? 14 : 16, fontWeight: 800, color: "#94A3B8", lineHeight: 1 }}>{(projCounts.teal ?? 0) + (projCounts.independent ?? 0) + (projCounts.crossbench ?? 0)}</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#94A3B840", textTransform: "uppercase" }}>Xbench</span>
-            </span>
-          </div>
-          <div style={{ display: "flex", gap: isMobile ? 8 : 14, alignItems: "center", marginLeft: isMobile ? 0 : "auto" }}>
-            <span style={{ fontSize: 11, color: "#64748B" }}>
-              Majority <span style={{ color: "#94A3B8", fontWeight: 600 }}>76</span>
-            </span>
-            {seatAvg2pp != null && (
-              <span style={{ fontSize: 11, color: "#64748B" }}>
-                2PP <span style={{ color: seatAvg2pp.avg >= 50 ? "#DC2626" : "#3B82F6", fontWeight: 700 }}>{seatAvg2pp.avg.toFixed(1)}%</span> ALP
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* ── Hero projection banner ── */}
+      <HeroBanner counts={projCounts} avg2pp={seatAvg2pp} isMobile={isMobile} />
+
+      {/* Keyed wrapper re-mounts on tab change → editorial rise-in transition */}
+      <div key={activeTab} style={{ animation: "riseIn 0.22s ease-out" }}>
 
       {/* ══════════════════════ LIVE RESULTS TAB ══════════════════════════════ */}
       {activeTab === "live" && (
@@ -6097,7 +6203,7 @@ export default function App() {
                     style={{
                       fontSize: 12, fontWeight: seatsJurisdiction === key ? 700 : 500,
                       padding: "4px 11px", borderRadius: 20, border: "1px solid",
-                      borderColor: seatsJurisdiction === key ? "#2563EB" : "#D1D5DB",
+                      borderColor: seatsJurisdiction === key ? "#2563EB" : "var(--border-2)",
                       background: seatsJurisdiction === key ? "var(--row-highlight)" : "var(--panel-bg)",
                       color: seatsJurisdiction === key ? "#2563EB" : "var(--text-2)",
                       cursor: "pointer", whiteSpace: "nowrap",
@@ -6119,7 +6225,7 @@ export default function App() {
             <div style={{ background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 12, overflow: "clip" }}>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                  <thead style={{ position: "sticky", top: isMobile ? 86 : 56, zIndex: 2 }}>
+                  <thead style={{ position: "sticky", top: isMobile ? 86 : 56, zIndex: 2, background: "var(--panel-bg)" }}>
                     <tr style={{ borderBottom: "1px solid var(--border-1)" }}>
                       <SortTh k="name">Division</SortTh>
                       <SortTh k="state">State</SortTh>
@@ -6151,9 +6257,9 @@ export default function App() {
                         <>
                           <tr key={s.id}
                             onClick={() => setExpandedSeatTabDemogId(prev => prev === s.id ? null : s.id)}
-                            style={{ background: isExpanded ? "var(--row-highlight)" : i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)", borderBottom: isExpanded ? "none" : "1px solid var(--border-3)", cursor: "pointer" }}
+                            style={{ background: isExpanded ? "var(--row-highlight)" : "var(--panel-bg)", borderBottom: isExpanded ? "none" : "1px solid var(--border-3)", cursor: "pointer", transition: "background 0.12s" }}
                             onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = "var(--row-highlight)"; }}
-                            onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)"; }}>
+                            onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = "var(--panel-bg)"; }}>
                             <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                                 <div style={{ width: 4, height: 32, background: p.color, borderRadius: 2, flexShrink: 0 }} />
@@ -6172,14 +6278,15 @@ export default function App() {
                             <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}><MarginDot margin={s.margin} /></td>
                             {isFederalTab && <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}><SwingBadge swing={s.swing} /></td>}
                             <td style={{ padding: "11px 14px", whiteSpace: "nowrap" }}>
-                              <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 20, background: MARGIN_COLOR[cat] + "20", color: MARGIN_COLOR[cat] }}>
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-2)" }}>
+                                <span style={{ width: 7, height: 7, borderRadius: "50%", background: MARGIN_COLOR[cat], display: "inline-block", flexShrink: 0 }} />
                                 {cat === "very_marginal" ? "Very marginal" : cat === "marginal" ? "Marginal" : cat === "fairly_safe" ? "Fairly safe" : "Safe"}
                               </span>
                             </td>
                           </tr>
                           {isExpanded && (
                             <tr key={`${s.id}-demog`}>
-                              <td colSpan={isFederalTab ? 8 : 7} style={{ background: "#F0F9FF", padding: "14px 20px", borderBottom: "2px solid #BFDBFE", animation: "fadeIn 0.15s ease" }}>
+                              <td colSpan={isFederalTab ? 8 : 7} style={{ background: "var(--row-highlight)", padding: "14px 20px", borderBottom: "2px solid var(--border-2)", animation: "fadeIn 0.15s ease" }}>
                                 {(() => {
                                   const d = isFederalTab ? getDemog(s.id) : getStateDemog(s.id);
                                   const hasData = d && (d.medianAge != null || d.medianPersonalIncome != null);
@@ -6192,8 +6299,8 @@ export default function App() {
                                     return (
                                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                         <span style={{ fontSize: 12, fontWeight: 600, minWidth: 56 }}>{fmt(value)}</span>
-                                        <div style={{ flex: 1, height: 5, background: "#E5E7EB", borderRadius: 3, position: "relative" }}>
-                                          <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${pct}%`, background: color, borderRadius: 3 }} />
+                                        <div style={{ flex: 1, height: 5, background: "var(--border-3)", borderRadius: 1, position: "relative" }}>
+                                          <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${pct}%`, background: color, borderRadius: 1 }} />
                                         </div>
                                         <span style={{ fontSize: 10, color: "var(--text-4)", minWidth: 28, textAlign: "right" }}>
                                           {pct < 33 ? "low" : pct < 66 ? "mid" : "high"}
@@ -6242,7 +6349,7 @@ export default function App() {
                                       <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>University educated</div>
                                       <DemogBar value={d.bachelorsOrAbovePct} min={5} max={60} color="#059669" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>No post-school qual.</div>
-                                      <DemogBar value={d.noQualificationPct} min={20} max={70} color="#6B7280" fmt={v => `${v}%`} />
+                                      <DemogBar value={d.noQualificationPct} min={20} max={70} color="var(--text-3)" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Overseas born</div>
                                       <DemogBar value={d.overseasBornPct} min={3} max={60} color="#10B981" fmt={v => `${v}%`} />
                                       <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 4 }}>Non-English at home</div>
@@ -6300,7 +6407,7 @@ export default function App() {
 
           {/* Add poll form */}
           {showAddPoll && (
-            <div style={{ ...panelStyle, background: "#F0F9FF", borderColor: "#BAE6FD", marginBottom: 16 }}>
+            <div style={{ ...panelStyle, background: "var(--row-highlight)", borderColor: "var(--border-2)", marginBottom: 16 }}>
               <div style={{ ...STYLES.panelTitle, color: "#0369A1" }}>Add new poll</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 12, marginBottom: 12 }}>
                 {[
@@ -6359,7 +6466,7 @@ export default function App() {
                       </span>
                     </div>
                     {card.delta != null && (
-                      <div style={{ fontSize: 11, fontWeight: 600, color: card.delta > 0 ? "#059669" : card.delta < 0 ? "#DC2626" : "#9CA3AF", marginTop: 2 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: card.delta > 0 ? "#059669" : card.delta < 0 ? "#DC2626" : "var(--text-4)", marginTop: 2 }}>
                         {card.delta > 0 ? "+" : ""}{card.delta.toFixed(1)} vs 2025
                       </div>
                     )}
@@ -6381,7 +6488,7 @@ export default function App() {
               { label: "2PP (ALP) est.", metric: "tpp_eff", color: "#991B1B", baseline: NATIONAL_2PP_2025 },
             ];
             return (
-              <div style={{ ...panelStyle, marginBottom: 14, borderColor: "#BFDBFE" }}>
+              <div style={{ ...panelStyle, marginBottom: 14, borderColor: "var(--border-2)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <div>
                     <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Pipeline Aggregate</span>
@@ -6406,7 +6513,7 @@ export default function App() {
                           [{d.lo95?.toFixed(1)}–{d.hi95?.toFixed(1)}] 95% CI
                         </div>
                         {delta != null && (
-                          <div style={{ fontSize: 11, fontWeight: 600, color: delta > 0 ? "#059669" : delta < 0 ? "#DC2626" : "#9CA3AF", marginTop: 2 }}>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: delta > 0 ? "#059669" : delta < 0 ? "#DC2626" : "var(--text-4)", marginTop: 2 }}>
                             {delta > 0 ? "+" : ""}{delta} vs 2025
                           </div>
                         )}
@@ -6443,7 +6550,7 @@ export default function App() {
                       {card.value != null ? `${card.value}%` : "—"}
                     </span>
                     {card.delta != null && (
-                      <div style={{ fontSize: 11, fontWeight: 600, color: card.delta > 0 ? "#059669" : card.delta < 0 ? "#DC2626" : "#9CA3AF", marginTop: 2 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: card.delta > 0 ? "#059669" : card.delta < 0 ? "#DC2626" : "var(--text-4)", marginTop: 2 }}>
                         {card.delta > 0 ? "+" : ""}{card.delta.toFixed(1)} vs 2025
                       </div>
                     )}
@@ -6518,21 +6625,21 @@ export default function App() {
             <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 12 }}>Thick lines = weighted aggregate (30-day window, decay + sample-size weighted) · Dots = individual polls</div>
             <ResponsiveContainer width="100%" height={340}>
               <LineChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+                <CartesianGrid {...CHART.grid} />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis domain={[0, 50]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
+                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={CHART.tooltip} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 {/* Raw poll scatter (strokeWidth=0 = dots only, no connecting line) */}
-                <Line type="linear" dataKey="ALP" stroke="#DC2626" strokeWidth={0} dot={{ r: 3, fill: "#DC2626" }} activeDot={{ r: 4 }} legendType="circle" />
-                <Line type="linear" dataKey="Coalition" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 3, fill: "#1D4ED8" }} activeDot={{ r: 4 }} legendType="circle" />
-                <Line type="linear" dataKey="Greens" stroke="#059669" strokeWidth={0} dot={{ r: 3, fill: "#059669" }} activeDot={{ r: 4 }} legendType="circle" />
-                <Line type="linear" dataKey="ON" stroke="#F97316" strokeWidth={0} dot={{ r: 3, fill: "#F97316" }} activeDot={{ r: 4 }} legendType="circle" name="One Nation" />
+                <Line type="linear" dataKey="ALP" stroke="#DC2626" strokeWidth={0} dot={{ r: 2.5, fill: "#DC2626" }} activeDot={{ r: 4 }} legendType="circle" />
+                <Line type="linear" dataKey="Coalition" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 2.5, fill: "#1D4ED8" }} activeDot={{ r: 4 }} legendType="circle" />
+                <Line type="linear" dataKey="Greens" stroke="#059669" strokeWidth={0} dot={{ r: 2.5, fill: "#059669" }} activeDot={{ r: 4 }} legendType="circle" />
+                <Line type="linear" dataKey="ON" stroke="#F97316" strokeWidth={0} dot={{ r: 2.5, fill: "#F97316" }} activeDot={{ r: 4 }} legendType="circle" name="One Nation" />
                 {/* Weighted aggregate trend lines */}
-                <Line type="monotone" dataKey="ALP (trend)" stroke="#DC2626" strokeWidth={2.5} dot={false} connectNulls />
-                <Line type="monotone" dataKey="Coal (trend)" stroke="#1D4ED8" strokeWidth={2.5} dot={false} connectNulls />
-                <Line type="monotone" dataKey="Grn (trend)" stroke="#059669" strokeWidth={2.5} dot={false} connectNulls />
-                <Line type="monotone" dataKey="ON (trend)" stroke="#EA580C" strokeWidth={2.5} dot={false} connectNulls name="One Nation (trend)" />
+                <Line type="monotone" dataKey="ALP (trend)" stroke="#DC2626" strokeWidth={2.25} dot={false} connectNulls />
+                <Line type="monotone" dataKey="Coal (trend)" stroke="#1D4ED8" strokeWidth={2.25} dot={false} connectNulls />
+                <Line type="monotone" dataKey="Grn (trend)" stroke="#059669" strokeWidth={2.25} dot={false} connectNulls />
+                <Line type="monotone" dataKey="ON (trend)" stroke="#EA580C" strokeWidth={2.25} dot={false} connectNulls name="One Nation (trend)" />
               </LineChart>
             </ResponsiveContainer>
             <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6, textAlign: "center" }}>Filled dots = individual primary vote polls · Thick lines = weighted aggregate trends</div>
@@ -6543,13 +6650,23 @@ export default function App() {
             <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Estimated aggregate 2PP</div>
             <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 12 }}>Thick lines = weighted aggregate trend (30-day window, decay + sample-size weighted) · Open circles = polls reporting 2PP directly · Polls reporting only primaries are imputed using 2022 AEC preference flows</div>
             <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+              <ComposedChart data={pollChartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="tppAreaAlp" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#DC2626" stopOpacity={0.16} />
+                    <stop offset="100%" stopColor="#DC2626" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="tppAreaCoal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#1D4ED8" stopOpacity={0.16} />
+                    <stop offset="100%" stopColor="#1D4ED8" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid {...CHART.grid} />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis domain={[38, 62]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
+                <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}%` : "—", name]} contentStyle={CHART.tooltip} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <ReferenceLine y={50} stroke="#9CA3AF" strokeDasharray="5 5" label={{ value: "50%", fontSize: 10, fill: "#9CA3AF", position: "insideRight" }} />
+                <ReferenceLine y={50} stroke="var(--text-4)" label={{ value: "50%", fontSize: 10, fill: "var(--text-4)", position: "insideRight" }} />
                 {BETTING_ODDS?.national?.alp_majority?.implied_2pp != null && (
                   <ReferenceLine
                     y={BETTING_ODDS.national.alp_majority.implied_2pp}
@@ -6559,12 +6676,15 @@ export default function App() {
                   />
                 )}
                 {/* Individual poll dots — open circles */}
-                <Line type="linear" dataKey="2PP (ALP)" stroke="#DC2626" strokeWidth={0} dot={{ r: 4, fill: "none", stroke: "#DC2626", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name="ALP 2PP (reported)" />
-                <Line type="linear" dataKey="2PP (Coal)" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 4, fill: "none", stroke: "#1D4ED8", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name="Coal 2PP (reported)" />
+                <Line type="linear" dataKey="2PP (ALP)" stroke="#DC2626" strokeWidth={0} dot={{ r: 3.5, fill: "none", stroke: "#DC2626", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name="ALP 2PP (reported)" />
+                <Line type="linear" dataKey="2PP (Coal)" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 3.5, fill: "none", stroke: "#1D4ED8", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name="Coal 2PP (reported)" />
+                {/* Gradient fills under aggregate trends */}
+                <Area type="monotone" dataKey="2PP (trend)" stroke="none" fill="url(#tppAreaAlp)" connectNulls legendType="none" tooltipType="none" name="ALP 2PP trend area" />
+                <Area type="monotone" dataKey="Coal 2PP (trend)" stroke="none" fill="url(#tppAreaCoal)" connectNulls legendType="none" tooltipType="none" name="Coal 2PP trend area" />
                 {/* Weighted aggregate trend lines */}
-                <Line type="monotone" dataKey="2PP (trend)" stroke="#991B1B" strokeWidth={3} dot={false} connectNulls name="ALP 2PP trend" />
-                <Line type="monotone" dataKey="Coal 2PP (trend)" stroke="#1E40AF" strokeWidth={3} dot={false} connectNulls name="Coal 2PP trend" />
-              </LineChart>
+                <Line type="monotone" dataKey="2PP (trend)" stroke="#991B1B" strokeWidth={2.25} dot={false} connectNulls name="ALP 2PP trend" />
+                <Line type="monotone" dataKey="Coal 2PP (trend)" stroke="#1E40AF" strokeWidth={2.25} dot={false} connectNulls name="Coal 2PP trend" />
+              </ComposedChart>
             </ResponsiveContainer>
             <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6, textAlign: "center" }}>Open circles = polls reporting 2PP directly · Thick lines = weighted aggregate (includes imputed 2PP from primaries)</div>
           </div>
@@ -6578,7 +6698,7 @@ export default function App() {
               </div>
               <ResponsiveContainer width="100%" height={280}>
                 <ComposedChart data={pipelineTrendData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+                  <CartesianGrid {...CHART.grid} />
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(pipelineTrendData.length / 8)} />
                   <YAxis domain={[0, 50]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
                   <Tooltip
@@ -6586,7 +6706,7 @@ export default function App() {
                       if (Array.isArray(v)) return [`${v[0]}%–${v[1]}%`, name];
                       return [v != null ? `${v}%` : "—", name];
                     }}
-                    contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)", background: "var(--panel-bg)", color: "var(--text-1)" }}
+                    contentStyle={CHART.tooltip}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Area type="monotone" dataKey="ALP CI" stroke="none" fill="#DC2626" fillOpacity={0.12} legendType="none" name="ALP 95% CI" />
@@ -6740,14 +6860,14 @@ export default function App() {
                 <div style={{ height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+                      <CartesianGrid {...CHART.grid} />
                       <XAxis dataKey="date" type="category" allowDuplicatedCategory={false}
                         tick={{ fontSize: 11, fill: chartTickColor }}
                         tickFormatter={d => new Date(d).toLocaleDateString("en-AU", { month: "short", year: "2-digit" })} />
                       <YAxis tick={{ fontSize: 11, fill: chartTickColor }} domain={[-20, 40]}
                         tickFormatter={v => `${v > 0 ? "+" : ""}${v}`} />
-                      <Tooltip formatter={(v, name) => [`${v > 0 ? "+" : ""}${v}pp net`, name]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", boxShadow: "0 4px 12px rgba(0,0,0,0.12)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
-                      <ReferenceLine y={0} stroke="#9CA3AF" strokeDasharray="4 2" />
+                      <Tooltip formatter={(v, name) => [`${v > 0 ? "+" : ""}${v}pp net`, name]} contentStyle={CHART.tooltip} />
+                      <ReferenceLine y={0} stroke="var(--text-4)" strokeDasharray="4 2" />
                       <Legend />
                       {leaders.map(leader => (
                         <Line key={leader.name} data={leader.data} type="monotone"
@@ -6815,7 +6935,7 @@ export default function App() {
                     const change = m.current - (m.election ?? m.current);
                     const changeStr = change > 0 ? `+${change.toFixed(1)}` : change.toFixed(1);
                     const isNeutral = Math.abs(change) < 0.05;
-                    const changeColor = isNeutral ? "#6B7280"
+                    const changeColor = isNeutral ? "var(--text-3)"
                       : ((change > 0) === m.higherIsBad) ? "#DC2626" : "#059669";
                     return (
                       <div key={m.label} style={{ background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 10, padding: "12px 14px" }}>
@@ -6848,10 +6968,10 @@ export default function App() {
                     <div style={{ height: 160 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={cpiData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+                          <CartesianGrid {...CHART.grid} />
                           <XAxis dataKey="period" tick={{ fontSize: 10, fill: chartTickColor }} />
                           <YAxis tick={{ fontSize: 10, fill: chartTickColor }} domain={[0, "auto"]} tickFormatter={v => `${v}%`} />
-                          <Tooltip formatter={(v) => [`${v}%`, "CPI YoY"]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
+                          <Tooltip formatter={(v) => [`${v}%`, "CPI YoY"]} contentStyle={CHART.tooltip} />
                           <ReferenceLine y={elecCpi} stroke="#DC2626" strokeDasharray="4 2" label={{ value: "Election", fill: "#DC2626", fontSize: 10 }} />
                           <ReferenceLine y={2.5} stroke="#059669" strokeDasharray="4 2" label={{ value: "RBA target", fill: "#059669", fontSize: 10 }} />
                           <Line type="monotone" dataKey="value" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3 }} name="CPI YoY %" />
@@ -6867,11 +6987,11 @@ export default function App() {
                     <div style={{ height: 140 }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={unempData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+                          <CartesianGrid {...CHART.grid} />
                           <XAxis dataKey="period" tick={{ fontSize: 10, fill: chartTickColor }}
                             tickFormatter={p => p.replace(/^(\d{4})-(\d{2})$/, (_, y, m) => `${["", "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+m]} ${y.slice(2)}`)} />
                           <YAxis tick={{ fontSize: 10, fill: chartTickColor }} domain={[3, 6]} tickFormatter={v => `${v}%`} />
-                          <Tooltip formatter={(v) => [`${v}%`, "Unemployment"]} contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--border-1)", background: "var(--panel-bg)", color: "var(--text-1)" }} />
+                          <Tooltip formatter={(v) => [`${v}%`, "Unemployment"]} contentStyle={CHART.tooltip} />
                           <ReferenceLine y={elecUnemp} stroke="#DC2626" strokeDasharray="4 2" label={{ value: "Election", fill: "#DC2626", fontSize: 10 }} />
                           <Line type="monotone" dataKey="value" stroke="#7C3AED" strokeWidth={2} dot={{ r: 2 }} name="Unemployment %" />
                         </LineChart>
@@ -6879,11 +6999,11 @@ export default function App() {
                     </div>
                   </div>
                 )}
-                <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 12px", fontSize: 12, color: "#92400E" }}>
+                <div style={{ background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.35)", borderRadius: 8, padding: "10px 12px", fontSize: 12, color: "#92400E" }}>
                   <strong>Cameron &amp; Crosby model note:</strong> {cc?.interpretation ?? "Economic model not yet computed."}
                   {" "}This is a structural baseline signal only — polling data is the primary forecast input.
                   <span style={{ display: "block", fontSize: 11, color: "#B45309", marginTop: 4 }}>
-                    Refresh with: <code style={{ background: "#FEF3C7", padding: "1px 4px", borderRadius: 3 }}>python pipeline/fetch_economics.py</code>
+                    Refresh with: <code style={{ background: "var(--subtle-bg)", padding: "1px 4px", borderRadius: 3 }}>python pipeline/fetch_economics.py</code>
                   </span>
                 </div>
               </div>
@@ -7024,7 +7144,7 @@ export default function App() {
                   <PrimaryInput label="Greens" value={primaries.grn} onChange={v => setPrimaries(p => ({ ...p, grn: v }))} color="#059669" baseline={BASELINE_2025.grn} />
                   <PrimaryInput label="Independents" value={primaries.teal} onChange={v => setPrimaries(p => ({ ...p, teal: v }))} color="#0891B2" baseline={BASELINE_2025.teal} />
                   <PrimaryInput label="One Nation" value={primaries.on} onChange={v => setPrimaries(p => ({ ...p, on: v }))} color="#B45309" baseline={BASELINE_2025.on} />
-                  <PrimaryInput label="Undecided" value={primaries.undecided ?? 0} onChange={v => setPrimaries(p => ({ ...p, undecided: v }))} color="#9CA3AF" baseline={0} />
+                  <PrimaryInput label="Undecided" value={primaries.undecided ?? 0} onChange={v => setPrimaries(p => ({ ...p, undecided: v }))} color="var(--text-4)" baseline={0} />
                   {/* ── Undecided allocation breakdown ── */}
                   {(primaries.undecided ?? 0) > 0 && (() => {
                     const undec = primaries.undecided;
@@ -7064,7 +7184,7 @@ export default function App() {
                     return (
                       <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: overLimit ? "#DC2626" : "#374151" }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: overLimit ? "#DC2626" : "var(--text-2)" }}>
                           {overLimit ? `−${Math.abs(other).toFixed(1)}% ⚠` : `${other}%`}
                         </span>
                       </div>
@@ -7097,7 +7217,7 @@ export default function App() {
                     warns.push(`ALP→ON (${(prefFlows.alp_on_v_coal * 100).toFixed(1)}%) is ≥ 50%. ALP voters strongly prefer Coalition over ON; this rate is implausibly high.`);
                   if (warns.length === 0) return null;
                   return (
-                    <div style={{ background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 8, padding: "10px 12px", marginBottom: 10 }}>
+                    <div style={{ background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.35)", borderRadius: 8, padding: "10px 12px", marginBottom: 10 }}>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "#92400E", marginBottom: 6 }}>⚠ Inconsistent preference flows</div>
                       {warns.map((w, i) => (
                         <div key={i} style={{ fontSize: 11, color: "#B45309", marginBottom: i < warns.length - 1 ? 4 : 0 }}>• {w}</div>
@@ -7144,7 +7264,7 @@ export default function App() {
                   {showAdvancedFlows && (
                     <div>
                       {/* ON vs ALP final flows */}
-                      <div style={{ marginBottom: 12, padding: "10px 12px", background: "#FEF3C7", borderRadius: 8, border: "1px solid #FDE68A" }}>
+                      <div style={{ marginBottom: 12, padding: "10px 12px", background: "rgba(217,119,6,0.10)", borderRadius: 3, border: "1px solid rgba(217,119,6,0.35)" }}>
                         <div style={{ fontSize: 11, fontWeight: 800, color: "#92400E", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
                           ON vs ALP final — flows toward ALP
                         </div>
@@ -7160,7 +7280,7 @@ export default function App() {
                         </div>
                       </div>
                       {/* ON vs Coal final flows */}
-                      <div style={{ padding: "10px 12px", background: "#FEF3C7", borderRadius: 8, border: "1px solid #FDE68A" }}>
+                      <div style={{ padding: "10px 12px", background: "rgba(217,119,6,0.10)", borderRadius: 3, border: "1px solid rgba(217,119,6,0.35)" }}>
                         <div style={{ fontSize: 11, fontWeight: 800, color: "#92400E", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
                           ON vs Coalition final — flows toward ON
                         </div>
@@ -7194,7 +7314,7 @@ export default function App() {
                     <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-2)" }}>
                       Advanced: state swing deltas
                       {Object.values(fedStateDeltas).some(d => d !== 0) && (
-                        <span style={{ marginLeft: 8, fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>active</span>
+                        <span style={{ marginLeft: 8, fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>active</span>
                       )}
                     </span>
                     <span style={{ fontSize: 13, color: "var(--text-4)" }}>{showStateSwings ? "▲" : "▼"}</span>
@@ -7260,7 +7380,7 @@ export default function App() {
                   </div>
                   <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
-                    <div style={{ fontSize: 30, fontWeight: 800, color: changedSeats.length > 0 ? "#F59E0B" : "#6B7280" }}>{changedSeats.length}</div>
+                    <div style={{ fontSize: 30, fontWeight: 800, color: changedSeats.length > 0 ? "#F59E0B" : "var(--text-3)" }}>{changedSeats.length}</div>
                     <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>of {SEATS.length} modelled</div>
                   </div>
                   {(() => {
@@ -7270,8 +7390,8 @@ export default function App() {
                     const isCoalMaj = (projCounts.coalition || 0) >= needsMaj;
                     const projMaj = isAlpMaj ? "ALP majority" : (isCoalMaj ? "Coalition majority" : "Hung parliament");
                     const majColor = isAlpMaj ? "#DC2626" : (isCoalMaj ? "#1D4ED8" : "#B45309");
-                    const majBg = isAlpMaj ? "#FEF2F2" : (isCoalMaj ? "#EFF6FF" : "#FFFBEB");
-                    const majBorder = isAlpMaj ? "#FECACA" : (isCoalMaj ? "#BFDBFE" : "#FDE68A");
+                    const majBg = isAlpMaj ? "rgba(220,38,38,0.08)" : (isCoalMaj ? "rgba(29,78,216,0.08)" : "rgba(217,119,6,0.08)");
+                    const majBorder = isAlpMaj ? "rgba(220,38,38,0.30)" : (isCoalMaj ? "rgba(29,78,216,0.30)" : "rgba(217,119,6,0.35)");
                     return (
                       <div style={{ ...STYLES.panel, marginBottom: 0, textAlign: "center", background: majBg, borderColor: majBorder }}>
                         <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Majority</div>
@@ -7292,7 +7412,7 @@ export default function App() {
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                       <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
-                      {hasChanges && <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
+                      {hasChanges && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
                     </div>
                     <TallyBar seats={modelledSeats} useModelled={true} />
                   </div>
@@ -7383,7 +7503,7 @@ export default function App() {
                     <div style={{
                       position: "absolute",
                       left: `${(76 - 50) / 101 * 100}%`,
-                      width: 1, height: "100%", background: "#6B7280",
+                      width: 1, height: "100%", background: "var(--text-3)",
                     }} title="76 seats = majority" />
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-4)" }}>
@@ -7406,7 +7526,7 @@ export default function App() {
                     <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-2)", cursor: "pointer", marginBottom: 8 }}>
                       <input type="checkbox" checked={useEconomicAdj} onChange={e => setUseEconomicAdj(e.target.checked)} />
                       Economic structural adjustment (Cameron &amp; Crosby)
-                      <span style={{ fontSize: 11, color: econAdjPp > 0.1 ? "#059669" : econAdjPp < -0.1 ? "#DC2626" : "#9CA3AF" }}>
+                      <span style={{ fontSize: 11, color: econAdjPp > 0.1 ? "#059669" : econAdjPp < -0.1 ? "#DC2626" : "var(--text-4)" }}>
                         {useEconomicAdj
                           ? `ON — ${econAdjPp >= 0 ? "+" : ""}${econAdjPp.toFixed(2)}pp ALP (${econAdjPp >= 0 ? "tailwind" : "headwind"})`
                           : `OFF — C&C effect: ${econAdjPp >= 0 ? "+" : ""}${econAdjPp.toFixed(2)}pp`}
@@ -7438,7 +7558,7 @@ export default function App() {
                 {(() => {
                   const filterBtnStyle = (active) => ({
                     padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid var(--border-2)",
-                    background: active ? "#374151" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
+                    background: active ? "var(--text-2)" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
                   });
                   const filtered = (riskFilter === "all" ? seatsByRisk
                     : riskFilter === "changing" ? seatsByRisk.filter(s => s.modelled.changed)
@@ -7465,7 +7585,7 @@ export default function App() {
                       <div style={{ overflowX: "auto" }}>
                       {/* Column headers */}
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 450 }}>
-                        {[["Seat", "#374151"], ["State", "#6B7280"], ["2025", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP win%", "#6B7280"], ["", "#6B7280"]].map(([label, color], i) => (
+                        {[["Seat", "var(--text-2)"], ["State", "var(--text-3)"], ["2025", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP win%", "var(--text-3)"], ["", "var(--text-3)"]].map(([label, color], i) => (
                           <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                         ))}
                       </div>
@@ -7476,7 +7596,7 @@ export default function App() {
                           const isSafe = margin > 10;
                           const changed = seat.modelled.changed;
                           const projGroup = seat.modelled.winnerGroup;
-                          const projColor = GROUP_CONFIG[projGroup]?.color ?? "#6B7280";
+                          const projColor = GROUP_CONFIG[projGroup]?.color ?? "var(--text-3)";
                           const isExpanded = expandedModelSeatId === seat.id;
                           const d = getDemog(seat.id);
 
@@ -7493,7 +7613,7 @@ export default function App() {
                                   padding: "5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
                                   borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
                                   opacity: isSafe ? 0.55 : 1,
-                                  background: isExpanded ? "#F0F9FF" : projGroup === "one_nation" && changed ? "#FFFBEB" : "transparent",
+                                  background: isExpanded ? "var(--row-highlight)" : projGroup === "one_nation" && changed ? "rgba(217,119,6,0.08)" : "transparent",
                                   cursor: "pointer",
                                 }}>
                                 <span style={{ fontWeight: changed ? 700 : 400, fontSize: 13, color: "var(--text-1)", paddingLeft: changed ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -7507,20 +7627,20 @@ export default function App() {
                                     : <span style={{ fontSize: 11, color: "var(--text-4)" }}>holds</span>
                                   }
                                 </div>
-                                <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
+                                <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "var(--text-2)" }}>
                                   {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
                                 </span>
                                 <span style={{
                                   fontSize: 11, fontWeight: 700, color:
-                                    seatWinProb == null ? "#9CA3AF"
+                                    seatWinProb == null ? "var(--text-4)"
                                       : seatWinProb >= 0.85 ? "#DC2626"
                                         : seatWinProb >= 0.60 ? "#F59E0B"
-                                          : seatWinProb >= 0.40 ? "#6B7280"
+                                          : seatWinProb >= 0.40 ? "var(--text-3)"
                                             : "#1D4ED8"
                                 }}>
                                   {seatWinProb != null ? `${Math.round(seatWinProb * 100)}%` : "—"}
                                 </span>
-                                <span style={{ fontSize: 10, color: changed ? projColor : "#9CA3AF", fontWeight: 600 }}>
+                                <span style={{ fontSize: 10, color: changed ? projColor : "var(--text-4)", fontWeight: 600 }}>
                                   {changed ? "CHANGED" : ""}
                                   {hasSeatOverrides && <span style={{ marginLeft: 4, fontSize: 9, color: "var(--text-3)", fontWeight: 700 }}>⚙</span>}
                                 </span>
@@ -7591,7 +7711,7 @@ export default function App() {
                                         Preference Flows (seat override)
                                       </div>
                                       {Object.values(seatPrefFlows).some(v => v != null) && (
-                                        <span style={{ fontSize: 10, background: "#6B7280", color: "#fff", padding: "1px 6px", borderRadius: 8, fontWeight: 600 }}>seat-level</span>
+                                        <span style={{ fontSize: 10, background: "var(--text-3)", color: "#fff", padding: "1px 6px", borderRadius: 8, fontWeight: 600 }}>seat-level</span>
                                       )}
                                     </div>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
@@ -7660,7 +7780,7 @@ export default function App() {
                                 ALP 2PP {alp2pp.toFixed(1)}%
                               </span>
                             )}
-                            {seat.modelled.isOverride && <span style={{ fontSize: 10, background: "#FEF3C7", color: "#92400E", padding: "1px 5px", borderRadius: 6, fontWeight: 600 }}>override</span>}
+                            {seat.modelled.isOverride && <span style={{ fontSize: 10, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 5px", borderRadius: 6, fontWeight: 600 }}>override</span>}
                           </div>
                         );
                       };
@@ -7696,7 +7816,7 @@ export default function App() {
                     <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-level primary overrides</span>
                     {Object.keys(seatOverrides).length > 0 && (
                       <>
-                        <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
+                        <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
                           {Object.keys(seatOverrides).length} active
                         </span>
                         <button onClick={() => setSeatOverrides({})}
@@ -7920,7 +8040,7 @@ export default function App() {
                   <PrimaryInput label="Greens" value={vicPrimaries.grn} onChange={v => setVicPrimaries(p => ({ ...p, grn: v }))} color="#059669" baseline={VIC_BASELINE_2022.grn} />
                   <PrimaryInput label="Independents" value={vicPrimaries.ind} onChange={v => setVicPrimaries(p => ({ ...p, ind: v }))} color="#0891B2" baseline={VIC_BASELINE_2022.ind} />
                   <PrimaryInput label="One Nation" value={vicPrimaries.on} onChange={v => setVicPrimaries(p => ({ ...p, on: v }))} color="#B45309" baseline={VIC_BASELINE_2022.on} />
-                  <PrimaryInput label="Undecided" value={vicPrimaries.undecided ?? 0} onChange={v => setVicPrimaries(p => ({ ...p, undecided: v }))} color="#9CA3AF" baseline={0} />
+                  <PrimaryInput label="Undecided" value={vicPrimaries.undecided ?? 0} onChange={v => setVicPrimaries(p => ({ ...p, undecided: v }))} color="var(--text-4)" baseline={0} />
                   {(() => {
                     const entered = +(vicPrimaries.alp + vicPrimaries.coal + vicPrimaries.grn + vicPrimaries.ind + vicPrimaries.on).toFixed(1);
                     const undecided = +(vicPrimaries.undecided ?? 0);
@@ -7929,7 +8049,7 @@ export default function App() {
                     return (
                       <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: overLimit ? "#DC2626" : "#374151" }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: overLimit ? "#DC2626" : "var(--text-2)" }}>
                           {overLimit ? `−${Math.abs(other).toFixed(1)}% ⚠` : `${other}%`}
                         </span>
                       </div>
@@ -8036,7 +8156,7 @@ export default function App() {
                   </div>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
-                    <div style={{ fontSize: 30, fontWeight: 800, color: vicChangedSeats.length > 0 ? "#F59E0B" : "#6B7280" }}>{vicChangedSeats.length}</div>
+                    <div style={{ fontSize: 30, fontWeight: 800, color: vicChangedSeats.length > 0 ? "#F59E0B" : "var(--text-3)" }}>{vicChangedSeats.length}</div>
                     <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>of 88 modelled</div>
                   </div>
                   <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
@@ -8066,7 +8186,7 @@ export default function App() {
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                       <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
-                      {vicHasChanges && <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
+                      {vicHasChanges && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
                     </div>
                     <TallyBar seats={vicModelledSeats} useModelled={true} />
                   </div>
@@ -8125,7 +8245,7 @@ export default function App() {
                     <div style={{ position: "absolute", left: `${Math.max(0, vicUncertainty.alpP05 / 89 * 100)}%`, width: `${Math.min(100, (vicUncertainty.alpP95 - vicUncertainty.alpP05) / 89 * 100)}%`, height: "100%", background: "#FECACA", borderRadius: 4 }} />
                     <div style={{ position: "absolute", left: `${Math.max(0, vicUncertainty.alpP25 / 89 * 100)}%`, width: `${Math.min(100, (vicUncertainty.alpP75 - vicUncertainty.alpP25) / 89 * 100)}%`, height: "100%", background: "#FCA5A5" }} />
                     <div style={{ position: "absolute", left: `${Math.max(0, vicUncertainty.alpP50 / 89 * 100)}%`, width: 2, height: "100%", background: "#DC2626" }} />
-                    <div style={{ position: "absolute", left: `${45 / 89 * 100}%`, width: 1, height: "100%", background: "#6B7280" }} title="45 seats = majority" />
+                    <div style={{ position: "absolute", left: `${45 / 89 * 100}%`, width: 1, height: "100%", background: "var(--text-3)" }} title="45 seats = majority" />
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-4)" }}>
                     <span>{vicUncertainty.alpP05}</span>
@@ -8153,7 +8273,7 @@ export default function App() {
                 {(() => {
                   const filterBtnStyle = (active) => ({
                     padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid var(--border-2)",
-                    background: active ? "#374151" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
+                    background: active ? "var(--text-2)" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
                   });
                   let vicFiltered = [...vicModelledSeats].sort((a, b) => {
                     const ma = Math.abs((a.modelled.projAlp2pp ?? 50) - 50);
@@ -8174,7 +8294,7 @@ export default function App() {
                       </div>
                       <div style={{ overflowX: "auto" }}>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 400 }}>
-                          {[["Seat", "#374151"], ["2022", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP%", "#6B7280"], ["", ""]].map(([label, color], i) => (
+                          {[["Seat", "var(--text-2)"], ["2022", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP%", "var(--text-3)"], ["", ""]].map(([label, color], i) => (
                             <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                           ))}
                         </div>
@@ -8182,7 +8302,7 @@ export default function App() {
                           {vicFiltered.map(seat => {
                             const margin = Math.abs((seat.modelled.projAlp2pp ?? 50) - 50);
                             const changed = seat.modelled.changed;
-                            const projColor = GROUP_CONFIG[seat.modelled.winnerGroup]?.color ?? "#6B7280";
+                            const projColor = GROUP_CONFIG[seat.modelled.winnerGroup]?.color ?? "var(--text-3)";
                             const winProb = vicUncertainty.seatWinProbs[seat.id];
                             const isExpanded = expandedStateSeatId === seat.id;
                             const d = getStateDemog(seat.id);
@@ -8194,7 +8314,7 @@ export default function App() {
                                     display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, alignItems: "center", minWidth: 400,
                                     padding: "5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
                                     borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
-                                    background: hasOv ? "#F0FDF4" : isExpanded ? "#F0F9FF" : changed ? "#FFF7ED" : "transparent",
+                                    background: hasOv ? "rgba(16,185,129,0.10)" : isExpanded ? "var(--row-highlight)" : changed ? "rgba(217,119,6,0.08)" : "transparent",
                                     cursor: "pointer",
                                   }}>
                                   <span style={{ fontWeight: changed ? 700 : 400, fontSize: 13, color: "var(--text-1)", paddingLeft: changed ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -8204,13 +8324,13 @@ export default function App() {
                                   <div>
                                     {changed ? <PartyBadge party={seat.modelled.winnerParty} /> : <span style={{ fontSize: 11, color: "var(--text-4)" }}>holds</span>}
                                   </div>
-                                  <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
+                                  <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "var(--text-2)" }}>
                                     {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
                                   </span>
-                                  <span style={{ fontSize: 11, fontWeight: 700, color: winProb == null ? "#9CA3AF" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "#6B7280" : "#1D4ED8" }}>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: winProb == null ? "var(--text-4)" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "var(--text-3)" : "#1D4ED8" }}>
                                     {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
                                   </span>
-                                  <span style={{ fontSize: 10, color: changed ? projColor : hasOv ? "#059669" : "#9CA3AF", fontWeight: 600 }}>
+                                  <span style={{ fontSize: 10, color: changed ? projColor : hasOv ? "#059669" : "var(--text-4)", fontWeight: 600 }}>
                                     {changed ? "CHANGED" : hasOv ? "OVERRIDE" : ""}
                                   </span>
                                 </div>
@@ -8273,7 +8393,7 @@ export default function App() {
                     <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-level overrides</span>
                     {Object.keys(vicSeatOverrides).length > 0 && (
                       <>
-                        <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
+                        <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
                           {Object.keys(vicSeatOverrides).length} active
                         </span>
                         <button onClick={() => setVicSeatOverrides({})}
@@ -8446,7 +8566,7 @@ export default function App() {
               return <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "320px minmax(0, 1fr)", gap: 16, alignItems: "start" }}>
                 {/* Baseline caveat (e.g. SA provisional count) */}
                 {caveat && (
-                  <div style={{ gridColumn: "1 / -1", background: "#FFFBEB", border: "1px solid #FCD34D", borderRadius: 8, padding: "10px 14px" }}>
+                  <div style={{ gridColumn: "1 / -1", background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.35)", borderRadius: 8, padding: "10px 14px" }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#92400E", marginBottom: 2 }}>⚠ Baseline caveat</div>
                     <div style={{ fontSize: 12, color: "#B45309", lineHeight: 1.5 }}>{caveat}</div>
                   </div>
@@ -8469,10 +8589,10 @@ export default function App() {
                     ))}
                     <PrimaryInput label="Undecided" value={prim.undecided ?? 0}
                       onChange={v => setPrim(pr => ({ ...pr, undecided: v }))}
-                      color="#9CA3AF" baseline={0} />
+                      color="var(--text-4)" baseline={0} />
                     <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: overLimit ? "#DC2626" : "#374151" }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: overLimit ? "#DC2626" : "var(--text-2)" }}>
                         {overLimit ? `−${Math.abs(other).toFixed(1)}% ⚠` : `${other}%`}
                       </span>
                     </div>
@@ -8625,7 +8745,7 @@ export default function App() {
                     </div>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Seats changing</div>
-                      <div style={{ fontSize: 30, fontWeight: 800, color: changed.length > 0 ? "#F59E0B" : "#6B7280" }}>{changed.length}</div>
+                      <div style={{ fontSize: 30, fontWeight: 800, color: changed.length > 0 ? "#F59E0B" : "var(--text-3)" }}>{changed.length}</div>
                       <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>of {totalSeats} modelled</div>
                     </div>
                     <div style={{ ...panelStyle, marginBottom: 0, textAlign: "center" }}>
@@ -8644,7 +8764,7 @@ export default function App() {
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                         <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
-                        {hasChanges && <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
+                        {hasChanges && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
                       </div>
                       <TallyBar seats={modelled} useModelled={true} />
                     </div>
@@ -8699,7 +8819,7 @@ export default function App() {
                       <div style={{ position: "absolute", left: `${Math.max(0, uncertainty.alpP05 / (totalSeats + 1) * 100)}%`, width: `${Math.min(100, (uncertainty.alpP95 - uncertainty.alpP05) / (totalSeats + 1) * 100)}%`, height: "100%", background: "#FECACA", borderRadius: 4 }} />
                       <div style={{ position: "absolute", left: `${Math.max(0, uncertainty.alpP25 / (totalSeats + 1) * 100)}%`, width: `${Math.min(100, (uncertainty.alpP75 - uncertainty.alpP25) / (totalSeats + 1) * 100)}%`, height: "100%", background: "#FCA5A5" }} />
                       <div style={{ position: "absolute", left: `${Math.max(0, uncertainty.alpP50 / (totalSeats + 1) * 100)}%`, width: 2, height: "100%", background: "#DC2626" }} />
-                      <div style={{ position: "absolute", left: `${majority / (totalSeats + 1) * 100}%`, width: 1, height: "100%", background: "#6B7280" }} title={`${majority} seats = majority`} />
+                      <div style={{ position: "absolute", left: `${majority / (totalSeats + 1) * 100}%`, width: 1, height: "100%", background: "var(--text-3)" }} title={`${majority} seats = majority`} />
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-4)" }}>
                       <span>{uncertainty.alpP05}</span>
@@ -8727,7 +8847,7 @@ export default function App() {
                   {(() => {
                     const filterBtnStyle = (active) => ({
                       padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid var(--border-2)",
-                      background: active ? "#374151" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
+                      background: active ? "var(--text-2)" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
                     });
                     let stateFiltered = [...modelled].sort((a, b) => {
                       const ma = Math.abs((a.modelled.projAlp2pp ?? 50) - 50);
@@ -8748,7 +8868,7 @@ export default function App() {
                         </div>
                         <div style={{ overflowX: "auto" }}>
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 400 }}>
-                            {[["Seat", "#374151"], ["Baseline", "#6B7280"], ["Projected", "#6B7280"], ["Margin", "#6B7280"], ["ALP%", "#6B7280"], ["", ""]].map(([label, color], i) => (
+                            {[["Seat", "var(--text-2)"], ["Baseline", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP%", "var(--text-3)"], ["", ""]].map(([label, color], i) => (
                               <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                             ))}
                           </div>
@@ -8756,7 +8876,7 @@ export default function App() {
                             {stateFiltered.map(seat => {
                               const margin = Math.abs((seat.modelled.projAlp2pp ?? 50) - 50);
                               const chg = seat.modelled.changed;
-                              const projColor = GROUP_CONFIG[seat.modelled.winnerGroup]?.color ?? "#6B7280";
+                              const projColor = GROUP_CONFIG[seat.modelled.winnerGroup]?.color ?? "var(--text-3)";
                               const winProb = uncertainty.seatWinProbs[seat.id];
                               const isExpanded = expandedStateSeatId === seat.id;
                               const d = getStateDemog(seat.id);
@@ -8769,7 +8889,7 @@ export default function App() {
                                       display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, alignItems: "center", minWidth: 400,
                                       padding: "5px 2px", borderLeft: `4px solid ${chg ? projColor : "transparent"}`,
                                       borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
-                                      background: hasOv ? "#F0FDF4" : isExpanded ? "#F0F9FF" : chg ? "#FFF7ED" : "transparent",
+                                      background: hasOv ? "rgba(16,185,129,0.10)" : isExpanded ? "var(--row-highlight)" : chg ? "rgba(217,119,6,0.08)" : "transparent",
                                       cursor: "pointer",
                                     }}>
                                     <span style={{ fontWeight: chg ? 700 : 400, fontSize: 13, color: "var(--text-1)", paddingLeft: chg ? 4 : 8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -8779,13 +8899,13 @@ export default function App() {
                                     <div>
                                       {chg ? <PartyBadge party={seat.modelled.winnerParty} /> : <span style={{ fontSize: 11, color: "var(--text-4)" }}>holds</span>}
                                     </div>
-                                    <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "#374151" }}>
+                                    <span style={{ fontSize: 12, fontWeight: margin < 5 ? 700 : 400, color: margin < 2 ? "#DC2626" : margin < 5 ? "#D97706" : "var(--text-2)" }}>
                                       {margin === Infinity ? "—" : `${margin.toFixed(1)}pp`}
                                     </span>
-                                    <span style={{ fontSize: 11, fontWeight: 700, color: winProb == null ? "#9CA3AF" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "#6B7280" : "#1D4ED8" }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: winProb == null ? "var(--text-4)" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "var(--text-3)" : "#1D4ED8" }}>
                                       {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
                                     </span>
-                                    <span style={{ fontSize: 10, color: chg ? projColor : hasOv ? "#059669" : autoOn ? "#B45309" : "#9CA3AF", fontWeight: 600 }}>
+                                    <span style={{ fontSize: 10, color: chg ? projColor : hasOv ? "#059669" : autoOn ? "#B45309" : "var(--text-4)", fontWeight: 600 }}>
                                       {chg ? "CHANGED" : hasOv ? "OVERRIDE" : autoOn ? "ON AUTO" : ""}
                                     </span>
                                   </div>
@@ -8850,7 +8970,7 @@ export default function App() {
                         <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-level overrides</span>
                         {Object.keys(seatOverrides ?? {}).length > 0 && (
                           <>
-                            <span style={{ fontSize: 11, background: "#FEF3C7", color: "#92400E", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
+                            <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
                               {Object.keys(seatOverrides).length} active
                             </span>
                             <button onClick={() => setSeatOverrides({})}
@@ -8951,7 +9071,7 @@ export default function App() {
                                     ].map(opt => (
                                       <button key={String(opt.val)}
                                         onClick={() => setOv({ tcpMatchup: opt.val })}
-                                        style={{ fontSize: 11, padding: "3px 8px", borderRadius: 5, border: "1px solid", cursor: "pointer", fontWeight: tcpMatchup === opt.val ? 700 : 400, background: tcpMatchup === opt.val ? "#FEF3C7" : "#F9FAFB", borderColor: tcpMatchup === opt.val ? "#F59E0B" : "#D1D5DB", color: tcpMatchup === opt.val ? "#92400E" : "#374151" }}>
+                                        style={{ fontSize: 11, padding: "3px 8px", borderRadius: 5, border: "1px solid", cursor: "pointer", fontWeight: tcpMatchup === opt.val ? 700 : 400, background: tcpMatchup === opt.val ? "rgba(217,119,6,0.15)" : "var(--subtle-bg)", borderColor: tcpMatchup === opt.val ? "#F59E0B" : "var(--border-2)", color: tcpMatchup === opt.val ? "var(--text-1)" : "var(--text-2)" }}>
                                         {opt.label}
                                       </button>
                                     ))}
@@ -9031,10 +9151,10 @@ export default function App() {
                     <PrimaryInput label="Greens" value={tasPrim.grn} onChange={v => setTasPrim(p => ({ ...p, grn: v }))} color="#059669" baseline={TAS_BL.grn} />
                     <PrimaryInput label="Independents" value={tasPrim.ind} onChange={v => setTasPrim(p => ({ ...p, ind: v }))} color="#0891B2" baseline={TAS_BL.ind} />
                     <PrimaryInput label="One Nation" value={tasPrim.on ?? 0} onChange={v => setTasPrim(p => ({ ...p, on: v }))} color="#B45309" baseline={TAS_BL.on} />
-                    <PrimaryInput label="Undecided" value={tasPrim.undecided ?? 0} onChange={v => setTasPrim(p => ({ ...p, undecided: v }))} color="#9CA3AF" baseline={0} />
+                    <PrimaryInput label="Undecided" value={tasPrim.undecided ?? 0} onChange={v => setTasPrim(p => ({ ...p, undecided: v }))} color="var(--text-4)" baseline={0} />
                     {(() => {
                       const e = +(tasPrim.alp + tasPrim.coal + tasPrim.grn + tasPrim.ind + (tasPrim.on ?? 0)).toFixed(1); const ud = +(tasPrim.undecided ?? 0); const o = +(100 - e - ud).toFixed(1); const ov = e + ud > 100;
-                      return <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span><span style={{ fontSize: 13, fontWeight: 700, color: ov ? "#DC2626" : "#374151" }}>{ov ? `−${Math.abs(o).toFixed(1)}% ⚠` : `${o}%`}</span></div>;
+                      return <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span><span style={{ fontSize: 13, fontWeight: 700, color: ov ? "#DC2626" : "var(--text-2)" }}>{ov ? `−${Math.abs(o).toFixed(1)}% ⚠` : `${o}%`}</span></div>;
                     })()}
                     <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6 }}>Baseline: ALP {TAS_BL.alp}% · Coalition {TAS_BL.coal}% · Grn {TAS_BL.grn}% · Ind {TAS_BL.ind}% · ON {TAS_BL.on}%</div>
                   </div>
@@ -9095,8 +9215,8 @@ export default function App() {
                             <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{s.mean}</div>
                             <div style={{ fontSize: 11, color: "var(--text-3)" }}>P25–P75: {s.p25}–{s.p75}</div>
                             <div style={{ fontSize: 11, color: "var(--text-4)" }}>P05–P95: {s.p05}–{s.p95}</div>
-                            {k === "coal" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#1D4ED8" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
-                            {k === "alp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#DC2626" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
+                            {k === "coal" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#1D4ED8" : "var(--text-3)" }}>P(maj): {s.pMajority}%</div>}
+                            {k === "alp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#DC2626" : "var(--text-3)" }}>P(maj): {s.pMajority}%</div>}
                           </div>
                         );
                       })}
@@ -9131,10 +9251,10 @@ export default function App() {
                     <PrimaryInput label="Greens" value={actPrim.grn} onChange={v => setActPrim(p => ({ ...p, grn: v }))} color="#059669" baseline={ACT_BL.grn} />
                     <PrimaryInput label="Independents" value={actPrim.ind} onChange={v => setActPrim(p => ({ ...p, ind: v }))} color="#0891B2" baseline={ACT_BL.ind} />
                     <PrimaryInput label="One Nation" value={actPrim.on ?? 0} onChange={v => setActPrim(p => ({ ...p, on: v }))} color="#B45309" baseline={ACT_BL.on} />
-                    <PrimaryInput label="Undecided" value={actPrim.undecided ?? 0} onChange={v => setActPrim(p => ({ ...p, undecided: v }))} color="#9CA3AF" baseline={0} />
+                    <PrimaryInput label="Undecided" value={actPrim.undecided ?? 0} onChange={v => setActPrim(p => ({ ...p, undecided: v }))} color="var(--text-4)" baseline={0} />
                     {(() => {
                       const e = +(actPrim.alp + actPrim.coal + actPrim.grn + actPrim.ind + (actPrim.on ?? 0)).toFixed(1); const ud = +(actPrim.undecided ?? 0); const o = +(100 - e - ud).toFixed(1); const ov = e + ud > 100;
-                      return <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span><span style={{ fontSize: 13, fontWeight: 700, color: ov ? "#DC2626" : "#374151" }}>{ov ? `−${Math.abs(o).toFixed(1)}% ⚠` : `${o}%`}</span></div>;
+                      return <div style={{ borderTop: "1px solid var(--border-3)", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between" }}><span style={{ fontSize: 12, color: "var(--text-3)" }}>Other / minor parties</span><span style={{ fontSize: 13, fontWeight: 700, color: ov ? "#DC2626" : "var(--text-2)" }}>{ov ? `−${Math.abs(o).toFixed(1)}% ⚠` : `${o}%`}</span></div>;
                     })()}
                     <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6 }}>Baseline: ALP {ACT_BL.alp}% · Coalition {ACT_BL.coal}% · Grn {ACT_BL.grn}% · Ind {ACT_BL.ind}% · ON {ACT_BL.on}%</div>
                   </div>
@@ -9195,8 +9315,8 @@ export default function App() {
                             <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{s.mean}</div>
                             <div style={{ fontSize: 11, color: "var(--text-3)" }}>P25–P75: {s.p25}–{s.p75}</div>
                             <div style={{ fontSize: 11, color: "var(--text-4)" }}>P05–P95: {s.p05}–{s.p95}</div>
-                            {k === "alp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#DC2626" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
-                            {k === "coal" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#1D4ED8" : "#6B7280" }}>P(maj): {s.pMajority}%</div>}
+                            {k === "alp" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#DC2626" : "var(--text-3)" }}>P(maj): {s.pMajority}%</div>}
+                            {k === "coal" && <div style={{ fontSize: 11, fontWeight: 700, color: s.pMajority >= 50 ? "#1D4ED8" : "var(--text-3)" }}>P(maj): {s.pMajority}%</div>}
                           </div>
                         );
                       })}
@@ -9234,15 +9354,15 @@ export default function App() {
                             <button key={st} onClick={() => toggleSet(setDemogStateFilter, st)}
                               style={{
                                 padding: "3px 10px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                                background: demogStateFilter.has(st) ? "#374151" : "var(--subtle-bg)",
+                                background: demogStateFilter.has(st) ? "var(--text-2)" : "var(--subtle-bg)",
                                 color: demogStateFilter.has(st) ? "#fff" : "var(--text-3)",
-                                border: "1px solid " + (demogStateFilter.has(st) ? "#374151" : "var(--border-1)")
+                                border: "1px solid " + (demogStateFilter.has(st) ? "var(--text-2)" : "var(--border-1)")
                               }}>
                               {st}
                             </button>
                           ))}
                         </div>
-                        <span style={{ color: "#E5E7EB" }}>|</span>
+                        <span style={{ color: "var(--border-1)" }}>|</span>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                           {["Inner Metropolitan", "Outer Metropolitan", "Provincial", "Rural"].map(cls => (
                             <button key={cls} onClick={() => toggleSet(setDemogClassFilter, cls)}
@@ -9320,7 +9440,7 @@ export default function App() {
                                     }
                                   }} style={{ padding: "10px 10px", textAlign: "left", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-3)", background: "var(--table-head-bg)", cursor: "pointer", userSelect: "none", whiteSpace: "nowrap", borderBottom: "1px solid var(--border-1)" }}>
                                     {label}{" "}
-                                    <span style={{ color: demogSortKey === k ? "#374151" : "#D1D5DB" }}>
+                                    <span style={{ color: demogSortKey === k ? "var(--text-2)" : "var(--border-2)" }}>
                                       {demogSortKey === k ? (demogSortDir === "asc" ? "↑" : "↓") : "↕"}
                                     </span>
                                   </th>
@@ -9346,7 +9466,10 @@ export default function App() {
                                       <td style={{ padding: "9px 12px", fontWeight: 600, color: "var(--text-1)" }}>{isExpanded ? "▾ " : "▸ "}{s.name}</td>
                                       <td style={{ padding: "9px 12px", color: "var(--text-3)" }}>{s.state}</td>
                                       <td style={{ padding: "9px 12px" }}>
-                                        <span style={{ background: pg.bg, color: pg.color, fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>{pg.short}</span>
+                                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "var(--subtle-bg)", color: "var(--text-1)", fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 2, border: "1px solid var(--border-1)" }}>
+                                          <span style={{ width: 7, height: 7, borderRadius: "50%", background: pg.color, display: "inline-block", flexShrink: 0 }} />
+                                          {pg.short}
+                                        </span>
                                       </td>
                                       <td style={{ padding: "9px 12px", color: "var(--text-3)", fontSize: 11 }}>{d.urbanClass ?? "—"}</td>
                                       <td style={{ padding: "9px 12px", fontWeight: 600 }}>{d.medianPersonalIncomeEarners ? `$${(d.medianPersonalIncomeEarners / 1000).toFixed(0)}k` : "—"}</td>
@@ -9428,7 +9551,7 @@ export default function App() {
                         </div>
                         <ResponsiveContainer width="100%" height={320}>
                           <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-3)" />
+                            <CartesianGrid {...CHART.grid} />
                             <XAxis dataKey="x" name="X" type="number" domain={["auto", "auto"]}
                               tickFormatter={v => {
                                 const m = DEMOG_METRICS.find(m => m.key === demogXMetric);
@@ -9460,7 +9583,7 @@ export default function App() {
                               if (!pts.length) return null;
                               return (
                                 <Scatter key={grp} name={GROUP_CONFIG[grp]?.label ?? grp} data={pts}
-                                  fill={GROUP_CONFIG[grp]?.color ?? "#6B7280"}
+                                  fill={GROUP_CONFIG[grp]?.color ?? "var(--text-3)"}
                                   fillOpacity={0.7} />
                               );
                             })}
@@ -9500,8 +9623,8 @@ export default function App() {
         const sourceBadge = {
           betfair:      { label: "Betfair Exchange", color: "#059669", bg: "#D1FAE5" },
           "the-odds-api": { label: "The Odds API", color: "#1D4ED8", bg: "#DBEAFE" },
-          manual:       { label: "Indicative", color: "#D97706", bg: "#FEF3C7" },
-        }[mktSource] ?? { label: mktSource, color: "var(--text-3)", bg: "#F3F4F6" };
+          manual:       { label: "Indicative", color: "#D97706", bg: "rgba(217,119,6,0.14)" },
+        }[mktSource] ?? { label: mktSource, color: "var(--text-3)", bg: "var(--subtle-bg)" };
 
         const alpMajority = mktNational.alp_majority;
         const coalMajority = mktNational.coalition_majority;
@@ -9513,7 +9636,7 @@ export default function App() {
 
         const groupColor = {
           alp: "#DC2626", coalition: "#1D4ED8", greens: "#059669",
-          teal: "#0891B2", on: "#B45309", other: "#6B7280",
+          teal: "#0891B2", on: "#B45309", other: "var(--text-3)",
         };
 
         return (
@@ -9634,11 +9757,11 @@ export default function App() {
                   </thead>
                   <tbody>
                     {seatRows.map(([seatName, mkt], i) => {
-                      const faColor = groupColor[mkt.finalist_a] ?? "#6B7280";
-                      const fbColor = groupColor[mkt.finalist_b] ?? "#6B7280";
+                      const faColor = groupColor[mkt.finalist_a] ?? "var(--text-3)";
+                      const fbColor = groupColor[mkt.finalist_b] ?? "var(--text-3)";
                       const tightnessColor = Math.min(mkt.finalist_a_prob, mkt.finalist_b_prob) > 0.4
                         ? "#DC2626" : Math.min(mkt.finalist_a_prob, mkt.finalist_b_prob) > 0.3
-                          ? "#D97706" : "#374151";
+                          ? "#D97706" : "var(--text-2)";
                       return (
                         <tr key={seatName} style={{ background: i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)", borderBottom: "1px solid var(--border-3)" }}>
                           <td style={{ padding: "8px 12px", fontWeight: 600 }}>{seatName}</td>
@@ -9690,7 +9813,7 @@ export default function App() {
                       return (
                         <div key={stateCode} style={{ ...STYLES.metricCard, position: "relative" }}>
                           {isManualState && (
-                            <span style={{ position: "absolute", top: 8, right: 8, fontSize: 9, fontWeight: 700, color: "#D97706", background: "#FEF3C7", padding: "2px 6px", borderRadius: 6 }}>
+                            <span style={{ position: "absolute", top: 8, right: 8, fontSize: 9, fontWeight: 700, color: "#D97706", background: "rgba(217,119,6,0.14)", padding: "2px 6px", borderRadius: 3 }}>
                               Indicative
                             </span>
                           )}
@@ -9705,7 +9828,7 @@ export default function App() {
                             {alpProb != null && (
                               <div style={{ flex: 1, textAlign: "center" }}>
                                 <div style={{ fontSize: 10, fontWeight: 700, color: statePartyColor.alp, marginBottom: 2 }}>ALP/Labor</div>
-                                <div style={{ fontSize: 22, fontWeight: 800, color: leader === "alp" ? statePartyColor.alp : "#374151" }}>
+                                <div style={{ fontSize: 22, fontWeight: 800, color: leader === "alp" ? statePartyColor.alp : "var(--text-2)" }}>
                                   {(alpProb * 100).toFixed(0)}%
                                 </div>
                                 {mkt.alp_win?.decimal_odds && (
@@ -9716,7 +9839,7 @@ export default function App() {
                             {coalProb != null && (
                               <div style={{ flex: 1, textAlign: "center" }}>
                                 <div style={{ fontSize: 10, fontWeight: 700, color: statePartyColor.coalition, marginBottom: 2 }}>Coalition/Lib</div>
-                                <div style={{ fontSize: 22, fontWeight: 800, color: leader === "coalition" ? statePartyColor.coalition : "#374151" }}>
+                                <div style={{ fontSize: 22, fontWeight: 800, color: leader === "coalition" ? statePartyColor.coalition : "var(--text-2)" }}>
                                   {(coalProb * 100).toFixed(0)}%
                                 </div>
                                 {mkt.coalition_win?.decimal_odds && (
@@ -9817,7 +9940,7 @@ export default function App() {
           </div>
 
           {/* Pipeline call-to-action */}
-          <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 10, padding: "14px 18px", marginBottom: 18 }}>
+          <div style={{ background: "var(--row-highlight)", border: "1px solid var(--border-2)", borderRadius: 10, padding: "14px 18px", marginBottom: 18 }}>
             <div style={{ fontWeight: 700, color: "#1D4ED8", marginBottom: 6, fontSize: 14 }}>
               Load full 88-seat data
             </div>
@@ -9825,7 +9948,7 @@ export default function App() {
               The VEC pipeline downloads district-level first preference and two-candidate preferred
               results from <strong>vec.vic.gov.au</strong> for all 88 Legislative Assembly seats.
             </p>
-            <code style={{ display: "block", background: "#1E293B", color: "#93C5FD", padding: "8px 12px", borderRadius: 6, fontSize: 12, fontFamily: "monospace" }}>
+            <code style={{ display: "block", background: "var(--header-bg)", color: "#93C5FD", padding: "8px 12px", borderRadius: 3, fontSize: 12, fontFamily: "monospace" }}>
               python main.py --state vic --year 202211
             </code>
             <p style={{ fontSize: 12, color: "var(--text-3)", marginTop: 8, marginBottom: 0 }}>
@@ -9913,9 +10036,9 @@ export default function App() {
         const codeBlock = {
           fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace",
           fontSize: isMobile ? 11 : 12,
-          background: "#0F172A",
-          color: "#E2E8F0",
-          borderRadius: 8,
+          background: "var(--header-bg)",
+          color: "var(--header-fg)",
+          borderRadius: 3,
           padding: "14px 16px",
           overflowX: "auto",
           whiteSpace: "pre",
@@ -10233,8 +10356,8 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
         const tblCell = { padding: "8px 12px", fontSize: 13, color: "var(--text-2)", borderBottom: "1px solid var(--border-3)", verticalAlign: "top" };
         const tblCellMono = { ...tblCell, fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace", fontSize: 12, color: "#2563EB" };
         const divider = { borderTop: "1px solid var(--border-1)", margin: "18px 0" };
-        const tip = { background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#1E40AF", lineHeight: 1.65, marginBottom: 14 };
-        const warn = { background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#92400E", lineHeight: 1.65, marginBottom: 14 };
+        const tip = { background: "var(--row-highlight)", border: "1px solid var(--border-2)", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#1E40AF", lineHeight: 1.65, marginBottom: 14 };
+        const warn = { background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.35)", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#92400E", lineHeight: 1.65, marginBottom: 14 };
         const inlineCode = { fontFamily: "monospace", background: "var(--page-bg)", padding: "1px 5px", borderRadius: 3, fontSize: 12 };
         const badge = (color, text) => (
           <span style={{ display: "inline-block", background: color, color: "#fff", borderRadius: 4, fontSize: 11, fontWeight: 700, padding: "1px 7px", letterSpacing: "0.03em" }}>{text}</span>
@@ -10593,7 +10716,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                 Whenever you change the <strong>national primary vote inputs</strong>, aus-poll automatically
                 encodes your inputs as URL query parameters. For example:
               </p>
-              <div style={{ fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace", fontSize: isMobile ? 11 : 12, background: "#0F172A", color: "#E2E8F0", borderRadius: 8, padding: "12px 16px", overflowX: "auto", whiteSpace: "pre", lineHeight: 1.7, marginBottom: 14 }}>
+              <div style={{ fontFamily: "'JetBrains Mono','Fira Code','Menlo',monospace", fontSize: isMobile ? 11 : 12, background: "var(--header-bg)", color: "var(--header-fg)", borderRadius: 3, padding: "12px 16px", overflowX: "auto", whiteSpace: "pre", lineHeight: 1.7, marginBottom: 14 }}>
                 {"?alp=36.0&coal=30.5&grn=13.0&teal=5.0&on=6.5"}
               </div>
               <p style={{ ...prose, marginBottom: 0 }}>
@@ -10750,7 +10873,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
             </div>
 
             {/* Disclaimer */}
-            <div style={{ ...panel, background: "#FFFBEB", border: "1px solid #FCD34D", marginBottom: 0 }}>
+            <div style={{ ...panel, background: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.35)", marginBottom: 0 }}>
               <div style={secHead}>Disclaimer</div>
               <p style={{ ...bodyText, margin: 0 }}>
                 aus-poll is an independent modelling tool and is not affiliated with the Australian Electoral Commission, any political party, or any government body. Projections are illustrative scenarios based on the inputs provided — they are not election predictions. Past model accuracy does not guarantee future performance. All polling data is sourced from publicly available figures as reported by pollsters and media outlets.
@@ -10761,23 +10884,25 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
         );
       })()}
 
+      </div>
+
       {/* ── Mobile floating seat count badge ── */}
       {isMobile && activeTab === "seats" && filtered.length < seatsForTab.length && (
         <div style={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", zIndex: 200, pointerEvents: "none" }}>
-          <div style={{ background: "#1E293B", color: "#E2E8F0", fontSize: 12, fontWeight: 600, padding: "7px 16px", borderRadius: 20, boxShadow: "0 4px 14px rgba(0,0,0,0.35)", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
+          <div style={{ background: "var(--header-bg)", color: "var(--header-fg)", fontSize: 12, fontWeight: 600, padding: "7px 16px", borderRadius: 20, boxShadow: "0 4px 14px rgba(0,0,0,0.35)", whiteSpace: "nowrap", letterSpacing: "0.01em" }}>
             {filtered.length} of {seatsForTab.length} seats
           </div>
         </div>
       )}
 
       {/* ── Footer ── */}
-      <footer style={{ background: "#0F172A", borderTop: "1px solid rgba(255,255,255,0.06)", padding: isMobile ? "18px 16px" : "20px 24px", marginTop: 8 }}>
+      <footer style={{ background: "var(--header-bg)", borderTop: "1px solid rgba(255,255,255,0.08)", padding: isMobile ? "18px 16px" : "20px 24px", marginTop: 8 }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
-          <span style={{ fontSize: 12, color: "#475569" }}>
-            aus-poll · open-source Australian election modelling ·{" "}
-            <a href="https://github.com/leifsmith01-ai/aus-poll" target="_blank" rel="noopener noreferrer" style={{ color: "#64748B", textDecoration: "none" }}>GitHub</a>
+          <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 13, color: "var(--header-muted)" }}>
+            Aus Poll · open-source Australian election modelling ·{" "}
+            <a href="https://github.com/leifsmith01-ai/aus-poll" target="_blank" rel="noopener noreferrer" style={{ color: "var(--header-fg)", textDecoration: "none" }}>GitHub</a>
           </span>
-          <span style={{ fontSize: 11, color: "#334155" }}>Not affiliated with the AEC · For informational purposes only</span>
+          <span style={{ fontSize: 11, color: "var(--header-muted)", opacity: 0.7 }}>Not affiliated with the AEC · For informational purposes only</span>
         </div>
       </footer>
 
