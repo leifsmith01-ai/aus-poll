@@ -23,7 +23,7 @@ This file is a reference for AI assistants working on the **aus-poll** repositor
 aus-poll/
 ├── webapp/                        # Vite + React frontend dashboard
 │   ├── src/
-│   │   ├── App.jsx                # Main dashboard (5,500+ lines) — all modelling logic lives here
+│   │   ├── App.jsx                # Main dashboard (10,000+ lines) — all modelling logic lives here
 │   │   ├── main.jsx               # React entry point
 │   │   └── data/
 │   │       └── demographics.js    # ABS demographic overlays (Census SA1/SA2 data)
@@ -182,7 +182,7 @@ Always run tests before committing changes to `pipeline/parse.py`.
 
 | File | Lines | Role |
 |------|-------|------|
-| `webapp/src/App.jsx` | ~5,500 | Entire React dashboard; all modelling constants and seat computation |
+| `webapp/src/App.jsx` | ~10,000 | Entire React dashboard; all modelling constants and seat computation |
 | `pipeline/config.py` | ~600 | Election event IDs, file templates, party abbreviations, seat constants |
 | `pipeline/database.py` | ~1,165 | SQLite schema init, bulk loaders, query helpers |
 | `pipeline/export.py` | ~1,070 | JSON generation for frontend consumption |
@@ -270,7 +270,7 @@ Covers both chambers:
 
 ## Frontend Architecture (`webapp/src/App.jsx`)
 
-The entire dashboard is a single React component file (~5,500 lines). There is no backend at runtime — all election data is embedded as JavaScript constants or loaded from `webapp/src/data/`.
+The entire dashboard is a single React component file (~10,000 lines). There is no backend at runtime — all election data is embedded as JavaScript constants or loaded from `webapp/src/data/`.
 
 ### Key sections in App.jsx
 
@@ -406,7 +406,7 @@ The frontend is fully static — no API calls at runtime. All election data is e
 
 `data/calibration_report.txt` contains per-seat 2PP prediction errors from backtesting (`scripts/compute_calibration.py`).
 
-Typical accuracy on ALP/Coalition seats: **±0.05% error** — very high precision. The model skips non-ALP/Coalition races (e.g., Greens vs. Teal contests).
+The headline "±0.05% error" on ALP/Coalition seats is the **in-sample fitted residual** (the per-seat calibration offsets are fitted to the 2025 result, so near-zero error at zero swing is by construction). The honest predictive-skill figure is the **leave-one-out MAE of ~1.4pp** reported by `compute_calibration.py`. The model skips non-ALP/Coalition races (e.g., Greens vs. Teal contests).
 
 To regenerate:
 ```bash

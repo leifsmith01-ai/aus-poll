@@ -95,7 +95,7 @@ def main():
 
     FRONTEND_DIR.mkdir(parents=True, exist_ok=True)
 
-    for year in [2022, 2019, 2016]:
+    for year in [2025, 2022, 2019, 2016]:
         copy_election_data(year)
 
     # Update elections.json in root

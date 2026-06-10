@@ -736,9 +736,10 @@ const SEAT_PREF_FLOWS_2025 = {
   316: { grn_alp: 0.8520, teal_alp: 0.6200, on_alp: 0.2550, other_alp: 0.4090 },  // Wright
   // ΓöÇΓöÇ SA ΓöÇΓöÇ
   179: { grn_alp: 0.8917, teal_alp: 0.6200, on_alp: 0.2210, other_alp: 0.6906 },  // Adelaide
-  180: { grn_alp: 1.0000, teal_alp: 1.0000, on_alp: 1.0000, other_alp: 1.0000 },  // Barker
+  // Barker (180) and Grey (183) omitted: the export produced placeholder flows of 1.0
+  // (impossible). They fall back to national PREF_FLOWS_2025 until real DOP values are
+  // regenerated via scripts/update_s25_from_exports.py (then re-run compute_calibration.py).
   182: { grn_alp: 0.8809, teal_alp: 0.6200, on_alp: 0.3014, other_alp: 0.3659 },  // Boothby
-  183: { grn_alp: 1.0000, teal_alp: 1.0000, on_alp: 1.0000, other_alp: 1.0000 },  // Grey
   185: { grn_alp: 0.8415, teal_alp: 0.6353, on_alp: 0.2179, other_alp: 0.4685 },  // Hindmarsh
   186: { grn_alp: 0.8217, teal_alp: 0.6200, on_alp: 0.2493, other_alp: 0.4323 },  // Kingston
   187: { grn_alp: 0.7122, teal_alp: 0.6200, on_alp: 0.2452, other_alp: 0.5218 },  // Makin
