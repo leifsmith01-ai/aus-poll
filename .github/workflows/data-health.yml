@@ -1,0 +1,86 @@
+name: Data Health Check
+
+# Weekly freshness assertions over the auto-updated datasets. A red run here
+# (which GitHub emails to watchers) is the alert that one of the scheduled
+# data workflows has silently stopped delivering — the failure mode that
+# previously went unnoticed for months (update-model-constants failed twice;
+# generate-state-fp no-opped green; betting odds served a manual placeholder).
+#
+# This job never commits anything.
+
+on:
+  schedule:
+    - cron: '0 3 * * 2'   # Tuesday 03:00 UTC (day after the Monday poll update)
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Check dataset freshness
+        env:
+          # Presence only — used to decide whether manual betting odds is an error.
+          HAS_ODDS_API_KEY: ${{ secrets.ODDS_API_KEY != '' }}
+        run: |
+          python - <<'EOF'
+          import json, os, sys
+          from datetime import date, timedelta
+
+          failures = []
+          warnings = []
+
+          def age_days(stamp):
+              return (date.today() - date.fromisoformat(stamp)).days
+
+          # Federal polls: scraped weekly from Wikipedia.
+          fed = json.load(open("data/polls/bludgertrack.json"))
+          if age_days(fed["retrieved"]) > 10:
+              failures.append(f"bludgertrack.json retrieved {fed['retrieved']} (>10 days old) — weekly poll scrape is not landing")
+
+          agg = json.load(open("data/polls/aggregated.json"))
+          if age_days(agg["generated"]) > 14:
+              failures.append(f"aggregated.json generated {agg['generated']} (>14 days old) — poll aggregator is not landing")
+
+          # VIC polls: a long gap is suspicious in a VIC election year but can be real.
+          vic = json.load(open("data/polls/vic_polls.json"))
+          newest_vic = max(p["date"] for p in vic["polls"])
+          if age_days(newest_vic) > 56:
+              warnings.append(f"newest VIC poll is {newest_vic} (>8 weeks old) — check the Wikipedia scraper's VIC table parsing")
+
+          # Betting odds: manual placeholder is an error once an API key exists.
+          odds = json.load(open("data/polls/betting_odds.json"))
+          if odds.get("source") == "manual":
+              if os.environ.get("HAS_ODDS_API_KEY") == "true":
+                  failures.append("betting_odds.json source is 'manual' despite ODDS_API_KEY being configured — the daily odds fetch is failing")
+              else:
+                  warnings.append("betting odds are the manual placeholder (no ODDS_API_KEY configured)")
+
+          # Economics: ABS/RBA indicators refresh monthly.
+          eco = json.load(open("data/economics.json"))
+          if age_days(eco["generated"]) > 90:
+              failures.append(f"economics.json generated {eco['generated']} (>90 days old) — economics refresh is not landing")
+
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          with open(summary, "a") as f:
+              f.write("## Data health\n")
+              for w in warnings:
+                  f.write(f"- :warning: {w}\n")
+              for x in failures:
+                  f.write(f"- :x: {x}\n")
+              if not warnings and not failures:
+                  f.write("- :white_check_mark: all tracked datasets fresh\n")
+
+          for w in warnings:
+              print(f"::warning::{w}")
+          for x in failures:
+              print(f"::error::{x}")
+          if failures:
+              sys.exit(1)
+          print("All tracked datasets fresh.")
+          EOF

@@ -18,6 +18,9 @@ on:
     - cron: '0 4 1 * *'   # 1st of each month, 04:00 UTC
   workflow_dispatch:        # allow manual trigger from GitHub Actions tab
 
+concurrency:
+  group: data-autocommit
+
 jobs:
   update-constants:
     runs-on: ubuntu-latest
@@ -25,26 +28,28 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: 'pip'
 
-      - name: Install pipeline dependencies
-        run: pip install requests pandas openpyxl tqdm
-
-      # Cache the SQLite DB between runs to avoid full re-download every week.
-      # Cache key includes requirements hash so it invalidates on dep updates.
+      # Cache the SQLite DB between runs to avoid a full AEC re-download every
+      # month. NOTE: the pipeline writes data/aec_elections.db (config.DB_PATH) —
+      # this previously cached data/elections.db, which never exists, so nothing
+      # was ever cached.
       - name: Cache elections database
         uses: actions/cache@v4
         id: db-cache
         with:
-          path: data/elections.db
+          path: data/aec_elections.db
           key: elections-db-${{ hashFiles('requirements.txt') }}-${{ github.sha }}
           restore-keys: |
             elections-db-${{ hashFiles('requirements.txt') }}-
+
+      - name: Install pipeline dependencies
+        run: pip install requests pandas openpyxl tqdm
 
       - name: Run federal pipeline — 2016, 2019, 2022, 2025
         run: python main.py --year 2016 2019 2022 2025
@@ -60,18 +65,17 @@ jobs:
 
       - name: Commit changes if any files were updated
         run: |
-          git diff --quiet \
-            data/seat_residuals.json \
-            data/seat_demo_mult.json \
-            webapp/src/App.jsx \
-          && echo "Nothing changed — skipping commit." && exit 0
-
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Stage first so newly created files (e.g. a first-ever
+          # data/seat_demo_mult.json) are included — `git diff` alone cannot
+          # see untracked files.
           git add \
             data/seat_residuals.json \
             data/seat_demo_mult.json \
             webapp/src/App.jsx
-          git commit -m "chore: auto-update SEAT_RESIDUAL_MAP and SEAT_DEMO_MULT constants [skip ci]"
+          git diff --cached --quiet && echo "Nothing changed — skipping commit." && exit 0
+
+          git commit -m "chore: auto-update SEAT_RESIDUAL_MAP and SEAT_DEMO_MULT constants"
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin "$GITHUB_REF_NAME"

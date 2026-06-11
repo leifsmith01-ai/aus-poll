@@ -1,0 +1,64 @@
+name: Deploy to GitHub Pages
+
+# Builds webapp/ and publishes it to GitHub Pages on every push to main —
+# including the data auto-commits from the polls/odds/constants workflows
+# (which previously carried [skip ci] and were never deployed anywhere).
+#
+# Owner action required once: Settings → Pages → Source = "GitHub Actions".
+#
+# The Pages build overrides Vite's base path to /aus-poll/ (project site);
+# vite.config.js keeps base "/" for Vercel.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+
+      - name: Install dependencies
+        working-directory: webapp
+        run: npm ci
+
+      - name: Run baseline-alignment tests
+        working-directory: webapp
+        run: npm test
+
+      - name: Build (Pages base path)
+        working-directory: webapp
+        run: npx vite build --base=/aus-poll/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: webapp/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

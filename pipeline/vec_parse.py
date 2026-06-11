@@ -212,6 +212,14 @@ def parse_vec_fp_excel(path: Path, election_id: int) -> list[dict]:
         if not votes_col:
             logger.debug("  Sheet '%s': no votes column found, skipping", sheet_name)
             continue
+        if not party_col:
+            # Without a party column every candidate defaults to IND, which
+            # silently corrupts downstream party-share aggregates.
+            logger.warning(
+                "  Sheet '%s' in %s: no party column found — all candidates "
+                "will be classified IND. Columns: %s",
+                sheet_name, path.name, list(df.columns)[:12],
+            )
 
         logger.debug(
             "  Sheet '%s': district=%s, surname=%s, party=%s, votes=%s",

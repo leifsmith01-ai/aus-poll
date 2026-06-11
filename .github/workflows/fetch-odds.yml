@@ -5,17 +5,20 @@ on:
     - cron: '0 1 * * *'  # Daily 01:00 UTC
   workflow_dispatch:
 
+concurrency:
+  group: data-autocommit
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: pip install requests
@@ -27,15 +30,35 @@ jobs:
           ODDS_API_KEY:          ${{ secrets.ODDS_API_KEY }}
         run: python pipeline/betting_odds.py
 
+      - name: Verify a live source was used
+        # With an API key configured, falling back to the manual placeholder is a
+        # failure (expired key / API change) and must show up red, not as months
+        # of "successful" placeholder commits. Without a key it is only a notice.
+        env:
+          HAS_ODDS_API_KEY: ${{ secrets.ODDS_API_KEY != '' }}
+          HAS_BETFAIR: ${{ secrets.BETFAIR_APP_KEY != '' }}
+        run: |
+          python - <<'EOF'
+          import json, os, sys
+          source = json.load(open("data/polls/betting_odds.json")).get("source")
+          print(f"betting odds source: {source}")
+          has_key = os.environ.get("HAS_ODDS_API_KEY") == "true" or os.environ.get("HAS_BETFAIR") == "true"
+          if source == "manual" and has_key:
+              print("::error::API credentials are configured but the fetch fell back to the manual placeholder.")
+              sys.exit(1)
+          if source == "manual":
+              print("::notice::No betting API credentials configured — serving the manual placeholder.")
+          EOF
+
       - name: Copy odds to frontend source
         run: cp data/polls/betting_odds.json webapp/src/data/betting_odds.json
 
       - name: Commit updated odds if changed
         run: |
-          git diff --quiet data/polls/betting_odds.json webapp/src/data/betting_odds.json && exit 0
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/polls/betting_odds.json webapp/src/data/betting_odds.json
+          git diff --cached --quiet && echo "Nothing changed — skipping commit." && exit 0
           git commit -m "chore: auto-refresh betting odds"
-          git pull --rebase origin main
-          git push
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "$GITHUB_REF_NAME"

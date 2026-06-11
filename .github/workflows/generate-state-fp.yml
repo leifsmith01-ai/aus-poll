@@ -4,15 +4,16 @@ name: Generate State FP Constants
 # state elections and writes them to webapp/src/data/state_seat_fp.js as an
 # ES module that App.jsx imports.
 #
-# Schedule: 1st of each month at 05:00 UTC (1 hour after model constants).
-# Also supports manual trigger with state/year inputs.
+# Manual trigger only: state election results are static between elections,
+# so there is nothing for a cron to pick up. Run this after a state election
+# is loaded into the pipeline or after parser changes. (The previous monthly
+# schedule spent a year re-deriving identical data — and reported success
+# while every state download silently failed.)
 #
 # The output file is auto-committed. All state constants live in a single
 # data module rather than inside App.jsx to keep the main file manageable.
 
 on:
-  schedule:
-    - cron: '0 5 1 * *'   # 1st of each month, 05:00 UTC
   workflow_dispatch:
     inputs:
       state:
@@ -26,6 +27,9 @@ on:
         required: false
         default: ''
 
+concurrency:
+  group: data-autocommit
+
 jobs:
   generate-fp:
     runs-on: ubuntu-latest
@@ -33,22 +37,26 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
         with:
-          python-version: '3.11'
+          # VIC raw Excel files are stored in Git LFS; without this the
+          # checkout leaves pointer stubs and the VIC parse produces nothing.
+          lfs: true
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
           cache: 'pip'
 
       - name: Install pipeline dependencies
         run: pip install requests pandas openpyxl tqdm
 
-      # Cache the SQLite DB between runs to avoid full re-download each month.
+      # Cache the SQLite DB between runs (path = config.DB_PATH).
       - name: Cache elections database
         uses: actions/cache@v4
         id: db-cache
         with:
-          path: data/elections.db
+          path: data/aec_elections.db
           key: state-elections-db-${{ hashFiles('requirements.txt') }}-${{ github.sha }}
           restore-keys: |
             state-elections-db-${{ hashFiles('requirements.txt') }}-
@@ -65,10 +73,18 @@ jobs:
             [tas]=202403 [act]=202410
           )
 
+          FAILED=()
           run_state() {
             local s=$1 y=$2
             echo "=== Running pipeline: state=$s year=$y ==="
-            python main.py --state "$s" --year "$y"
+            local log
+            log=$(mktemp)
+            python main.py --state "$s" --year "$y" 2>&1 | tee "$log"
+            # main.py soft-continues on per-state errors (exit 0); surface them
+            # here so a run that loaded no data cannot report success.
+            if grep -qE "ERROR" "$log"; then
+              FAILED+=("$s/$y")
+            fi
           }
 
           if [ "$INPUT_STATE" = "all" ]; then
@@ -81,7 +97,14 @@ jobs:
             run_state "$INPUT_STATE" "$y"
           fi
 
+          if [ ${#FAILED[@]} -gt 0 ]; then
+            echo "::error::State pipeline reported errors for: ${FAILED[*]} (downloads blocked or data missing)"
+            exit 1
+          fi
+
       # ── Generate JS module ────────────────────────────────────────────────
+      # Exits non-zero (and refuses to write corrupt data) when the generated
+      # FP map fails the degeneracy sanity check in generate_state_seat_fp.py.
       - name: Generate state FP module
         env:
           INPUT_STATE: ${{ inputs.state || 'all' }}
@@ -97,12 +120,11 @@ jobs:
       # ── Auto-commit if changed ────────────────────────────────────────────
       - name: Commit changes if state FP data was updated
         run: |
-          git diff --quiet webapp/src/data/state_seat_fp.js \
-          && echo "Nothing changed — skipping commit." && exit 0
-
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add webapp/src/data/state_seat_fp.js
-          git commit -m "chore: auto-update state seat FP baselines [skip ci]"
+          git diff --cached --quiet && echo "Nothing changed — skipping commit." && exit 0
+
+          git commit -m "chore: auto-update state seat FP baselines"
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin "$GITHUB_REF_NAME"
