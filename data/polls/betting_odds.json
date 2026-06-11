@@ -194,5 +194,6 @@
         "implied_prob": 0.33
       }
     }
-  }
+  },
+  "fallback_reason": "no_au_markets"
 }
