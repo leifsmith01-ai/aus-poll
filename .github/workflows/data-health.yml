@@ -53,10 +53,16 @@ jobs:
           if age_days(newest_vic) > 56:
               warnings.append(f"newest VIC poll is {newest_vic} (>8 weeks old) — check the Wikipedia scraper's VIC table parsing")
 
-          # Betting odds: manual placeholder is an error once an API key exists.
+          # Betting odds: a manual placeholder caused by an API *error* is a failure;
+          # "no Australian markets listed" is a normal between-cycles state.
           odds = json.load(open("data/polls/betting_odds.json"))
           if odds.get("source") == "manual":
-              if os.environ.get("HAS_ODDS_API_KEY") == "true":
+              reason = odds.get("fallback_reason", "")
+              if reason.startswith("api_error"):
+                  failures.append(f"betting odds fetch is failing ({reason}) — check the API key/quota")
+              elif reason == "no_au_markets":
+                  warnings.append("betting odds: API reachable but no Australian election markets listed (manual placeholder in use)")
+              elif os.environ.get("HAS_ODDS_API_KEY") == "true":
                   failures.append("betting_odds.json source is 'manual' despite ODDS_API_KEY being configured — the daily odds fetch is failing")
               else:
                   warnings.append("betting odds are the manual placeholder (no ODDS_API_KEY configured)")

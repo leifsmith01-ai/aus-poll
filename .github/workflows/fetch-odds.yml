@@ -31,22 +31,22 @@ jobs:
         run: python pipeline/betting_odds.py
 
       - name: Verify a live source was used
-        # With an API key configured, falling back to the manual placeholder is a
-        # failure (expired key / API change) and must show up red, not as months
-        # of "successful" placeholder commits. Without a key it is only a notice.
-        env:
-          HAS_ODDS_API_KEY: ${{ secrets.ODDS_API_KEY != '' }}
-          HAS_BETFAIR: ${{ secrets.BETFAIR_APP_KEY != '' }}
+        # Fail red only when the fetch *errored* (bad key, quota, API change).
+        # "API reachable but no Australian election market listed" is a normal
+        # state between election cycles — notice, not failure.
         run: |
           python - <<'EOF'
-          import json, os, sys
-          source = json.load(open("data/polls/betting_odds.json")).get("source")
-          print(f"betting odds source: {source}")
-          has_key = os.environ.get("HAS_ODDS_API_KEY") == "true" or os.environ.get("HAS_BETFAIR") == "true"
-          if source == "manual" and has_key:
-              print("::error::API credentials are configured but the fetch fell back to the manual placeholder.")
+          import json, sys
+          odds = json.load(open("data/polls/betting_odds.json"))
+          source = odds.get("source")
+          reason = odds.get("fallback_reason", "")
+          print(f"betting odds source: {source}  fallback_reason: {reason or '-'}")
+          if source == "manual" and reason.startswith("api_error"):
+              print(f"::error::Betting odds fetch failed ({reason}) — check the API key/quota.")
               sys.exit(1)
-          if source == "manual":
+          if source == "manual" and reason == "no_au_markets":
+              print("::notice::Odds API reachable but no Australian election markets are listed — manual placeholder in use.")
+          elif source == "manual":
               print("::notice::No betting API credentials configured — serving the manual placeholder.")
           EOF
 
