@@ -322,6 +322,30 @@ STATE_META: dict[str, dict] = {
 }
 
 
+def _select_federal_sport_keys(sports: list[dict]) -> list[str]:
+    """
+    Pick sport keys that could be the Australian federal election market.
+
+    Every candidate MUST mention Australia in its title. An earlier fallback
+    accepted anything in the "politics" group, which selected
+    politics_us_presidential_election_winner when no Australian market was
+    listed and broke the whole fetch with a 422.
+    """
+    def is_au(s: dict) -> bool:
+        title = s.get("title", "").lower()
+        return "australia" in title or "aussie" in title
+
+    keys = [
+        s["key"] for s in sports
+        if is_au(s)
+        and ("election" in s.get("title", "").lower() or "politic" in s.get("group", "").lower())
+    ]
+    if not keys:
+        # Broader fallback, still Australia-only.
+        keys = [s["key"] for s in sports if is_au(s)]
+    return keys
+
+
 def _parse_odds_event(event: dict) -> dict[str, dict]:
     """
     Extract averaged decimal odds and normalised probabilities from a single
@@ -392,23 +416,18 @@ def fetch_odds_api(api_key: str) -> dict:
         all_titles_lower = list(sport_by_title.keys())
 
         # ── Federal election ───────────────────────────────────────────────────
-        federal_keys = [
-            s["key"] for s in sports
-            if "australia" in s.get("title", "").lower()
-            and ("election" in s.get("title", "").lower() or "politic" in s.get("group", "").lower())
-        ]
-        if not federal_keys:
-            # Broader fallback: any AU politics
-            federal_keys = [
-                s["key"] for s in sports
-                if "australia" in s.get("title", "").lower()
-                or "politic" in s.get("group", "").lower()
-            ]
+        federal_keys = _select_federal_sport_keys(sports)
 
         if federal_keys:
             sport_key = federal_keys[0]
             logger.info("Odds API: federal market sport key '%s'", sport_key)
-            events = _get_odds_for_sport(api_key, sport_key)
+            try:
+                events = _get_odds_for_sport(api_key, sport_key)
+            except Exception as e:
+                # A per-market error must not abort the state-market scan below.
+                logger.warning("Odds API: error fetching federal market %s: %s", sport_key, e)
+                result["fetch_error"] = f"federal market {sport_key}: {e}"
+                events = []
             for event in events:
                 name_lower = event.get("sport_title", event.get("home_team", "")).lower()
                 # Skip obvious state matches at the federal level
@@ -427,8 +446,10 @@ def fetch_odds_api(api_key: str) -> dict:
                 if result["national"]:
                     break  # found the federal market
         else:
-            logger.warning("Odds API: no Australian federal election market found. "
-                           "Available sports: %s", [s["key"] for s in sports[:15]])
+            # Expected between election cycles — bookmakers may not list the next
+            # federal election yet. Informational, not an error.
+            logger.info("Odds API: no Australian federal election market currently listed. "
+                        "Available sports: %s", [s["key"] for s in sports[:15]])
 
         # ── State elections ────────────────────────────────────────────────────
         for state_code, search_terms in STATE_SEARCH_TERMS.items():
@@ -483,6 +504,7 @@ def fetch_odds_api(api_key: str) -> dict:
 
     except Exception as e:
         logger.warning("Odds API: error: %s", e)
+        result["fetch_error"] = str(e)
 
     return result
 
@@ -513,6 +535,12 @@ def run(force_source: str | None = None) -> dict:
     odds_api_key = os.environ.get("ODDS_API_KEY", "")
 
     output: dict | None = None
+    # Why the manual placeholder ended up being served (recorded in the output
+    # JSON so CI can distinguish "API broken" from "no markets listed yet"):
+    #   no_credentials — no API keys configured
+    #   no_au_markets  — API reachable but no Australian election market listed
+    #   api_error: ... — a request failed (bad key, quota, API change)
+    fallback_reason = "forced_manual" if force_source == "manual" else "no_credentials"
 
     if force_source != "manual":
         # ── Tier 1: Betfair ────────────────────────────────────────────────────
@@ -533,27 +561,41 @@ def run(force_source: str | None = None) -> dict:
             logger.info("Fetching from The Odds API...")
             try:
                 output = fetch_odds_api(odds_api_key)
-                if not output.get("national"):
-                    logger.warning("Odds API returned no national data — falling back to manual")
+                fetch_error = output.pop("fetch_error", None)
+                # Any live market — national or state — counts as a live result;
+                # the federal market is often unlisted between election cycles.
+                if not output.get("national") and not output.get("state_elections"):
+                    fallback_reason = f"api_error: {fetch_error}" if fetch_error else "no_au_markets"
+                    logger.warning("Odds API returned no usable markets (%s) — falling back to manual",
+                                   fallback_reason)
                     output = None
                 else:
-                    logger.info("Odds API: fetched national market")
+                    logger.info("Odds API: fetched %s%s",
+                                "national market" if output.get("national") else "",
+                                f" + {len(output.get('state_elections', {}))} state market(s)"
+                                if output.get("state_elections") else "")
             except Exception as e:
+                fallback_reason = f"api_error: {e}"
                 logger.warning("Odds API fetch failed: %s — falling back to manual", e)
                 output = None
 
     # ── Tier 3: Manual placeholder ─────────────────────────────────────────────
     if output is None:
-        logger.info("Using manual placeholder data from %s", MANUAL_JSON)
+        logger.info("Using manual placeholder data from %s (reason: %s)",
+                    MANUAL_JSON, fallback_reason)
         output = load_manual()
+        output["fallback_reason"] = fallback_reason
+    else:
+        output.pop("fallback_reason", None)
 
     # Per-state merge: live markets win, manual placeholders fill only the
     # states the live feed didn't return. Each manual entry keeps its
     # source="manual" tag so the frontend can label it indicative rather than
     # passing it off as live.
     if output.get("source") != "manual":
+        manual = load_manual()
         live_states = output.setdefault("state_elections", {})
-        manual_states = load_manual().get("state_elections", {})
+        manual_states = manual.get("state_elections", {})
         filled = []
         for code, entry in manual_states.items():
             if code not in live_states:
@@ -562,6 +604,12 @@ def run(force_source: str | None = None) -> dict:
         if filled:
             logger.info("State elections: no live market for %s — using manual placeholder",
                         ", ".join(c.upper() for c in sorted(filled)))
+        # Same for the national market — often unlisted between election cycles
+        # even when state markets are live. national_source flags it as manual.
+        if not output.get("national") and manual.get("national"):
+            output["national"] = manual["national"]
+            output["national_source"] = "manual"
+            logger.info("National: no live market — using manual placeholder")
 
     output.setdefault("state_elections", {})
 
