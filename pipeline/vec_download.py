@@ -169,13 +169,26 @@ def _classify_file(filename: str) -> str | None:
     """
     Heuristically classify a VEC Excel filename into a type key.
     Returns None for irrelevant files.
+
+    Handles both generic names ("...two-candidate...", "...first-preference...")
+    and the VEC's published naming convention for 2022
+    ("VIC-2022-LA-Primary-Electorate.xlsx", "VIC-2022-LA-2CP-Pollingplace.xlsx",
+    "VIC-2022-LA-Candidates.xlsx", ...). District-level (Electorate) and
+    booth-level (Pollingplace) files map to distinct keys so they cannot
+    overwrite each other; Legislative Council (-LC-) files are skipped here
+    (lower-house parsing only).
     """
     name = filename.lower()
+    if "-lc-" in name:
+        return None
+    booth = "pollingplace" in name or "polling-place" in name or "polling_place" in name
     if any(t in name for t in ("two-candidate", "two_candidate", "tcp", "2cp")):
-        return "tcp_xlsx"
-    if any(t in name for t in ("first-preference", "first_preference", "fp", "first-pref")):
-        return "fp_xlsx"
-    if any(t in name for t in ("result", "district", "summary")):
+        return "tcp_booth_xlsx" if booth else "tcp_xlsx"
+    if any(t in name for t in ("first-preference", "first_preference", "first-pref", "primary", "fp")):
+        return "fp_booth_xlsx" if booth else "fp_xlsx"
+    if "candidate" in name:
+        return "candidates_xlsx"
+    if any(t in name for t in ("result", "district", "summary", "electorates")):
         return "results_xlsx"
     if name.endswith((".xlsx", ".xls")):
         return "other_xlsx"
