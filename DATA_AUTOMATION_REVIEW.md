@@ -1,5 +1,37 @@
 # Scheduled Dataset Automation Review
 
+> **Status (2026-06-11, this branch):** the findings below have been actioned.
+>
+> - **#1 fixed** — root cause was VEC filename classification (`_classify_file`
+>   never matched `Primary`/`Candidates`; booth files overwrote district files),
+>   not just the party guess. `state_seat_fp.js` regenerated with real 2022 data,
+>   keyed by district name and remapped to seat IDs in App.jsx (the old numeric
+>   keys never matched a seat). Generator now refuses degenerate output.
+> - **#2/#3 fixed** — cache paths corrected to `data/aec_elections.db`;
+>   `git diff --cached` change checks everywhere; `generate-state-fp` is
+>   manual-only, checks out LFS, and fails on pipeline errors.
+> - **#4 fixed** — `deploy-pages.yml` added; `[skip ci]` removed from data
+>   commits with an actor guard against recursion. *Owner action:* set
+>   Settings → Pages → Source = "GitHub Actions".
+> - **#5 partially** — odds job now fails red when credentials exist but the
+>   fetch falls back to manual. *Owner action:* add `ODDS_API_KEY` secret.
+> - **#6 partially** — `data-health.yml` warns when the newest VIC poll is
+>   >8 weeks old; the dead `vic_aggregated.json` copy step was removed.
+>   Scraper investigation remains open.
+> - **#7/#8 fixed** — `data/polls/` is canonical (weekly workflow copies
+>   leaders + state polls to the webapp); `update-economics.yml` added.
+> - **Cross-cutting** — `data-health.yml` freshness alerts; `data-autocommit`
+>   concurrency group; actions bumped (checkout@v5, setup-python@v6) ahead of
+>   the 2026-06-16 Node 20→24 switch.
+> - **Beyond the review:** baseline-alignment testing exposed real model
+>   miscalibration at zero swing (federal `dopCalibDelta` double-correction
+>   flipping Bowman/Longman/La Trobe; ON auto-promotion flipping SA Schubert;
+>   `VIC_2022_SUMMARY` misstating the 2022 result). All fixed; guarded by
+>   `webapp/src/__tests__/baseline-alignment.test.jsx` (`npm test`).
+> - *Owner actions outstanding:* Pages source setting; `ODDS_API_KEY`;
+>   `workflow_dispatch` of `update-model-constants` to validate its June 10
+>   fix + new cache path; SA baseline refresh when ECSA declares finals.
+
 Review date: 2026-06-11. Scope: the four scheduled GitHub Actions workflows that
 auto-update datasets, the scripts they call, the data files they produce, and how
 those files reach the deployed frontend. Findings are ordered by severity.

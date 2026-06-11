@@ -1,0 +1,41 @@
+name: Update Economic Indicators
+
+# Monthly refresh of data/economics.json (ABS CPI, unemployment, RBA cash rate)
+# via pipeline/fetch_economics.py, which also writes the webapp copy. These
+# indicators feed the incumbent-vote model and previously had no automation.
+
+on:
+  schedule:
+    - cron: '0 3 2 * *'   # 2nd of each month, 03:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: data-autocommit
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch ABS/RBA indicators
+        run: python -m pipeline.fetch_economics
+
+      - name: Commit updated indicators if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/economics.json webapp/src/data/economics.json
+          git diff --cached --quiet && echo "Nothing changed — skipping commit." && exit 0
+          git commit -m "chore: auto-refresh economic indicators"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "$GITHUB_REF_NAME"

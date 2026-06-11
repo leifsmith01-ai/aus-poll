@@ -159,8 +159,16 @@ Supported `--state` values: `vic`, `nsw`, `qld`, `wa`, `sa`, `tas`, `act`, `nt`
 ## Testing
 
 ```bash
-python -m pytest tests/ -v
+python -m pytest tests/ -v        # pipeline (parsing, schemas, scraper, VEC)
+cd webapp && npm test             # baseline-alignment suite (vitest)
 ```
+
+The vitest suite (`webapp/src/__tests__/baseline-alignment.test.jsx`) asserts
+that every model at zero swing reproduces the actual election result — no seat
+flips and the documented tallies hold (federal 2025 ALP 94, VIC 2022 ALP 56 /
+Coalition 28, NSW 2023 ALP 45, QLD 2024 LNP 52, WA 2025 ALP 46). Run it after
+ANY change to the model functions, calibration constants, seat data, or
+`state_seat_fp.js`; the Pages deploy workflow runs it as a gate.
 
 Tests are in `tests/test_parse.py` and cover the AEC CSV parsing functions using synthetic data:
 - `_iter_aec_csv` — skips AEC metadata header rows
@@ -384,11 +392,32 @@ Do not assume division IDs are stable across elections — always join through e
 
 ### GitHub Pages (primary)
 
-Push to `main` → GitHub Actions automatically builds and publishes `webapp/dist/`.
+`.github/workflows/deploy-pages.yml` builds and publishes the site on every push
+to `main` (including the data auto-commits, which intentionally do NOT carry
+`[skip ci]`). The Pages build runs `npx vite build --base=/aus-poll/`;
+`vite.config.js` keeps `base: '/'` for Vercel. The workflow also runs the
+baseline-alignment test suite (`npm test`) before deploying.
 
-Build command: `cd webapp && npm install && npm run build`
+One-time repo setting: Settings → Pages → Source = "GitHub Actions".
 
 The frontend is fully static — no API calls at runtime. All election data is embedded.
+
+### Scheduled data automation
+
+| Workflow | Schedule | Updates |
+|----------|----------|---------|
+| `update-polls.yml` | Mon 02:00 UTC | Wikipedia poll scrape → `bludgertrack.json`/`vic_polls.json`, aggregation, webapp copies (incl. leaders + state polls) |
+| `fetch-odds.yml` | Daily 01:00 UTC | `betting_odds.json` (fails red if API keys exist but fetch falls back to manual) |
+| `update-model-constants.yml` | Monthly (1st) | `SEAT_RESIDUAL_MAP`/`SEAT_DEMO_MULT` injected into App.jsx |
+| `update-economics.yml` | Monthly (2nd) | ABS/RBA indicators → `economics.json` |
+| `data-health.yml` | Tue 03:00 UTC | Freshness assertions — a red run means a data workflow silently stopped |
+| `generate-state-fp.yml` | manual only | `webapp/src/data/state_seat_fp.js` (run after a state election is loaded) |
+
+Conventions for these workflows: `data/polls/` is the source of truth and webapp
+copies are derived; commit steps stage first then use `git diff --cached --quiet`
+(plain `git diff` misses newly created files); all share the `data-autocommit`
+concurrency group; the DB cache path is `data/aec_elections.db` (matches
+`config.DB_PATH` — not `data/elections.db`).
 
 ### Vercel (alternative)
 
