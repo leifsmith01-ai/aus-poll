@@ -66,6 +66,18 @@ function getSeatGroup(seat, overrideParty) {
   return g;
 }
 
+// Tally a list of items into a { group: count } map. Replaces the
+// `const c = {}; items.forEach(... c[g] = (c[g] || 0) + 1); return c;` block
+// that was copy-pasted for every jurisdiction's proj/base counts.
+const countByGroup = (items, groupOf) => {
+  const c = {};
+  items.forEach((it) => {
+    const g = groupOf(it);
+    c[g] = (c[g] || 0) + 1;
+  });
+  return c;
+};
+
 const GROUP_CONFIG = {
   alp: { label: "Labor", color: "#DC2626" },
   coalition: { label: "Coalition", color: "#1D4ED8" },
@@ -5027,7 +5039,7 @@ export default function App() {
   }, [seatsForTab, isFederalTab, search, stateFilter, groupFilter, marginFilter, sortKey, sortDir]);
 
   const stateCounts = useMemo(() => Object.fromEntries(STATES.map(s => [s, seatsForTab.filter(d => d.state === s).length])), [seatsForTab]);
-  const groupCounts = useMemo(() => { const c = {}; seatsForTab.forEach(s => { const g = getSeatGroup(s); c[g] = (c[g] || 0) + 1; }); return c; }, [seatsForTab]);
+  const groupCounts = useMemo(() => countByGroup(seatsForTab, getSeatGroup), [seatsForTab]);
   const marginCounts = useMemo(() => { const c = {}; seatsForTab.forEach(s => { const cat = getMarginCat(s.margin); c[cat] = (c[cat] || 0) + 1; }); return c; }, [seatsForTab]);
 
   // ── Modelling ──
@@ -5130,17 +5142,11 @@ export default function App() {
     () => (liveProjected ? computeLiveConfidence(liveProjected, LIVE_CONFIG.active.cfg) : null),
     [liveProjected]);
 
-  const projCounts = useMemo(() => {
-    const c = {};
-    modelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; });
-    return c;
-  }, [modelledSeats]);
+  const projCounts = useMemo(
+    () => countByGroup(modelledSeats, (s) => s.modelled.winnerGroup),
+    [modelledSeats]);
 
-  const baseCounts = useMemo(() => {
-    const c = {};
-    SEATS.forEach(s => { const g = getSeatGroup(s); c[g] = (c[g] || 0) + 1; });
-    return c;
-  }, []);
+  const baseCounts = useMemo(() => countByGroup(SEATS, getSeatGroup), []);
 
   const changedSeats = useMemo(() =>
     modelledSeats.filter(s => s.modelled.changed),
@@ -5210,17 +5216,12 @@ export default function App() {
     return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing, vicOnTcp, baseline2pp, vicSeatOverrides, VIC_SEAT_FP_2022);
   }, [vicPrimaries, vicPrefFlows, useVicRegionalSwing, vicOnTcp, vicSeatOverrides]);
 
-  const vicProjCounts = useMemo(() => {
-    const c = {};
-    vicModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; });
-    return c;
-  }, [vicModelledSeats]);
+  const vicProjCounts = useMemo(
+    () => countByGroup(vicModelledSeats, (s) => s.modelled.winnerGroup),
+    [vicModelledSeats]);
 
-  const vicBaseCounts = useMemo(() => {
-    const c = {};
-    VIC_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; });
-    return c;
-  }, []);
+  const vicBaseCounts = useMemo(
+    () => countByGroup(VIC_SEATS, (s) => getParty(s.winner.party).group), []);
 
   const vicChangedSeats = useMemo(() =>
     vicModelledSeats.filter(s => s.modelled.changed),
@@ -5295,8 +5296,8 @@ export default function App() {
       useElasticity, NSW_SEAT_PREF_FLOWS_2023, NSW_BL, NSW_SEAT_FP_2023,
     );
   }, [nswPrim, nswFlows, nswOnTcp, useNswRegionalSwing, nswSeatOverrides, useElasticity]);
-  const nswProjCounts = useMemo(() => { const c = {}; nswModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [nswModelledSeats]);
-  const nswBaseCounts = useMemo(() => { const c = {}; NSW_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
+  const nswProjCounts = useMemo(() => countByGroup(nswModelledSeats, (s) => s.modelled.winnerGroup), [nswModelledSeats]);
+  const nswBaseCounts = useMemo(() => countByGroup(NSW_SEATS, (s) => getParty(s.winner.party).group), []);
   const nswChanged = useMemo(() => nswModelledSeats.filter(s => s.modelled.changed), [nswModelledSeats]);
   const nswImplied2pp = useMemo(() => {
     // Standard ALP-vs-Coalition 2PP: ON preferences distributed via on_alp (not dumped
@@ -5379,8 +5380,8 @@ export default function App() {
       useElasticity, QLD_SEAT_PREF_FLOWS_2024, QLD_BL, QLD_SEAT_FP_2024,
     );
   }, [qldPrim, qldFlows, qldOnTcp, useQldRegionalSwing, qldSeatOverrides, useElasticity]);
-  const qldProjCounts = useMemo(() => { const c = {}; qldModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [qldModelledSeats]);
-  const qldBaseCounts = useMemo(() => { const c = {}; QLD_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
+  const qldProjCounts = useMemo(() => countByGroup(qldModelledSeats, (s) => s.modelled.winnerGroup), [qldModelledSeats]);
+  const qldBaseCounts = useMemo(() => countByGroup(QLD_SEATS, (s) => getParty(s.winner.party).group), []);
   const qldChanged = useMemo(() => qldModelledSeats.filter(s => s.modelled.changed), [qldModelledSeats]);
   const qldImplied2pp = useMemo(() => {
     const onV = qldPrim.on ?? 0;
@@ -5456,8 +5457,8 @@ export default function App() {
       useElasticity, null, WA_BL, WA_SEAT_FP_2025,
     );
   }, [waPrim, waFlows, waOnTcp, useWaRegionalSwing, waSeatOverrides, useElasticity]);
-  const waProjCounts = useMemo(() => { const c = {}; waModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [waModelledSeats]);
-  const waBaseCounts = useMemo(() => { const c = {}; WA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
+  const waProjCounts = useMemo(() => countByGroup(waModelledSeats, (s) => s.modelled.winnerGroup), [waModelledSeats]);
+  const waBaseCounts = useMemo(() => countByGroup(WA_SEATS, (s) => getParty(s.winner.party).group), []);
   const waChanged = useMemo(() => waModelledSeats.filter(s => s.modelled.changed), [waModelledSeats]);
   const waImplied2pp = useMemo(() => {
     const onV = waPrim.on ?? 0;
@@ -5542,8 +5543,8 @@ export default function App() {
       useElasticity, null, SA_BL, SA_SEAT_FP_2026,
     );
   }, [saPrim, saFlows, saOnTcp, useSaRegionalSwing, saSeatOverrides, useElasticity]);
-  const saProjCounts = useMemo(() => { const c = {}; saModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [saModelledSeats]);
-  const saBaseCounts = useMemo(() => { const c = {}; SA_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
+  const saProjCounts = useMemo(() => countByGroup(saModelledSeats, (s) => s.modelled.winnerGroup), [saModelledSeats]);
+  const saBaseCounts = useMemo(() => countByGroup(SA_SEATS, (s) => getParty(s.winner.party).group), []);
   const saChanged = useMemo(() => saModelledSeats.filter(s => s.modelled.changed), [saModelledSeats]);
   const saImplied2pp = useMemo(() => {
     const onV = saPrim.on ?? 0;
@@ -5624,8 +5625,8 @@ export default function App() {
       useElasticity, null, NT_BL, NT_SEAT_FP_2024,
     );
   }, [ntPrim, ntFlows, ntOnTcp, ntExhaustRate, useNtRegionalSwing, ntSeatOverrides, useElasticity]);
-  const ntProjCounts = useMemo(() => { const c = {}; ntModelledSeats.forEach(s => { const g = s.modelled.winnerGroup; c[g] = (c[g] || 0) + 1; }); return c; }, [ntModelledSeats]);
-  const ntBaseCounts = useMemo(() => { const c = {}; NT_SEATS.forEach(s => { const g = getParty(s.winner.party).group; c[g] = (c[g] || 0) + 1; }); return c; }, []);
+  const ntProjCounts = useMemo(() => countByGroup(ntModelledSeats, (s) => s.modelled.winnerGroup), [ntModelledSeats]);
+  const ntBaseCounts = useMemo(() => countByGroup(NT_SEATS, (s) => getParty(s.winner.party).group), []);
   const ntChanged = useMemo(() => ntModelledSeats.filter(s => s.modelled.changed), [ntModelledSeats]);
   const ntHasChanges = Object.entries(NT_BL).some(([k, v]) => Math.abs((ntPrim[k] ?? v) - v) > 0.05) || (ntPrim.undecided || 0) > 0 || ntFlows.grn_alp !== 0.80 || ntFlows.ind_alp !== 0.45 || ntFlows.on_alp !== 0.20 || ntFlows.other_alp !== 0.40 || ntOnTcp !== null || !useNtRegionalSwing || Object.keys(ntSeatOverrides).length > 0 || (ntFlows.onCoalOriginFactor ?? 0) !== 0 || ntExhaustRate !== NT_EXHAUST_DEFAULT;
 
