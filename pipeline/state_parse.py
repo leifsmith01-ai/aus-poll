@@ -78,6 +78,8 @@ import csv
 import logging
 from pathlib import Path
 
+from .parse_common import safe_float, safe_int
+
 logger = logging.getLogger(__name__)
 
 
@@ -85,18 +87,11 @@ logger = logging.getLogger(__name__)
 
 def _safe_int(val) -> int | None:
     """Convert val to int, returning None on failure."""
-    try:
-        return int(str(val).replace(",", "").strip())
-    except (ValueError, TypeError):
-        return None
+    # State parsers expect None (not 0) on failure, e.g. for ballot positions.
+    return safe_int(val, default=None)
 
 
-def _safe_float(val) -> float | None:
-    """Convert val to float, returning None on failure."""
-    try:
-        return float(str(val).replace(",", "").strip())
-    except (ValueError, TypeError):
-        return None
+_safe_float = safe_float
 
 
 def _read_csv(path: str) -> list[dict]:

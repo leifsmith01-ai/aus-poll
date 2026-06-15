@@ -13,14 +13,6 @@ pandas>=2.0.0
 # Excel file reading (for VEC data — pandas uses openpyxl under the hood)
 openpyxl>=3.1.0
 
-# Geospatial (for boundary processing + ABS data overlay)
-geopandas>=0.14.0
-shapely>=2.0.0
-
-# Web framework for the API layer (Phase 2+)
-fastapi>=0.110.0
-uvicorn[standard]>=0.27.0
-
 # Progress bars (nice for long downloads/loads)
 tqdm>=4.66.0
 
