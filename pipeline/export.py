@@ -18,6 +18,7 @@ import logging
 import sqlite3
 from pathlib import Path
 
+from .export_schemas import validate_export
 from .config import (
     DATA_EXPORTS_DIR, ELECTIONS, COALITION_PARTIES,
     VIC_ELECTIONS, VIC_EXPORTS_DIR, VIC_COALITION_PARTIES,
@@ -47,6 +48,10 @@ logger = logging.getLogger(__name__)
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _write_json(data, path: Path) -> None:
+    # Validate against the export contract before writing (no-op for files
+    # without a registered schema) so shape drift fails loudly here rather
+    # than silently dropping data in the frontend.
+    validate_export(path.name, data)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=None, separators=(",", ":"))
