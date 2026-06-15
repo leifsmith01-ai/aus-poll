@@ -1,0 +1,63 @@
+name: CI
+
+# Runs the test suites on every pull request and on pushes to feature
+# branches. Until this existed, pytest and the baseline-alignment suite only
+# ran inside deploy-pages.yml on push to main — so a broken model or parser
+# could merge and only surface at deploy time. This gives PR authors a signal
+# before merge.
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline tests
+        run: python -m pytest tests/ -v
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+
+      - name: Install dependencies
+        working-directory: webapp
+        run: npm ci
+
+      - name: Lint
+        working-directory: webapp
+        run: npm run lint
+
+      - name: Run baseline-alignment tests
+        working-directory: webapp
+        run: npm test
+
+      - name: Build
+        working-directory: webapp
+        run: npm run build
