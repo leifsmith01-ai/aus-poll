@@ -16,7 +16,14 @@ import logging
 from pathlib import Path
 from typing import Iterator
 
+from .parse_common import safe_float, safe_int
+
 logger = logging.getLogger(__name__)
+
+# Backwards-compatible aliases — federal ints default to 0, floats to None.
+# These names are imported directly by tests/test_parse.py.
+_safe_int = safe_int
+_safe_float = safe_float
 
 
 # ── Low-level CSV reader ─────────────────────────────────────────────────────
@@ -62,20 +69,6 @@ def _iter_aec_csv(filepath: str | Path) -> Iterator[dict]:
         # Zip even if row is shorter than headers (pad with empty strings)
         padded = row + [""] * (len(headers) - len(row))
         yield dict(zip(headers, padded))
-
-
-def _safe_int(value: str, default: int = 0) -> int:
-    try:
-        return int(str(value).replace(",", "").strip())
-    except (ValueError, AttributeError):
-        return default
-
-
-def _safe_float(value: str, default: float = None):
-    try:
-        return float(str(value).replace(",", "").strip())
-    except (ValueError, AttributeError):
-        return default
 
 
 # ── Candidates ───────────────────────────────────────────────────────────────

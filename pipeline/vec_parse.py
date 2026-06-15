@@ -33,6 +33,7 @@ from typing import Any
 import pandas as pd
 
 from .config import VIC_ELECTIONS
+from .parse_common import safe_float as _safe_float, safe_int as _safe_int
 
 logger = logging.getLogger(__name__)
 
@@ -70,26 +71,6 @@ def _find_col(df: pd.DataFrame, candidates: list[str]) -> str | None:
             if c in lc or lc in c:
                 return orig
     return None
-
-
-def _safe_int(val) -> int:
-    """Convert a value to int, stripping commas; return 0 on failure."""
-    if val is None or (isinstance(val, float) and pd.isna(val)):
-        return 0
-    try:
-        return int(str(val).replace(",", "").replace(" ", "").strip())
-    except (ValueError, TypeError):
-        return 0
-
-
-def _safe_float(val) -> float | None:
-    """Convert a value to float; return None on failure."""
-    if val is None or (isinstance(val, float) and pd.isna(val)):
-        return None
-    try:
-        return float(str(val).replace(",", "").replace("%", "").strip())
-    except (ValueError, TypeError):
-        return None
 
 
 def _normalise_district(name: str) -> str:

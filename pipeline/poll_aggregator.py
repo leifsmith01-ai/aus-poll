@@ -256,10 +256,9 @@ def run_vic(
 
     Steps: load → impute TPP → compute house effects → build trend → write.
     """
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
+    # Library functions adjust only their own logger level; root logging is
+    # configured by the entry point (main.py's setup_logging, or __main__ below).
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
     if not input_path.exists():
         logger.error("VIC polls file not found: %s", input_path)
@@ -402,10 +401,9 @@ def run_state(
         python -m pipeline.poll_aggregator --state nsw
         python -m pipeline.poll_aggregator --state qld
     """
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
+    # Library functions adjust only their own logger level; root logging is
+    # configured by the entry point (main.py's setup_logging, or __main__ below).
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
     cfg = STATE_AGGREGATION_REGISTRY.get(state.lower())
     if cfg is None:
@@ -865,10 +863,9 @@ def run(
       5. Compute current (most-recent-window) aggregate.
       6. Write output JSON.
     """
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
+    # Library functions adjust only their own logger level; root logging is
+    # configured by the entry point (main.py's setup_logging, or __main__ below).
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
     with open(input_path, encoding="utf-8") as f:
         raw = json.load(f)
@@ -987,6 +984,8 @@ if __name__ == "__main__":
     parser.add_argument("--plot",   action="store_true",      help="Print ASCII trend summary")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
 
     state_arg = args.state.lower() if args.state else ""
     if state_arg in STATE_AGGREGATION_REGISTRY:
