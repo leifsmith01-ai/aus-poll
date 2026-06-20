@@ -218,7 +218,7 @@ def ridge_regression(
     Returns beta coefficients.
     Uses normal equations: beta = (X^T X + alpha I)^{-1} X^T y
     """
-    n, p = len(X), len(X[0])
+    _n, p = len(X), len(X[0])
 
     # X^T X
     XtX = [[0.0] * p for _ in range(p)]

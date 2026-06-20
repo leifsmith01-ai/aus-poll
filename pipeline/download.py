@@ -12,7 +12,6 @@ Usage:
     python -m pipeline.download --year 2019 2022
 """
 
-import os
 import time
 import logging
 import argparse

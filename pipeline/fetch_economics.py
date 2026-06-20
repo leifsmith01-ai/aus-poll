@@ -27,9 +27,8 @@ import argparse
 import json
 import logging
 import shutil
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

@@ -3469,6 +3469,43 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
   });
 }
 
+// ── Generic state 2CP calculator ─────────────────────────────────────────────
+// Builds the per-seat ALP-2CP function used by every non-VIC state model
+// (NSW/QLD/WA/SA/NT). These were five near-identical inline closures; the only
+// differences are the state's `ind` primary, the forced ON matchup (`onTcp`),
+// and NT's optional-preferential exhaustion. Parameters:
+//   ind      – the state's Independent primary vote % (constant across seats)
+//   onTcp    – null | "on_v_alp" | "on_v_coal" to force a One Nation final 2CP
+//   swings   – statewide primary swings { alp, coal, grn, on }; used to derive
+//              the Coalition→ON transfer share when an ON surge is Coalition-fed
+//   exhaust  – optional-preferential exhaust rate (NT); 0 = full preferential
+// Returns a function (p, f) → ALP 2CP %, where p is the seat's projected
+// primaries and f the preference-flow set.
+function makeStateCompute2pp({ ind = 0, onTcp = null, swings, exhaust = 0 }) {
+  const coalToOnXfer = (swings.on > 0 && swings.coal < 0)
+    ? Math.max(0, Math.min(1, -swings.coal / swings.on))
+    : 0;
+  const k = 1 - exhaust;
+  return (p, f) => {
+    const onV = p.on ?? 0;
+    const other = Math.max(0, 100 - p.alp - p.coal - p.grn - ind - onV);
+    if (onTcp === "on_v_alp") {
+      const a = p.alp + k * (p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + ind * f.ind_alp_v_on + other * f.other_alp_v_on);
+      const on = onV + k * (p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on));
+      return a / (a + on) * 100;
+    }
+    if (onTcp === "on_v_coal") {
+      const on = onV + k * (p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + ind * f.ind_on_v_coal + other * f.other_on_v_coal);
+      const c = p.coal + k * (p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal));
+      return on / (on + c) * 100;
+    }
+    const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
+    const a = p.alp + k * (ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp);
+    const c = p.coal + k * (ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp));
+    return a / (a + c) * 100;
+  };
+}
+
 // ── Generic single-member preferential swing model ───────────────────────────
 // Works for NSW, QLD, WA, SA, NT (all single-member, preferential lower houses).
 // Parameters:
@@ -5269,25 +5306,7 @@ export default function App() {
   const [nswSeatOverrides, setNswSeatOverrides] = useState({}); // { seatId: { tcpMatchup, tcpPct, on } }
   const nswModelledSeats = useMemo(() => {
     const s = { alp: nswPrim.alp - NSW_BL.alp, coal: nswPrim.coal - NSW_BL.coal, grn: nswPrim.grn - NSW_BL.grn, on: nswPrim.on - NSW_BL.on };
-    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
-    const compute2pp = (p, f) => {
-      const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - nswPrim.ind - onV);
-      if (nswOnTcp === "on_v_alp") {
-        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + nswPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
-        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + nswPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
-        return a / (a + on) * 100;
-      }
-      if (nswOnTcp === "on_v_coal") {
-        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + nswPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
-        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + nswPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
-        return on / (on + c) * 100;
-      }
-      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
-      const a = p.alp + nswPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
-      const c = p.coal + nswPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
-      return a / (a + c) * 100;
-    };
+    const compute2pp = makeStateCompute2pp({ ind: nswPrim.ind, onTcp: nswOnTcp, swings: s });
     const baseline2pp = compute2pp(NSW_BL, nswFlows);
     return computeModelledSeatsState(NSW_SEATS, nswPrim, compute2pp, baseline2pp, nswFlows, NSW_COAL, s,
       useNswRegionalSwing ? NSW_DISTRICT_REGION : null,
@@ -5353,25 +5372,7 @@ export default function App() {
   const [qldSeatOverrides, setQldSeatOverrides] = useState({}); // { seatId: { tcpMatchup, tcpPct, on } }
   const qldModelledSeats = useMemo(() => {
     const s = { alp: qldPrim.alp - QLD_BL.alp, coal: qldPrim.coal - QLD_BL.coal, grn: qldPrim.grn - QLD_BL.grn, on: qldPrim.on - QLD_BL.on };
-    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
-    const compute2pp = (p, f) => {
-      const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - qldPrim.ind - onV);
-      if (qldOnTcp === "on_v_alp") {
-        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + qldPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
-        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + qldPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
-        return a / (a + on) * 100;
-      }
-      if (qldOnTcp === "on_v_coal") {
-        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + qldPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
-        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + qldPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
-        return on / (on + c) * 100;
-      }
-      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
-      const a = p.alp + qldPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
-      const c = p.coal + qldPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
-      return a / (a + c) * 100;
-    };
+    const compute2pp = makeStateCompute2pp({ ind: qldPrim.ind, onTcp: qldOnTcp, swings: s });
     const baseline2pp = compute2pp(QLD_BL, qldFlows);
     return computeModelledSeatsState(QLD_SEATS, qldPrim, compute2pp, baseline2pp, qldFlows, QLD_COAL, s,
       useQldRegionalSwing ? QLD_DISTRICT_REGION : null,
@@ -5430,25 +5431,7 @@ export default function App() {
   const [waSeatOverrides, setWaSeatOverrides] = useState({});
   const waModelledSeats = useMemo(() => {
     const s = { alp: waPrim.alp - WA_BL.alp, coal: waPrim.coal - WA_BL.coal, grn: waPrim.grn - WA_BL.grn, on: waPrim.on - WA_BL.on };
-    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
-    const compute2pp = (p, f) => {
-      const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - waPrim.ind - onV);
-      if (waOnTcp === "on_v_alp") {
-        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + waPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
-        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + waPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
-        return a / (a + on) * 100;
-      }
-      if (waOnTcp === "on_v_coal") {
-        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + waPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
-        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + waPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
-        return on / (on + c) * 100;
-      }
-      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
-      const a = p.alp + waPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
-      const c = p.coal + waPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
-      return a / (a + c) * 100;
-    };
+    const compute2pp = makeStateCompute2pp({ ind: waPrim.ind, onTcp: waOnTcp, swings: s });
     const baseline2pp = compute2pp(WA_BL, waFlows);
     return computeModelledSeatsState(WA_SEATS, waPrim, compute2pp, baseline2pp, waFlows, WA_COAL, s,
       useWaRegionalSwing ? WA_DISTRICT_REGION : null,
@@ -5516,25 +5499,7 @@ export default function App() {
     const s = { alp: saPrim.alp - SA_BL.alp, coal: saPrim.coal - SA_BL.coal, grn: saPrim.grn - SA_BL.grn, on: saPrim.on - SA_BL.on };
     // When ON rises at Coalition's expense, ex-LP defectors preference ALP at a higher rate than
     // baseline ON voters. onCoalOriginFactor (0–1) scales this adjustment up when the signal is clear.
-    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
-    const compute2pp = (p, f) => {
-      const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - saPrim.ind - onV);
-      if (saOnTcp === "on_v_alp") {
-        const a = p.alp + p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + saPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on;
-        const on = onV + p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + saPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on);
-        return a / (a + on) * 100;
-      }
-      if (saOnTcp === "on_v_coal") {
-        const on = onV + p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + saPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal;
-        const c = p.coal + p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + saPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal);
-        return on / (on + c) * 100;
-      }
-      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
-      const a = p.alp + saPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp;
-      const c = p.coal + saPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp);
-      return a / (a + c) * 100;
-    };
+    const compute2pp = makeStateCompute2pp({ ind: saPrim.ind, onTcp: saOnTcp, swings: s });
     const baseline2pp = compute2pp(SA_BL, saFlows);
     return computeModelledSeatsState(SA_SEATS, saPrim, compute2pp, baseline2pp, saFlows, SA_COAL, s,
       useSaRegionalSwing ? SA_DISTRICT_REGION : null,
@@ -5595,28 +5560,7 @@ export default function App() {
   const [ntSeatOverrides, setNtSeatOverrides] = useState({});
   const ntModelledSeats = useMemo(() => {
     const s = { alp: ntPrim.alp - NT_BL.alp, coal: ntPrim.coal - NT_BL.coal, grn: ntPrim.grn - NT_BL.grn, on: ntPrim.on - NT_BL.on };
-    const coalToOnXfer = (s.on > 0 && s.coal < 0) ? Math.max(0, Math.min(1, -s.coal / s.on)) : 0;
-    const compute2pp = (p, f) => {
-      const onV = p.on ?? 0;
-      const other = Math.max(0, 100 - p.alp - p.coal - p.grn - ntPrim.ind - onV);
-      // Optional-preferential exhaustion: a share of minor-party votes never reaches the
-      // final 2CP. Scale all minor-party flows by (1 - exhaust rate); 0 = full preferential.
-      const ef = ntExhaustRate;
-      if (ntOnTcp === "on_v_alp") {
-        const a = p.alp + (1 - ef) * (p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + ntPrim.ind * f.ind_alp_v_on + other * f.other_alp_v_on);
-        const on = onV + (1 - ef) * (p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + ntPrim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on));
-        return a / (a + on) * 100;
-      }
-      if (ntOnTcp === "on_v_coal") {
-        const on = onV + (1 - ef) * (p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + ntPrim.ind * f.ind_on_v_coal + other * f.other_on_v_coal);
-        const c = p.coal + (1 - ef) * (p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + ntPrim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal));
-        return on / (on + c) * 100;
-      }
-      const effOnAlp = f.on_alp + (f.onCoalOriginFactor ?? 0) * coalToOnXfer * (1 - f.on_alp);
-      const a = p.alp + (1 - ef) * (ntPrim.ind * f.ind_alp + p.grn * f.grn_alp + onV * effOnAlp + other * f.other_alp);
-      const c = p.coal + (1 - ef) * (ntPrim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - effOnAlp) + other * (1 - f.other_alp));
-      return a / (a + c) * 100;
-    };
+    const compute2pp = makeStateCompute2pp({ ind: ntPrim.ind, onTcp: ntOnTcp, swings: s, exhaust: ntExhaustRate });
     const baseline2pp = compute2pp(NT_BL, ntFlows);
     return computeModelledSeatsState(NT_SEATS, ntPrim, compute2pp, baseline2pp, ntFlows, NT_COAL, s,
       useNtRegionalSwing ? NT_DISTRICT_REGION : null,
@@ -11116,6 +11060,7 @@ export {
   computeModelledSeats,
   computeModelledSeatsVic,
   computeModelledSeatsState,
+  makeStateCompute2pp,
   computeVic2pp,
   computeNat2pp,
   getParty,

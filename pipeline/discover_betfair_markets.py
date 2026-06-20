@@ -34,7 +34,6 @@ import json
 import os
 import sys
 import argparse
-from pathlib import Path
 
 import requests
 
@@ -69,7 +68,7 @@ def list_competitions(app_key: str, session_token: str, text_filter: str = "") -
     }
     try:
         return _post("listCompetitions", body, app_key, session_token)
-    except Exception as e:
+    except Exception:
         # Try without filtering by event type (in case the ID differs by locale)
         body = {"filter": {"textQuery": text_filter} if text_filter else {}}
         return _post("listCompetitions", body, app_key, session_token)
@@ -169,7 +168,7 @@ def main():
     )
 
     if not markets:
-        print(f"No markets found. Try --list-competitions to find the right competition ID.")
+        print("No markets found. Try --list-competitions to find the right competition ID.")
         return
 
     if args.json:

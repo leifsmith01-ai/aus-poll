@@ -181,7 +181,7 @@ def main() -> None:
                 "(district_id, election_id, district_name, enrolment) VALUES(?,?,?,?)",
                 (i, eid, name, enrol),
             )
-    print(f"  Inserted districts for all elections.")
+    print("  Inserted districts for all elections.")
 
     # ── Candidates + 2CP ──────────────────────────────────────────────────────
     # candidate_id scheme: district_id * 10 + offset (ALP=1, CLP=2)
@@ -225,7 +225,7 @@ def main() -> None:
     conn = sqlite3.connect(DB_PATH)
     for eid, _, date in ELECTIONS:
         rows = conn.execute(
-            f"""
+            """
             SELECT d.district_name, t.vote_pct
             FROM nt_district_2cp t
             JOIN nt_candidates c ON c.candidate_id = t.candidate_id

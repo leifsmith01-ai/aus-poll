@@ -32,7 +32,6 @@ import math
 import sqlite3
 import sys
 from pathlib import Path
-from typing import Iterable
 
 ROOT = Path(__file__).parent.parent
 # DB filename must match pipeline/config.py (DB_PATH = data/aec_elections.db).

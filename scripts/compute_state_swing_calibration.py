@@ -407,7 +407,7 @@ def print_recommendations(state: str, rec: dict[str, dict]) -> None:
         f'"{r}": {info["recommended_multiplier"]:.2f}'
         for r, info in rec.items()
     )
-    print(f"\n  → Paste into App.jsx:")
+    print("\n  → Paste into App.jsx:")
     print(f"    const {state.upper()}_REGION_SWING_MULT = {{ {js_entries} }};")
 
 

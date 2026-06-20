@@ -23,7 +23,6 @@ import json
 import logging
 import math
 import os
-import sys
 from datetime import date
 from pathlib import Path
 
@@ -413,7 +412,6 @@ def fetch_odds_api(api_key: str) -> dict:
 
         # Build lookup: sport title (lower) → sport key
         sport_by_title = {s.get("title", "").lower(): s["key"] for s in sports}
-        all_titles_lower = list(sport_by_title.keys())
 
         # ── Federal election ───────────────────────────────────────────────────
         federal_keys = _select_federal_sport_keys(sports)

@@ -13,7 +13,7 @@ Or use the data entry functions directly to build data dictionaries.
 
 import re
 import json
-from typing import Dict, Tuple, Optional
+from typing import Dict
 
 
 class WA_2CP_Extractor:
@@ -58,11 +58,6 @@ class WA_2CP_Extractor:
 
         # Very basic table extraction - adjust regex as needed
         results = {}
-
-        # Look for table rows with electorate names and percentages
-        # Pattern: <td>Electorate Name</td>...<td>XX.X%</td>
-        electorate_pattern = r'<td[^>]*>([A-Z][A-Za-z\s]+)</td>'
-        pct_pattern = r'<td[^>]*>(\d+\.\d+)%?</td>'
 
         # Split by table rows
         rows = re.split(r'<tr[^>]*>', content)
