@@ -13,8 +13,7 @@ from pathlib import Path
 from contextlib import contextmanager
 
 from .config import (
-    ELECTIONS, VIC_ELECTIONS, DB_PATH, COALITION_PARTIES, VIC_COALITION_PARTIES,
-    STATE_REGISTRY,
+    ELECTIONS, VIC_ELECTIONS, DB_PATH, STATE_REGISTRY,
 )
 
 logger = logging.getLogger(__name__)

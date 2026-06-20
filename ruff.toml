@@ -1,0 +1,12 @@
+# Ruff configuration for the Python pipeline.
+#
+# Scoped to the high-signal rule sets: pyflakes (F — undefined names, unused
+# imports/variables, f-string mistakes) and the pycodestyle error checks that
+# catch real syntax/runtime problems (E9). This is bug-detection without
+# stylistic churn on the existing codebase; the `select` set can be broadened
+# over time (e.g. add "I" for import sorting once imports are normalised).
+target-version = "py310"
+line-length = 100
+
+[lint]
+select = ["F", "E9"]

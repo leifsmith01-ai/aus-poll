@@ -26,14 +26,20 @@ Tally Room CSV structure:
 """
 
 import logging
-import re
+import zipfile
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
-from .config import VIC_ELECTIONS
 from .parse_common import safe_float as _safe_float, safe_int as _safe_int
+
+# Exceptions a file read can legitimately raise (missing, unreadable, corrupt
+# or malformed file). Catching this tuple instead of a bare `Exception` lets
+# genuine code bugs (NameError, AttributeError, …) propagate rather than being
+# silently logged as "failed to read". OSError covers missing/permission/IO;
+# ValueError covers pandas ParserError/EmptyDataError and decode errors;
+# BadZipFile covers a corrupt .xlsx.
+_FILE_READ_ERRORS = (OSError, ValueError, zipfile.BadZipFile)
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +138,7 @@ def _load_sheet(path: Path) -> list[pd.DataFrame]:
             df = xl.parse(sheet_name, header=None)
             sheets.append((sheet_name, df))
         return sheets
-    except Exception as exc:
+    except _FILE_READ_ERRORS as exc:
         logger.error("Failed to read Excel file %s: %s", path, exc)
         return []
 
@@ -378,7 +384,7 @@ def parse_tally_room_candidates(path: Path, election_id: int) -> list[dict]:
     logger.info("Parsing Tally Room candidates CSV: %s", path.name)
     try:
         df = pd.read_csv(path, encoding="utf-8-sig")
-    except Exception as exc:
+    except _FILE_READ_ERRORS as exc:
         logger.error("Failed to read %s: %s", path, exc)
         return []
 
@@ -420,7 +426,7 @@ def parse_tally_room_results(
     logger.info("Parsing Tally Room %s results CSV: %s", result_type.upper(), path.name)
     try:
         df = pd.read_csv(path, encoding="utf-8-sig")
-    except Exception as exc:
+    except _FILE_READ_ERRORS as exc:
         logger.error("Failed to read %s: %s", path, exc)
         return []
 
@@ -494,7 +500,7 @@ def parse_vec_booths(
     logger.info("Parsing Tally Room booth %s CSV: %s", result_type.upper(), path.name)
     try:
         df = pd.read_csv(path, encoding="utf-8-sig")
-    except Exception as exc:
+    except _FILE_READ_ERRORS as exc:
         logger.error("Failed to read %s: %s", path, exc)
         return [], []
 
@@ -576,7 +582,7 @@ def parse_vec_enrolment(path: Path, election_id: int) -> dict[str, int]:
             df = pd.read_excel(path)
         else:
             df = pd.read_csv(path, encoding="utf-8-sig")
-    except Exception as exc:
+    except _FILE_READ_ERRORS as exc:
         logger.warning("Could not parse enrolment file %s: %s", path, exc)
         return {}
 

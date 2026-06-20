@@ -250,7 +250,7 @@ def main() -> None:
                 "(district_id, election_id, district_name, enrolment) VALUES(?,?,?,?)",
                 (i, eid, name, enrol),
             )
-    print(f"  Inserted districts for all elections.")
+    print("  Inserted districts for all elections.")
 
     # ── Candidates + 2CP ──────────────────────────────────────────────────────
     # candidate_id scheme: district_id * 10 + 1 (ALP), district_id * 10 + 2 (opponent)

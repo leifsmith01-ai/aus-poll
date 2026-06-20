@@ -12,8 +12,6 @@ To also copy fresh betting odds (after running pipeline/betting_odds.py):
 This replaces the sample data files with real pipeline output.
 """
 
-import os
-import json
 import shutil
 from pathlib import Path
 
@@ -59,7 +57,7 @@ def copy_economics() -> None:
     src = BASE_DIR / "data" / "economics.json"
     dst = WEBAPP_DATA_DIR / "economics.json"
     if not src.exists():
-        print(f"  ✗ No economics.json found (run: python pipeline/fetch_economics.py)")
+        print("  ✗ No economics.json found (run: python pipeline/fetch_economics.py)")
         return
     shutil.copy2(src, dst)
     print(f"  ✓ economics.json → {dst}")
@@ -83,7 +81,7 @@ def copy_aggregated_polls() -> None:
     src = BASE_DIR / "data" / "polls" / "aggregated.json"
     dst = WEBAPP_DATA_DIR / "aggregated.json"
     if not src.exists():
-        print(f"  ✗ No aggregated.json found (run: python -m pipeline.poll_aggregator)")
+        print("  ✗ No aggregated.json found (run: python -m pipeline.poll_aggregator)")
         return
     shutil.copy2(src, dst)
     print(f"  ✓ aggregated.json → {dst}")
@@ -119,7 +117,7 @@ def main():
     elections_src = EXPORTS_DIR / "elections.json"
     if elections_src.exists():
         shutil.copy2(elections_src, FRONTEND_DIR / "elections.json")
-        print(f"  ✓ Updated elections.json")
+        print("  ✓ Updated elections.json")
 
     # ── Betting odds → webapp/src/data/ ──────────────────────────────────────
     copy_betting_odds()

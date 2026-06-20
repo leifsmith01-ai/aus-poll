@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Lint (ruff)
+        run: ruff check pipeline/ tests/ scripts/ main.py
+
       - name: Run pipeline tests
         run: python -m pytest tests/ -v
 

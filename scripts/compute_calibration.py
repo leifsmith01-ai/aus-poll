@@ -27,9 +27,7 @@ machine-readable offsets to data/model_constants/seat_calib_2025.json
 from __future__ import annotations
 
 import json
-import math
 import re
-import sys
 from pathlib import Path
 
 APP_JSX = Path(__file__).parent.parent / "webapp" / "src" / "App.jsx"

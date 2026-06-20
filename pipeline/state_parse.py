@@ -76,7 +76,6 @@ NTEC (NT): CSV or Excel.  Key files:
 
 import csv
 import logging
-from pathlib import Path
 
 from .parse_common import safe_float, safe_int
 

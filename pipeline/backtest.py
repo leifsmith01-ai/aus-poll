@@ -460,9 +460,6 @@ def monte_carlo_seat_counts(
     """
     import random
 
-    n_alp_coal = sum(1 for s in baseline_seats if s.alp_2pp is not None)
-    n_non_alp_coal = len(baseline_seats) - n_alp_coal
-
     # Per-seat ALP win probability (from simulations)
     seat_alp_wins = {s.division_id: 0 for s in baseline_seats}
     alp_seat_counts = []
@@ -908,7 +905,7 @@ def print_report(bt: BacktestResult) -> None:
     print(f"  Marginal seats (≤5pp):          {bt.n_marginal}")
     print(f"  Marginal correct (%):           {bt.pct_marginal_correct:.1f}%")
     print()
-    print(f"  Swing elasticity:")
+    print("  Swing elasticity:")
     print(f"    National swing:               {bt.national_swing:+.2f}pp")
     print(f"    Mean seat-level swing:        {bt.mean_seat_swing:+.2f}pp")
     print(f"    Elasticity (seat/national):   {bt.elasticity:.2f}x")

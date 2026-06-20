@@ -20,16 +20,14 @@ from pathlib import Path
 
 from .export_schemas import validate_export
 from .config import (
-    DATA_EXPORTS_DIR, ELECTIONS, COALITION_PARTIES,
+    DATA_EXPORTS_DIR, COALITION_PARTIES,
     VIC_ELECTIONS, VIC_EXPORTS_DIR, VIC_COALITION_PARTIES,
     STATE_REGISTRY,
 )
 from .database import (
     get_connection,
-    get_all_divisions,
     get_division_summary,
     get_national_summary,
-    get_vic_districts,
     get_vic_district_results,
     get_vic_state_summary,
     get_state_districts,
@@ -39,7 +37,6 @@ from .database import (
     get_state_booth_votes,
     get_state_previous_election_id,
     get_state_district_tcp_pcts,
-    DB_PATH,
 )
 
 logger = logging.getLogger(__name__)
@@ -951,14 +948,15 @@ def export_vic_election(election_id: int, db_path: str = None,
 
     # Compute district-level swings vs the preceding election if both are loaded.
     # Ordering: 202211 → 201811 → 201411
-    from .config import VIC_ELECTIONS
     all_ids = sorted(VIC_ELECTIONS.keys(), reverse=True)  # descending: 202211, 201811, 201411
     idx = all_ids.index(election_id) if election_id in all_ids else -1
     if idx >= 0 and idx + 1 < len(all_ids):
         prev_id = all_ids[idx + 1]
         try:
             compute_vic_swings(election_id, prev_id, db_path, exports_dir)
-        except Exception as exc:
+        except (sqlite3.Error, KeyError, ValueError, IndexError) as exc:
+            # Best-effort: the previous election may not be loaded yet. Narrow to
+            # the DB/lookup errors that signals; let unexpected errors surface.
             logger.warning(
                 "Could not compute VIC swings (%d→%d): %s (run both elections first)",
                 prev_id, election_id, exc,
@@ -1119,7 +1117,7 @@ def export_lc_summary(state_ab: str, election_id: int,
         if ab == "vic":
             regions_out = []
             for reg in conn.execute(
-                f"""
+                """
                 SELECT region_id, region_name, seats_in_region
                 FROM vic_lc_regions WHERE election_id = ?
                 ORDER BY region_name
