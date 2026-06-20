@@ -15,6 +15,7 @@ import {
   computeModelledSeats,
   computeModelledSeatsVic,
   computeModelledSeatsState,
+  makeStateCompute2pp,
   computeVic2pp,
   getParty,
   getSeatGroup,
@@ -35,28 +36,7 @@ import {
 } from "../App.jsx";
 
 const ZERO_SWINGS = { alp: 0, coal: 0, grn: 0, ind: 0, on: 0, teal: 0, other: 0 };
-
-// Generic state compute2pp mirroring the per-state closures in App.jsx at zero
-// swing (coalToOnXfer = 0 → effOnAlp = f.on_alp). `exhaust` covers NT's
-// optional-preferential exhaustion factor.
-const makeCompute2pp = (prim, onTcp = null, exhaust = 0) => (p, f) => {
-  const onV = p.on ?? 0;
-  const other = Math.max(0, 100 - p.alp - p.coal - p.grn - prim.ind - onV);
-  const k = 1 - exhaust;
-  if (onTcp === "on_v_alp") {
-    const a = p.alp + k * (p.coal * f.coal_alp_v_on + p.grn * f.grn_alp_v_on + prim.ind * f.ind_alp_v_on + other * f.other_alp_v_on);
-    const on = onV + k * (p.coal * (1 - f.coal_alp_v_on) + p.grn * (1 - f.grn_alp_v_on) + prim.ind * (1 - f.ind_alp_v_on) + other * (1 - f.other_alp_v_on));
-    return a / (a + on) * 100;
-  }
-  if (onTcp === "on_v_coal") {
-    const on = onV + k * (p.alp * f.alp_on_v_coal + p.grn * f.grn_on_v_coal + prim.ind * f.ind_on_v_coal + other * f.other_on_v_coal);
-    const c = p.coal + k * (p.alp * (1 - f.alp_on_v_coal) + p.grn * (1 - f.grn_on_v_coal) + prim.ind * (1 - f.ind_on_v_coal) + other * (1 - f.other_on_v_coal));
-    return on / (on + c) * 100;
-  }
-  const a = p.alp + k * (prim.ind * f.ind_alp + p.grn * f.grn_alp + onV * f.on_alp + other * f.other_alp);
-  const c = p.coal + k * (prim.ind * (1 - f.ind_alp) + p.grn * (1 - f.grn_alp) + onV * (1 - f.on_alp) + other * (1 - f.other_alp));
-  return a / (a + c) * 100;
-};
+const NO_SWING = { alp: 0, coal: 0, grn: 0, on: 0 };
 
 const tallyByGroup = (seats, pick) => {
   const c = {};
@@ -84,7 +64,8 @@ function expectNoChanges(modelled, label) {
 
 function runState({ seats, bl, coal, flows, onFp, seatPrefFlows, regionMap, regionMult, seatFp, exhaust = 0 }) {
   const prim = { ...bl, undecided: 0 };
-  const compute2pp = makeCompute2pp(prim, null, exhaust);
+  // Use the production 2CP calculator (zero swing → coalToOnXfer = 0).
+  const compute2pp = makeStateCompute2pp({ ind: prim.ind, onTcp: null, swings: NO_SWING, exhaust });
   const baseline2pp = compute2pp(bl, flows);
   return computeModelledSeatsState(
     seats, prim, compute2pp, baseline2pp, flows, coal,
@@ -230,5 +211,54 @@ describe("NT model at zero swing reproduces the 2024 result", () => {
 
   it("matches the actual 2024 tallies", () => {
     expect(projectedTally(modelled)).toEqual(baselineTally(NT_SEATS));
+  });
+});
+
+// Direct coverage of the unified state 2CP calculator across the swing-dependent
+// paths the baseline (zero-swing) cases never exercise: the standard ALP-vs-Coal
+// distribution, optional-preferential exhaustion, the forced ON-vs-ALP and
+// ON-vs-Coalition finals, and the Coalition-fed ON-surge preference adjustment.
+describe("makeStateCompute2pp (non-baseline preference distribution)", () => {
+  const FLOWS = {
+    ind_alp: 0.5, grn_alp: 0.8, on_alp: 0.3, other_alp: 0.5, onCoalOriginFactor: 0,
+    coal_alp_v_on: 0.12, grn_alp_v_on: 0.85, ind_alp_v_on: 0.6, other_alp_v_on: 0.5,
+    alp_on_v_coal: 0.2, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.25,
+  };
+
+  it("distributes preferences to an ALP-vs-Coalition 2PP", () => {
+    const f = makeStateCompute2pp({ ind: 5, onTcp: null, swings: NO_SWING });
+    // a = 40 + 5*.5 + 12*.8 + 5*.3 = 53.6 ; c = 46.4 → 53.6
+    expect(f({ alp: 40, coal: 38, grn: 12, on: 5 }, FLOWS)).toBeCloseTo(53.6, 4);
+  });
+
+  it("optional-preferential exhaustion damps minor-party preferences", () => {
+    const f = makeStateCompute2pp({ ind: 5, onTcp: null, swings: NO_SWING, exhaust: 0.2 });
+    // k=0.8 → a=50.88, c=44.72, total 95.6 → 53.2218
+    expect(f({ alp: 40, coal: 38, grn: 12, on: 5 }, FLOWS)).toBeCloseTo(53.2218, 3);
+  });
+
+  it("computes a One-Nation-vs-ALP final when forced", () => {
+    const f = makeStateCompute2pp({ ind: 5, onTcp: "on_v_alp", swings: NO_SWING });
+    // a = 30 + 35*.12 + 10*.85 + 5*.6 = 45.7 ; on = 54.3 → returns ALP share 45.7
+    expect(f({ alp: 30, coal: 35, grn: 10, on: 20 }, FLOWS)).toBeCloseTo(45.7, 4);
+  });
+
+  it("computes a One-Nation-vs-Coalition final when forced", () => {
+    const f = makeStateCompute2pp({ ind: 5, onTcp: "on_v_coal", swings: NO_SWING });
+    // on = 25 + 25*.2 + 10*.07 + 5*.12 = 31.3 ; c = 68.7 → returns ON share 31.3
+    expect(f({ alp: 25, coal: 35, grn: 10, on: 25 }, FLOWS)).toBeCloseTo(31.3, 4);
+  });
+
+  it("lifts ALP 2PP when a Coalition-fed ON surge raises the ON→ALP flow", () => {
+    const seat = { alp: 35, coal: 35, grn: 10, on: 15 };
+    const neutral = makeStateCompute2pp({ ind: 5, onTcp: null, swings: NO_SWING });
+    // ON up 5, Coalition down 4 → coalToOnXfer = 0.8; onCoalOriginFactor lifts ON→ALP.
+    const coalFed = makeStateCompute2pp({
+      ind: 5, onTcp: null, swings: { alp: 0, coal: -4, grn: 0, on: 5 },
+    });
+    const base = neutral(seat, FLOWS);
+    const lifted = coalFed(seat, { ...FLOWS, onCoalOriginFactor: 0.5 });
+    expect(base).toBeCloseTo(50.0, 4);
+    expect(lifted).toBeGreaterThan(base);
   });
 });
