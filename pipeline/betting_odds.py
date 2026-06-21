@@ -402,9 +402,13 @@ def fetch_odds_api(api_key: str) -> dict:
 
     try:
         # ── Fetch sports list (1 request) ──────────────────────────────────────
+        # all=true is required: the default response only includes sports that
+        # are currently "in season", which excludes politics/election outright
+        # markets almost all of the time and made this lookup return zero
+        # politics sport keys regardless of what bookmakers actually listed.
         sports_resp = requests.get(
             f"{ODDS_API_BASE}/sports",
-            params={"apiKey": api_key},
+            params={"apiKey": api_key, "all": "true"},
             timeout=10,
         )
         sports_resp.raise_for_status()
