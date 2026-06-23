@@ -449,18 +449,24 @@ def merge_into_file(path: Path, new_records: list[dict]) -> int:
             if (r.get("n") or 0) > (prev.get("n") or 0):
                 seen_new[key] = r
     additions = list(seen_new.values())
-    if not additions:
-        logger.info("merge_into_file(%s): all %d scraped records already present",
-                    path.name, len(new_records))
-        return 0
 
-    data["polls"] = sorted(existing + additions, key=lambda p: p.get("date", ""))
+    # A successful scrape always refreshes 'retrieved', even when every record
+    # was already present. This keeps 'retrieved' a true "last successful fetch"
+    # signal so the Data Health Check can tell a dead scraper apart from a quiet
+    # polling week — without it, a run that finds no new poll leaves the file
+    # untouched and the stamp drifts stale, tripping a false alarm.
     data["retrieved"] = date.today().isoformat()
+    if additions:
+        data["polls"] = sorted(existing + additions, key=lambda p: p.get("date", ""))
 
     with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         f.write("\n")
 
+    if not additions:
+        logger.info("merge_into_file(%s): all %d scraped records already present "
+                    "(refreshed retrieved stamp)", path.name, len(new_records))
+        return 0
     logger.info("merge_into_file(%s): appended %d new record(s)", path.name, len(additions))
     return len(additions)
 

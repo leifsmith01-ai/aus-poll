@@ -38,14 +38,24 @@ jobs:
           def age_days(stamp):
               return (date.today() - date.fromisoformat(stamp)).days
 
-          # Federal polls: scraped weekly from Wikipedia.
+          # Federal polls: the scraper fetches from Wikipedia weekly and stamps
+          # 'retrieved' on every successful fetch — even a week with no new poll —
+          # so a stale stamp means the scrape itself stopped, not merely a quiet
+          # polling stretch.
           fed = json.load(open("data/polls/bludgertrack.json"))
           if age_days(fed["retrieved"]) > 10:
               failures.append(f"bludgertrack.json retrieved {fed['retrieved']} (>10 days old) — weekly poll scrape is not landing")
 
+          # Aggregator: 'generated' is the data-as-of date (newest poll folded
+          # in), not a run timestamp, so it legitimately stops advancing between
+          # polls. The aggregator runs right after the scrape, so it is healthy
+          # as long as it reflects the newest poll we actually hold; lagging
+          # behind that means the aggregator step silently stopped while the
+          # scrape kept landing.
           agg = json.load(open("data/polls/aggregated.json"))
-          if age_days(agg["generated"]) > 14:
-              failures.append(f"aggregated.json generated {agg['generated']} (>14 days old) — poll aggregator is not landing")
+          newest_fed = max(p["date"] for p in fed["polls"])
+          if agg["generated"] < newest_fed:
+              failures.append(f"aggregated.json generated {agg['generated']} is behind newest poll {newest_fed} — poll aggregator is not landing")
 
           # VIC polls: a long gap is suspicious in a VIC election year but can be real.
           vic = json.load(open("data/polls/vic_polls.json"))
