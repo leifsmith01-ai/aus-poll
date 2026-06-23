@@ -161,6 +161,9 @@ def test_merge_dedupes_and_preserves_curated(tmp_path):
     assert len(data["polls"]) == 1
     assert data["polls"][0]["alp"] == 99.0      # untouched, NOT overwritten
     assert data["polls"][0]["tpp"] == 99.0
+    # A successful scrape with no new rows still refreshes 'retrieved' so the
+    # Data Health Check sees the scrape is alive during quiet polling weeks.
+    assert data["retrieved"] != "2026-01-01"
 
 
 def test_merge_appends_new_records_and_sorts(tmp_path):
