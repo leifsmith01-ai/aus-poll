@@ -1318,24 +1318,29 @@ const SEAT_RESIDUAL_MAP = {
   328: 2.0
 };  // auto-injected by inject_model_constants.py
 
-// Estimate seat-level ON first preference using the 2025 seat baseline plus the
-// national ON swing applied on the log-odds (logit) scale rather than linearly.
-// The national swing is converted to a logit shift at the national base and that
-// shift is applied to each seat's own base: low-base seats move less in pp terms
-// (a +7pp national surge does not add 7pp to a 2% inner-city seat) while high-base
-// seats gain more absolute points without blowing through natural ceilings as the
-// share saturates. Bases are clamped to [0.1, 60]% before the logit so degenerate
-// inputs can't produce ±Infinity/NaN. Zero swing returns the baseline exactly.
-function estimateSeatOnFp(seatId, swings) {
-  const base = SEAT_FP_2025[seatId]?.on ?? ON_FP_2025[seatId] ?? BASELINE_2025.on;
-  const onSwing = swings.on ?? 0;
-  if (onSwing === 0) return base;
+// Distribute a national/statewide ON swing onto a seat's own ON base on the
+// log-odds (logit) scale rather than linearly. The swing is converted to a logit
+// shift at the reference (national/statewide) base and that shift is applied to
+// each seat's own base: low-base seats move less in pp terms (a +7pp surge does
+// not add 7pp to a 2% inner-city seat) while high-base seats gain more absolute
+// points without blowing through natural ceilings as the share saturates. Bases
+// are clamped to [0.1, 60]% before the logit so degenerate inputs can't produce
+// ±Infinity/NaN. Zero swing returns the seat base exactly.
+function logitShiftOnFp(seatBase, refBase, onSwing) {
+  if (!onSwing) return seatBase;
   const clampPct = (v) => Math.min(60, Math.max(0.1, v));
   const logit = (p) => Math.log(p / (100 - p));
   const invlogit = (x) => 100 / (1 + Math.exp(-x));
-  const shift = logit(clampPct(BASELINE_2025.on + onSwing)) - logit(clampPct(BASELINE_2025.on));
-  const est = invlogit(logit(clampPct(base)) + shift);
-  return Number.isFinite(est) ? est : base;
+  const shift = logit(clampPct(refBase + onSwing)) - logit(clampPct(refBase));
+  const est = invlogit(logit(clampPct(seatBase)) + shift);
+  return Number.isFinite(est) ? est : seatBase;
+}
+
+// Estimate seat-level ON first preference using the 2025 seat baseline plus the
+// national ON swing applied on the logit scale (see logitShiftOnFp).
+function estimateSeatOnFp(seatId, swings) {
+  const base = SEAT_FP_2025[seatId]?.on ?? ON_FP_2025[seatId] ?? BASELINE_2025.on;
+  return logitShiftOnFp(base, BASELINE_2025.on, swings.on ?? 0);
 }
 
 // Estimate ON first preference for a state seat given a per-state ON FP lookup and swing.
@@ -2583,6 +2588,16 @@ function normalizePrimaries(fp, locked = []) {
   return { ...v, other: Math.max(0, 100 - newNamed) };
 }
 
+// Extra reduction to the Coalition primary that sources a rising ON vote from
+// ex-Coalition defectors. Total Coalition reduction we want = onFromCoalShare × ON's
+// rise; the explicit coal swing already cuts some, so only the shortfall is taken
+// additionally. Zero when ON is flat or falling, so zero-swing baselines are unchanged.
+function extraCoalCutFor(sw, onFromCoalShare) {
+  const onRise = Math.max(0, sw.on ?? 0);
+  const uniformCoalCut = Math.max(0, -(sw.coal ?? 0));
+  return Math.max(0, onFromCoalShare * onRise - uniformCoalCut);
+}
+
 // Apply per-party swings to a seat's baseline primaries, sourcing a share of any ON
 // *increase* from the Coalition primary (the remainder is reabsorbed by the seat's
 // residual "other" via normalizePrimaries). This reflects that a rising ON vote is
@@ -2591,11 +2606,7 @@ function normalizePrimaries(fp, locked = []) {
 // zero-swing 2025 baseline is unchanged. `onFromCoalShare` is the Coalition source share.
 // `locked` parties keep their swung value during normalization (passed through).
 function applySeatSwings(base, sw, onFromCoalShare = 0, locked = []) {
-  // Total Coalition reduction we want = onFromCoalShare × ON's rise. The uniform coal
-  // swing already cuts some; only the shortfall is taken additionally from the Coalition.
-  const onRise = Math.max(0, sw.on ?? 0);
-  const uniformCoalCut = Math.max(0, -(sw.coal ?? 0));
-  const extraCoalCut = Math.max(0, onFromCoalShare * onRise - uniformCoalCut);
+  const extraCoalCut = extraCoalCutFor(sw, onFromCoalShare);
   return normalizePrimaries({
     alp: base.alp + (sw.alp ?? 0),
     coal: base.coal + (sw.coal ?? 0) - extraCoalCut,
@@ -3323,10 +3334,20 @@ function computeVic2pp(primaries, prefFlows, onTcpMatchup = null) {
 // Regional multipliers reflect the historically observed pattern that inner-metro seats
 // swing more than suburban seats, which in turn swing more than regional/rural seats.
 // The useRegionalSwing parameter enables/disables regional differentiation.
-function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing = true, onTcpMatchup = null, baseline2pp = VIC_2PP_2022, seatOverrides = null, seatFpMap = null) {
+// onFpLookup ({ seatId: baselineOnFp% }, e.g. VIC_SEAT_ON_FP) + onThreshold enable
+// per-seat ON-vs-major TCP auto-detection, mirroring computeModelledSeatsState.
+// onThreshold is only a pre-filter — the binding condition is the projected ON primary
+// overtaking a major party's, which self-adjusts to VIC's low (~1.3%) statewide ON base.
+function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing = true, onTcpMatchup = null, baseline2pp = VIC_2PP_2022, seatOverrides = null, seatFpMap = null, onFpLookup = null, onThreshold = MODEL_PARAMS.onThresholdDefault) {
+  // Source a share of any ON *rise* from the Coalition primary (federal-model parity —
+  // see MODEL_PARAMS.onFromCoalShare). Without this, a high ON primary wrongly inflates
+  // Coalition 2PP via ON's ~75% back-flow. The cut mass lands in the residual "others"
+  // because computeVic2pp derives others as 100 − sum. Zero when swings.on ≤ 0.
+  const onFromCoalShare = prefFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare;
+  const extraCoalCut = extraCoalCutFor(swings, onFromCoalShare);
   const newPrim = {
     alp: Math.max(0, VIC_BASELINE_2022.alp + swings.alp),
-    coal: Math.max(0, VIC_BASELINE_2022.coal + (swings.coal ?? 0)),
+    coal: Math.max(0, VIC_BASELINE_2022.coal + (swings.coal ?? 0) - extraCoalCut),
     grn: Math.max(0, VIC_BASELINE_2022.grn + swings.grn),
     ind: Math.max(0, VIC_BASELINE_2022.ind + swings.ind),
     on: Math.max(0, VIC_BASELINE_2022.on + (swings.on ?? 0)),
@@ -3377,6 +3398,92 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
       };
     }
 
+    // Per-seat FP baseline and projection (used by the standard swing arithmetic and
+    // the ON detection below). The seat's ON base comes from the propensity prior
+    // (onFpLookup) when available — VIC_SEAT_FP_2022 has on: 0.0 everywhere because ON
+    // ran no LA candidates in 2022 — substituted on BOTH sides so zero swing stays a
+    // no-op (the residual "others" inside computeVic2pp absorbs the substitution). The
+    // ON swing distributes on the logit scale so it concentrates where ON is strong.
+    const onBase = onFpLookup?.[seat.id];
+    let sfEff = null, projSf = null;
+    if (seatFpMap?.[seat.id]) {
+      const sf = seatFpMap[seat.id];
+      sfEff = { alp: sf.alp, coal: sf.coal, grn: sf.grn, ind: sf.ind, on: onBase ?? sf.on ?? 0 };
+      projSf = {
+        alp:  Math.max(0, sfEff.alp  + swings.alp),
+        coal: Math.max(0, sfEff.coal + (swings.coal ?? 0) - extraCoalCut),
+        grn:  Math.max(0, sfEff.grn  + swings.grn),
+        ind:  Math.max(0, sfEff.ind  + swings.ind),
+        on:   Math.max(0, logitShiftOnFp(sfEff.on, VIC_BASELINE_2022.on, swings.on ?? 0)),
+      };
+    }
+
+    // ── ON-final auto-detection for ALP-vs-Coalition seats ──────────────────────
+    // Mirrors computeModelledSeatsState, but uses the seat's own projected primaries
+    // (projSf) as competitors where available instead of statewide proxies. Skipped
+    // when a statewide ON final is forced (onTcpMatchup) — forced mode wins.
+    const isAlpVsCoal = (t1 === "ALP" && ["LP", "NP"].includes(t2)) || (["LP", "NP"].includes(t1) && t2 === "ALP");
+    if (isAlpVsCoal && onTcpMatchup == null && ov?.tcpPct == null && !ov?.forceGroup) {
+      const estOn = ov?.on ?? (onBase != null ? logitShiftOnFp(onBase, VIC_BASELINE_2022.on, swings.on ?? 0) : null);
+      let activeTcp = (ov?.tcpMatchup === "on_v_alp" || ov?.tcpMatchup === "on_v_coal") ? ov.tcpMatchup : null;
+      // Auto-promote ON into the final two only on a positive ON swing: the seat's
+      // recorded TCP pair is the actual result and must be reproduced at zero swing.
+      if (!activeTcp && estOn != null && estOn >= onThreshold && (swings.on ?? 0) > 0) {
+        const estAlp = ov?.alp ?? projSf?.alp ?? newPrim.alp;
+        const estCoal = ov?.coal ?? projSf?.coal ?? newPrim.coal;
+        const estGrn = ov?.grn ?? projSf?.grn ?? newPrim.grn;
+        const estInd = ov?.ind ?? projSf?.ind ?? newPrim.ind;
+        // ON must also out-poll the seat's Greens and independents to reach the final
+        // two — otherwise ON gets promoted in GRN-heavy inner seats (Northcote) and
+        // IND-strongman seats (Mildura, Shepparton) where a third party is the real
+        // challenger and the actual final would be GRN/IND-vs-major.
+        if (estOn > estGrn && estOn > estInd) {
+          if (estOn > estAlp && estCoal >= estAlp) activeTcp = "on_v_coal";
+          else if (estOn > estCoal && estAlp >= estCoal) activeTcp = "on_v_alp";
+        }
+      }
+      if (activeTcp) {
+        const fp = {
+          alp: ov?.alp ?? projSf?.alp ?? newPrim.alp,
+          coal: ov?.coal ?? projSf?.coal ?? newPrim.coal,
+          grn: ov?.grn ?? projSf?.grn ?? newPrim.grn,
+          ind: ov?.ind ?? projSf?.ind ?? newPrim.ind,
+          on: estOn ?? newPrim.on,
+        };
+        fp.other = Math.max(0, 100 - fp.alp - fp.coal - fp.grn - fp.ind - fp.on);
+        const pf = prefFlows;
+        let projWinnerParty, projWinnerGroup, projWinnerPct;
+        if (activeTcp === "on_v_coal") {
+          const coalParty = ["LP", "NP"].includes(t1) ? t1 : t2;
+          const onTcpV = fp.on + fp.alp * pf.alp_on_v_coal + fp.grn * pf.grn_on_v_coal + fp.ind * pf.ind_on_v_coal + fp.other * pf.other_on_v_coal;
+          const coalTcpV = fp.coal + fp.alp * (1 - pf.alp_on_v_coal) + fp.grn * (1 - pf.grn_on_v_coal) + fp.ind * (1 - pf.ind_on_v_coal) + fp.other * (1 - pf.other_on_v_coal);
+          const onPct = safePct(onTcpV, onTcpV + coalTcpV);
+          projWinnerGroup = onPct >= 50 ? "one_nation" : "coalition";
+          projWinnerParty = onPct >= 50 ? "ON" : coalParty;
+          projWinnerPct = onPct >= 50 ? onPct : 100 - onPct;
+        } else {
+          const alpTcpV = fp.alp + fp.coal * pf.coal_alp_v_on + fp.grn * pf.grn_alp_v_on + fp.ind * pf.ind_alp_v_on + fp.other * pf.other_alp_v_on;
+          const onTcpV = fp.on + fp.coal * (1 - pf.coal_alp_v_on) + fp.grn * (1 - pf.grn_alp_v_on) + fp.ind * (1 - pf.ind_alp_v_on) + fp.other * (1 - pf.other_alp_v_on);
+          const onPct = safePct(onTcpV, alpTcpV + onTcpV);
+          projWinnerGroup = onPct >= 50 ? "one_nation" : "alp";
+          projWinnerParty = onPct >= 50 ? "ON" : "ALP";
+          projWinnerPct = onPct >= 50 ? onPct : 100 - onPct;
+        }
+        return {
+          ...seat,
+          modelled: {
+            winnerParty: projWinnerParty, winnerGroup: projWinnerGroup, winnerPct: projWinnerPct,
+            projAlp2pp: null, // ALP not in the final TCP in one branch
+            changed: projWinnerGroup !== getParty(seat.winner.party).group,
+            isOnRace: true,
+            isAutoMatchup: !ov?.tcpMatchup,
+            activeTcpMatchup: activeTcp,
+            regionMult, region,
+          },
+        };
+      }
+    }
+
     // Per-seat primary override: derive effective swing from override primaries
     if (ov && (ov.alp != null || ov.coal != null || ov.grn != null || ov.ind != null || ov.on != null) && ov.tcpPct == null) {
       const ovPrim = {
@@ -3388,8 +3495,8 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
       };
       const ovNew2pp = computeVic2pp(ovPrim, prefFlows, onTcpMatchup);
       // Use per-seat FP as baseline when available; fall back to statewide baseline2pp.
-      const ovBaseline2pp = seatFpMap?.[seat.id]
-        ? computeVic2pp(seatFpMap[seat.id], prefFlows, onTcpMatchup)
+      const ovBaseline2pp = sfEff
+        ? computeVic2pp(sfEff, prefFlows, onTcpMatchup)
         : baseline2pp;
       const effectiveSwing = (ovNew2pp - ovBaseline2pp) * regionMult;
       let swingToT1 = 0;
@@ -3413,19 +3520,12 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
       };
     }
 
-    // Per-seat FP baseline: compute seat-specific 2PP swing from this seat's primary composition.
+    // Per-seat FP baseline: seat-specific 2PP swing from this seat's primary composition
+    // (sfEff/projSf hoisted above so the ON detection block can reuse them).
     let effectiveVicSwing = vic2ppSwing;
-    if (seatFpMap?.[seat.id]) {
-      const sf = seatFpMap[seat.id];
-      const projSf = {
-        alp:  Math.max(0, sf.alp  + swings.alp),
-        coal: Math.max(0, sf.coal + (swings.coal ?? 0)),
-        grn:  Math.max(0, sf.grn  + swings.grn),
-        ind:  Math.max(0, sf.ind  + swings.ind),
-        on:   Math.max(0, (sf.on  ?? 0) + (swings.on  ?? 0)),
-      };
+    if (projSf) {
       effectiveVicSwing = computeVic2pp(projSf, prefFlows, onTcpMatchup)
-                        - computeVic2pp(sf,     prefFlows, onTcpMatchup);
+                        - computeVic2pp(sfEff,  prefFlows, onTcpMatchup);
     }
 
     const sAlpV = swings.alp ?? 0;
@@ -3560,7 +3660,7 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
       // Source the ON increase largely from the Coalition primary (rest from residual),
       // matching the federal model — a rising ON vote is mostly ex-Coalition defection.
       const onFromCoalShare = prefFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare;
-      const extraCoalCut = Math.max(0, onFromCoalShare * Math.max(0, swings.on ?? 0) - Math.max(0, -(swings.coal ?? 0)));
+      const extraCoalCut = extraCoalCutFor(swings, onFromCoalShare);
       const projSf = {
         alp:  Math.max(0, sf.alp  + swings.alp),
         coal: Math.max(0, sf.coal + swings.coal - extraCoalCut),
@@ -4880,12 +4980,118 @@ const NT_DEFAULT_FLOWS = {
   onCoalOriginFactor: 0.0,
 };
 
+// Per-seat ON first-preference propensity prior for VIC. One Nation ran no
+// Legislative Assembly candidates in 2022 (upper house only), so unlike
+// NSW_SEAT_ON_FP_2023 / QLD_SEAT_ON_FP_2024 there is no historical LA baseline;
+// VIC_SEAT_FP_2022's on: 0.0 for every district is correct data. This prior instead
+// encodes *where* a VIC ON vote would concentrate if ON contests 2026: the federal
+// 2025 per-seat ON pattern (ON_FP_2025) of the overlapping division(s) — averaged
+// where a district straddles divisions — rescaled so the 88-seat mean equals the
+// statewide baseline VIC_BASELINE_2022.on (1.3):
+//   seatBase = 1.3 × fedOn(overlapping division) / mean(fedOn over VIC divisions)
+// Regional concentration (Gippsland, Mallee, Nicholls country ~2.5–3.3; inner metro
+// ~0.2–0.8) therefore lives in the base itself, and an ON surge distributed on the
+// logit scale (logitShiftOnFp) lands where ON is actually strong without also
+// multiplying by VIC_REGION_SWING_MULT (which would double-count).
+const VIC_SEAT_ON_FP = {
+  9001: 1.8,  // Narracan (fed: Monash)
+  9002: 0.6,  // Albert Park (fed: Macnamara)
+  9003: 0.4,  // Ashwood (fed: Chisholm)
+  9004: 1.8,  // Bass (fed: Monash)
+  9005: 0.8,  // Bayswater (fed: Aston)
+  9006: 0.7,  // Bellarine (fed: Corangamite)
+  9007: 1.6,  // Benambra (fed: Indi)
+  9008: 1.1,  // Bendigo East (fed: Bendigo)
+  9009: 1.1,  // Bendigo West (fed: Bendigo)
+  9010: 0.7,  // Bentleigh (fed: Goldstein/Hotham)
+  9011: 1.7,  // Berwick (fed: La Trobe)
+  9012: 0.4,  // Box Hill (fed: Chisholm)
+  9013: 0.4,  // Brighton (fed: Goldstein)
+  9014: 0.7,  // Broadmeadows (fed: Calwell)
+  9015: 0.8,  // Brunswick (fed: Wills)
+  9016: 0.4,  // Bulleen (fed: Menzies)
+  9017: 1.2,  // Bundoora (fed: Scullin/Jagajaga)
+  9018: 1.2,  // Carrum (fed: Isaacs/Dunkley)
+  9019: 0.6,  // Caulfield (fed: Macnamara)
+  9020: 1.0,  // Clarinda (fed: Hotham)
+  9021: 2.0,  // Cranbourne (fed: Holt)
+  9022: 0.9,  // Croydon (fed: Deakin/Casey)
+  9023: 1.9,  // Dandenong (fed: Bruce)
+  9024: 1.4,  // Eildon (fed: Indi/Casey)
+  9025: 0.6,  // Eltham (fed: Jagajaga/Menzies)
+  9026: 1.5,  // Essendon (fed: Maribyrnong)
+  9027: 1.8,  // Eureka (fed: Ballarat)
+  9028: 2.6,  // Euroa (fed: Nicholls)
+  9029: 1.2,  // Evelyn (fed: Casey)
+  9030: 1.1,  // Footscray (fed: Fraser/Gellibrand)
+  9031: 1.5,  // Frankston (fed: Dunkley)
+  9032: 2.3,  // Geelong (fed: Corio)
+  9033: 3.3,  // Gippsland East (fed: Gippsland)
+  9034: 3.3,  // Gippsland South (fed: Gippsland)
+  9035: 0.6,  // Glen Waverley (fed: Chisholm/Aston)
+  9036: 0.7,  // Greenvale (fed: Calwell)
+  9037: 1.4,  // Hastings (fed: Flinders/Dunkley)
+  9038: 0.2,  // Hawthorn (fed: Kooyong)
+  9039: 0.8,  // Ivanhoe (fed: Jagajaga)
+  9040: 1.1,  // Kalkallo (fed: Calwell/McEwen)
+  9041: 0.2,  // Kew (fed: Kooyong)
+  9042: 1.2,  // Kororoit (fed: Fraser/Gorton)
+  9043: 2.3,  // Lara (fed: Corio)
+  9044: 1.4,  // Laverton (fed: Gellibrand/Lalor)
+  9045: 1.8,  // Lowan (fed: Mallee/Wannon)
+  9046: 1.2,  // Macedon (fed: McEwen/Bendigo)
+  9047: 0.4,  // Malvern (fed: Kooyong/Macnamara, ex-Higgins)
+  9048: 0.5,  // Melbourne (fed: Melbourne)
+  9049: 2.1,  // Melton (fed: Hawke)
+  9050: 2.6,  // Mildura (fed: Mallee)
+  9051: 1.5,  // Mill Park (fed: Scullin)
+  9052: 1.2,  // Monbulk (fed: Casey)
+  9053: 1.0,  // Mordialloc (fed: Isaacs)
+  9054: 1.3,  // Mornington (fed: Flinders)
+  9055: 3.3,  // Morwell (fed: Gippsland)
+  9056: 1.5,  // Mulgrave (fed: Bruce/Hotham)
+  9057: 2.6,  // Murray Plains (fed: Mallee/Nicholls)
+  9058: 1.8,  // Narre Warren North (fed: La Trobe/Bruce)
+  9059: 1.7,  // Narre Warren South (fed: La Trobe)
+  9060: 1.3,  // Nepean (fed: Flinders)
+  9061: 1.5,  // Niddrie (fed: Maribyrnong)
+  9062: 1.2,  // Northcote (fed: Cooper)
+  9063: 1.0,  // Oakleigh (fed: Hotham)
+  9064: 1.6,  // Ovens Valley (fed: Indi)
+  9065: 1.8,  // Pakenham (fed: La Trobe/Monash)
+  9066: 0.8,  // Pascoe Vale (fed: Wills)
+  9067: 1.4,  // Point Cook (fed: Lalor/Gellibrand)
+  9068: 0.8,  // Polwarth (fed: Wannon/Corangamite)
+  9069: 0.6,  // Prahran (fed: Macnamara, ex-Higgins)
+  9070: 1.2,  // Preston (fed: Cooper)
+  9071: 0.5,  // Richmond (fed: Melbourne)
+  9072: 0.6,  // Ringwood (fed: Deakin)
+  9073: 2.2,  // Ripon (fed: Mallee/Ballarat)
+  9074: 0.8,  // Rowville (fed: Aston)
+  9075: 0.4,  // Sandringham (fed: Goldstein)
+  9076: 2.6,  // Shepparton (fed: Nicholls)
+  9077: 0.7,  // South Barwon (fed: Corangamite)
+  9078: 0.9,  // South-West Coast (fed: Wannon)
+  9079: 1.0,  // St Albans (fed: Fraser)
+  9080: 1.8,  // Sunbury (fed: Hawke/McEwen)
+  9081: 1.3,  // Sydenham (fed: Gorton)
+  9082: 1.5,  // Tarneit (fed: Lalor)
+  9083: 1.5,  // Thomastown (fed: Scullin)
+  9084: 0.5,  // Warrandyte (fed: Menzies/Deakin)
+  9085: 1.8,  // Wendouree (fed: Ballarat)
+  9086: 1.5,  // Werribee (fed: Lalor)
+  9087: 1.3,  // Williamstown (fed: Gellibrand)
+  9088: 1.4,  // Yan Yean (fed: McEwen)
+};
+
 const VIC_DEFAULT_PREF_FLOWS = {
   grn_alp: 0.85, ind_alp: 0.60, on_alp: 0.25, other_alp: 0.43,
   // ON vs ALP final flows
   coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58,
   // ON vs Coalition final flows
   alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22,
+  // Share of each seat's ON increase drawn from the Coalition primary (see MODEL_PARAMS).
+  onFromCoalShare: MODEL_PARAMS.onFromCoalShare,
 };
 
 const FED_DEFAULT_PREF_FLOWS = {
@@ -5250,7 +5456,8 @@ export default function App() {
       on: +(vicPrimaries.on - VIC_BASELINE_2022.on).toFixed(2),
     };
     const baseline2pp = computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp);
-    return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing, vicOnTcp, baseline2pp, vicSeatOverrides, VIC_SEAT_FP_2022);
+    return computeModelledSeatsVic(VIC_SEATS, s, vicPrefFlows, useVicRegionalSwing, vicOnTcp, baseline2pp, vicSeatOverrides, VIC_SEAT_FP_2022,
+      VIC_SEAT_ON_FP, MODEL_PARAMS.onThresholdDefault);
   }, [vicPrimaries, vicPrefFlows, useVicRegionalSwing, vicOnTcp, vicSeatOverrides]);
 
   const vicProjCounts = useMemo(
@@ -5273,10 +5480,12 @@ export default function App() {
   }, [vicModelledSeats]);
 
   const vicImplied2pp = useMemo(() => {
+    // Standard ALP-vs-Coalition 2PP: ON preferences distributed via on_alp (not dumped
+    // wholly on the right), consistent with the seat model and the NSW/national tabs.
     const onV = vicPrimaries.on ?? 0;
     const other = Math.max(0, 100 - vicPrimaries.alp - vicPrimaries.coal - vicPrimaries.grn - vicPrimaries.ind - onV - (vicPrimaries.undecided || 0));
-    const a = vicPrimaries.alp + vicPrimaries.grn * vicPrefFlows.grn_alp + vicPrimaries.ind * vicPrefFlows.ind_alp + other * vicPrefFlows.other_alp;
-    const c = vicPrimaries.coal + onV + vicPrimaries.grn * (1 - vicPrefFlows.grn_alp) + vicPrimaries.ind * (1 - vicPrefFlows.ind_alp) + other * (1 - vicPrefFlows.other_alp);
+    const a = vicPrimaries.alp + vicPrimaries.grn * vicPrefFlows.grn_alp + vicPrimaries.ind * vicPrefFlows.ind_alp + onV * vicPrefFlows.on_alp + other * vicPrefFlows.other_alp;
+    const c = vicPrimaries.coal + vicPrimaries.grn * (1 - vicPrefFlows.grn_alp) + vicPrimaries.ind * (1 - vicPrefFlows.ind_alp) + onV * (1 - vicPrefFlows.on_alp) + other * (1 - vicPrefFlows.other_alp);
     return (a + c === 0) ? null : a / (a + c) * 100;
   }, [vicPrimaries, vicPrefFlows]);
 
@@ -8214,7 +8423,7 @@ export default function App() {
 
                 <div style={panelStyle}>
                   <div style={sectionHead}>ON Race Flows</div>
-                  <div style={{ marginBottom: 8, fontSize: 12, color: "var(--text-3)" }}>Select if One Nation reaches the final two-candidate count statewide.</div>
+                  <div style={{ marginBottom: 8, fontSize: 12, color: "var(--text-3)" }}>Forces a statewide ON final. Per-seat ON finals are auto-detected when a seat's projected ON primary overtakes a major party (badge: ON RACE).</div>
                   {[{ val: null, label: "Standard (ALP vs Coalition)" }, { val: "on_v_alp", label: "ON vs ALP final" }, { val: "on_v_coal", label: "ON vs Coalition final" }].map(opt => (
                     <label key={String(opt.val)} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, cursor: "pointer" }}>
                       <input type="radio" name="vicOnTcp" checked={vicOnTcp === opt.val} onChange={() => setVicOnTcp(opt.val)}
@@ -8448,6 +8657,7 @@ export default function App() {
                             const isExpanded = expandedStateSeatId === seat.id;
                             const d = getStateDemog(seat.id);
                             const hasOv = vicSeatOverrides[seat.id] != null;
+                            const onRace = seat.modelled.isOnRace && seat.modelled.isAutoMatchup;
                             return (
                               <div key={seat.id}>
                                 <div onClick={() => setExpandedStateSeatId(prev => prev === seat.id ? null : seat.id)}
@@ -8471,8 +8681,8 @@ export default function App() {
                                   <span style={{ fontSize: 11, fontWeight: 700, color: winProb == null ? "var(--text-4)" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "var(--text-3)" : "#1D4ED8" }}>
                                     {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
                                   </span>
-                                  <span style={{ fontSize: 10, color: changed ? projColor : hasOv ? "#059669" : "var(--text-4)", fontWeight: 600 }}>
-                                    {changed ? "CHANGED" : hasOv ? "OVERRIDE" : ""}
+                                  <span style={{ fontSize: 10, color: changed ? projColor : hasOv ? "#059669" : onRace ? "#B45309" : "var(--text-4)", fontWeight: 600 }}>
+                                    {changed ? "CHANGED" : hasOv ? "OVERRIDE" : onRace ? "ON RACE" : ""}
                                   </span>
                                 </div>
                                 {isExpanded && (
@@ -8509,7 +8719,10 @@ export default function App() {
                                         </div>
                                       </div>
                                     ) : (
-                                      <div style={{ fontSize: 11, color: "var(--text-4)" }}>Region: {seat.modelled.region ?? "—"} · No demographic data yet (run pipeline/fetch_demographics.py to populate)</div>
+                                      <div style={{ fontSize: 11, color: "var(--text-4)" }}>
+                                        TCP: {seat.modelled.activeTcpMatchup ? seat.modelled.activeTcpMatchup.replace("on_v_alp", "ON vs ALP").replace("on_v_coal", "ON vs Coal") : `${seat.tcp[0].party} vs ${seat.tcp[1].party}`}
+                                        {` · Region: ${seat.modelled.region ?? "—"} · No demographic data yet (run pipeline/fetch_demographics.py to populate)`}
+                                      </div>
                                     )}
                                   </div>
                                 )}
@@ -11066,10 +11279,13 @@ export {
   getParty,
   getSeatGroup,
   mapSeatFpById,
+  logitShiftOnFp,
+  extraCoalCutFor,
+  MODEL_PARAMS,
   SEATS,
   VIC_SEATS, NSW_SEATS, QLD_SEATS, WA_SEATS, SA_SEATS, NT_SEATS,
   FED_DEFAULT_PREF_FLOWS,
-  VIC_BASELINE_2022, VIC_2PP_2022, VIC_DEFAULT_PREF_FLOWS, VIC_SEAT_FP_2022,
+  VIC_BASELINE_2022, VIC_2PP_2022, VIC_DEFAULT_PREF_FLOWS, VIC_SEAT_FP_2022, VIC_SEAT_ON_FP,
   NSW_BL, NSW_2PP, NSW_COAL, NSW_DEFAULT_FLOWS, NSW_SEAT_ON_FP_2023,
   NSW_SEAT_PREF_FLOWS_2023, NSW_DISTRICT_REGION, NSW_REGION_SWING_MULT, NSW_SEAT_FP_2023,
   QLD_BL, QLD_2PP, QLD_COAL, QLD_DEFAULT_FLOWS, QLD_SEAT_ON_FP_2024,

@@ -19,10 +19,11 @@ import {
   computeVic2pp,
   getParty,
   getSeatGroup,
+  MODEL_PARAMS,
   SEATS,
   VIC_SEATS, NSW_SEATS, QLD_SEATS, WA_SEATS, SA_SEATS, NT_SEATS,
   FED_DEFAULT_PREF_FLOWS,
-  VIC_BASELINE_2022, VIC_DEFAULT_PREF_FLOWS, VIC_SEAT_FP_2022,
+  VIC_BASELINE_2022, VIC_DEFAULT_PREF_FLOWS, VIC_SEAT_FP_2022, VIC_SEAT_ON_FP,
   NSW_BL, NSW_COAL, NSW_DEFAULT_FLOWS, NSW_SEAT_ON_FP_2023,
   NSW_SEAT_PREF_FLOWS_2023, NSW_DISTRICT_REGION, NSW_REGION_SWING_MULT, NSW_SEAT_FP_2023,
   QLD_BL, QLD_COAL, QLD_DEFAULT_FLOWS, QLD_SEAT_ON_FP_2024,
@@ -96,6 +97,7 @@ describe("VIC model at zero swing reproduces the 2022 result", () => {
   const modelled = computeModelledSeatsVic(
     VIC_SEATS, { alp: 0, coal: 0, grn: 0, ind: 0, on: 0 },
     VIC_DEFAULT_PREF_FLOWS, true, null, baseline2pp, null, VIC_SEAT_FP_2022,
+    VIC_SEAT_ON_FP, MODEL_PARAMS.onThresholdDefault,
   );
 
   it("does not flip any seat", () => {
