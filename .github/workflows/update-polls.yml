@@ -70,7 +70,7 @@ jobs:
         run: |
           cp data/polls/aggregated.json webapp/src/data/aggregated.json
           cp data/polls/leaders.json    webapp/src/data/leaders.json
-          for st in nsw qld sa wa; do
+          for st in nsw qld sa vic wa; do
             cp "data/polls/${st}_polls.json" "webapp/src/data/${st}_polls.json"
           done
 
@@ -90,6 +90,7 @@ jobs:
             webapp/src/data/nsw_polls.json \
             webapp/src/data/qld_polls.json \
             webapp/src/data/sa_polls.json \
+            webapp/src/data/vic_polls.json \
             webapp/src/data/wa_polls.json
           git diff --cached --quiet && echo "Nothing changed — skipping commit." && exit 0
 

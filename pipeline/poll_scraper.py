@@ -56,6 +56,9 @@ CANONICAL_POLLSTERS = {
 POLLSTER_ALIASES = {
     "redbridge":             "RedBridge Group",
     "redbridge group":       "RedBridge Group",
+    "redbridge/accent":      "RedBridge Group",
+    "redbridge / accent":    "RedBridge Group",
+    "redbridge/accent research": "RedBridge Group",
     "youGov":                "YouGov",
     "yougov":                "YouGov",
     "yougov/public first":   "YouGov",
@@ -94,7 +97,18 @@ def normalise_pollster(raw: str) -> str | None:
         return None
     if cleaned in CANONICAL_POLLSTERS:
         return cleaned
-    return POLLSTER_ALIASES.get(cleaned.lower())
+    hit = POLLSTER_ALIASES.get(cleaned.lower())
+    if hit:
+        return hit
+    # Joint-badged polls ("Redbridge/Accent", "DemosAU/AFR"): match any single
+    # component so new partner brandings don't silently drop a known pollster.
+    for part in re.split(r"\s*/\s*", cleaned):
+        if part in CANONICAL_POLLSTERS:
+            return part
+        hit = POLLSTER_ALIASES.get(part.lower())
+        if hit:
+            return hit
+    return None
 
 
 # ── Date parsing ──────────────────────────────────────────────────────────────
@@ -114,10 +128,27 @@ _DATE_DAY_FIRST = re.compile(
 _DATE_MONTH_FIRST = re.compile(
     r"([A-Za-z]+)\s+(\d{1,2})\s*(?:[–\-]\s*(\d{1,2}))?,?\s+(\d{4})"
 )
+# Year-less variants ("17–28 June", "28 Feb – 3 Mar", "June 17–28"): the current
+# election-year table on Wikipedia omits the year from its date cells, taking it
+# from the section heading instead — callers pass that year as default_year.
+_DATE_DAY_FIRST_NOYEAR = re.compile(
+    r"(\d{1,2})\s*(?:[–\-]\s*(\d{1,2}))?\s+([A-Za-z]+)"
+)
+_DATE_MONTH_FIRST_NOYEAR = re.compile(
+    r"([A-Za-z]+)\s+(\d{1,2})\s*(?:[–\-]\s*(\d{1,2}))?"
+)
+_MONTH_TOKEN = re.compile(r"[A-Za-z]+")
 
 
-def parse_fieldwork_date(raw: str) -> str | None:
-    """Return the LATEST day in a Wikipedia fieldwork range as ISO YYYY-MM-DD."""
+def parse_fieldwork_date(raw: str, default_year: int | None = None) -> str | None:
+    """Return the LATEST day in a Wikipedia fieldwork range as ISO YYYY-MM-DD.
+
+    Dates without an explicit year ("17–28 June") are resolved against
+    default_year, and month-only ranges ("May – Jun") resolve to the 15th of the
+    final month — a deliberate midpoint so a two-month fieldwork window is never
+    dated more than ~2 weeks too recent. Both forms return None when no
+    default_year is supplied.
+    """
     if not raw:
         return None
     cleaned = re.sub(r"\[[^\]]*\]", "", raw)
@@ -128,15 +159,49 @@ def parse_fieldwork_date(raw: str) -> str | None:
         day = int(d_end or d_start)
     else:
         m = _DATE_MONTH_FIRST.search(cleaned)
-        if not m:
+        if m:
+            mon_raw, d_start, d_end, year = m.groups()
+            day = int(d_end or d_start)
+        elif default_year is not None:
+            return _parse_yearless_date(cleaned, default_year)
+        else:
             return None
-        mon_raw, d_start, d_end, year = m.groups()
-        day = int(d_end or d_start)
     month = _MONTHS.get(mon_raw.lower())
     if not month or not (1 <= day <= 31):
         return None
     try:
         return date(int(year), month, day).isoformat()
+    except ValueError:
+        return None
+
+
+def _parse_yearless_date(cleaned: str, year: int) -> str | None:
+    """Resolve a year-less fieldwork string against *year*. Uses the LAST
+    day+month (or month+day) pair in the string, so cross-month ranges like
+    "28 Feb – 3 Mar" land on the end of fieldwork."""
+    last: tuple[int, int] | None = None            # (month, day)
+    for m in _DATE_DAY_FIRST_NOYEAR.finditer(cleaned):
+        d_start, d_end, mon_raw = m.groups()
+        month = _MONTHS.get(mon_raw.lower())
+        if month:
+            last = (month, int(d_end or d_start))
+    if last is None:
+        for m in _DATE_MONTH_FIRST_NOYEAR.finditer(cleaned):
+            mon_raw, d_start, d_end = m.groups()
+            month = _MONTHS.get(mon_raw.lower())
+            if month:
+                last = (month, int(d_end or d_start))
+    if last is None:
+        # Month-only range ("May – Jun"): mid-month of the final month.
+        months = [t for t in _MONTH_TOKEN.findall(cleaned) if t.lower() in _MONTHS]
+        if not months:
+            return None
+        last = (_MONTHS[months[-1].lower()], 15)
+    month, day = last
+    if not (1 <= day <= 31):
+        return None
+    try:
+        return date(year, month, day).isoformat()
     except ValueError:
         return None
 
@@ -273,9 +338,11 @@ def _iter_data_rows(table) -> Iterable[list]:
         yield cells
 
 
-def _parse_table(table, schema: dict, allow_coal_2pp: bool) -> list[dict]:
+def _parse_table(table, schema: dict, allow_coal_2pp: bool,
+                 default_year: int | None = None) -> list[dict]:
     """Parse one wikitable using header-driven column mapping. Returns a list
-    of dicts in the schema's keys; rows missing required fields are dropped."""
+    of dicts in the schema's keys; rows missing required fields are dropped.
+    default_year resolves date cells that omit the year (current-year tables)."""
     headers = _build_col_labels(table)
     if not headers:
         return []
@@ -306,7 +373,7 @@ def _parse_table(table, schema: dict, allow_coal_2pp: bool) -> list[dict]:
             logger.info("skip unknown pollster: %r", texts[cols["pollster"]])
             continue
 
-        iso = parse_fieldwork_date(texts[cols["date"]])
+        iso = parse_fieldwork_date(texts[cols["date"]], default_year=default_year)
         if not iso:
             continue
 
@@ -375,12 +442,43 @@ def parse_federal(html: str) -> list[dict]:
     return records
 
 
+_HEADING_YEAR_RE = re.compile(r"^\s*(20\d{2})\b")
+
+
+def _table_section_year(table) -> int | None:
+    """Year from the table's nearest preceding section heading, or None.
+
+    On the VIC polling page the statewide Legislative Assembly tables sit under
+    year headings ("2026", "2025", …) while regional/demographic breakouts,
+    Legislative Council, leadership and individual-seat tables sit under name
+    headings ("Inner Melbourne", "Women", "Hawthorn", …) with IDENTICAL column
+    headers. The heading therefore doubles as the statewide-table filter AND
+    supplies the year that the current-year table's date cells omit.
+    """
+    heading = table.find_previous(["h2", "h3", "h4", "h5"])
+    if heading is None:
+        return None
+    text = re.sub(r"\[[^\]]*\]", "", heading.get_text(" ", strip=True))
+    m = _HEADING_YEAR_RE.match(text)
+    return int(m.group(1)) if m else None
+
+
 def parse_vic(html: str) -> list[dict]:
-    """Extract Victorian state poll records from Wikipedia HTML."""
+    """Extract Victorian state poll records from Wikipedia HTML.
+
+    Only tables under a year section heading are parsed — the demographic and
+    regional breakout tables share the statewide tables' exact column layout,
+    and parsing them would merge subgroup figures as statewide polls (dedup is
+    keyed by pollster+date, so whichever table parsed first would win).
+    """
     soup = BeautifulSoup(html, "html.parser")
     records: list[dict] = []
     for table in soup.find_all("table", class_="wikitable"):
-        rows = _parse_table(table, _VIC_SCHEMA, allow_coal_2pp=False)
+        year = _table_section_year(table)
+        if year is None:
+            continue
+        rows = _parse_table(table, _VIC_SCHEMA, allow_coal_2pp=False,
+                            default_year=year)
         for r in rows:
             records.append({
                 "scope":    "VIC",
