@@ -31,9 +31,11 @@ jobs:
         run: python pipeline/betting_odds.py
 
       - name: Verify a live source was used
-        # Fail red only when the fetch *errored* (bad key, quota, API change).
-        # "API reachable but no Australian election market listed" is a normal
-        # state between election cycles — notice, not failure.
+        # Fail red only when a fetch *errored* (bad key, quota, API change).
+        # Smarkets needs no credentials, so the expected source is "smarkets"
+        # (or betfair when its secrets are set). "APIs reachable but no
+        # Australian election market listed" is a normal state between
+        # election cycles — notice, not failure.
         run: |
           python - <<'EOF'
           import json, sys

@@ -10,8 +10,11 @@ Usage:
 
 Priority cascade:
     1. Betfair Exchange API  (BETFAIR_APP_KEY + BETFAIR_SESSION_TOKEN env vars)
-    2. The Odds API          (ODDS_API_KEY env var)
-    3. Manual placeholder    (data/polls/betting_odds_manual.json)
+    2. Smarkets Exchange     (public API — no credentials required)
+    3. The Odds API          (ODDS_API_KEY env var; politics coverage is
+                              US-presidential-only as of mid-2026, kept in case
+                              Australian markets are ever added)
+    4. Manual placeholder    (data/polls/betting_odds_manual.json)
 
 Math: win probability → implied 2PP
     Model: 2PP ~ Normal(mu, sigma)
@@ -289,6 +292,187 @@ def fetch_betfair(app_key: str, session_token: str, seat_market_ids: dict[str, s
     return result
 
 
+# ── Smarkets Exchange ──────────────────────────────────────────────────────────
+#
+# Public read-only API — no credentials required. As of mid-2026 Smarkets lists
+# an Australian politics tree (Australia → Federal Elections → Next Federal
+# Election; Australia → Victoria → Victorian State Election 2026), making it the
+# only live source here that actually carries Australian election markets.
+
+SMARKETS_BASE = "https://api.smarkets.com/v3"
+
+
+def _smarkets_get(path: str, params: dict | None = None) -> dict:
+    resp = requests.get(
+        f"{SMARKETS_BASE}{path}",
+        params=params,
+        headers={"User-Agent": "aus-poll/1.0 (+https://github.com/leifsmith01-ai/aus-poll)"},
+        timeout=15,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def _smarkets_mid_prob(quote: dict) -> float | None:
+    """
+    Best bid/offer midpoint → probability.
+    Smarkets prices are in basis points of probability (10000 = 100%).
+    Falls back to the single available side when the book is one-sided.
+    """
+    bids = quote.get("bids") or []
+    offers = quote.get("offers") or []
+    best_bid = bids[0].get("price") if bids else None
+    best_offer = offers[0].get("price") if offers else None
+    if best_bid and best_offer:
+        return (best_bid + best_offer) / 2 / 10000
+    if best_bid:
+        return best_bid / 10000
+    if best_offer:
+        return best_offer / 10000
+    return None
+
+
+def _classify_party(name: str) -> str:
+    """Map a market runner/contract name to a party group key."""
+    n = name.lower()
+    if "labor" in n or "alp" in n:
+        return "alp"
+    if "coalition" in n or "liberal" in n or "lnp" in n or "national" in n:
+        return "coalition"
+    if "green" in n:
+        return "greens"
+    return "other"
+
+
+def _parse_smarkets_market(contracts: list[dict], quotes: dict) -> dict[str, dict] | None:
+    """
+    Parse a Smarkets market's contracts + quotes into normalised odds.
+
+    Returns {"Labor": {"decimal_odds": 2.9, "implied_prob": 0.345}, ...} with
+    probabilities normalised to sum to 1, or None if fewer than two contracts
+    have a quotable price.
+    """
+    raw: dict[str, float] = {}
+    for c in contracts:
+        p = _smarkets_mid_prob(quotes.get(str(c["id"]), {}))
+        if p and p > 0:
+            raw[c["name"]] = p
+    if len(raw) < 2:
+        return None
+    total = sum(raw.values())
+    return {
+        name: {"decimal_odds": round(total / p, 2), "implied_prob": round(p / total, 4)}
+        for name, p in raw.items()
+    }
+
+
+def _smarkets_au_events() -> list[dict]:
+    """
+    List every event under the Australia node of the Smarkets politics domain.
+    The flat politics listing includes nested events with parent_id, so the
+    subtree can be resolved from a single request.
+    """
+    data = _smarkets_get(
+        "/events/",
+        params={"state": ["new", "upcoming", "live"], "type_domain": "politics", "limit": 100},
+    )
+    events = data.get("events", [])
+    au_ids = {e["id"] for e in events if e.get("name", "").strip().lower() == "australia"}
+    changed = True
+    while changed:
+        changed = False
+        for e in events:
+            if e["id"] not in au_ids and e.get("parent_id") in au_ids:
+                au_ids.add(e["id"])
+                changed = True
+    return [e for e in events if e["id"] in au_ids]
+
+
+def fetch_smarkets() -> dict:
+    """
+    Fetch Australian federal and state election markets from Smarkets.
+
+    Federal: the "Party to Provide the Next Prime Minister" market → national
+    ALP/Coalition entries (nearest available proxy for the government-winner
+    market; the market name is recorded in national_market_name so the frontend
+    can label it honestly).
+    State: "<State> State Election …" events → Winning Party market.
+    """
+    result: dict = {"source": "smarkets", "national": {}, "seats": {}, "state_elections": {}}
+
+    for event in _smarkets_au_events():
+        ename = event.get("name", "").lower()
+        try:
+            markets = _smarkets_get(f"/events/{event['id']}/markets/").get("markets", [])
+        except Exception as e:
+            logger.warning("Smarkets: error listing markets for event %s: %s", event.get("name"), e)
+            continue
+
+        for market in markets:
+            mname = market.get("name", "").lower()
+
+            is_federal = (
+                not result["national"]
+                and ("prime minister" in mname
+                     or ("federal election" in ename and "winning party" in mname))
+            )
+            state_code = None
+            if not is_federal and "election" in ename:
+                for code, terms in STATE_SEARCH_TERMS.items():
+                    if code not in result["state_elections"] and any(t in ename for t in terms):
+                        state_code = code
+                        break
+            if not is_federal and not state_code:
+                continue
+
+            try:
+                contracts = _smarkets_get(f"/markets/{market['id']}/contracts/").get("contracts", [])
+                quotes = _smarkets_get(f"/markets/{market['id']}/quotes/")
+            except Exception as e:
+                logger.warning("Smarkets: error fetching market %s: %s", market.get("name"), e)
+                continue
+
+            parsed = _parse_smarkets_market(contracts, quotes)
+            if not parsed:
+                continue
+
+            if is_federal:
+                for runner, odds in parsed.items():
+                    group = _classify_party(runner)
+                    if group == "alp":
+                        result["national"]["alp_majority"] = {
+                            **odds,
+                            "implied_2pp": prob_to_implied_2pp(odds["implied_prob"], SIGMA_NATIONAL),
+                        }
+                    elif group == "coalition":
+                        result["national"]["coalition_majority"] = odds
+                if result["national"]:
+                    result["national_market_name"] = market.get("name", "")
+                    logger.info("Smarkets: national market '%s' (%d runners)",
+                                market.get("name"), len(parsed))
+            else:
+                entry: dict = {
+                    "source": "smarkets",
+                    "market_name": market.get("name", ""),
+                    **STATE_META.get(state_code, {}),
+                }
+                for runner, odds in parsed.items():
+                    group = _classify_party(runner)
+                    if group == "alp":
+                        entry["alp_win"] = odds
+                    elif group == "coalition":
+                        entry["coalition_win"] = odds
+                    else:
+                        safe = runner.lower().replace(" ", "_").replace("'", "")
+                        entry[f"other_{safe}"] = odds
+                if "alp_win" in entry or "coalition_win" in entry:
+                    result["state_elections"][state_code] = entry
+                    logger.info("Smarkets: %s market '%s' (%d runners)",
+                                state_code.upper(), market.get("name"), len(parsed))
+
+    return result
+
+
 # ── The Odds API ───────────────────────────────────────────────────────────────
 
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
@@ -334,15 +518,15 @@ def _select_federal_sport_keys(sports: list[dict]) -> list[str]:
         title = s.get("title", "").lower()
         return "australia" in title or "aussie" in title
 
-    keys = [
+    # No broader fallback: an earlier "any Australian sport" fallback selected
+    # tennis_atp_aus_open_singles (the Australian Open) as the federal election
+    # market, wasting a request every run and burying the real story — The Odds
+    # API simply doesn't list Australian election markets.
+    return [
         s["key"] for s in sports
         if is_au(s)
         and ("election" in s.get("title", "").lower() or "politic" in s.get("group", "").lower())
     ]
-    if not keys:
-        # Broader fallback, still Australia-only.
-        keys = [s["key"] for s in sports if is_au(s)]
-    return keys
 
 
 def _parse_odds_event(event: dict) -> dict[str, dict]:
@@ -525,10 +709,10 @@ def load_manual() -> dict:
 
 def run(force_source: str | None = None) -> dict:
     """
-    Priority cascade: Betfair → Odds API → manual placeholder.
+    Priority cascade: Betfair → Smarkets → Odds API → manual placeholder.
     Writes data/polls/betting_odds.json and returns the output dict.
 
-    force_source: "betfair" | "odds_api" | "manual" to skip the cascade.
+    force_source: "betfair" | "smarkets" | "odds_api" | "manual" to skip the cascade.
     """
     logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 
@@ -539,10 +723,12 @@ def run(force_source: str | None = None) -> dict:
     output: dict | None = None
     # Why the manual placeholder ended up being served (recorded in the output
     # JSON so CI can distinguish "API broken" from "no markets listed yet"):
-    #   no_credentials — no API keys configured
-    #   no_au_markets  — API reachable but no Australian election market listed
+    #   no_au_markets  — API(s) reachable but no Australian election market listed
     #   api_error: ... — a request failed (bad key, quota, API change)
-    fallback_reason = "forced_manual" if force_source == "manual" else "no_credentials"
+    #   no_credentials — nothing was attempted at all (should not normally
+    #                    happen now that Smarkets needs no credentials)
+    errors: list[str] = []      # fetch attempts that raised
+    live_but_empty = False      # a live source responded but had no AU markets
 
     if force_source != "manual":
         # ── Tier 1: Betfair ────────────────────────────────────────────────────
@@ -556,9 +742,24 @@ def run(force_source: str | None = None) -> dict:
                             len(output.get("seats", {})))
             except Exception as e:
                 logger.warning("Betfair fetch failed: %s — trying next source", e)
+                errors.append(f"betfair: {e}")
                 output = None
 
-        # ── Tier 2: The Odds API ───────────────────────────────────────────────
+        # ── Tier 2: Smarkets (no credentials required) ─────────────────────────
+        if output is None and force_source in (None, "smarkets"):
+            logger.info("Fetching from Smarkets Exchange...")
+            try:
+                output = fetch_smarkets()
+                if not output.get("national") and not output.get("state_elections"):
+                    live_but_empty = True
+                    logger.info("Smarkets: no Australian election markets listed — trying next source")
+                    output = None
+            except Exception as e:
+                logger.warning("Smarkets fetch failed: %s — trying next source", e)
+                errors.append(f"smarkets: {e}")
+                output = None
+
+        # ── Tier 3: The Odds API ───────────────────────────────────────────────
         if output is None and (force_source == "odds_api" or odds_api_key):
             logger.info("Fetching from The Odds API...")
             try:
@@ -567,9 +768,11 @@ def run(force_source: str | None = None) -> dict:
                 # Any live market — national or state — counts as a live result;
                 # the federal market is often unlisted between election cycles.
                 if not output.get("national") and not output.get("state_elections"):
-                    fallback_reason = f"api_error: {fetch_error}" if fetch_error else "no_au_markets"
-                    logger.warning("Odds API returned no usable markets (%s) — falling back to manual",
-                                   fallback_reason)
+                    if fetch_error:
+                        errors.append(f"odds-api: {fetch_error}")
+                    else:
+                        live_but_empty = True
+                    logger.warning("Odds API returned no usable markets — falling back to manual")
                     output = None
                 else:
                     logger.info("Odds API: fetched %s%s",
@@ -577,9 +780,18 @@ def run(force_source: str | None = None) -> dict:
                                 f" + {len(output.get('state_elections', {}))} state market(s)"
                                 if output.get("state_elections") else "")
             except Exception as e:
-                fallback_reason = f"api_error: {e}"
                 logger.warning("Odds API fetch failed: %s — falling back to manual", e)
+                errors.append(f"odds-api: {e}")
                 output = None
+
+    if force_source == "manual":
+        fallback_reason = "forced_manual"
+    elif errors:
+        fallback_reason = "api_error: " + "; ".join(errors)
+    elif live_but_empty:
+        fallback_reason = "no_au_markets"
+    else:
+        fallback_reason = "no_credentials"
 
     # ── Tier 3: Manual placeholder ─────────────────────────────────────────────
     if output is None:
@@ -641,7 +853,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--source",
-        choices=["betfair", "odds_api", "manual"],
+        choices=["betfair", "smarkets", "odds_api", "manual"],
         default=None,
         help="Force a specific data source (default: auto-detect from env vars)",
     )

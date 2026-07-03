@@ -10024,6 +10024,7 @@ export default function App() {
 
         const sourceBadge = {
           betfair:      { label: "Betfair Exchange", color: "#059669", bg: "#D1FAE5" },
+          smarkets:     { label: "Smarkets Exchange (live)", color: "#059669", bg: "#D1FAE5" },
           "the-odds-api": { label: "The Odds API", color: "#1D4ED8", bg: "#DBEAFE" },
           manual:       { label: "Indicative", color: "#D97706", bg: "rgba(217,119,6,0.14)" },
         }[mktSource] ?? { label: mktSource, color: "var(--text-3)", bg: "var(--subtle-bg)" };
@@ -10065,7 +10066,21 @@ export default function App() {
 
             {/* National government odds */}
             <div style={{ ...panelStyle, marginBottom: 14 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 12 }}>National government odds</div>
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>
+                  National government odds
+                  {BETTING_ODDS?.national_source === "manual" && (
+                    <span style={{ marginLeft: 8, fontSize: 9, fontWeight: 700, color: "#D97706", background: "rgba(217,119,6,0.14)", padding: "2px 6px", borderRadius: 3, verticalAlign: "middle" }}>
+                      Indicative
+                    </span>
+                  )}
+                </div>
+                {BETTING_ODDS?.national_market_name && (
+                  <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 2 }}>
+                    Market: {BETTING_ODDS.national_market_name}
+                  </div>
+                )}
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
                 {alpMajority && (
                   <div style={STYLES.metricCard}>
@@ -10260,7 +10275,7 @@ export default function App() {
                     })}
                   </div>
                   <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8 }}>
-                    Live markets (Betfair / The Odds API) override these as elections approach. States without a live market show indicative placeholder odds, tagged above.
+                    Live markets (Betfair / Smarkets / The Odds API) override these as elections approach. States without a live market show indicative placeholder odds, tagged above.
                   </div>
                 </div>
               );
