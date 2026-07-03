@@ -32,7 +32,13 @@ for (const tag of ["000", "035", "080", "100"]) {
   const counts = {};
   for (const s of proj) counts[s.winnerGroup] = (counts[s.winnerGroup] || 0) + 1;
   console.log(`${tag}% counted: ALP ${conf.alp.mean} [${conf.alp.p05}-${conf.alp.p95}] std ${conf.alp.std} | P(maj) ${JSON.stringify(conf.pMajority)} | ${JSON.stringify(counts)}`);
-  if (conf.alp.std > prevStd + 0.5) { console.error(`  ! std rose at ${tag}%`); failures++; }
+  // Monotone-shrinkage is only asserted between LIVE snapshots (035 onward).
+  // The 000 snapshot projects from the prior-election baseline, and the first
+  // real count can legitimately WIDEN the seat-total spread by revealing a
+  // closer race with more marginal seats than the baseline implied.
+  if (tag !== "035" && conf.alp.std > prevStd + 0.5) {
+    console.error(`  ! std rose at ${tag}%`); failures++;
+  }
   prevStd = conf.alp.std;
 }
 

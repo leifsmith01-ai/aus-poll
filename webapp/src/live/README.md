@@ -22,12 +22,31 @@ EC feed (JSON)  ──fetch──▶  adapter ──▶  normalized contract  �
   probability of majority, with a **count-driven sigma** that collapses to certainty at 100%.
 - **`config.js`** — the active election, sources, baseline URL, party groups, pref flows.
 
-## Switching to the real VEC feed on election night
+## Election night runbook (VIC 2026)
 
-1. Confirm the VEC live results endpoint URL + payload shape (see
-   https://www.vec.vic.gov.au/results). Implement the mapping in **`adapters/vec.js`**.
-2. Set `LIVE_SOURCES.vec_vic_2026.url` in `config.js` to that endpoint and change
-   `LIVE_CONFIG.active.sourceId` to `"vec_vic_2026"`; rebuild + deploy.
+**Primary path — the Live Feed Proxy** (no CORS dependency on the VEC):
+
+1. Confirm the VEC live results endpoint URL (see https://www.vec.vic.gov.au/results
+   and the VEC media-feed registration pack). If its JSON shape differs from the
+   generic `{districts:[...]}` mapping, adjust **`scripts/fetch_live_vec.py`** —
+   all VEC-shape knowledge lives there.
+2. GitHub → Actions → **Live Feed Proxy** → Run workflow → paste the feed URL.
+   The job polls, normalizes, validates and force-pushes each snapshot to the
+   `live-feed` branch (single commit, disposable). Re-dispatch when the 6-hour
+   job limit ends a run.
+3. Open the dashboard with `?liveSource=vec_proxy_2026` — or flip
+   `LIVE_CONFIG.active.sourceId` to `"vec_proxy_2026"` and deploy beforehand.
+   The source polls `raw.githubusercontent.com/.../live-feed/live/vec-latest.json`
+   (served with `CORS: *`; the fetch loop cache-busts through the CDN cache).
+
+**Rehearsal before the night:** dispatch the workflow with a BLANK feed URL — it
+replays the committed sample snapshots (0% → 35% → 80% → 100%) through the full
+proxy → branch → dashboard path. Verify the Live tab follows along on
+`?liveSource=vec_proxy_2026`.
+
+**Direct-to-VEC fallback:** only if the VEC endpoint turns out to serve CORS
+headers — map its raw shape in `adapters/vec.js` and use `?liveUrl=` +
+`?liveAdapter=vec`.
 
 No rebuild needed for a quick repoint — query overrides win over config:
 
@@ -37,11 +56,6 @@ No rebuild needed for a quick repoint — query overrides win over config:
 | `?liveUrl=URL`   | override the feed URL (adapter unchanged)           |
 | `?liveAdapter=X` | override the adapter (`passthrough`/`vec`/`aec`)     |
 | `?liveSnapshot=` | (dev) point at a sample snapshot                    |
-
-**CORS / FTP fallback.** The browser fetches the feed directly. If the EC endpoint blocks
-cross-origin requests (e.g. the AEC media feed is FTP/XML), run a thin scheduled job that
-fetches + normalizes the feed and commits a same-origin snapshot to `public/live/`, then
-point a source at it. The rest of the page is unchanged.
 
 ## Updating the baseline / sample data
 
@@ -58,7 +72,13 @@ swap the sample source for the live VEC adapter, when the real election begins.
 
 - VEC publishes **district-level** live counts only, so VIC projections use district swing
   (booth-matched swing activates automatically for feeds that carry booth arrays).
-- Sigma constants in `confidence.js` are first estimates — recalibrate against
-  2022 booth-vs-final once booth-level baselines are reachable.
-- `webapp/src/data/state_seat_fp.js` `VIC_SEAT_FP_2022` is still placeholder data; the live
-  baseline does **not** depend on it (it uses `_VS` 2CP), but populate it for the model tab.
+- Sigma constants in `confidence.js` are **calibrated against the VIC 2022
+  booth-level count** (`python scripts/calibrate_live_sigma.py` — a progressive
+  booth-order replay). Re-run and update the constants if the replay
+  methodology or 2022 inputs change; keep script and constants in sync.
+- The real 2026 VEC endpoint shape is unconfirmed until the night — the generic
+  district mapping in `scripts/fetch_live_vec.py` may need adjusting on the fly
+  (validation failures keep the previous good snapshot on the branch).
+- An ON-vs-Independent final is not modelled pre-2CP: seats without a published
+  2CP project from FP only in ALP-vs-Coalition contests; others hold the
+  baseline until the VEC publishes a pair.

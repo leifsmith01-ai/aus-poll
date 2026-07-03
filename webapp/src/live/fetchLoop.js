@@ -6,7 +6,12 @@ import { getAdapter } from "./adapters/index.js";
 import { validateFeed } from "./contract.js";
 
 async function fetchJson(url, signal) {
-  const res = await fetch(url, { signal, cache: "no-store" });
+  // Cache-bust every poll: `cache: "no-store"` only bypasses the BROWSER cache,
+  // but the vec_proxy source is served from raw.githubusercontent.com behind a
+  // ~5-minute CDN cache — a unique query string per request punches through it
+  // (and is harmless for same-origin static sources).
+  const busted = url + (url.includes("?") ? "&" : "?") + "_=" + Date.now();
+  const res = await fetch(busted, { signal, cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
   return res.json();
 }

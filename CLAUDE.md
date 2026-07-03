@@ -410,8 +410,9 @@ The frontend is fully static — no API calls at runtime. All election data is e
 | `fetch-odds.yml` | Daily 01:00 UTC | `betting_odds.json` (fails red if API keys exist but fetch falls back to manual) |
 | `update-model-constants.yml` | Monthly (1st) | `SEAT_RESIDUAL_MAP`/`SEAT_DEMO_MULT` injected into App.jsx |
 | `update-economics.yml` | Monthly (2nd) | ABS/RBA indicators → `economics.json` |
-| `data-health.yml` | Tue 03:00 UTC | Freshness assertions — a red run means a data workflow silently stopped |
+| `data-health.yml` | Tue 03:00 UTC | Freshness assertions — a red run means a data workflow silently stopped (stale VIC polls are a hard failure until the Nov 2026 election) |
 | `generate-state-fp.yml` | manual only | `webapp/src/data/state_seat_fp.js` (run after a state election is loaded) |
+| `live-feed.yml` | manual only | Election-night CORS proxy: polls the VEC, normalizes via `scripts/fetch_live_vec.py`, force-pushes snapshots to the `live-feed` branch for the Live tab's `vec_proxy_2026` source (blank URL = sample replay rehearsal) |
 
 Conventions for these workflows: `data/polls/` is the source of truth and webapp
 copies are derived; commit steps stage first then use `git diff --cached --quiet`

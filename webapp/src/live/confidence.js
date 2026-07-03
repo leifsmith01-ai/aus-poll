@@ -19,26 +19,36 @@ function normCDF(x) {
   return x >= 0 ? p : 1 - p;
 }
 
-// Sigma constants (pp). First estimates — recalibrate against 2022 booth-vs-final once
-// booth-level baselines are reachable.
-// The floor terms are kept tiny and the count-driven terms dominate, so uncertainty
-// collapses to near-certainty as a seat/state is fully counted.
-const SIGMA_FLOOR = 0.4;       // small residual (late absent/postal, recount risk)
-const SIGMA_SCALE = 4.5;       // sqrt(1-f): finite-population sampling error of the remainder
-const LATE_SWING_SIGMA = 3.5;  // (1-f): systematic early-booth vs late-postal/prepoll skew
-const NON_ALP_COAL_FLOOR = 0.6; // floor for Greens/Independent contests
-const NON_ALP_COAL_SCALE = 4.0; // …their count-driven component
-const CORR_BASE = 5.0;         // statewide correlated swing sigma at 0 % counted (→0 at 100 %)
+// Sigma constants (pp) — CALIBRATED against the VIC 2022 booth-level count
+// (scripts/calibrate_live_sigma.py, seed 20221126: progressive booth-order
+// replay of VIC-2022-LA-2CP-Pollingplace.xlsx, late categories landing last).
+// The empirical error of a partial count tracks the finite-population sampling
+// shape sqrt((1-f)/f) almost exactly, so that replaced the old sqrt(1-f) term;
+// the (1-f) term carries the district-specific early-booth vs postal/prepoll
+// skew. The floor is a judgment call for recount/data-entry risk the replay
+// cannot see. Statewide-COMMON skew (+1.34pp ordinary-booths-vs-final in 2022,
+// cross-district spread 1.63pp) is deliberately excluded from per-seat sigma
+// and covered by CORR_BASE ≈ |skew| + spread instead.
+const SIGMA_FLOOR = 0.25;       // recount / check-count residual
+const SAMPLE_SIGMA = 0.93;      // sqrt((1-f)/f): booth-sampling error of the remainder
+const LATE_SWING_SIGMA = 0.33;  // (1-f): district-specific late-category skew
+const F_MIN = 0.02;             // clamps the sampling term as f -> 0
+const NON_ALP_COAL_FLOOR = 0.25;  // Greens/Independent finals (fitted separately —
+const NON_ALP_COAL_SAMPLE = 0.6;  //  more booth heterogeneity, so the late/skew
+const NON_ALP_COAL_LATE = 2.32;   //  term dominates their curve)
+const CORR_BASE = 3.0;          // statewide correlated swing sigma at 0 % counted (→0 at 100 %)
 
 // Per-seat winner-margin sigma, driven by how much of THIS seat is counted.
 function seatSigma(f) {
   const r = Math.max(0, 1 - f);
-  return SIGMA_FLOOR + SIGMA_SCALE * Math.sqrt(r) + LATE_SWING_SIGMA * r;
+  const sample = Math.sqrt(r / Math.max(f, F_MIN));
+  return SIGMA_FLOOR + SAMPLE_SIGMA * sample + LATE_SWING_SIGMA * r;
 }
 
 function nonAlpCoalSigma(f) {
   const r = Math.max(0, 1 - f);
-  return NON_ALP_COAL_FLOOR + NON_ALP_COAL_SCALE * Math.sqrt(r);
+  const sample = Math.sqrt(r / Math.max(f, F_MIN));
+  return NON_ALP_COAL_FLOOR + NON_ALP_COAL_SAMPLE * sample + NON_ALP_COAL_LATE * r;
 }
 
 // computeLiveConfidence(projectedSeats, cfg)

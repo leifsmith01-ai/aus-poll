@@ -1,0 +1,101 @@
+name: Live Feed Proxy
+
+# Election-night CORS proxy for the Live Results tab (webapp/src/live/).
+#
+# The browser cannot fetch the VEC results endpoint directly if it lacks CORS
+# headers, so this workflow polls it server-side, normalizes the payload into
+# the live contract (scripts/fetch_live_vec.py — all VEC-shape knowledge lives
+# there), and force-pushes the snapshot as the single-commit `live-feed`
+# branch. raw.githubusercontent.com serves that file with `CORS: *`, and the
+# dashboard's `vec_proxy_2026` source polls it (the fetch loop cache-busts, so
+# the CDN's 5-minute cache does not delay updates... each poll URL is unique).
+#
+# On the night:  Actions -> Live Feed Proxy -> Run workflow, paste the VEC
+# feed URL, leave the rest default. Re-dispatch when the 6-hour job limit
+# ends a run. Leave feed_url BLANK for a replay rehearsal that steps through
+# the committed sample snapshots (0% -> 35% -> 80% -> 100%) — end-to-end
+# practice of proxy -> branch -> dashboard with no VEC dependency.
+#
+# This never touches main; the live-feed branch is disposable afterwards.
+
+on:
+  workflow_dispatch:
+    inputs:
+      feed_url:
+        description: "VEC live feed URL (leave blank for replay rehearsal)"
+        required: false
+        default: ""
+      interval_seconds:
+        description: "Seconds between fetches"
+        required: false
+        default: "90"
+      duration_minutes:
+        description: "How long to keep polling (max ~350; job limit is 6h)"
+        required: false
+        default: "300"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: live-feed-proxy
+  cancel-in-progress: true    # a re-dispatch supersedes the running proxy
+
+jobs:
+  proxy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Poll, normalize, publish
+        env:
+          FEED_URL: ${{ inputs.feed_url }}
+          INTERVAL: ${{ inputs.interval_seconds }}
+          DURATION_MIN: ${{ inputs.duration_minutes }}
+          TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          deadline=$(( $(date +%s) + DURATION_MIN * 60 ))
+          step=0
+          failures=0
+          while [ "$(date +%s)" -lt "$deadline" ]; do
+            if [ -n "$FEED_URL" ]; then
+              src_args=(--url "$FEED_URL")
+            else
+              src_args=(--replay "$step")
+            fi
+            if python scripts/fetch_live_vec.py "${src_args[@]}" \
+                 --out publish/live/vec-latest.json; then
+              failures=0
+              (
+                cd publish
+                rm -rf .git
+                git init -q -b live-feed
+                git -c user.name="github-actions[bot]" \
+                    -c user.email="github-actions[bot]@users.noreply.github.com" \
+                    add -A
+                git -c user.name="github-actions[bot]" \
+                    -c user.email="github-actions[bot]@users.noreply.github.com" \
+                    commit -qm "live snapshot $(date -u +%FT%TZ)"
+                git push -qf \
+                  "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+                  live-feed
+              )
+              echo "$(date -u +%T) published step $step"
+            else
+              # Keep the previous good snapshot on the branch; back off a little.
+              failures=$((failures + 1))
+              echo "::warning::fetch/normalize failed (streak $failures) — keeping last good snapshot"
+              sleep $(( INTERVAL < 60 ? INTERVAL : 60 ))
+            fi
+            step=$((step + 1))
+            sleep "$INTERVAL"
+          done
+          echo "duration elapsed — re-dispatch to continue"

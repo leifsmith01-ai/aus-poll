@@ -57,11 +57,19 @@ jobs:
           if agg["generated"] < newest_fed:
               failures.append(f"aggregated.json generated {agg['generated']} is behind newest poll {newest_fed} — poll aggregator is not landing")
 
-          # VIC polls: a long gap is suspicious in a VIC election year but can be real.
+          # VIC polls: until the 28 Nov 2026 election a long gap is treated as a
+          # FAILURE — the scrape once rotted silently for 4.5 months behind green
+          # runs because this was only a warning. After the election it reverts
+          # to a warning (long quiet stretches are normal between cycles).
+          VIC_ELECTION_DAY = date(2026, 11, 28)
           vic = json.load(open("data/polls/vic_polls.json"))
           newest_vic = max(p["date"] for p in vic["polls"])
           if age_days(newest_vic) > 56:
-              warnings.append(f"newest VIC poll is {newest_vic} (>8 weeks old) — check the Wikipedia scraper's VIC table parsing")
+              msg = f"newest VIC poll is {newest_vic} (>8 weeks old) — check the Wikipedia scraper's VIC table parsing"
+              if date.today() <= VIC_ELECTION_DAY:
+                  failures.append(msg + " (hard failure until the 2026 VIC election)")
+              else:
+                  warnings.append(msg)
 
           # Betting odds: a manual placeholder caused by an API *error* is a failure;
           # "no Australian markets listed" is a normal between-cycles state.

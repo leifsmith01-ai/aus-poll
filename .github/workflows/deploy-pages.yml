@@ -43,6 +43,9 @@ jobs:
         working-directory: webapp
         run: npm test
 
+      - name: Run live-engine checks
+        run: node webapp/scripts/live-check.mjs
+
       - name: Build (Pages base path)
         working-directory: webapp
         run: npx vite build --base=/aus-poll/
