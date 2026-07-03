@@ -61,6 +61,9 @@ jobs:
         working-directory: webapp
         run: npm test
 
+      - name: Run live-engine checks
+        run: node webapp/scripts/live-check.mjs
+
       - name: Build
         working-directory: webapp
         run: npm run build

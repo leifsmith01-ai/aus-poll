@@ -50,8 +50,23 @@ export const LIVE_SOURCES = {
     id: "vec_vic_2026",
     jurisdiction: "vic",
     label: "VEC Live",
-    // Confirmed on election night — see webapp/src/live/adapters/vec.js.
+    // Direct-to-VEC (only works if the endpoint serves CORS headers) —
+    // confirmed on election night; see webapp/src/live/adapters/vec.js.
     url: `${BASE}live/sample-vic-2026.json`,
+    adapter: "vec",
+    pollMs: 90_000,
+    baselineUrl: `${BASE}live/baseline-vic-2026.json`,
+  },
+  vec_proxy_2026: {
+    id: "vec_proxy_2026",
+    jurisdiction: "vic",
+    label: "VEC Live (proxy)",
+    // The Live Feed Proxy workflow (.github/workflows/live-feed.yml) polls the
+    // VEC, normalizes via scripts/fetch_live_vec.py, and force-pushes the
+    // snapshot to the live-feed branch. raw.githubusercontent.com serves it
+    // with CORS: * — the primary election-night path (no CORS dependency on
+    // the VEC). The fetch loop cache-busts through the raw CDN's ~5 min cache.
+    url: "https://raw.githubusercontent.com/leifsmith01-ai/aus-poll/live-feed/live/vec-latest.json",
     adapter: "vec",
     pollMs: 90_000,
     baselineUrl: `${BASE}live/baseline-vic-2026.json`,
