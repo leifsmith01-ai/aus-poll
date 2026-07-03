@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-06-29",
+  "retrieved": "2026-07-03",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2038,6 +2038,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2026-05-14",
+      "alp": 76.0,
+      "coal": 12.0,
+      "grn": 0.0,
+      "on": 53.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 6015
+    },
+    {
+      "scope": "NAT",
       "pollster": "Freshwater Strategy",
       "date": "2026-05-15",
       "alp": 29.0,
@@ -2140,6 +2152,18 @@
       "coal": 18.0,
       "grn": 11.0,
       "on": 33.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-06-30",
+      "alp": 30.0,
+      "coal": 15.0,
+      "grn": 13.0,
+      "on": 32.0,
       "teal": 0.0,
       "tpp": null,
       "n": null
