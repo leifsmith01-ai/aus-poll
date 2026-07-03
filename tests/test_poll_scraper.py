@@ -53,6 +53,32 @@ def test_parse_fieldwork_date_returns_none_on_garbage():
     assert parse_fieldwork_date("not a date") is None
 
 
+# Year-less forms — the current election-year table on Wikipedia omits the
+# year from date cells; it is supplied from the section heading.
+def test_parse_fieldwork_date_yearless_range_uses_default_year():
+    assert parse_fieldwork_date("17–28 June", default_year=2026) == "2026-06-28"
+
+
+def test_parse_fieldwork_date_yearless_single_day():
+    assert parse_fieldwork_date("2 May", default_year=2026) == "2026-05-02"
+
+
+def test_parse_fieldwork_date_yearless_cross_month_range_uses_end():
+    assert parse_fieldwork_date("28 Feb – 3 Mar", default_year=2026) == "2026-03-03"
+
+
+def test_parse_fieldwork_date_month_only_range_uses_mid_final_month():
+    assert parse_fieldwork_date("May – Jun", default_year=2026) == "2026-06-15"
+
+
+def test_parse_fieldwork_date_yearless_without_default_year_is_none():
+    assert parse_fieldwork_date("17–28 June") is None
+
+
+def test_parse_fieldwork_date_explicit_year_beats_default_year():
+    assert parse_fieldwork_date("15–17 Mar 2025", default_year=2026) == "2025-03-17"
+
+
 # ── Pollster normalisation ────────────────────────────────────────────────────
 def test_normalise_aliases_redbridge():
     assert normalise_pollster("RedBridge") == "RedBridge Group"
@@ -68,6 +94,22 @@ def test_normalise_canonical_passthrough():
 
 def test_normalise_unknown_returns_none():
     assert normalise_pollster("Foo Polling") is None
+
+
+def test_normalise_joint_badged_redbridge_accent():
+    assert normalise_pollster("Redbridge/Accent") == "RedBridge Group"
+    assert normalise_pollster("Redbridge/Accent [ 1 ]") == "RedBridge Group"
+
+
+def test_normalise_joint_badge_with_unknown_partner():
+    # Generic slash-split fallback: any single known component matches.
+    assert normalise_pollster("Freshwater/AFR") == "Freshwater Strategy"
+
+
+def test_normalise_event_row_text_is_not_a_pollster():
+    assert normalise_pollster(
+        "The Liberals retain Nepean in the 2026 Nepean state by-election"
+    ) is None
 
 
 def test_normalise_strips_refs():
@@ -120,6 +162,39 @@ def test_parse_vic_extracts_known_pollsters(vic_html):
     pollsters = {r["pollster"] for r in records}
     assert "Newspoll" in pollsters
     assert "Resolve Strategic" in pollsters
+
+
+def test_parse_vic_yearless_dates_resolve_from_section_heading(vic_html):
+    records = parse_vic(vic_html)
+    redbridge = next(r for r in records if r["pollster"] == "RedBridge Group")
+    assert redbridge["date"] == "2026-06-28"      # "17–28 June" under <h2>2026</h2>
+    assert redbridge["alp"] == 26
+    assert redbridge["on"] == 27
+    assert redbridge["tpp"] == 46
+
+
+def test_parse_vic_month_only_fieldwork_range(vic_html):
+    resolve = [r for r in records_by(vic_html, "Resolve Strategic") if r["date"] == "2026-06-15"]
+    assert resolve, "expected Resolve May – Jun poll dated mid-June"
+    assert resolve[0]["tpp"] is None              # em-dash 2PP cell → None
+
+
+def test_parse_vic_cross_month_range(vic_html):
+    demos = records_by(vic_html, "DemosAU")
+    assert demos[0]["date"] == "2026-03-03"       # "28 Feb – 3 Mar" → end of fieldwork
+
+
+def test_parse_vic_excludes_breakout_tables(vic_html):
+    # The 'Inner Melbourne' regional table carries a poison alp=99 row that
+    # must not surface as a statewide poll.
+    records = parse_vic(vic_html)
+    assert all(r["alp"] != 99 for r in records)
+    assert not any(r["pollster"] == "Newspoll" and r["date"] == "2026-06-01"
+                   for r in records)
+
+
+def records_by(html: str, pollster: str) -> list[dict]:
+    return [r for r in parse_vic(html) if r["pollster"] == pollster]
 
 
 # ── Merge: append-only, dedup by (pollster, date) ─────────────────────────────
