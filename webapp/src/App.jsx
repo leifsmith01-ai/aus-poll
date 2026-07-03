@@ -4296,7 +4296,7 @@ function TallyBar({ seats, useModelled = false }) {
     counts[g] = (counts[g] || 0) + 1;
   });
   const total = seats.length;
-  const majorityAt = 76;
+  const majorityAt = Math.floor(total / 2) + 1;
   const majorityPct = total > 0 ? (majorityAt / total) * 100 : 50;
   return (
     <div style={{ ...STYLES.panel, marginBottom: 14 }}>
@@ -4311,10 +4311,10 @@ function TallyBar({ seats, useModelled = false }) {
             </div>
           ))}
         </div>
-        {/* 76-seat majority marker */}
+        {/* majority marker */}
         <div style={{ position: "absolute", top: 0, bottom: 0, left: `${majorityPct}%`, width: 2, background: "rgba(0,0,0,0.35)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", top: -18, left: `${majorityPct}%`, transform: "translateX(-50%)", fontSize: 10, fontWeight: 700, color: "var(--text-3)", whiteSpace: "nowrap" }}>
-          76 needed
+          {majorityAt} needed
         </div>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "7px 16px", marginTop: 12 }}>
@@ -6621,9 +6621,9 @@ export default function App() {
               <span style={{ fontSize: 13, color: "var(--text-3)" }}>{filtered.length} of {seatsForTab.length} seats</span>
             </div>
             <div style={{ background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 12, overflow: "clip" }}>
-              <div style={{ overflowX: "auto" }}>
+              <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "70vh" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                  <thead style={{ position: "sticky", top: isMobile ? 86 : 56, zIndex: 2, background: "var(--panel-bg)" }}>
+                  <thead style={{ position: "sticky", top: 0, zIndex: 2, background: "var(--panel-bg)" }}>
                     <tr style={{ borderBottom: "1px solid var(--border-1)" }}>
                       <SortTh k="name">Division</SortTh>
                       <SortTh k="state">State</SortTh>
