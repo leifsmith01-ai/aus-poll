@@ -25,6 +25,8 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Optional
 
+from pipeline.poll_validation import filter_plausible
+
 logger = logging.getLogger(__name__)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
@@ -41,6 +43,9 @@ MIN_POLLS_FOR_HE = 3         # Minimum polls from a house to estimate its bias
 SMOOTHING_WINDOW_DAYS = 14   # Rolling window for trend output points (days either side)
 TREND_STEP_DAYS = 7          # Generate one trend point per week
 MEDIAN_SAMPLE_SIZE = 1500    # Normalisation base for sample-size weighting
+SINGLE_POLL_STD_FLOOR = 2.0  # Minimum std error (pp) when a window holds one poll —
+                             # cross-pollster variance is undefined with n=1, and a
+                             # collapsed 95% band would imply false certainty
 
 # Effective-sample-size / inverse-variance weighting. When True, a poll's weight
 # scales linearly with n (variance of a proportion ∝ 1/n, so inverse-variance ∝ n).
@@ -274,6 +279,16 @@ def run_vic(
         logger.warning("No VIC polls to aggregate.")
         return {}
 
+    n_before = len(polls)
+    polls = filter_plausible(polls, kind="state", logger=logger)
+    if len(polls) < n_before:
+        logger.warning("Dropped %d implausible VIC poll record(s)", n_before - len(polls))
+    if not polls:
+        logger.warning("No plausible VIC polls to aggregate.")
+        return {}
+
+    election_day = _election_day_from(raw)
+
     # Impute TPP where missing
     n_imputed = 0
     for p in polls:
@@ -296,18 +311,20 @@ def run_vic(
     logger.info("Computing VIC house effects (ref date: %s) ...", ref_date)
     house_effects: dict[str, dict[str, float]] = {}
     for metric in metrics:
-        he = compute_house_effects(polls, metric, ref_date)
+        he = compute_house_effects(polls, metric, ref_date, election_day=election_day)
         house_effects[metric] = he
 
     first_date = min(poll_dates)
     logger.info("Building VIC trend %s → %s ...", first_date, ref_date)
-    trend = build_trend(polls, house_effects, metrics, first_date, ref_date)
+    trend = build_trend(polls, house_effects, metrics, first_date, ref_date,
+                        election_day=election_day)
 
     current_window = 60
     current: dict = {}
     for metric in metrics:
         he = house_effects.get(metric, {})
-        result = aggregate_at_date(polls, ref_date, he, metric, window_days=current_window)
+        result = aggregate_at_date(polls, ref_date, he, metric,
+                                   window_days=current_window, election_day=election_day)
         current[metric] = result
 
     he_summary: dict[str, dict] = {}
@@ -431,6 +448,17 @@ def run_state(
         logger.warning("No %s polls to aggregate.", state.upper())
         return {}
 
+    n_before = len(polls)
+    polls = filter_plausible(polls, kind="state", logger=logger)
+    if len(polls) < n_before:
+        logger.warning("Dropped %d implausible %s poll record(s)",
+                       n_before - len(polls), state.upper())
+    if not polls:
+        logger.warning("No plausible %s polls to aggregate.", state.upper())
+        return {}
+
+    election_day = _election_day_from(raw)
+
     # Impute TPP where missing
     n_imputed = 0
     for p in polls:
@@ -457,17 +485,20 @@ def run_state(
 
     house_effects: dict = {}
     for metric in metrics:
-        house_effects[metric] = compute_house_effects(polls, metric, ref_date)
+        house_effects[metric] = compute_house_effects(polls, metric, ref_date,
+                                                      election_day=election_day)
 
     first_date = min(poll_dates)
     logger.info("Building %s trend %s → %s ...", state.upper(), first_date, ref_date)
-    trend = build_trend(polls, house_effects, metrics, first_date, ref_date)
+    trend = build_trend(polls, house_effects, metrics, first_date, ref_date,
+                        election_day=election_day)
 
     current_window = 60
     current: dict = {}
     for metric in metrics:
         he = house_effects.get(metric, {})
-        result = aggregate_at_date(polls, ref_date, he, metric, window_days=current_window)
+        result = aggregate_at_date(polls, ref_date, he, metric,
+                                   window_days=current_window, election_day=election_day)
         current[metric] = result
 
     he_summary: dict[str, dict] = {}
@@ -504,6 +535,18 @@ def run_state(
     logger.info("Wrote %s aggregated polls → %s", state.upper(), out_path)
 
     return output
+
+
+def _election_day_from(raw: dict) -> date | None:
+    """Parse an ISO election_date field from a polls file header, or None."""
+    ed = raw.get("election_date")
+    if not ed:
+        return None
+    try:
+        return date.fromisoformat(ed)
+    except (TypeError, ValueError):
+        logger.warning("Unparseable election_date %r — using fixed half-life", ed)
+        return None
 
 
 def _decay_weight(
@@ -616,6 +659,7 @@ def compute_house_effects(
     iterations: int = HOUSE_EFFECT_ITERATIONS,
     tolerance: float = HOUSE_EFFECT_TOLERANCE,
     min_polls: int = MIN_POLLS_FOR_HE,
+    election_day: date | None = None,
 ) -> dict[str, float]:
     """
     Iterative house-effect (pollster bias) correction.
@@ -637,6 +681,10 @@ def compute_house_effects(
     if not valid:
         return {}
 
+    # Adaptive decay: when the election date is known, the half-life shortens
+    # as it approaches (see adaptive_half_life). None keeps the fixed default.
+    days_to_election = max(0, (election_day - ref_date).days) if election_day else None
+
     house_effects: dict[str, float] = {}
     converged = False
     last_max_change = float("inf")
@@ -650,7 +698,7 @@ def compute_house_effects(
                 continue
             he = house_effects.get(p["pollster"], 0.0)
             values.append(p[metric] - he)
-            weights.append(_combined_weight(p, days_ago))
+            weights.append(_combined_weight(p, days_ago, days_to_election=days_to_election))
 
         nat_mean = _weighted_mean(values, weights)
         if math.isnan(nat_mean):
@@ -665,7 +713,7 @@ def compute_house_effects(
             he = house_effects.get(p["pollster"], 0.0)
             residual = (p[metric] - he) - nat_mean
             pollster_residuals[p["pollster"]].append(
-                (residual, _combined_weight(p, days_ago))
+                (residual, _combined_weight(p, days_ago, days_to_election=days_to_election))
             )
 
         max_change = 0.0
@@ -704,6 +752,7 @@ def aggregate_at_date(
     house_effects: dict[str, float],
     metric: str,
     window_days: int = SMOOTHING_WINDOW_DAYS,
+    election_day: date | None = None,
 ) -> Optional[dict]:
     """
     Compute the weighted aggregate for `metric` at `target_date`.
@@ -722,13 +771,15 @@ def aggregate_at_date(
     if not relevant:
         return None
 
+    days_to_election = max(0, (election_day - target_date).days) if election_day else None
+
     values, weights = [], []
     for p in relevant:
         days_ago = (target_date - date.fromisoformat(p["date"])).days
         he = house_effects.get(p["pollster"], 0.0)
         adjusted = p[metric] - he
         values.append(adjusted)
-        weights.append(_combined_weight(p, days_ago))
+        weights.append(_combined_weight(p, days_ago, days_to_election=days_to_election))
 
     mean = _weighted_mean(values, weights)
     variance = _weighted_variance(values, weights, mean)
@@ -740,6 +791,10 @@ def aggregate_at_date(
     n_eff   = (total_w ** 2 / sum_w2) if sum_w2 > 0 else 1.0
 
     std_err = std / math.sqrt(n_eff) if n_eff > 0 else std
+    # Cross-pollster variance is 0 by construction with a single poll in the
+    # window; floor the error so the 95% band never collapses to a point.
+    if len(relevant) == 1:
+        std_err = max(std_err, SINGLE_POLL_STD_FLOOR)
     margin  = 1.96 * std_err
 
     return {
@@ -760,6 +815,7 @@ def build_trend(
     last_date: date,
     step_days: int = TREND_STEP_DAYS,
     window_days: int = SMOOTHING_WINDOW_DAYS,
+    election_day: date | None = None,
 ) -> list[dict]:
     """
     Build a weekly trend series from `first_date` to `last_date`.
@@ -772,7 +828,8 @@ def build_trend(
         has_data = False
         for metric in metrics:
             he = house_effects.get(metric, {})
-            result = aggregate_at_date(polls, current, he, metric, window_days)
+            result = aggregate_at_date(polls, current, he, metric, window_days,
+                                       election_day=election_day)
             if result:
                 point[metric] = result
                 has_data = True
@@ -812,9 +869,12 @@ def compute_state_swings(
     STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"]
     result = {}
 
-    # National TPP at ref_date for computing deviations
+    # National TPP at ref_date for computing deviations — from nationally-scoped
+    # polls only, so state rows never contaminate their own baseline.
+    nat_polls = [p for p in polls
+                 if (p.get("scope") or "NAT").upper() in ("NAT", "NATIONAL", "AUS")]
     nat_he = national_house_effects.get("tpp_eff", {})
-    nat_agg = aggregate_at_date(polls, ref_date, nat_he, "tpp_eff", window_days)
+    nat_agg = aggregate_at_date(nat_polls, ref_date, nat_he, "tpp_eff", window_days)
     if nat_agg is None:
         return {}
     national_mean = nat_agg["mean"]
@@ -873,6 +933,15 @@ def run(
     polls = raw["polls"]
     logger.info("Loaded %d polls from %s", len(polls), input_path)
 
+    # Defensive gate: drop implausible rows (mis-parsed scraper output) so a
+    # bad record already in the file cannot distort the aggregate.
+    n_before = len(polls)
+    polls = filter_plausible(polls, kind="federal", logger=logger)
+    if len(polls) < n_before:
+        logger.warning("Dropped %d implausible poll record(s)", n_before - len(polls))
+
+    election_day = _election_day_from(raw)
+
     # Step 1: Impute TPP where missing
     n_imputed = 0
     for p in polls:
@@ -890,15 +959,25 @@ def run(
     for p in polls:
         p["tpp_eff"] = p.get("tpp") if p.get("tpp") is not None else p.get("tpp_imputed")
 
+    # National aggregates must only use nationally-scoped polls; state-subsample
+    # rows (scope="NSW" etc., invited by compute_state_swings) would otherwise
+    # bias the national house effects and trend toward over-polled states.
+    nat_polls = [p for p in polls
+                 if (p.get("scope") or "NAT").upper() in ("NAT", "NATIONAL", "AUS")]
+    if len(nat_polls) < len(polls):
+        logger.info("Using %d national polls for the national aggregate "
+                    "(%d state-scoped rows reserved for state swings)",
+                    len(nat_polls), len(polls) - len(nat_polls))
+
     # Step 2: Compute house effects for each metric
-    poll_dates = [date.fromisoformat(p["date"]) for p in polls]
+    poll_dates = [date.fromisoformat(p["date"]) for p in nat_polls]
     ref_date   = max(poll_dates)
     metrics    = ["alp", "coal", "grn", "on", "teal", "tpp_eff"]
 
     logger.info("Computing house effects (ref date: %s) ...", ref_date)
     house_effects: dict[str, dict[str, float]] = {}
     for metric in metrics:
-        he = compute_house_effects(polls, metric, ref_date)
+        he = compute_house_effects(nat_polls, metric, ref_date, election_day=election_day)
         house_effects[metric] = he
         if he:
             logger.debug("House effects for %s: %s", metric, he)
@@ -907,7 +986,8 @@ def run(
     first_date = min(poll_dates)
     logger.info("Building trend from %s to %s (step=%d days, window=%d days) ...",
                 first_date, ref_date, TREND_STEP_DAYS, SMOOTHING_WINDOW_DAYS)
-    trend = build_trend(polls, house_effects, metrics, first_date, ref_date)
+    trend = build_trend(nat_polls, house_effects, metrics, first_date, ref_date,
+                        election_day=election_day)
     logger.info("Built %d trend points", len(trend))
 
     # Step 4: Compute current aggregate (last 60 days)
@@ -915,7 +995,8 @@ def run(
     current: dict = {}
     for metric in metrics:
         he = house_effects.get(metric, {})
-        result = aggregate_at_date(polls, ref_date, he, metric, window_days=current_window)
+        result = aggregate_at_date(nat_polls, ref_date, he, metric,
+                                   window_days=current_window, election_day=election_day)
         current[metric] = result
     logger.info("Current aggregate (last %d days): TPP=%.1f%% [%.1f-%.1f]",
                 current_window,

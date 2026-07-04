@@ -610,13 +610,6 @@ if __name__ == "__main__":
                     print(f"  {key:<28} {Path(path).name}  ({size_kb:.0f} KB)")
         sys.exit(0)
 
-    if args.betting:
-        logger = logging.getLogger(__name__)
-        logger.info("Running betting odds fetch...")
-        from pipeline.betting_odds import run as run_betting
-        run_betting()
-        logger.info("Betting odds fetch complete.")
-
     if is_vic:
         election_ids = args.year or [202211, 201811]
         run_vic_pipeline(
@@ -644,3 +637,12 @@ if __name__ == "__main__":
             force_download=args.force_download,
             export_only=args.export_only,
         )
+
+    # --betting runs after the main pipeline (as the help text documents), so
+    # the odds fetch reflects any freshly loaded election data.
+    if args.betting:
+        logger = logging.getLogger(__name__)
+        logger.info("Running betting odds fetch...")
+        from pipeline.betting_odds import run as run_betting
+        run_betting()
+        logger.info("Betting odds fetch complete.")

@@ -37,7 +37,7 @@ MODEL_CONSTANTS_DIR = Path(__file__).parent.parent / "data" / "model_constants"
 PREF_FLOWS = {
     "grn_alp":   0.810,
     "teal_alp":  0.620,
-    "on_alp":    0.430,
+    "on_alp":    0.255,   # 2025 AEC DOP (25.5% to ALP) — keep in sync with poll_aggregator
     "other_alp": 0.500,
 }
 

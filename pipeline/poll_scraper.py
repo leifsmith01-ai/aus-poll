@@ -30,6 +30,8 @@ from typing import Iterable
 import requests
 from bs4 import BeautifulSoup
 
+from pipeline.poll_validation import filter_plausible
+
 logger = logging.getLogger(__name__)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
@@ -439,7 +441,10 @@ def parse_federal(html: str) -> list[dict]:
                 "tpp":      r["tpp"],
                 "n":        r.get("n"),
             })
-    return records
+    # The federal page carries seat-projection, leadership and breakout tables
+    # with headers that can satisfy the column schema; drop any row whose
+    # figures are not poll-shaped before it can be merged permanently.
+    return filter_plausible(records, kind="federal", logger=logger)
 
 
 _HEADING_YEAR_RE = re.compile(r"^\s*(20\d{2})\b")
@@ -492,7 +497,7 @@ def parse_vic(html: str) -> list[dict]:
                 "tpp":      r["tpp"],
                 "n":        r.get("n"),
             })
-    return records
+    return filter_plausible(records, kind="state", logger=logger)
 
 
 def scrape_federal() -> list[dict]:

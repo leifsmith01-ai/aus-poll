@@ -44,7 +44,7 @@ ON_PARTIES        = {"ON", "PHON"}
 DEFAULT_PREF_FLOWS = {
     "grn_alp":   0.810,
     "teal_alp":  0.620,
-    "on_alp":    0.430,
+    "on_alp":    0.255,   # 2025 AEC DOP (25.5% to ALP) — keep in sync with poll_aggregator
     "other_alp": 0.500,
 }
 
@@ -305,9 +305,7 @@ def apply_uniform_swing(
         }
 
     pred = max(0.0, min(100.0, baseline.alp_2pp + nat_2pp_swing))
-    winner = "ALP" if pred >= 50.0 else next(
-        (p for p in COALITION_PARTIES if p != "NP"), "LP"
-    )
+    winner = "ALP" if pred >= 50.0 else "LP"
     return {
         "pred_alp_2pp":      round(pred, 2),
         "pred_winner_party": winner,
@@ -759,6 +757,13 @@ def run_calibration(
     """
     Validate monte_carlo_seat_counts probabilities against actual outcomes.
 
+    IMPORTANT — this is an IN-SAMPLE check, not out-of-sample validation: each
+    election is simulated with that election's OBSERVED national swing as the
+    central estimate, so the only uncertainty tested is the seat-level spread
+    around a known-correct national number. Operational forecasts must also
+    carry national-swing (polling) error, so real-world calibration will be
+    worse than the figures reported here.
+
     For each (baseline, election) pair, simulates the election with the
     observed national swing as the central estimate, then evaluates:
       • Brier score of per-seat ALP win probabilities (classic seats only)
@@ -864,6 +869,8 @@ def print_calibration(cal: dict) -> None:
           f"(swing_std={cal['swing_std']}, state_swing_std={cal['state_swing_std']}, "
           f"{cal['n_simulations']} sims/election)")
     print(line)
+    print("  NOTE: in-sample — each election is simulated with its OBSERVED")
+    print("  national swing, so operational (forecast) calibration will be worse.")
     print(f"  Seat-level predictions evaluated: {cal['n_seat_predictions']}")
     print(f"  Brier score (ALP win prob):       {cal['brier_score']:.4f}")
     print()

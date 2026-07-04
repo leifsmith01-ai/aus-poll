@@ -60,15 +60,6 @@ def title_name(name: str) -> str:
     return " ".join(p.capitalize() for p in parts)
 
 
-def compute_margin(tcp: list) -> float:
-    """Return two-candidate margin as absolute percentage difference / 2."""
-    if len(tcp) != 2:
-        return 0.0
-    pct1 = tcp[0]["pct"]
-    pct2 = tcp[1]["pct"]
-    return round(abs(pct1 - pct2) / 2, 2)
-
-
 COALITION_PARTIES = {"LP", "LNP", "NP", "CLP"}
 
 # AEC party_ab values that map to App.jsx teal/IND category
@@ -277,14 +268,14 @@ def main():
             pf_str = (
                 f"  {div_id}: {{ grn_alp: {pref_flows.get('grn_alp', 0.81):.4f}, "
                 f"teal_alp: {pref_flows.get('teal_alp', 0.62):.4f}, "
-                f"on_alp: {pref_flows.get('on_alp', 0.43):.4f}, "
+                f"on_alp: {pref_flows.get('on_alp', 0.255):.4f}, "
                 f"other_alp: {pref_flows.get('other_alp', 0.50):.4f} }},  // {name}"
             )
             pref_flow_lines_by_state.setdefault(state, []).append(pf_str)
             pref_flows_json[div_id] = {
                 "grn_alp":   round(pref_flows.get("grn_alp", 0.81), 4),
                 "teal_alp":  round(pref_flows.get("teal_alp", 0.62), 4),
-                "on_alp":    round(pref_flows.get("on_alp", 0.43), 4),
+                "on_alp":    round(pref_flows.get("on_alp", 0.255), 4),
                 "other_alp": round(pref_flows.get("other_alp", 0.50), 4),
                 "name":      name,
                 "state":     state,
