@@ -74,7 +74,11 @@ jobs:
             if python scripts/fetch_live_vec.py "${src_args[@]}" \
                  --out publish/live/vec-latest.json; then
               failures=0
-              (
+              # `set -e` semantics inside the subshell so a failed push is not
+              # silently reported as published; the snapshot self-heals on the
+              # next interval, but the log must show it was lost.
+              if (
+                set -e
                 cd publish
                 rm -rf .git
                 git init -q -b live-feed
@@ -87,8 +91,11 @@ jobs:
                 git push -qf \
                   "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
                   live-feed
-              )
-              echo "$(date -u +%T) published step $step"
+              ); then
+                echo "$(date -u +%T) published step $step"
+              else
+                echo "::warning::push of snapshot $step failed — retrying on the next interval"
+              fi
             else
               # Keep the previous good snapshot on the branch; back off a little.
               failures=$((failures + 1))

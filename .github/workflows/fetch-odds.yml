@@ -28,7 +28,11 @@ jobs:
           BETFAIR_APP_KEY:       ${{ secrets.BETFAIR_APP_KEY }}
           BETFAIR_SESSION_TOKEN: ${{ secrets.BETFAIR_SESSION_TOKEN }}
           ODDS_API_KEY:          ${{ secrets.ODDS_API_KEY }}
-        run: python pipeline/betting_odds.py
+        # -m keeps the repo root on sys.path: run as a plain script, the
+        # `from pipeline.config import BETTING_CONFIG` inside the Betfair tier
+        # raises ModuleNotFoundError, which the broad except swallowed — so
+        # Betfair silently degraded to Smarkets even with credentials set.
+        run: python -m pipeline.betting_odds
 
       - name: Verify a live source was used
         # Fail red only when a fetch *errored* (bad key, quota, API change).
