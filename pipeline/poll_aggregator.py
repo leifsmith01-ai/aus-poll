@@ -43,9 +43,10 @@ MIN_POLLS_FOR_HE = 3         # Minimum polls from a house to estimate its bias
 SMOOTHING_WINDOW_DAYS = 14   # Rolling window for trend output points (days either side)
 TREND_STEP_DAYS = 7          # Generate one trend point per week
 MEDIAN_SAMPLE_SIZE = 1500    # Normalisation base for sample-size weighting
-SINGLE_POLL_STD_FLOOR = 2.0  # Minimum std error (pp) when a window holds one poll —
-                             # cross-pollster variance is undefined with n=1, and a
-                             # collapsed 95% band would imply false certainty
+SINGLE_POLLSTER_STD_FLOOR = 2.0  # Minimum std error (pp) when a window holds polls
+                                 # from fewer than two distinct pollsters — cross-
+                                 # pollster variance is meaningless there, and a
+                                 # collapsed 95% band would imply false certainty
 
 # Effective-sample-size / inverse-variance weighting. When True, a poll's weight
 # scales linearly with n (variance of a proportion ∝ 1/n, so inverse-variance ∝ n).
@@ -791,10 +792,11 @@ def aggregate_at_date(
     n_eff   = (total_w ** 2 / sum_w2) if sum_w2 > 0 else 1.0
 
     std_err = std / math.sqrt(n_eff) if n_eff > 0 else std
-    # Cross-pollster variance is 0 by construction with a single poll in the
-    # window; floor the error so the 95% band never collapses to a point.
-    if len(relevant) == 1:
-        std_err = max(std_err, SINGLE_POLL_STD_FLOOR)
+    # Cross-pollster variance is meaningless when the window holds a single
+    # poll (or duplicate rows of the same poll); floor the error so the 95%
+    # band never collapses to a point.
+    if len({p.get("pollster") for p in relevant}) < 2:
+        std_err = max(std_err, SINGLE_POLLSTER_STD_FLOOR)
     margin  = 1.96 * std_err
 
     return {
