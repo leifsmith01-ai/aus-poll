@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-07-03",
+  "retrieved": "2026-07-05",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -673,6 +673,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2025-11-13",
+      "alp": 34.0,
+      "coal": 23.0,
+      "grn": 11.0,
+      "on": 18.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Roy Morgan",
       "date": "2025-11-15",
       "alp": 33,
@@ -888,6 +900,18 @@
       "on": 17,
       "tpp": 56,
       "n": 1000
+    },
+    {
+      "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2025-12-12",
+      "alp": 40.0,
+      "coal": 22.0,
+      "grn": 12.0,
+      "on": 18.0,
+      "teal": 0.0,
+      "tpp": 60.0,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -1236,6 +1260,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2026-01-29",
+      "alp": 31.0,
+      "coal": 16.0,
+      "grn": 9.0,
+      "on": 33.0,
+      "teal": 0.0,
+      "tpp": 52.0,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Roy Morgan",
       "date": "2026-01-31",
       "alp": 30.5,
@@ -1555,6 +1591,18 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1237
+    },
+    {
+      "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2026-02-27",
+      "alp": 32.0,
+      "coal": 13.0,
+      "grn": 14.0,
+      "on": 28.0,
+      "teal": 0.0,
+      "tpp": 57.0,
+      "n": null
     },
     {
       "scope": "NAT",
@@ -2026,12 +2074,48 @@
     },
     {
       "scope": "NAT",
+      "pollster": "Fox & Hedgehog",
+      "date": "2026-05-26",
+      "alp": 26.0,
+      "coal": 26.0,
+      "grn": 9.0,
+      "on": 26.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1700
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-06-02",
+      "alp": 26.0,
+      "coal": 19.0,
+      "grn": 13.0,
+      "on": 28.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "DemosAU",
       "date": "2026-06-18",
       "alp": 25.0,
       "coal": 18.0,
       "grn": 11.0,
       "on": 33.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2026-06-26",
+      "alp": 31.0,
+      "coal": 16.0,
+      "grn": 13.0,
+      "on": 29.0,
       "teal": 0.0,
       "tpp": null,
       "n": null
