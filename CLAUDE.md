@@ -406,7 +406,7 @@ The frontend is fully static — no API calls at runtime. All election data is e
 
 | Workflow | Schedule | Updates |
 |----------|----------|---------|
-| `update-polls.yml` | Mon 02:00 UTC | Wikipedia poll scrape → `bludgertrack.json`/`vic_polls.json`, aggregation, webapp copies (incl. leaders + state polls) |
+| `update-polls.yml` | Mon 02:00 UTC | Wikipedia poll scrape → `bludgertrack.json`/`vic_polls.json`, aggregation, webapp copies (incl. bludgertrack — the Polls tab renders from it — plus leaders + state polls) |
 | `fetch-odds.yml` | Daily 01:00 UTC | `betting_odds.json` — cascade Betfair → Smarkets (keyless, primary live source) → The Odds API → manual (fails red if a fetch errored; The Odds API carries no AU election markets) |
 | `update-model-constants.yml` | Monthly (1st) | `SEAT_RESIDUAL_MAP`/`SEAT_DEMO_MULT` injected into App.jsx |
 | `update-economics.yml` | Monthly (2nd) | ABS/RBA indicators → `economics.json` |

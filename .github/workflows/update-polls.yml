@@ -68,8 +68,9 @@ jobs:
         # data/polls/ is the single source of truth; the webapp copies are derived.
         # (vic_aggregated.json stays pipeline-side only — nothing imports it yet.)
         run: |
-          cp data/polls/aggregated.json webapp/src/data/aggregated.json
-          cp data/polls/leaders.json    webapp/src/data/leaders.json
+          cp data/polls/aggregated.json   webapp/src/data/aggregated.json
+          cp data/polls/bludgertrack.json webapp/src/data/bludgertrack.json
+          cp data/polls/leaders.json      webapp/src/data/leaders.json
           for st in nsw qld sa vic wa; do
             cp "data/polls/${st}_polls.json" "webapp/src/data/${st}_polls.json"
           done
@@ -86,6 +87,7 @@ jobs:
             data/polls/aggregated.json \
             data/polls/vic_aggregated.json \
             webapp/src/data/aggregated.json \
+            webapp/src/data/bludgertrack.json \
             webapp/src/data/leaders.json \
             webapp/src/data/nsw_polls.json \
             webapp/src/data/qld_polls.json \

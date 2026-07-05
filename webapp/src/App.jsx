@@ -17,6 +17,7 @@ import BETTING_ODDS from "./data/betting_odds.json";
 import ECONOMICS_DATA from "./data/economics.json";
 import LEADERS_DATA from "./data/leaders.json";
 import AGGREGATED_POLLS from "./data/aggregated.json";
+import BLUDGERTRACK from "./data/bludgertrack.json";
 import NSW_STATE_POLLS from "./data/nsw_polls.json";
 import QLD_STATE_POLLS from "./data/qld_polls.json";
 import WA_STATE_POLLS from "./data/wa_polls.json";
@@ -1544,126 +1545,33 @@ const SEATS = _S25.map(([id, name, state, wp, wn, t1, t2, m]) => ({
   tcp: [{ party: t1, pct: +(50 + m / 2).toFixed(2) }, { party: t2, pct: +(50 - m / 2).toFixed(2) }]
 }));
 
-// ─── Sample polling data (pre-loaded) ────────────────────────────────────────
-// National polls — primary vote and 2PP figures as published
+// ─── Polling data (auto-updated) ─────────────────────────────────────────────
+// National polls come from data/polls/bludgertrack.json, scraped weekly from
+// Wikipedia by .github/workflows/update-polls.yml (which copies the file into
+// webapp/src/data/). Do not hand-edit poll rows here — fix the source JSON.
 // 'on' = One Nation first-preference %; 'oth' computed as 100 - alp - coal - grn - on
 // tpp = ALP two-party preferred (null if not reported by pollster)
-// n = approximate sample size (used for weighted aggregation)
+// n = sample size from the scrape, falling back to the pollster's typical size
 const POLL_SAMPLE_SIZES = {
   "Newspoll": 1597, "Roy Morgan": 2537, "Essential Research": 1020,
   "YouGov": 1511, "Resolve Strategic": 1605, "RedBridge Group": 1000,
   "DemosAU": 1500, "Freshwater Strategy": 1000, "Fox & Hedgehog": 1000,
   "Spectre Strategy": 1000,
 };
-const INITIAL_POLLS = [
-  { id: 1, pollster: "Election Result", date: "2025-05-02", alp: 34.6, coal: 31.8, grn: 12.2, on: 6.4, tpp: 55.2 },
-  { id: 2, pollster: "Roy Morgan", date: "2025-05-31", alp: 37, coal: 31, grn: 11.5, on: 6, tpp: 58.5 },
-  { id: 3, pollster: "Roy Morgan", date: "2025-06-21", alp: 37.5, coal: 31, grn: 12, on: 6, tpp: 58 },
-  { id: 4, pollster: "RedBridge Group", date: "2025-06-29", alp: 37, coal: 31, grn: 11, on: 9, tpp: 55.5 },
-  { id: 5, pollster: "Roy Morgan", date: "2025-06-28", alp: 36.5, coal: 30.5, grn: 12, on: 8.5, tpp: 56.5 },
-  { id: 6, pollster: "DemosAU", date: "2025-07-05", alp: 36, coal: 26, grn: 14, on: 9, tpp: 59 },
-  { id: 7, pollster: "Roy Morgan", date: "2025-07-26", alp: 36.5, coal: 31, grn: 12, on: 7, tpp: 57 },
-  { id: 8, pollster: "Newspoll", date: "2025-07-16", alp: 36, coal: 29, grn: 12, on: 8, tpp: 57 },
-  { id: 9, pollster: "Resolve Strategic", date: "2025-07-18", alp: 35, coal: 29, grn: 12, on: 8, tpp: 56 },
-  { id: 10, pollster: "Roy Morgan", date: "2025-08-23", alp: 34, coal: 30, grn: 12, on: 9, tpp: 55.5 },
-  { id: 11, pollster: "Newspoll", date: "2025-08-13", alp: 36, coal: 30, grn: 12, on: 9, tpp: 56 },
-  { id: 12, pollster: "Resolve Strategic", date: "2025-08-15", alp: 37, coal: 29, grn: 12, on: 9, tpp: 59 },
-  { id: 13, pollster: "RedBridge Group", date: "2025-09-07", alp: 35, coal: 30, grn: 11, on: 11, tpp: 53.5 },
-  { id: 14, pollster: "Roy Morgan", date: "2025-09-20", alp: 34, coal: 30, grn: 12, on: 9.5, tpp: 55.5 },
-  { id: 15, pollster: "Newspoll", date: "2025-09-10", alp: 36, coal: 27, grn: 13, on: 10, tpp: 58 },
-  { id: 16, pollster: "Resolve Strategic", date: "2025-09-12", alp: 35, coal: 27, grn: 11, on: 12, tpp: 55 },
-  { id: 17, pollster: "Essential Research", date: "2025-09-28", alp: 35, coal: 27, grn: 11, on: 13, tpp: 51 },
-  { id: 18, pollster: "YouGov", date: "2025-09-29", alp: 34, coal: 27, grn: 12, on: 12, tpp: 56 },
-  { id: 19, pollster: "Newspoll", date: "2025-10-01", alp: 37, coal: 28, grn: 12, on: 11, tpp: 57 },
-  { id: 20, pollster: "RedBridge Group", date: "2025-10-06", alp: 34, coal: 29, grn: 11, on: 14, tpp: 54 },
-  { id: 21, pollster: "Roy Morgan", date: "2025-10-18", alp: 35, coal: 27, grn: 13, on: 12, tpp: 57 },
-  { id: 22, pollster: "Resolve Strategic", date: "2025-10-11", alp: 34, coal: 28, grn: 11, on: 12, tpp: 55 },
-  { id: 23, pollster: "Freshwater Strategy", date: "2025-10-19", alp: 33, coal: 31, grn: 14, on: 10, tpp: 55 },
-  { id: 24, pollster: "Essential Research", date: "2025-10-26", alp: 36, coal: 26, grn: 9, on: 15, tpp: 50 },
-  { id: 25, pollster: "DemosAU", date: "2025-11-10", alp: 33, coal: 24, grn: 13, on: 17, tpp: 56 },
-  { id: 26, pollster: "Newspoll", date: "2025-10-29", alp: 36, coal: 24, grn: 11, on: 15, tpp: 57 },
-  { id: 27, pollster: "Roy Morgan", date: "2025-11-15", alp: 33, coal: 27, grn: 12.5, on: 14, tpp: 55 },
-  { id: 28, pollster: "Resolve Strategic", date: "2025-11-07", alp: 33, coal: 29, grn: 12, on: 12, tpp: 53 },
-  { id: 29, pollster: "YouGov", date: "2025-11-10", alp: 32, coal: 25, grn: 12, on: 18, tpp: null },
-  { id: 30, pollster: "RedBridge Group", date: "2025-11-12", alp: 38, coal: 24, grn: 9, on: 18, tpp: 56 },
-  { id: 31, pollster: "Spectre Strategy", date: "2025-11-16", alp: 33, coal: 25, grn: 12.5, on: 17.5, tpp: 53 },
-  { id: 32, pollster: "YouGov", date: "2025-11-16", alp: 34, coal: 26, grn: 12, on: 18, tpp: null },
-  { id: 33, pollster: "RedBridge Group", date: "2025-11-25", alp: 35, coal: 26, grn: 10, on: 18, tpp: 54 },
-  { id: 34, pollster: "Newspoll", date: "2025-11-19", alp: 36, coal: 24, grn: 13, on: 15, tpp: 58 },
-  { id: 35, pollster: "Essential Research", date: "2025-11-23", alp: 36, coal: 27, grn: 11, on: 15, tpp: 50 },
-  { id: 36, pollster: "Roy Morgan", date: "2025-12-13", alp: 32, coal: 26.5, grn: 13.5, on: 15.5, tpp: 55 },
-  { id: 37, pollster: "YouGov", date: "2025-12-01", alp: 32, coal: 24, grn: 13, on: 19, tpp: null },
-  { id: 38, pollster: "Resolve Strategic", date: "2025-12-06", alp: 35, coal: 26, grn: 11, on: 14, tpp: 55 },
-  { id: 39, pollster: "Essential Research", date: "2025-12-07", alp: 34, coal: 26, grn: 10, on: 17, tpp: 49 },
-  { id: 40, pollster: "RedBridge Group", date: "2025-12-11", alp: 35, coal: 26, grn: 13, on: 17, tpp: 56 },
-  { id: 41, pollster: "Resolve Strategic", date: "2025-12-19", alp: 32, coal: 28, grn: 12, on: 16, tpp: 54 },
-  { id: 42, pollster: "YouGov", date: "2025-12-22", alp: 30, coal: 24, grn: 13, on: 20, tpp: null },
-  { id: 43, pollster: "DemosAU", date: "2026-01-05", alp: 29, coal: 23, grn: 12, on: 23, tpp: 52 },
-  { id: 44, pollster: "Fox & Hedgehog", date: "2026-01-05", alp: 29, coal: 25, grn: 14, on: 21, tpp: 53 },
-  { id: 45, pollster: "Roy Morgan", date: "2026-01-10", alp: 30, coal: 30.5, grn: 13.5, on: 15, tpp: 52 },
-  { id: 46, pollster: "Resolve Strategic", date: "2026-01-15", alp: 30, coal: 28, grn: 10, on: 18, tpp: 52 },
-  { id: 47, pollster: "Newspoll", date: "2026-01-14", alp: 32, coal: 21, grn: 12, on: 22, tpp: 55 },
-  { id: 48, pollster: "Freshwater Strategy", date: "2026-01-17", alp: 33, coal: 28, grn: 11, on: 19, tpp: 53 },
-  { id: 49, pollster: "Roy Morgan", date: "2026-01-17", alp: 28.5, coal: 24, grn: 13.5, on: 21, tpp: 53 },
-  { id: 50, pollster: "DemosAU", date: "2026-01-20", alp: 30, coal: 21, grn: 13, on: 24, tpp: null },
-  { id: 51, pollster: "Roy Morgan", date: "2026-01-24", alp: 30.5, coal: 22.5, grn: 13.5, on: 22.5, tpp: 54.5 },
-  { id: 52, pollster: "YouGov", date: "2026-01-26", alp: 31, coal: 20, grn: 12, on: 25, tpp: 55 },
-  { id: 53, pollster: "Essential Research", date: "2026-01-27", alp: 31, coal: 25, grn: 9, on: 22, tpp: 49 },
-  { id: 54, pollster: "RedBridge Group", date: "2026-01-28", alp: 34, coal: 19, grn: 11, on: 26, tpp: 56 },
-  { id: 55, pollster: "Roy Morgan", date: "2026-01-31", alp: 30.5, coal: 20.5, grn: 12.5, on: 25, tpp: 54.5 },
-  { id: 56, pollster: "Newspoll", date: "2026-02-07", alp: 33, coal: 18, grn: 12, on: 27, tpp: null },
-  { id: 57, pollster: "Roy Morgan", date: "2026-02-07", alp: 28.5, coal: 22.5, grn: 13.5, on: 24.5, tpp: 53 },
-  { id: 58, pollster: "YouGov", date: "2026-02-09", alp: 30, coal: 19, grn: 12, on: 28, tpp: 54 },
-  { id: 59, pollster: "Roy Morgan", date: "2026-02-12", alp: 30.5, coal: 20, grn: 13, on: 25, tpp: 55 },
-  { id: 60, pollster: "Resolve Strategic", date: "2026-02-13", alp: 32, coal: 23, grn: 11, on: 23, tpp: 55 },
-  { id: 61, pollster: "Roy Morgan", date: "2026-02-15", alp: 32, coal: 23.5, grn: 12.5, on: 21.5, tpp: 55 },
-  { id: 62, pollster: "Fox & Hedgehog", date: "2026-02-18", alp: 30, coal: 24, grn: 12, on: 25, tpp: 51 },
-  { id: 63, pollster: "DemosAU", date: "2026-02-19", alp: 29, coal: 21, grn: 12, on: 28, tpp: null },
-  { id: 64, pollster: "Roy Morgan", date: "2026-02-21", alp: 31, coal: 24, grn: 12.5, on: 20.5, tpp: 54 },
-  { id: 65, pollster: "Essential Research", date: "2026-02-20", alp: 30, coal: 26, grn: 11, on: 22, tpp: 47 },
-  { id: 66, pollster: "YouGov", date: "2026-02-23", alp: 29, coal: 22, grn: 13, on: 24, tpp: 53 },
-  { id: 67, pollster: "Newspoll", date: "2026-02-25", alp: 32, coal: 20, grn: 11, on: 27, tpp: null },
-  { id: 68, pollster: "RedBridge Group", date: "2026-02-26", alp: 32, coal: 19, grn: 12, on: 28, tpp: 54 },
-  { id: 69, pollster: "Roy Morgan", date: "2026-03-01", alp: 30.5, coal: 23.5, grn: 11.5, on: 22, tpp: 53.5 },
-  { id: 70, pollster: "Roy Morgan", date: "2026-03-08", alp: 26.5, coal: 22.5, grn: 14.5, on: 22.5, tpp: 53 },
-  { id: 71, pollster: "YouGov", date: "2026-03-10", alp: 30, coal: 19, grn: 13, on: 26, tpp: 55 },
-  { id: 72, pollster: "Resolve Strategic", date: "2026-03-14", alp: 29, coal: 22, grn: 12, on: 24, tpp: null },
-  { id: 73, pollster: "Roy Morgan", date: "2026-03-15", alp: 28.5, coal: 24, grn: 12.5, on: 22.5, tpp: 53 },
-  { id: 74, pollster: "Roy Morgan", date: "2026-03-22", alp: 27, coal: 25.5, grn: 13.5, on: 23.5, tpp: 51 },
-  { id: 75, pollster: "YouGov", date: "2026-03-24", alp: 29, coal: 19, grn: 13, on: 27, tpp: null },
-  { id: 76, pollster: "Essential Research", date: "2026-03-23", alp: 31, coal: 24, grn: 10, on: 24, tpp: null },
-  { id: 77, pollster: "Fox & Hedgehog", date: "2026-03-26", alp: 30, coal: 23, grn: 13, on: 23, tpp: 51 },
-  { id: 78, pollster: "Newspoll", date: "2026-03-27", alp: 31, coal: 21, grn: 12, on: 26, tpp: null },
-  { id: 79, pollster: "RedBridge Group", date: "2026-03-26", alp: 32, coal: 17, grn: 13, on: 29, tpp: 53 },
-  { id: 80, pollster: "Roy Morgan", date: "2026-03-29", alp: 30, coal: 22.5, grn: 13.5, on: 23.5, tpp: 54.5 },
-  { id: 81, pollster: "Freshwater Strategy", date: "2026-03-29", alp: 32, coal: 23, grn: 12, on: 25, tpp: 51 },
-  { id: 82, pollster: "Roy Morgan", date: "2026-04-05", alp: 30.5, coal: 24, grn: 12, on: 21.5, tpp: 56 },
-  { id: 83, pollster: "YouGov", date: "2026-04-07", alp: 30, coal: 20, grn: 13, on: 25, tpp: 55 },
-  { id: 84, pollster: "Spectre Strategy", date: "2026-04-08", alp: 28, coal: 24, grn: 12, on: 26, tpp: 51 },
-  { id: 85, pollster: "Roy Morgan", date: "2026-04-12", alp: 30, coal: 22.5, grn: 12.5, on: 24.5, tpp: 56 },
-  { id: 86, pollster: "DemosAU", date: "2026-04-14", alp: 26, coal: 23, grn: 13, on: 26, tpp: null },
-  { id: 87, pollster: "Newspoll", date: "2026-04-16", alp: 31, coal: 21, grn: 13, on: 24, tpp: null },
-  { id: 88, pollster: "Resolve Strategic", date: "2026-04-18", alp: 32, coal: 23, grn: 12, on: 22, tpp: null },
-  { id: 89, pollster: "Roy Morgan", date: "2026-04-19", alp: 30.5, coal: 23, grn: 13.5, on: 21.5, tpp: 55.5 },
-  { id: 90, pollster: "YouGov", date: "2026-04-21", alp: 27, coal: 20, grn: 14, on: 27, tpp: 53 },
-  { id: 91, pollster: "Roy Morgan", date: "2026-04-26", alp: 30, coal: 22.5, grn: 14, on: 22.5, tpp: 54.5 },
-  { id: 92, pollster: "Essential Research", date: "2026-04-27", alp: 30, coal: 24, grn: 11, on: 25, tpp: 47 },
-  { id: 93, pollster: "RedBridge Group", date: "2026-04-30", alp: 31, coal: 22, grn: 13, on: 27, tpp: 53 },
-  { id: 94, pollster: "Freshwater Strategy", date: "2026-04-30", alp: 32, coal: 23, grn: 12, on: 25, tpp: 53 },
-  { id: 95, pollster: "Roy Morgan", date: "2026-05-03", alp: 29.5, coal: 24, grn: 13, on: 21.5, tpp: 53 },
-  { id: 96, pollster: "YouGov", date: "2026-05-03", alp: 30, coal: 21, grn: 14, on: 24, tpp: 54 },
-  { id: 97, pollster: "Roy Morgan", date: "2026-05-10", alp: 30.5, coal: 25, grn: 11.5, on: 22, tpp: 52.5 },
-  { id: 98, pollster: "Freshwater Strategy", date: "2026-05-15", alp: 29, coal: 25, grn: 11, on: 26, tpp: 50 },
-  { id: 99, pollster: "Resolve Strategic", date: "2026-05-16", alp: 29, coal: 23, grn: 12, on: 24, tpp: null },
-  { id: 100, pollster: "Newspoll", date: "2026-05-17", alp: 31, coal: 20, grn: 12, on: 27, tpp: null },
-  { id: 101, pollster: "Roy Morgan", date: "2026-05-17", alp: 29.5, coal: 24, grn: 11.5, on: 24.5, tpp: 52.5 },
-  { id: 102, pollster: "YouGov", date: "2026-05-19", alp: 28, coal: 23, grn: 13, on: 25, tpp: null },
-  { id: 103, pollster: "DemosAU", date: "2026-05-20", alp: 26, coal: 23, grn: 13, on: 28, tpp: null },
-].map(p => ({
-  ...p,
-  oth: p.on != null ? +(100 - p.alp - p.coal - p.grn - p.on).toFixed(1) : +(100 - p.alp - p.coal - p.grn).toFixed(1),
-  n: POLL_SAMPLE_SIZES[p.pollster] ?? null,
-}));
+const INITIAL_POLLS = (BLUDGERTRACK?.polls ?? [])
+  .filter(p => p && p.date && (p.scope ?? "NAT") === "NAT" &&
+    [p.alp, p.coal, p.grn].every(Number.isFinite))
+  .sort((a, b) => a.date.localeCompare(b.date))
+  .map((p, i) => ({
+    id: i + 1,
+    pollster: p.pollster,
+    date: p.date,
+    alp: p.alp, coal: p.coal, grn: p.grn,
+    on: p.on ?? null,
+    tpp: p.tpp ?? null,
+    oth: p.on != null ? +(100 - p.alp - p.coal - p.grn - p.on).toFixed(1) : +(100 - p.alp - p.coal - p.grn).toFixed(1),
+    n: p.n ?? POLL_SAMPLE_SIZES[p.pollster] ?? null,
+  }));
 
 // ─── Election data ────────────────────────────────────────────────────────────
 // Helper: build a seat object from a flat tuple
