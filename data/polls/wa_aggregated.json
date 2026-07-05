@@ -1,0 +1,176 @@
+{
+  "generated": "2025-03-08",
+  "jurisdiction": "wa_state",
+  "election_date": "2029-03-10",
+  "source": "WA state-level polls (manual collection)",
+  "methodology": {
+    "half_life_days": 90,
+    "smoothing_window_days": 14,
+    "trend_step_days": 7,
+    "tpp_pref_flows": {
+      "grn_alp": 0.86,
+      "ind_alp": 0.58,
+      "on_alp": 0.22,
+      "other_alp": 0.44
+    },
+    "coalition_keys": [
+      "lp",
+      "nat"
+    ]
+  },
+  "house_effects": {
+    "alp": {},
+    "lp": {},
+    "nat": {},
+    "grn": {},
+    "ind": {},
+    "on": {},
+    "tpp_eff": {}
+  },
+  "house_effect_converged": {
+    "alp": true,
+    "lp": true,
+    "nat": true,
+    "grn": true,
+    "ind": true,
+    "on": true,
+    "tpp_eff": true
+  },
+  "current": {
+    "alp": {
+      "mean": 55.0,
+      "lo95": 51.08,
+      "hi95": 58.92,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "lp": {
+      "mean": 18.5,
+      "lo95": 14.58,
+      "hi95": 22.42,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "nat": {
+      "mean": 4.5,
+      "lo95": 0.58,
+      "hi95": 8.42,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "grn": {
+      "mean": 11.0,
+      "lo95": 7.08,
+      "hi95": 14.92,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "ind": {
+      "mean": 5.0,
+      "lo95": 1.08,
+      "hi95": 8.92,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "on": {
+      "mean": 2.5,
+      "lo95": -1.42,
+      "hi95": 6.42,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "tpp_eff": {
+      "mean": 63.1,
+      "lo95": 59.18,
+      "hi95": 67.02,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    }
+  },
+  "trend": [
+    {
+      "date": "2025-03-08",
+      "alp": {
+        "mean": 55.0,
+        "lo95": 51.08,
+        "hi95": 58.92,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "lp": {
+        "mean": 18.5,
+        "lo95": 14.58,
+        "hi95": 22.42,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "nat": {
+        "mean": 4.5,
+        "lo95": 0.58,
+        "hi95": 8.42,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "grn": {
+        "mean": 11.0,
+        "lo95": 7.08,
+        "hi95": 14.92,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "ind": {
+        "mean": 5.0,
+        "lo95": 1.08,
+        "hi95": 8.92,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "on": {
+        "mean": 2.5,
+        "lo95": -1.42,
+        "hi95": 6.42,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "tpp_eff": {
+        "mean": 63.1,
+        "lo95": 59.18,
+        "hi95": 67.02,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      }
+    }
+  ],
+  "polls": [
+    {
+      "scope": "WA",
+      "pollster": "2025 Election Result",
+      "date": "2025-03-08",
+      "alp": 55.0,
+      "lp": 18.5,
+      "nat": 4.5,
+      "grn": 11.0,
+      "ind": 5.0,
+      "on": 2.5,
+      "tpp": 63.1,
+      "n": null,
+      "note": "WAEC 2025 official results — matches WA_BL/WA_2PP in App.jsx (Coalition 23.0 = LP 18.5 + NP 4.5).",
+      "tpp_imputed": null,
+      "tpp_eff": 63.1
+    }
+  ]
+}

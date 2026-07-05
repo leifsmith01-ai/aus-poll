@@ -38,6 +38,8 @@ STATE_BOUNDS: dict[str, tuple[float, float]] = {
     "alp": (15.0, 60.0),
     "lp":  (10.0, 60.0),
     "lnp": (10.0, 60.0),   # QLD coalition key
+    "np":  (0.0, 25.0),    # NSW Nationals (junior Coalition partner)
+    "nat": (0.0, 20.0),    # WA Nationals (junior Coalition partner)
     "grn": (2.0, 25.0),
     "ind": (0.0, 30.0),
     "on":  (0.0, 40.0),
@@ -45,7 +47,7 @@ STATE_BOUNDS: dict[str, tuple[float, float]] = {
 }
 
 FEDERAL_PRIMARY_FIELDS = ("alp", "coal", "grn", "on", "teal")
-STATE_PRIMARY_FIELDS = ("alp", "lp", "lnp", "grn", "ind", "on")
+STATE_PRIMARY_FIELDS = ("alp", "lp", "lnp", "np", "nat", "grn", "ind", "on")
 
 # Named primaries must sum to something poll-like: below the floor the row is
 # missing major columns; above the ceiling it isn't percentages at all (seat

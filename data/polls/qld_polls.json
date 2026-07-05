@@ -4,11 +4,11 @@
   "election_date": "2028-10-28",
   "note": "QLD state polls. Includes Newspoll QLD state breakdowns, YouGov/Essential QLD sub-national estimates, and dedicated QLD state polls where available. tpp = ALP 2-party-preferred vs LNP. n = sample size. Last election result (2024-10-26) used as baseline.",
   "party_keys": {
-    "alp":  "Australian Labor Party (QLD Branch)",
-    "lnp":  "Liberal National Party of Queensland",
-    "grn":  "The Greens (QLD)",
-    "ind":  "Independents and other minor parties",
-    "on":   "Pauline Hanson's One Nation"
+    "alp": "Australian Labor Party (QLD Branch)",
+    "lnp": "Liberal National Party of Queensland",
+    "grn": "The Greens (QLD)",
+    "ind": "Independents and other minor parties",
+    "on": "Pauline Hanson's One Nation"
   },
   "polls": [
     {
@@ -23,6 +23,175 @@
       "tpp": 46.3,
       "n": null,
       "note": "ECQ official 2024 result — used as baseline"
+    },
+    {
+      "scope": "QLD",
+      "pollster": "DemosAU",
+      "date": "2025-02-14",
+      "alp": 30.0,
+      "lnp": 40.0,
+      "grn": 12.0,
+      "ind": 0.0,
+      "on": 10.0,
+      "tpp": 44.0,
+      "n": 1004
+    },
+    {
+      "scope": "QLD",
+      "pollster": "RedBridge Group",
+      "date": "2025-03-25",
+      "alp": 27.0,
+      "lnp": 44.0,
+      "grn": 12.0,
+      "ind": 0.0,
+      "on": 10.0,
+      "tpp": 43.5,
+      "n": 1507
+    },
+    {
+      "scope": "QLD",
+      "pollster": "Resolve Strategic",
+      "date": "2025-04-15",
+      "alp": 22.0,
+      "lnp": 45.0,
+      "grn": 12.0,
+      "ind": 7.0,
+      "on": 8.0,
+      "tpp": 40.0,
+      "n": 934
+    },
+    {
+      "scope": "QLD",
+      "pollster": "DemosAU",
+      "date": "2025-07-09",
+      "alp": 28.0,
+      "lnp": 40.0,
+      "grn": 13.0,
+      "ind": 0.0,
+      "on": 12.0,
+      "tpp": 45.0,
+      "n": 1027
+    },
+    {
+      "scope": "QLD",
+      "pollster": "Resolve Strategic",
+      "date": "2025-08-15",
+      "alp": 32.0,
+      "lnp": 34.0,
+      "grn": 10.0,
+      "ind": 8.0,
+      "on": 8.0,
+      "tpp": 50.5,
+      "n": 869
+    },
+    {
+      "scope": "QLD",
+      "pollster": "Resolve Strategic",
+      "date": "2025-10-15",
+      "alp": 32.0,
+      "lnp": 33.0,
+      "grn": 10.0,
+      "ind": 7.0,
+      "on": 9.0,
+      "tpp": 50.7,
+      "n": 868
+    },
+    {
+      "scope": "QLD",
+      "pollster": "DemosAU",
+      "date": "2025-10-20",
+      "alp": 29.0,
+      "lnp": 37.0,
+      "grn": 12.0,
+      "ind": 0.0,
+      "on": 14.0,
+      "tpp": 46.0,
+      "n": 1006
+    },
+    {
+      "scope": "QLD",
+      "pollster": "RedBridge Group",
+      "date": "2025-12-08",
+      "alp": 27.0,
+      "lnp": 40.0,
+      "grn": 12.0,
+      "ind": 0.0,
+      "on": 16.0,
+      "tpp": 44.0,
+      "n": 818
+    },
+    {
+      "scope": "QLD",
+      "pollster": "Resolve Strategic",
+      "date": "2025-12-15",
+      "alp": 30.0,
+      "lnp": 33.0,
+      "grn": 11.0,
+      "ind": 8.0,
+      "on": 9.0,
+      "tpp": 48.9,
+      "n": 803
+    },
+    {
+      "scope": "QLD",
+      "pollster": "Resolve Strategic",
+      "date": "2026-02-15",
+      "alp": 26.0,
+      "lnp": 34.0,
+      "grn": 10.0,
+      "ind": 9.0,
+      "on": 16.0,
+      "tpp": 45.4,
+      "n": 868
+    },
+    {
+      "scope": "QLD",
+      "pollster": "DemosAU",
+      "date": "2026-02-20",
+      "alp": 28.0,
+      "lnp": 34.0,
+      "grn": 10.0,
+      "ind": 0.0,
+      "on": 21.0,
+      "tpp": 44.0,
+      "n": 1044
+    },
+    {
+      "scope": "QLD",
+      "pollster": "Resolve Strategic",
+      "date": "2026-04-15",
+      "alp": 28.0,
+      "lnp": 30.0,
+      "grn": 11.0,
+      "ind": 10.0,
+      "on": 17.0,
+      "tpp": null,
+      "n": 870
+    },
+    {
+      "scope": "QLD",
+      "pollster": "DemosAU",
+      "date": "2026-06-03",
+      "alp": 25.0,
+      "lnp": 34.0,
+      "grn": 10.0,
+      "ind": 0.0,
+      "on": 24.0,
+      "tpp": 42.0,
+      "n": 1033
+    },
+    {
+      "scope": "QLD",
+      "pollster": "Resolve Strategic",
+      "date": "2026-06-15",
+      "alp": 24.0,
+      "lnp": 30.0,
+      "grn": 10.0,
+      "ind": 5.0,
+      "on": 24.0,
+      "tpp": 44.0,
+      "n": 868
     }
-  ]
+  ],
+  "retrieved": "2026-07-05"
 }

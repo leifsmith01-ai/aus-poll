@@ -1,0 +1,176 @@
+{
+  "generated": "2023-03-25",
+  "jurisdiction": "nsw_state",
+  "election_date": "2027-03-27",
+  "source": "NSW state-level polls (manual collection)",
+  "methodology": {
+    "half_life_days": 90,
+    "smoothing_window_days": 14,
+    "trend_step_days": 7,
+    "tpp_pref_flows": {
+      "grn_alp": 0.88,
+      "ind_alp": 0.55,
+      "on_alp": 0.2,
+      "other_alp": 0.45
+    },
+    "coalition_keys": [
+      "lp",
+      "np"
+    ]
+  },
+  "house_effects": {
+    "alp": {},
+    "lp": {},
+    "np": {},
+    "grn": {},
+    "ind": {},
+    "on": {},
+    "tpp_eff": {}
+  },
+  "house_effect_converged": {
+    "alp": true,
+    "lp": true,
+    "np": true,
+    "grn": true,
+    "ind": true,
+    "on": true,
+    "tpp_eff": true
+  },
+  "current": {
+    "alp": {
+      "mean": 37.6,
+      "lo95": 33.68,
+      "hi95": 41.52,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "lp": {
+      "mean": 28.6,
+      "lo95": 24.68,
+      "hi95": 32.52,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "np": {
+      "mean": 8.4,
+      "lo95": 4.48,
+      "hi95": 12.32,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "grn": {
+      "mean": 10.4,
+      "lo95": 6.48,
+      "hi95": 14.32,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "ind": {
+      "mean": 8.5,
+      "lo95": 4.58,
+      "hi95": 12.42,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "on": {
+      "mean": 2.0,
+      "lo95": -1.92,
+      "hi95": 5.92,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "tpp_eff": {
+      "mean": 53.2,
+      "lo95": 49.28,
+      "hi95": 57.12,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    }
+  },
+  "trend": [
+    {
+      "date": "2023-03-25",
+      "alp": {
+        "mean": 37.6,
+        "lo95": 33.68,
+        "hi95": 41.52,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "lp": {
+        "mean": 28.6,
+        "lo95": 24.68,
+        "hi95": 32.52,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "np": {
+        "mean": 8.4,
+        "lo95": 4.48,
+        "hi95": 12.32,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "grn": {
+        "mean": 10.4,
+        "lo95": 6.48,
+        "hi95": 14.32,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "ind": {
+        "mean": 8.5,
+        "lo95": 4.58,
+        "hi95": 12.42,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "on": {
+        "mean": 2.0,
+        "lo95": -1.92,
+        "hi95": 5.92,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "tpp_eff": {
+        "mean": 53.2,
+        "lo95": 49.28,
+        "hi95": 57.12,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      }
+    }
+  ],
+  "polls": [
+    {
+      "scope": "NSW",
+      "pollster": "2023 Election Result",
+      "date": "2023-03-25",
+      "alp": 37.6,
+      "lp": 28.6,
+      "np": 8.4,
+      "grn": 10.4,
+      "ind": 8.5,
+      "on": 2.0,
+      "tpp": 53.2,
+      "n": null,
+      "note": "NSWEC official 2023 result — used as baseline",
+      "tpp_imputed": null,
+      "tpp_eff": 53.2
+    }
+  ]
+}

@@ -1387,6 +1387,61 @@ function statePollAverage(polls) {
   return (avg.alp != null && avg.coal != null) ? avg : null;
 }
 
+// ── Polls-tab jurisdiction switcher ───────────────────────────────────────────
+// Federal plus every state with a polls JSON. coalKeys mirror the Model-tab
+// state builder configs; coalLabel names the Coalition column in the UI (QLD
+// merges as LNP, VIC/SA Liberals run alone). modelId deep-links into the
+// matching scenario builder on the Model tab.
+const POLLS_TAB_JURISDICTIONS = [
+  { id: "FED", label: "Federal" },
+  { id: "VIC", label: "VIC", pollsJson: VIC_STATE_POLLS, coalKeys: ["lp"],        coalLabel: "Liberal",   modelId: "vic_2022" },
+  { id: "NSW", label: "NSW", pollsJson: NSW_STATE_POLLS, coalKeys: ["lp", "np"],  coalLabel: "Coalition", modelId: "nsw_2023" },
+  { id: "QLD", label: "QLD", pollsJson: QLD_STATE_POLLS, coalKeys: ["lnp"],       coalLabel: "LNP",       modelId: "qld_2024" },
+  { id: "WA",  label: "WA",  pollsJson: WA_STATE_POLLS,  coalKeys: ["lp", "nat"], coalLabel: "Coalition", modelId: "wa_2025" },
+  { id: "SA",  label: "SA",  pollsJson: SA_STATE_POLLS,  coalKeys: ["lp"],        coalLabel: "Liberal",   modelId: "sa_2026" },
+];
+
+// Chart rows for the state polls view: raw dots per poll plus a decay + sample-
+// size weighted trend over a trailing 30-day window — the same weighting the
+// federal Polls-tab chart uses. Takes normalizeStatePoll output sorted
+// ascending by date; state 2PP uses reported tpp only (the pipeline imputes
+// missing state TPP upstream, and normalizeStatePoll carries the reported one).
+function buildStatePollChartData(normPolls) {
+  const HALF_LIFE = 90, MEDIAN_N = 1000, WINDOW_MS = 30 * 86400000;
+  return normPolls.map(p => {
+    const pMs = new Date(p.date).getTime();
+    const label = new Date(p.date).toLocaleDateString("en-AU", { month: "short", day: "numeric", year: "2-digit" });
+    const inWindow = normPolls.filter(q => {
+      const qMs = new Date(q.date).getTime();
+      return qMs <= pMs && pMs - qMs <= WINDOW_MS;
+    });
+    const wt = q => {
+      const days = (pMs - new Date(q.date).getTime()) / 86400000;
+      return Math.exp(-Math.log(2) / HALF_LIFE * days) * Math.sqrt((q.n ?? MEDIAN_N) / MEDIAN_N);
+    };
+    const wavg = vals => {
+      const tw = vals.reduce((s, q) => s + wt(q), 0);
+      return tw ? +(vals.reduce((s, q) => s + q.v * wt(q), 0) / tw).toFixed(1) : null;
+    };
+    const series = key => inWindow.map(q => ({ ...q, v: q[key] })).filter(q => q.v != null);
+    const tppPts = series("tpp");
+    const hasEnough = inWindow.length >= 2;
+    const tppTrend = tppPts.length >= 2 ? wavg(tppPts) : null;
+    return {
+      date: label,
+      ALP: p.alp, Coalition: p.coal, Greens: p.grn, Ind: p.ind, ON: p.on, "2PP (ALP)": p.tpp,
+      "ALP (trend)": hasEnough ? wavg(series("alp")) : null,
+      "Coal (trend)": hasEnough ? wavg(series("coal")) : null,
+      "Grn (trend)": hasEnough ? wavg(series("grn")) : null,
+      "Ind (trend)": series("ind").length >= 2 ? wavg(series("ind")) : null,
+      "ON (trend)": series("on").length >= 2 ? wavg(series("on")) : null,
+      "2PP (trend)": tppTrend,
+      "2PP (Coal)": p.tpp != null ? +(100 - p.tpp).toFixed(1) : null,
+      "Coal 2PP (trend)": tppTrend != null ? +(100 - tppTrend).toFixed(1) : null,
+    };
+  });
+}
+
 // ── 2025 seat data from AEC final results (event_id=31496) ────────────────────
 const _S25 = [
   [318,"Bean","ACT","ALP","David Smith","ALP","IND",0.68],
@@ -5096,6 +5151,44 @@ export default function App() {
 
   // ── Polls tab state ──
   const [polls, setPolls] = useState(INITIAL_POLLS);
+  const [pollsJurisdiction, setPollsJurisdiction] = useState("FED");
+
+  // Derived view for the selected state on the Polls tab (null for Federal).
+  // Normalises the state polls (summing split Coalition columns), computes the
+  // recency-weighted average and chart rows, and pulls the election-result
+  // baseline row for reference lines and deltas.
+  const statePollsView = useMemo(() => {
+    if (pollsJurisdiction === "FED") return null;
+    const cfg = POLLS_TAB_JURISDICTIONS.find(j => j.id === pollsJurisdiction);
+    if (!cfg) return null;
+    const raw = cfg.pollsJson?.polls ?? [];
+    const normalized = raw.map(p => normalizeStatePoll(p, cfg.coalKeys)).filter(Boolean);
+    const sortedDesc = [...normalized].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const baselineRaw = [...raw].reverse().find(p => /election result/i.test(p.pollster ?? "")) ?? null;
+    let baseline = null;
+    if (baselineRaw) {
+      const coalVals = cfg.coalKeys.map(k => baselineRaw[k]).filter(v => Number.isFinite(v));
+      baseline = {
+        label: baselineRaw.pollster,
+        date: baselineRaw.date,
+        alp: baselineRaw.alp,
+        coal: coalVals.length ? +coalVals.reduce((s, v) => s + v, 0).toFixed(1) : null,
+        grn: baselineRaw.grn,
+        ind: baselineRaw.ind,
+        on: baselineRaw.on,
+        tpp: baselineRaw.tpp,
+      };
+    }
+    return {
+      cfg,
+      polls: sortedDesc,
+      latest: sortedDesc[0] ?? null,
+      avg: statePollAverage(sortedDesc),
+      chartData: buildStatePollChartData([...normalized].sort((a, b) => new Date(a.date) - new Date(b.date))),
+      baseline,
+      electionDate: cfg.pollsJson?.election_date ?? null,
+    };
+  }, [pollsJurisdiction]);
   const [showAddPoll, setShowAddPoll] = useState(false);
   const [showHouseEffects, setShowHouseEffects] = useState(false);
   const [nextPollId, setNextPollId] = useState(INITIAL_POLLS.length + 1);
@@ -6703,20 +6796,43 @@ export default function App() {
       {/* ══════════════════════ POLLS TAB ═════════════════════════════════════ */}
       {activeTab === "polls" && (
         <div style={{ padding: isMobile ? "14px 16px" : "20px 24px", maxWidth: 1000, margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <div>
               <h2 style={STYLES.sectionTitle}>Polling Tracker</h2>
-              <p style={{ color: "var(--text-3)", fontSize: 13, margin: "4px 0 0" }}>{polls.length} polls · weighted aggregate with house-effect correction · tap "Load latest" or "Load avg" to run scenarios</p>
+              {pollsJurisdiction === "FED" ? (
+                <p style={{ color: "var(--text-3)", fontSize: 13, margin: "4px 0 0" }}>{polls.length} polls · weighted aggregate with house-effect correction · tap "Load latest" or "Load avg" to run scenarios</p>
+              ) : (
+                <p style={{ color: "var(--text-3)", fontSize: 13, margin: "4px 0 0" }}>{statePollsView?.cfg?.label} state polling · {statePollsView?.polls?.length ?? 0} poll{(statePollsView?.polls?.length ?? 0) === 1 ? "" : "s"} · recency-weighted average (60-day half-life)</p>
+              )}
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={loadFromPoll} style={STYLES.btnPrimary}>
-                Load latest → Model
-              </button>
-              <button onClick={() => setShowAddPoll(s => !s)} style={STYLES.btnSecondary}>
-                {showAddPoll ? "Cancel" : "+ Add poll"}
-              </button>
-            </div>
+            {pollsJurisdiction === "FED" && (
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={loadFromPoll} style={STYLES.btnPrimary}>
+                  Load latest → Model
+                </button>
+                <button onClick={() => setShowAddPoll(s => !s)} style={STYLES.btnSecondary}>
+                  {showAddPoll ? "Cancel" : "+ Add poll"}
+                </button>
+              </div>
+            )}
           </div>
+
+          {/* Jurisdiction switcher — Federal + state polling views */}
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+            {POLLS_TAB_JURISDICTIONS.map(j => (
+              <button
+                key={j.id}
+                onClick={() => setPollsJurisdiction(j.id)}
+                style={pollsJurisdiction === j.id
+                  ? { ...STYLES.btnPrimary, padding: "6px 14px" }
+                  : { ...STYLES.btnSecondary, padding: "6px 14px" }}
+              >
+                {j.label}
+              </button>
+            ))}
+          </div>
+
+          {pollsJurisdiction === "FED" && (<>
 
           {/* Add poll form */}
           {showAddPoll && (
@@ -7320,6 +7436,221 @@ export default function App() {
                   </span>
                 </div>
               </div>
+            );
+          })()}
+
+          </>)}
+
+          {/* ── State polling view (jurisdiction switcher ≠ Federal) ─────────── */}
+          {pollsJurisdiction !== "FED" && statePollsView && (() => {
+            const v = statePollsView;
+            const cfg = v.cfg;
+            const bl = v.baseline;
+            const daysToGo = v.electionDate != null
+              ? Math.ceil((new Date(v.electionDate).getTime() - Date.now()) / 86400000)
+              : null;
+            const fmtDate = d => new Date(d).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+            const openBuilder = () => { setSelectedModelId(cfg.modelId); setActiveTab("model"); };
+            const partyCards = p => [
+              { label: "ALP primary", value: p.alp, color: "#DC2626", base: bl?.alp },
+              { label: `${cfg.coalLabel} primary`, value: p.coal, color: "#1D4ED8", base: bl?.coal },
+              { label: "Greens primary", value: p.grn, color: "#059669", base: bl?.grn },
+              { label: "Independents", value: p.ind, color: "#0891B2", base: bl?.ind },
+              { label: "One Nation", value: p.on, color: "#B45309", base: bl?.on },
+              { label: "2PP (ALP)", value: p.tpp, color: "#991B1B", base: bl?.tpp },
+            ];
+            const renderCards = (cards) => (
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(6,1fr)", gap: 12 }}>
+                {cards.map(card => {
+                  const delta = card.value != null && card.base != null ? +(card.value - card.base).toFixed(1) : null;
+                  return (
+                    <div key={card.label} style={STYLES.metricCard}>
+                      <div style={{ width: 20, height: 3, background: card.color, borderRadius: 2, marginBottom: 6 }} />
+                      <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>
+                        {card.value != null ? `${card.value}%` : "—"}
+                      </span>
+                      {delta != null && (
+                        <div style={{ fontSize: 11, fontWeight: 600, color: delta > 0 ? "#059669" : delta < 0 ? "#DC2626" : "var(--text-4)", marginTop: 2 }}>
+                          {delta > 0 ? "+" : ""}{delta} vs last election
+                        </div>
+                      )}
+                      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>{card.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+            return (
+              <>
+                {/* Election header panel */}
+                <div style={{ ...panelStyle, marginBottom: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>
+                        Next {cfg.label} state election{v.electionDate ? `: ${fmtDate(v.electionDate)}` : ""}
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 3 }}>
+                        {daysToGo != null && daysToGo > 0 ? `${daysToGo} days away · ` : ""}
+                        {v.polls.length} published poll{v.polls.length === 1 ? "" : "s"} collected
+                        {bl ? ` · baseline: ${bl.label} (${fmtDate(bl.date)})` : ""}
+                        {" · 2PP = ALP vs "}{cfg.coalLabel}
+                      </div>
+                    </div>
+                    <button onClick={openBuilder} style={STYLES.btnSecondary}>
+                      Open {cfg.label} scenario builder →
+                    </button>
+                  </div>
+                </div>
+
+                {/* Empty state — no published polls yet, show the baseline result */}
+                {v.polls.length === 0 && (
+                  <div style={{ ...panelStyle, marginBottom: 14 }}>
+                    <div style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 12 }}>
+                      No published {cfg.label} state polls collected yet — showing the last election result as baseline.
+                      Polls are added automatically once a Wikipedia polling page exists for the next {cfg.label} election, or can be curated manually in <code style={{ background: "var(--subtle-bg)", padding: "1px 4px", borderRadius: 3 }}>data/polls/</code>.
+                    </div>
+                    {bl && renderCards(partyCards(bl).map(c => ({ ...c, base: null })))}
+                  </div>
+                )}
+
+                {/* Latest poll cards */}
+                {v.latest && (
+                  <div style={{ ...panelStyle, marginBottom: 14 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 10 }}>
+                      Latest: {v.latest.pollster} · {fmtDate(v.latest.date)}{v.latest.n ? ` · n=${v.latest.n.toLocaleString()}` : ""}
+                    </div>
+                    {renderCards(partyCards(v.latest))}
+                  </div>
+                )}
+
+                {/* Recency-weighted average */}
+                {v.avg && v.polls.length >= 2 && (
+                  <div style={{ ...panelStyle, marginBottom: 14 }}>
+                    <div style={{ marginBottom: 10 }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Recency-Weighted Average</span>
+                      <span style={{ fontSize: 12, color: "var(--text-3)", marginLeft: 8 }}>{v.polls.length} polls · exponential decay, 60-day half-life · no house-effect correction</span>
+                    </div>
+                    {renderCards(partyCards({ ...v.avg, tpp: null }).slice(0, 5))}
+                  </div>
+                )}
+
+                {/* Primary vote trend chart */}
+                {v.polls.length >= 2 && (
+                  <div style={panelStyle}>
+                    <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Primary vote trends — {cfg.label}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 12 }}>Thick lines = weighted aggregate (30-day window, decay + sample-size weighted) · Dots = individual polls · Dashed lines = last election result</div>
+                    <ResponsiveContainer width="100%" height={340}>
+                      <LineChart data={v.chartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
+                        <CartesianGrid {...CHART.grid} />
+                        <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+                        <YAxis domain={[0, 50]} tick={{ fontSize: 11 }} tickFormatter={val => `${val}%`} />
+                        <Tooltip formatter={(val, name) => [val != null ? `${val.toFixed(1)}%` : "—", name]} contentStyle={CHART.tooltip} />
+                        <Legend wrapperStyle={{ fontSize: 11 }} />
+                        {bl?.alp != null && <ReferenceLine y={bl.alp} stroke="#DC2626" strokeDasharray="4 3" strokeOpacity={0.5} />}
+                        {bl?.coal != null && <ReferenceLine y={bl.coal} stroke="#1D4ED8" strokeDasharray="4 3" strokeOpacity={0.5} />}
+                        {/* Raw poll scatter (strokeWidth=0 = dots only, no connecting line) */}
+                        <Line type="linear" dataKey="ALP" stroke="#DC2626" strokeWidth={0} dot={{ r: 2.5, fill: "#DC2626" }} activeDot={{ r: 4 }} legendType="circle" />
+                        <Line type="linear" dataKey="Coalition" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 2.5, fill: "#1D4ED8" }} activeDot={{ r: 4 }} legendType="circle" name={cfg.coalLabel} />
+                        <Line type="linear" dataKey="Greens" stroke="#059669" strokeWidth={0} dot={{ r: 2.5, fill: "#059669" }} activeDot={{ r: 4 }} legendType="circle" />
+                        <Line type="linear" dataKey="Ind" stroke="#0891B2" strokeWidth={0} dot={{ r: 2.5, fill: "#0891B2" }} activeDot={{ r: 4 }} legendType="circle" name="Independents" />
+                        <Line type="linear" dataKey="ON" stroke="#F97316" strokeWidth={0} dot={{ r: 2.5, fill: "#F97316" }} activeDot={{ r: 4 }} legendType="circle" name="One Nation" />
+                        {/* Weighted aggregate trend lines */}
+                        <Line type="monotone" dataKey="ALP (trend)" stroke="#DC2626" strokeWidth={2.25} dot={false} connectNulls />
+                        <Line type="monotone" dataKey="Coal (trend)" stroke="#1D4ED8" strokeWidth={2.25} dot={false} connectNulls name={`${cfg.coalLabel} (trend)`} />
+                        <Line type="monotone" dataKey="Grn (trend)" stroke="#059669" strokeWidth={2.25} dot={false} connectNulls />
+                        <Line type="monotone" dataKey="Ind (trend)" stroke="#0E7490" strokeWidth={2.25} dot={false} connectNulls name="Ind (trend)" />
+                        <Line type="monotone" dataKey="ON (trend)" stroke="#EA580C" strokeWidth={2.25} dot={false} connectNulls name="One Nation (trend)" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6, textAlign: "center" }}>Filled dots = individual primary vote polls · Thick lines = weighted aggregate trends · Dashed = last election baseline</div>
+                  </div>
+                )}
+
+                {/* 2PP chart */}
+                {v.polls.length >= 2 && v.chartData.some(d => d["2PP (ALP)"] != null) && (
+                  <div style={panelStyle}>
+                    <div style={{ ...STYLES.panelTitle, marginBottom: 4 }}>Estimated aggregate 2PP — {cfg.label}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 12 }}>2PP = ALP vs {cfg.coalLabel} · Thick lines = weighted aggregate trend · Open circles = polls reporting 2PP directly · Dashed line = last election 2PP</div>
+                    <ResponsiveContainer width="100%" height={260}>
+                      <ComposedChart data={v.chartData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="stTppAreaAlp" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#DC2626" stopOpacity={0.16} />
+                            <stop offset="100%" stopColor="#DC2626" stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="stTppAreaCoal" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#1D4ED8" stopOpacity={0.16} />
+                            <stop offset="100%" stopColor="#1D4ED8" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid {...CHART.grid} />
+                        <XAxis dataKey="date" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
+                        <YAxis domain={[35, 65]} tick={{ fontSize: 11 }} tickFormatter={val => `${val}%`} />
+                        <Tooltip formatter={(val, name) => [val != null ? `${val.toFixed(1)}%` : "—", name]} contentStyle={CHART.tooltip} />
+                        <Legend wrapperStyle={{ fontSize: 11 }} />
+                        <ReferenceLine y={50} stroke="var(--text-4)" label={{ value: "50%", fontSize: 10, fill: "var(--text-4)", position: "insideRight" }} />
+                        {bl?.tpp != null && (
+                          <ReferenceLine y={bl.tpp} stroke="#991B1B" strokeDasharray="4 3"
+                            label={{ value: `Last election: ${bl.tpp}%`, fontSize: 10, fill: "#991B1B", position: "insideLeft" }} />
+                        )}
+                        {/* Individual poll dots — open circles */}
+                        <Line type="linear" dataKey="2PP (ALP)" stroke="#DC2626" strokeWidth={0} dot={{ r: 3.5, fill: "none", stroke: "#DC2626", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name="ALP 2PP (reported)" />
+                        <Line type="linear" dataKey="2PP (Coal)" stroke="#1D4ED8" strokeWidth={0} dot={{ r: 3.5, fill: "none", stroke: "#1D4ED8", strokeWidth: 1.5 }} activeDot={{ r: 5 }} legendType="circle" name={`${cfg.coalLabel} 2PP (reported)`} />
+                        {/* Gradient fills under aggregate trends */}
+                        <Area type="monotone" dataKey="2PP (trend)" stroke="none" fill="url(#stTppAreaAlp)" connectNulls legendType="none" tooltipType="none" name="ALP 2PP trend area" />
+                        <Area type="monotone" dataKey="Coal 2PP (trend)" stroke="none" fill="url(#stTppAreaCoal)" connectNulls legendType="none" tooltipType="none" name="Coal 2PP trend area" />
+                        {/* Weighted aggregate trend lines */}
+                        <Line type="monotone" dataKey="2PP (trend)" stroke="#991B1B" strokeWidth={2.25} dot={false} connectNulls name="ALP 2PP trend" />
+                        <Line type="monotone" dataKey="Coal 2PP (trend)" stroke="#1E40AF" strokeWidth={2.25} dot={false} connectNulls name={`${cfg.coalLabel} 2PP trend`} />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                    <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6, textAlign: "center" }}>Open circles = polls reporting 2PP directly · Thick lines = weighted aggregate of reported 2PP</div>
+                  </div>
+                )}
+
+                {/* State polls table (read-only) */}
+                {v.polls.length > 0 && (
+                  <div style={{ background: "var(--panel-bg)", border: "1px solid var(--border-1)", borderRadius: 12, overflow: "hidden" }}>
+                    <div style={{ overflowX: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                        <thead>
+                          <tr style={{ borderBottom: "1px solid var(--border-1)" }}>
+                            {["Pollster", "Date", "ALP %", `${cfg.coalLabel} %`, "Greens %", "Ind %", "One Nation %", "2PP ALP %", "n"].map((h, i) => (
+                              <th key={i} style={{ ...STYLES.tableHead, whiteSpace: "nowrap" }}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {v.polls.map((p, i) => (
+                            <tr key={`${p.pollster}-${p.date}`} style={{ background: i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)", borderBottom: "1px solid var(--border-3)" }}
+                              onMouseEnter={e => e.currentTarget.style.background = "var(--row-highlight)"}
+                              onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? "var(--panel-bg)" : "var(--table-row-alt)"}>
+                              <td style={{ padding: "9px 12px", fontWeight: 600 }}>{p.pollster}</td>
+                              <td style={{ padding: "9px 12px", color: "var(--text-3)" }}>{fmtDate(p.date)}</td>
+                              {[p.alp, p.coal, p.grn, p.ind, p.on].map((val, j) => (
+                                <td key={j} style={{ padding: "9px 12px" }}>
+                                  <span style={{ fontWeight: 600, color: ["#DC2626", "#1D4ED8", "#059669", "#0891B2", "#B45309"][j] }}>{val != null ? `${val}%` : "—"}</span>
+                                </td>
+                              ))}
+                              <td style={{ padding: "9px 12px" }}>
+                                {p.tpp != null ? (
+                                  <>
+                                    <span style={{ fontWeight: 700, fontSize: 14, color: p.tpp >= 50 ? "#059669" : "#DC2626" }}>{p.tpp}%</span>
+                                    <span style={{ fontSize: 11, color: "var(--text-4)", marginLeft: 5 }}>
+                                      ({p.tpp >= 50 ? "ALP ahead" : `${cfg.coalLabel} ahead`})
+                                    </span>
+                                  </>
+                                ) : <span style={{ color: "var(--text-4)" }}>—</span>}
+                              </td>
+                              <td style={{ padding: "9px 12px", color: "var(--text-4)", fontSize: 12 }}>{p.n ?? "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </>
             );
           })()}
 

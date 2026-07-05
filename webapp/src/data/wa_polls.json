@@ -2,7 +2,7 @@
   "source": "WA state-level polls (manual collection)",
   "jurisdiction": "wa_state",
   "election_date": "2029-03-10",
-  "note": "WA state polls. Schema mirrors data/polls/vic_polls.json. Populate with Newspoll WA state breakdowns, YouGov/Essential WA sub-national estimates, and dedicated WA state polls as they are collected. tpp = ALP 2-party-preferred vs Liberals/Nationals. n = sample size. Last election result (2025-03-08) used as baseline.",
+  "note": "WA state polls. Schema mirrors data/polls/vic_polls.json. Populate with Newspoll WA state breakdowns, YouGov/Essential WA sub-national estimates, and dedicated WA state polls as they are collected. tpp = ALP 2-party-preferred vs Liberals/Nationals. n = sample size. Last election result (2025-03-08) used as baseline — figures must stay in sync with WA_BL/WA_2PP in webapp/src/App.jsx.",
   "party_keys": {
     "alp":  "Australian Labor Party (WA Branch)",
     "lp":   "Liberal Party of Australia (WA Division)",
@@ -16,15 +16,15 @@
       "scope": "WA",
       "pollster": "2025 Election Result",
       "date": "2025-03-08",
-      "alp": null,
-      "lp": null,
-      "nat": null,
-      "grn": null,
-      "ind": null,
-      "on": null,
-      "tpp": null,
+      "alp": 55.0,
+      "lp": 18.5,
+      "nat": 4.5,
+      "grn": 11.0,
+      "ind": 5.0,
+      "on": 2.5,
+      "tpp": 63.1,
       "n": null,
-      "note": "WAEC 2025 baseline placeholder — fill in primary votes and tpp from the official declaration when available."
+      "note": "WAEC 2025 official results — matches WA_BL/WA_2PP in App.jsx (Coalition 23.0 = LP 18.5 + NP 4.5)."
     }
   ]
 }

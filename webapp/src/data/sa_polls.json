@@ -1,8 +1,8 @@
 {
   "source": "SA state-level polls (manual collection)",
   "jurisdiction": "sa_state",
-  "election_date": "2026-03-21",
-  "note": "SA state polls. Schema mirrors data/polls/vic_polls.json. Populate with Newspoll SA state breakdowns, YouGov/Essential SA sub-national estimates, and dedicated SA state polls as they are collected. tpp = ALP 2-party-preferred vs Liberals. n = sample size. Last election result (2022-03-19) used as baseline.",
+  "election_date": "2030-03-16",
+  "note": "SA state polls for the 2030 election cycle. Schema mirrors data/polls/vic_polls.json. Populate with Newspoll SA state breakdowns, YouGov/Essential SA sub-national estimates, and dedicated SA state polls as they are collected. tpp = ALP 2-party-preferred vs Liberals. n = sample size. Last election result (2026-03-21) used as baseline — figures are from the provisional ECSA count and must stay in sync with SA_BL/SA_2PP in webapp/src/App.jsx; refresh both once ECSA publishes the declared result.",
   "party_keys": {
     "alp":  "Australian Labor Party (SA Branch)",
     "lp":   "Liberal Party of Australia (SA Division)",
@@ -13,16 +13,16 @@
   "polls": [
     {
       "scope": "SA",
-      "pollster": "2022 Election Result",
-      "date": "2022-03-19",
-      "alp": null,
-      "lp": null,
-      "grn": null,
-      "ind": null,
-      "on": null,
-      "tpp": null,
+      "pollster": "2026 Election Result",
+      "date": "2026-03-21",
+      "alp": 39.1,
+      "lp": 18.7,
+      "grn": 11.1,
+      "ind": 4.7,
+      "on": 21.6,
+      "tpp": 57.4,
       "n": null,
-      "note": "ECSA 2022 baseline placeholder — fill in primary votes and tpp from the official declaration when available."
+      "note": "ECSA 2026 provisional count (6 seats still in doubt at capture) — matches SA_BL/SA_2PP in App.jsx."
     }
   ]
 }

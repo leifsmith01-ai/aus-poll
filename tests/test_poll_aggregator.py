@@ -127,6 +127,58 @@ def test_impute_vic_tpp_missing_returns_none():
     assert pa._impute_vic_tpp({"alp": 38.0, "grn": 12.0}) is None  # no 'lp'
 
 
+# ── _impute_state_tpp with multi-key Coalitions ───────────────────────────────
+
+def test_state_aggregation_registry_covers_five_states():
+    assert set(pa.STATE_AGGREGATION_REGISTRY) == {"vic", "nsw", "qld", "wa", "sa"}
+    for state, cfg in pa.STATE_AGGREGATION_REGISTRY.items():
+        for key in ("polls_file", "output_file", "pref_flows", "primary_parties", "coal_keys"):
+            assert key in cfg, f"{state} registry entry missing {key}"
+
+
+def test_registry_coal_keys_sum_junior_partners():
+    assert pa.STATE_AGGREGATION_REGISTRY["nsw"]["coal_keys"] == ["lp", "np"]
+    assert pa.STATE_AGGREGATION_REGISTRY["wa"]["coal_keys"] == ["lp", "nat"]
+    assert pa.STATE_AGGREGATION_REGISTRY["qld"]["coal_keys"] == ["lnp"]
+
+
+def test_impute_state_tpp_counts_nationals_as_coalition():
+    # NSW-shaped poll: LIB 28 + NP 8. With coal_keys=['lp','np'] the Nationals'
+    # 8 points seed the Coalition 2PP base; with the old single-key behaviour
+    # they fell into "other" and flowed ~45% back to ALP, inflating ALP's 2PP.
+    poll = {"alp": 34.0, "lp": 28.0, "np": 8.0, "grn": 11.0, "ind": 5.0, "on": 6.0}
+    flows = pa.NSW_PREF_FLOWS
+    both = pa._impute_state_tpp(poll, flows, coal_keys=["lp", "np"])
+    lp_only = pa._impute_state_tpp(poll, flows, coal_keys=["lp"])
+    assert both is not None and lp_only is not None
+    assert both < lp_only          # Nationals counted as Coalition → lower ALP 2PP
+
+
+def test_impute_state_tpp_missing_junior_partner_counts_zero():
+    poll = {"alp": 34.0, "lp": 33.0, "grn": 11.0, "ind": 5.0, "on": 6.0}
+    result = pa._impute_state_tpp(poll, pa.NSW_PREF_FLOWS, coal_keys=["lp", "np"])
+    assert result is not None and 0 < result < 100
+
+
+def test_impute_state_tpp_missing_senior_partner_returns_none():
+    poll = {"alp": 34.0, "np": 8.0, "grn": 11.0}
+    assert pa._impute_state_tpp(poll, pa.NSW_PREF_FLOWS, coal_keys=["lp", "np"]) is None
+
+
+def test_run_state_baseline_only_file_does_not_crash(tmp_path):
+    # SA/WA files hold only the election-result baseline row; run_state must
+    # produce a valid (single-point) aggregate without raising.
+    import json
+    src = json.loads(pa.SA_POLLS_FILE.read_text(encoding="utf-8"))
+    in_path = tmp_path / "sa_polls.json"
+    out_path = tmp_path / "sa_aggregated.json"
+    in_path.write_text(json.dumps(src), encoding="utf-8")
+    result = pa.run_state("sa", input_path=in_path, output_path=out_path)
+    assert result
+    assert result["methodology"]["coalition_keys"] == ["lp"]
+    assert out_path.exists()
+
+
 # ── compute_house_effects ─────────────────────────────────────────────────────
 
 def test_house_effects_recovers_symmetric_bias():
