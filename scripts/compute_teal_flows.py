@@ -23,7 +23,7 @@ Prints a per-seat table and a JS snippet ready to paste into
 SEAT_PREF_FLOWS_2025 in App.jsx for any seat whose flow differs materially
 from the stored value.
 
-Requires data/elections.db populated for election_id=2025 (event_id=31496).
+Requires data/aec_elections.db populated for election_id=2025 (event_id=31496).
 """
 
 from __future__ import annotations
@@ -182,7 +182,7 @@ def main() -> None:
         teals = teal_candidates(conn)
         if not teals:
             sys.exit(
-                "No teal candidates found. Confirm data/elections.db is populated "
+                "No teal candidates found. Confirm data/aec_elections.db is populated "
                 "for 2025 and extend KNOWN_TEAL_SURNAMES if necessary."
             )
 

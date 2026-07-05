@@ -427,6 +427,12 @@ concurrency group; the DB cache path is `data/aec_elections.db` (matches
 - Output: `dist`
 - Rewrites: `/*` → `/index.html` (SPA routing)
 
+The Vercel project's dashboard sets **Root Directory = `webapp`**, and Vercel
+runs the root `vercel.json`'s commands *inside* that directory. Its
+`buildCommand`/`outputDirectory` must therefore stay relative to `webapp/` —
+do not prefix them with `webapp/` or `cd webapp` (that fails with ENOENT, as
+there is no `webapp/webapp`).
+
 ---
 
 ## Model Accuracy

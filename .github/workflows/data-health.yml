@@ -57,12 +57,39 @@ jobs:
           if agg["generated"] < newest_fed:
               failures.append(f"aggregated.json generated {agg['generated']} is behind newest poll {newest_fed} — poll aggregator is not landing")
 
+          # Value plausibility: freshness alone once let mis-parsed Wikipedia
+          # rows (ALP primary 98, subsample 2PPs of 64) sit in the source files
+          # behind green runs. The scraper now rejects such rows up front; this
+          # asserts none slipped through (e.g. via a manual edit).
+          sys.path.insert(0, ".")
+          from pipeline.poll_validation import poll_implausibility
+          for p in fed["polls"]:
+              reason = poll_implausibility(p, kind="federal")
+              if reason:
+                  failures.append(f"bludgertrack.json has an implausible poll ({p.get('pollster')} {p.get('date')}): {reason}")
+
+          # The published aggregate itself must stay poll-shaped: trend/current
+          # ALP 2PP within 40-60 and no zero-width confidence band.
+          points = [t["tpp_eff"] for t in agg.get("trend", []) if t.get("tpp_eff")]
+          if agg.get("current", {}).get("tpp_eff"):
+              points.append(agg["current"]["tpp_eff"])
+          for pt in points:
+              if not (40 <= pt["mean"] <= 60):
+                  failures.append(f"aggregated.json has an implausible ALP 2PP point ({pt['mean']}) — corrupt poll input?")
+                  break
+          if any(pt["lo95"] == pt["hi95"] for pt in points):
+              failures.append("aggregated.json has a zero-width 95% band — variance floor is not being applied")
+
           # VIC polls: until the 28 Nov 2026 election a long gap is treated as a
           # FAILURE — the scrape once rotted silently for 4.5 months behind green
           # runs because this was only a warning. After the election it reverts
           # to a warning (long quiet stretches are normal between cycles).
           VIC_ELECTION_DAY = date(2026, 11, 28)
           vic = json.load(open("data/polls/vic_polls.json"))
+          for p in vic["polls"]:
+              reason = poll_implausibility(p, kind="state")
+              if reason:
+                  failures.append(f"vic_polls.json has an implausible poll ({p.get('pollster')} {p.get('date')}): {reason}")
           newest_vic = max(p["date"] for p in vic["polls"])
           if age_days(newest_vic) > 56:
               msg = f"newest VIC poll is {newest_vic} (>8 weeks old) — check the Wikipedia scraper's VIC table parsing"

@@ -19,7 +19,7 @@ inspected before being pasted into App.jsx:1768-1773 and
 pipeline/backtest.py:210-212.
 
 Requires:
-    - data/elections.db populated for 2022 (event_id=27966) and 2025 (31496)
+    - data/aec_elections.db populated for 2022 (event_id=27966) and 2025 (31496)
     - scipy (already in requirements.txt)
 
 Usage:
