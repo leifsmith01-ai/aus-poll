@@ -22,6 +22,7 @@ import NSW_STATE_POLLS from "./data/nsw_polls.json";
 import QLD_STATE_POLLS from "./data/qld_polls.json";
 import WA_STATE_POLLS from "./data/wa_polls.json";
 import SA_STATE_POLLS from "./data/sa_polls.json";
+import VIC_STATE_POLLS from "./data/vic_polls.json";
 import * as STATE_SEAT_FP from "./data/state_seat_fp.js";
 import { useLiveResults } from "./live/useLiveResults.js";
 import { projectSeats } from "./live/project.js";
@@ -8371,6 +8372,60 @@ export default function App() {
                     2022 result: ALP {VIC_BASELINE_2022.alp}% · Coalition {VIC_BASELINE_2022.coal}% · Grn {VIC_BASELINE_2022.grn}% · Ind {VIC_BASELINE_2022.ind}% · ON {VIC_BASELINE_2022.on}%
                   </div>
                 </div>
+
+                {/* Recent VIC polls — list + apply action (defaults stay at the 2022 election result) */}
+                {(() => {
+                  const vicPollList = (VIC_STATE_POLLS?.polls ?? [])
+                    .map(p => normalizeStatePoll(p, ["lp"]))
+                    .filter(Boolean)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                  const vicPollAvg = statePollAverage(vicPollList);
+                  const applyVicPolls = () => {
+                    if (!vicPollAvg) return;
+                    setVicPrimaries(pr => ({
+                      ...pr,
+                      alp: vicPollAvg.alp,
+                      coal: vicPollAvg.coal,
+                      grn: vicPollAvg.grn ?? pr.grn,
+                      ind: vicPollAvg.ind ?? pr.ind,
+                      on: vicPollAvg.on ?? pr.on,
+                      undecided: 0,
+                    }));
+                  };
+                  return (
+                    <div style={panelStyle}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                        <div style={sectionHead}>Recent polls</div>
+                        {vicPollAvg && (
+                          <button onClick={applyVicPolls}
+                            style={{ fontSize: 11, fontWeight: 600, color: "#1D4ED8", background: "none", border: "none", cursor: "pointer", padding: 0, textDecoration: "underline", whiteSpace: "nowrap" }}>
+                            Apply latest polls
+                          </button>
+                        )}
+                      </div>
+                      {vicPollList.length > 0 ? (
+                        <>
+                          {vicPollList.slice(0, 6).map((p, i) => (
+                            <div key={`${p.pollster}-${p.date}-${i}`} style={{ display: "flex", alignItems: "baseline", gap: 6, padding: "4px 0", borderBottom: i < Math.min(vicPollList.length, 6) - 1 ? "1px solid var(--border-3)" : "none" }}>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-2)", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.pollster}</span>
+                              <span style={{ fontSize: 10, color: "var(--text-4)", whiteSpace: "nowrap" }}>{p.date}</span>
+                              <span style={{ fontSize: 10, color: "var(--text-3)", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                                ALP {p.alp} · Coal {p.coal} · Grn {p.grn}{p.on > 0 ? ` · ON ${p.on}` : ""}{p.tpp != null ? ` · 2PP ${p.tpp}` : ""}
+                              </span>
+                            </div>
+                          ))}
+                          <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 6, lineHeight: 1.4 }}>
+                            "Apply latest polls" seeds the primary inputs from a recency-weighted average (exponential decay, 60-day half-life); polls missing primaries are skipped. Defaults remain the 2022 election result until applied.
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ fontSize: 11, color: "var(--text-4)" }}>
+                          No published state polls collected yet — the model baseline is the election result.
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 <div style={panelStyle}>
                   <div style={sectionHead}>Preference flows to ALP</div>
