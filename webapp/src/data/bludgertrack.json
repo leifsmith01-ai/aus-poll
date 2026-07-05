@@ -1433,6 +1433,18 @@
     },
     {
       "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-02-15",
+      "alp": 32.0,
+      "coal": 30.0,
+      "grn": 2.0,
+      "on": 27.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
+    },
+    {
+      "scope": "NAT",
       "pollster": "Roy Morgan",
       "date": "2026-02-16",
       "alp": 32.0,
@@ -1855,6 +1867,18 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1500
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-04-15",
+      "alp": 33.0,
+      "coal": 14.0,
+      "grn": 14.0,
+      "on": 26.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": null
     },
     {
       "scope": "NAT",

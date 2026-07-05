@@ -63,6 +63,18 @@
     {
       "scope": "VIC",
       "pollster": "Resolve Strategic",
+      "date": "2023-06-15",
+      "alp": 41.0,
+      "lp": 23.0,
+      "grn": 15.0,
+      "ind": 12.0,
+      "on": 0.0,
+      "tpp": null,
+      "n": 1003
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Resolve Strategic",
       "date": "2023-06-20",
       "alp": 41.0,
       "lp": 23.0,
@@ -87,6 +99,18 @@
     {
       "scope": "VIC",
       "pollster": "Resolve Strategic",
+      "date": "2023-08-15",
+      "alp": 39.0,
+      "lp": 28.0,
+      "grn": 13.0,
+      "ind": 13.0,
+      "on": 0.0,
+      "tpp": null,
+      "n": 1100
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Resolve Strategic",
       "date": "2023-08-20",
       "alp": 39.0,
       "lp": 28.0,
@@ -107,6 +131,18 @@
       "on": 0.0,
       "tpp": 56.5,
       "n": 3001
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Resolve Strategic",
+      "date": "2023-10-15",
+      "alp": 39.0,
+      "lp": 32.0,
+      "grn": 12.0,
+      "ind": 10.0,
+      "on": 0.0,
+      "tpp": null,
+      "n": 1100
     },
     {
       "scope": "VIC",
@@ -287,6 +323,18 @@
       "on": 0.0,
       "tpp": 49.0,
       "n": 920
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Resolve Strategic",
+      "date": "2025-01-15",
+      "alp": 22.0,
+      "lp": 42.0,
+      "grn": 13.0,
+      "ind": 17.0,
+      "on": 0.0,
+      "tpp": null,
+      "n": 1124
     },
     {
       "scope": "VIC",
