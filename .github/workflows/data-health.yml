@@ -80,6 +80,20 @@ jobs:
           if any(pt["lo95"] == pt["hi95"] for pt in points):
               failures.append("aggregated.json has a zero-width 95% band — variance floor is not being applied")
 
+          # Webapp copies: the page renders from webapp/src/data/, not from
+          # data/polls/. Fresh source files behind stale webapp copies kept the
+          # published site weeks out of date while every check above stayed
+          # green — assert the derived copies are byte-identical to the source.
+          for name in ("bludgertrack.json", "aggregated.json", "leaders.json",
+                       "nsw_polls.json", "qld_polls.json", "sa_polls.json",
+                       "vic_polls.json", "wa_polls.json"):
+              src = open(f"data/polls/{name}", "rb").read()
+              dst_path = f"webapp/src/data/{name}"
+              if not os.path.exists(dst_path):
+                  failures.append(f"{dst_path} is missing — update-polls.yml is not copying it to the frontend")
+              elif open(dst_path, "rb").read() != src:
+                  failures.append(f"{dst_path} differs from data/polls/{name} — the webapp copy step is not landing, the page is serving stale polls")
+
           # VIC polls: until the 28 Nov 2026 election a long gap is treated as a
           # FAILURE — the scrape once rotted silently for 4.5 months behind green
           # runs because this was only a warning. After the election it reverts
