@@ -6,6 +6,10 @@ on:
     paths:
       - 'data/polls/bludgertrack.json'
       - 'data/polls/vic_polls.json'
+      - 'data/polls/nsw_polls.json'
+      - 'data/polls/qld_polls.json'
+      - 'data/polls/wa_polls.json'
+      - 'data/polls/sa_polls.json'
   schedule:
     - cron: '0 2 * * 1'  # Monday 02:00 UTC (noon AEST)
   workflow_dispatch:
@@ -37,9 +41,10 @@ jobs:
           python -c "
           import json
           fed = json.load(open('data/polls/bludgertrack.json'))
-          vic = json.load(open('data/polls/vic_polls.json'))
           print(f'Federal polls before: {len(fed[\"polls\"])} (retrieved {fed.get(\"retrieved\",\"unknown\")})')
-          print(f'VIC polls before: {len(vic[\"polls\"])}')
+          for st in ('vic', 'nsw', 'qld', 'wa', 'sa'):
+              d = json.load(open(f'data/polls/{st}_polls.json'))
+              print(f'{st.upper()} polls before: {len(d[\"polls\"])}')
           "
 
       - name: Fetch latest polls from Wikipedia
@@ -53,20 +58,25 @@ jobs:
           python -c "
           import json
           fed = json.load(open('data/polls/bludgertrack.json'))
-          vic = json.load(open('data/polls/vic_polls.json'))
           print(f'Federal polls after: {len(fed[\"polls\"])} (retrieved {fed.get(\"retrieved\",\"unknown\")})')
-          print(f'VIC polls after: {len(vic[\"polls\"])}')
+          for st in ('vic', 'nsw', 'qld', 'wa', 'sa'):
+              d = json.load(open(f'data/polls/{st}_polls.json'))
+              print(f'{st.upper()} polls after: {len(d[\"polls\"])}')
           "
 
       - name: Run federal poll aggregator
         run: python -m pipeline.poll_aggregator
 
-      - name: Run VIC poll aggregator
-        run: python -m pipeline.poll_aggregator --state vic
+      - name: Run state poll aggregators
+        run: |
+          for st in vic nsw qld wa sa; do
+            python -m pipeline.poll_aggregator --state "$st"
+          done
 
       - name: Copy poll data to frontend
         # data/polls/ is the single source of truth; the webapp copies are derived.
-        # (vic_aggregated.json stays pipeline-side only — nothing imports it yet.)
+        # ({st}_aggregated.json files stay pipeline-side only — the Polls tab's
+        # state views render from the raw {st}_polls.json copies.)
         run: |
           cp data/polls/aggregated.json   webapp/src/data/aggregated.json
           cp data/polls/bludgertrack.json webapp/src/data/bludgertrack.json
@@ -83,9 +93,17 @@ jobs:
           # newly created files, which previously made them uncommittable.
           git add \
             data/polls/bludgertrack.json \
-            data/polls/vic_polls.json \
             data/polls/aggregated.json \
+            data/polls/vic_polls.json \
+            data/polls/nsw_polls.json \
+            data/polls/qld_polls.json \
+            data/polls/sa_polls.json \
+            data/polls/wa_polls.json \
             data/polls/vic_aggregated.json \
+            data/polls/nsw_aggregated.json \
+            data/polls/qld_aggregated.json \
+            data/polls/sa_aggregated.json \
+            data/polls/wa_aggregated.json \
             webapp/src/data/aggregated.json \
             webapp/src/data/bludgertrack.json \
             webapp/src/data/leaders.json \

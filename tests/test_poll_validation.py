@@ -71,6 +71,24 @@ class TestStateBounds:
                "tpp": None}
         assert poll_implausibility(rec, kind="state") is None
 
+    def test_nsw_split_coalition_row_passes(self):
+        # NSW polls report LIB and NP separately; 'np' must count toward the
+        # primary sum (78 incl. np, 69 without — under the 75 floor, which is
+        # exactly how scraped NSW rows were silently dropped before np/nat
+        # joined STATE_PRIMARY_FIELDS).
+        rec = {"pollster": "Resolve Strategic", "date": "2026-06-10", "scope": "NSW",
+               "alp": 28.0, "lp": 25.0, "np": 9.0, "grn": 9.0, "ind": 3.0,
+               "on": 4.0, "tpp": 48.0}
+        assert poll_implausibility(rec, kind="state") is None
+        rec_no_np = {**rec, "np": None}
+        assert poll_implausibility(rec_no_np, kind="state") is not None
+
+    def test_wa_nat_key_counts_toward_sum(self):
+        rec = {"pollster": "2025 Election Result", "date": "2025-03-08",
+               "alp": 55.0, "lp": 18.5, "nat": 4.5, "grn": 11.0, "ind": 5.0,
+               "on": 2.5, "tpp": 63.1}
+        assert poll_implausibility(rec, kind="state") is None
+
 
 class TestFilterPlausible:
     def test_drops_only_bad_rows_and_logs(self, caplog):

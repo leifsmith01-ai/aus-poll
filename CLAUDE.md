@@ -54,7 +54,8 @@ aus-poll/
 │   ├── polls/
 │   │   ├── aggregated.json        # BludgerTrack-style poll aggregation with house effects
 │   │   ├── bludgertrack.json      # Historical polling tracker data
-│   │   └── vic_polls.json         # Victorian state polling
+│   │   ├── vic_polls.json         # Victorian state polling (auto-scraped)
+│   │   └── {nsw,qld,wa,sa}_polls.json  # Other state polls (scraped once a Wikipedia page exists)
 │   ├── calibration_report.txt     # Model accuracy report (2PP predictions vs. actuals)
 │   ├── raw/                       # Downloaded AEC/VEC files (gitignored, except VEC Excels via LFS)
 │   │   └── vic/202211/            # Victorian 2022 Excel files — stored in Git LFS
@@ -353,6 +354,7 @@ Poll data lives in `data/polls/`:
 - **`aggregated.json`:** BludgerTrack-style aggregated poll with house effects applied for each pollster (Newspoll, RedBridge, DemosAU, etc.)
 - **`bludgertrack.json`:** Historical polling tracker with ALP 2PP estimates over time
 - **`vic_polls.json`:** Victorian state polling
+- **`nsw_polls.json` / `qld_polls.json` / `wa_polls.json` / `sa_polls.json`:** Other state polls. Same schema as `vic_polls.json` but with state-specific Coalition keys (`lp`+`np` NSW, `lnp` QLD, `lp`+`nat` WA, `lp` SA). `pipeline/poll_scraper.py`'s `STATE_SCRAPER_REGISTRY` scrapes each state's Wikipedia polling page, soft-skipping states whose next-election page doesn't exist yet. The frontend Polls tab has a jurisdiction switcher (Federal/VIC/NSW/QLD/WA/SA) rendering these files directly (`POLLS_TAB_JURISDICTIONS` in App.jsx).
 
 ### House effects in `poll_aggregator.py`
 
@@ -406,7 +408,7 @@ The frontend is fully static — no API calls at runtime. All election data is e
 
 | Workflow | Schedule | Updates |
 |----------|----------|---------|
-| `update-polls.yml` | Mon 02:00 UTC | Wikipedia poll scrape → `bludgertrack.json`/`vic_polls.json`, aggregation, webapp copies (incl. bludgertrack — the Polls tab renders from it — plus leaders + state polls) |
+| `update-polls.yml` | Mon 02:00 UTC | Wikipedia poll scrape → `bludgertrack.json` + all `{st}_polls.json` (states without a Wikipedia page yet soft-skip), federal + per-state aggregation, webapp copies (incl. bludgertrack — the Polls tab renders from it — plus leaders + state polls) |
 | `fetch-odds.yml` | Daily 01:00 UTC | `betting_odds.json` — cascade Betfair → Smarkets (keyless, primary live source) → The Odds API → manual (fails red if a fetch errored; The Odds API carries no AU election markets) |
 | `update-model-constants.yml` | Monthly (1st) | `SEAT_RESIDUAL_MAP`/`SEAT_DEMO_MULT` injected into App.jsx |
 | `update-economics.yml` | Monthly (2nd) | ABS/RBA indicators → `economics.json` |

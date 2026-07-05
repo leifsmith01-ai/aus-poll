@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html><head><title>Opinion polling — QLD 2028 (test fixture)</title></head>
+<body>
+<h2>Voting intention</h2>
+<!-- Statewide table, real-page style (2028 QLD layout): tables sit under a
+     named "Voting intention" section (no year headings), the header spans two
+     rows with colspans ("Primary vote" over 7 party columns, "2PP vote" over
+     LNP + ALP), some fieldwork windows are month-only WITH an explicit year,
+     and by-election event rows span the full width. -->
+<table class="wikitable sortable">
+  <tr>
+    <th rowspan="2">Date</th>
+    <th rowspan="2">Firm</th>
+    <th rowspan="2">Sample size</th>
+    <th colspan="7">Primary vote</th>
+    <th colspan="2">2PP vote</th>
+  </tr>
+  <tr>
+    <th>LNP</th>
+    <th>ALP</th>
+    <th>GRN</th>
+    <th>ONP</th>
+    <th>KAP</th>
+    <th>IND</th>
+    <th>OTH</th>
+    <th>LNP</th>
+    <th>ALP</th>
+  </tr>
+  <tr>
+    <td>May &#8211; June 2026</td>
+    <td>Resolve<sup>[1]</sup></td>
+    <td>868</td>
+    <td>30%</td>
+    <td>24%</td>
+    <td>10%</td>
+    <td>24%</td>
+    <td>0%</td>
+    <td>5%</td>
+    <td>6%</td>
+    <td>56%</td>
+    <td>44%</td>
+  </tr>
+  <tr>
+    <td>27 May &#8211; 3 Jun 2026</td>
+    <td>DemosAU<sup>[2]</sup></td>
+    <td>1,033</td>
+    <td>34%</td>
+    <td>25%</td>
+    <td>10%</td>
+    <td>24%</td>
+    <td>&#8212; N/a</td>
+    <td>&#8212; N/a</td>
+    <td>7%</td>
+    <td>58%</td>
+    <td>42%</td>
+  </tr>
+  <tr>
+    <td>16 May 2026</td>
+    <td colspan="11">The ALP wins the Stafford by-election</td>
+  </tr>
+  <tr>
+    <td>24 Nov &#8211; 8 Dec 2025</td>
+    <td>RedBridge/Accent<sup>[3]</sup></td>
+    <td>818</td>
+    <td>40%</td>
+    <td>27%</td>
+    <td>12%</td>
+    <td>16%</td>
+    <td>&#8212; N/a</td>
+    <td>&#8212; N/a</td>
+    <td>5%</td>
+    <td>56%</td>
+    <td>44%</td>
+  </tr>
+  <tr>
+    <td>26 Oct 2024</td>
+    <td>2024 election</td>
+    <td>&#8212;</td>
+    <td>41.5%</td>
+    <td>32.6%</td>
+    <td>9.9%</td>
+    <td>8.0%</td>
+    <td>2.5%</td>
+    <td>2.3%</td>
+    <td>3.2%</td>
+    <td>53.8%</td>
+    <td>46.2%</td>
+  </tr>
+</table>
+
+<h3>Preferred premier</h3>
+<!-- Leadership table: no primary-vote columns, but the heading filter must
+     reject it before column matching is even attempted. -->
+<table class="wikitable sortable">
+  <tr>
+    <th>Date</th>
+    <th>Firm</th>
+    <th>Sample size</th>
+    <th>Crisafulli</th>
+    <th>Miles</th>
+    <th>Net</th>
+  </tr>
+  <tr>
+    <td>27 May &#8211; 3 Jun 2026</td>
+    <td>DemosAU</td>
+    <td>1,033</td>
+    <td>39%</td>
+    <td>34%</td>
+    <td>+5</td>
+  </tr>
+</table>
+
+<h3>Inner Brisbane</h3>
+<!-- Sub-state breakout: IDENTICAL column layout to the statewide table, with
+     plausible-looking figures — only the section-heading filter keeps it out.
+     Dedup is keyed by (pollster, date), so a leak here would permanently merge
+     subgroup figures as a statewide poll. -->
+<table class="wikitable sortable">
+  <tr>
+    <th rowspan="2">Date</th>
+    <th rowspan="2">Firm</th>
+    <th rowspan="2">Sample size</th>
+    <th colspan="7">Primary vote</th>
+    <th colspan="2">2PP vote</th>
+  </tr>
+  <tr>
+    <th>LNP</th>
+    <th>ALP</th>
+    <th>GRN</th>
+    <th>ONP</th>
+    <th>KAP</th>
+    <th>IND</th>
+    <th>OTH</th>
+    <th>LNP</th>
+    <th>ALP</th>
+  </tr>
+  <tr>
+    <td>1 Jun 2026</td>
+    <td>Newspoll</td>
+    <td>412</td>
+    <td>26%</td>
+    <td>31%</td>
+    <td>19%</td>
+    <td>9%</td>
+    <td>1%</td>
+    <td>7%</td>
+    <td>7%</td>
+    <td>44%</td>
+    <td>56%</td>
+  </tr>
+</table>
+</body></html>

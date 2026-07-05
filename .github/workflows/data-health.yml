@@ -112,6 +112,21 @@ jobs:
               else:
                   warnings.append(msg)
 
+          # Other state polls (NSW/QLD/WA/SA): plausibility is asserted, but
+          # staleness is only a warning — state polling is sparse and three of
+          # the four states don't yet have a Wikipedia polling page to scrape.
+          for st in ("nsw", "qld", "wa", "sa"):
+              data = json.load(open(f"data/polls/{st}_polls.json"))
+              for p in data["polls"]:
+                  reason = poll_implausibility(p, kind="state")
+                  if reason:
+                      failures.append(f"{st}_polls.json has an implausible poll ({p.get('pollster')} {p.get('date')}): {reason}")
+              real = [p for p in data["polls"] if "election" not in (p.get("pollster") or "").lower()]
+              if real:
+                  newest = max(p["date"] for p in real)
+                  if age_days(newest) > 120:
+                      warnings.append(f"newest {st.upper()} poll is {newest} (>17 weeks old) — scrape may have stopped, or polling is just quiet")
+
           # Betting odds: a manual placeholder caused by an API *error* is a failure;
           # "no Australian markets listed" is a normal between-cycles state.
           odds = json.load(open("data/polls/betting_odds.json"))

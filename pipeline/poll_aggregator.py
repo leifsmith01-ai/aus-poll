@@ -183,28 +183,71 @@ QLD_PRIMARY_PARTIES = ["alp", "lnp", "grn", "ind", "on"]
 QLD_POLLS_FILE  = POLLS_DIR / "qld_polls.json"
 QLD_OUTPUT_FILE = POLLS_DIR / "qld_aggregated.json"
 
-# Registry of supported state aggregations
+# ── WA state election preference flows ────────────────────────────────────────
+# WA uses full compulsory preferential voting. Provisional defaults from WAEC
+# 2025 DOP — revisit once 2029-cycle polling and DOP data accumulate.
+WA_PREF_FLOWS = {
+    "grn_alp":   0.860,  # Greens → ALP (WAEC 2025 DOP: ~86%)
+    "ind_alp":   0.580,  # Independents → ALP
+    "on_alp":    0.220,  # One Nation → ALP (WAEC 2025 DOP: ~22%)
+    "other_alp": 0.440,  # Other minor parties → ALP
+}
+WA_PRIMARY_PARTIES = ["alp", "lp", "nat", "grn", "ind", "on"]
+WA_POLLS_FILE  = POLLS_DIR / "wa_polls.json"
+WA_OUTPUT_FILE = POLLS_DIR / "wa_aggregated.json"
+
+# ── SA state election preference flows ────────────────────────────────────────
+# SA uses full compulsory preferential voting. Provisional defaults from the
+# ECSA 2026 provisional count — refresh at the final declaration.
+SA_PREF_FLOWS = {
+    "grn_alp":   0.840,  # Greens → ALP (ECSA 2026 provisional: ~84%)
+    "ind_alp":   0.520,  # Independents → ALP
+    "on_alp":    0.220,  # One Nation → ALP
+    "other_alp": 0.450,  # Other minor parties → ALP
+}
+SA_PRIMARY_PARTIES = ["alp", "lp", "grn", "ind", "on"]
+SA_POLLS_FILE  = POLLS_DIR / "sa_polls.json"
+SA_OUTPUT_FILE = POLLS_DIR / "sa_aggregated.json"
+
+# Registry of supported state aggregations. "coal_keys" lists every Coalition
+# component key in the polls file — TPP imputation sums them, so the junior
+# partner (NSW 'np', WA 'nat') counts as Coalition rather than falling into
+# the "other" residual at other_alp's ~45% ALP flow.
 STATE_AGGREGATION_REGISTRY = {
     "vic": {
         "polls_file":    VIC_POLLS_FILE,
         "output_file":   VIC_OUTPUT_FILE,
         "pref_flows":    VIC_PREF_FLOWS,
         "primary_parties": VIC_PRIMARY_PARTIES,
-        "coal_key":      "lp",
+        "coal_keys":     ["lp"],
     },
     "nsw": {
         "polls_file":    NSW_POLLS_FILE,
         "output_file":   NSW_OUTPUT_FILE,
         "pref_flows":    NSW_PREF_FLOWS,
         "primary_parties": NSW_PRIMARY_PARTIES,
-        "coal_key":      "lp",  # LP is the major Coalition party in NSW state
+        "coal_keys":     ["lp", "np"],
     },
     "qld": {
         "polls_file":    QLD_POLLS_FILE,
         "output_file":   QLD_OUTPUT_FILE,
         "pref_flows":    QLD_PREF_FLOWS,
         "primary_parties": QLD_PRIMARY_PARTIES,
-        "coal_key":      "lnp",
+        "coal_keys":     ["lnp"],
+    },
+    "wa": {
+        "polls_file":    WA_POLLS_FILE,
+        "output_file":   WA_OUTPUT_FILE,
+        "pref_flows":    WA_PREF_FLOWS,
+        "primary_parties": WA_PRIMARY_PARTIES,
+        "coal_keys":     ["lp", "nat"],
+    },
+    "sa": {
+        "polls_file":    SA_POLLS_FILE,
+        "output_file":   SA_OUTPUT_FILE,
+        "pref_flows":    SA_PREF_FLOWS,
+        "primary_parties": SA_PRIMARY_PARTIES,
+        "coal_keys":     ["lp"],
     },
 }
 
@@ -366,18 +409,24 @@ def run_vic(
     return output
 
 
-def _impute_state_tpp(poll: dict, pref_flows: dict, coal_key: str = "lp") -> Optional[float]:
+def _impute_state_tpp(poll: dict, pref_flows: dict,
+                      coal_keys: list[str] | None = None) -> Optional[float]:
     """
     Estimate ALP 2PP from state primary votes when TPP not reported.
 
     Generalised version of _impute_vic_tpp for any state. Uses the state's
-    pref_flows and the coalition party key (e.g. 'lp' for NSW/VIC, 'lnp' for QLD).
+    pref_flows and its Coalition component keys, summed — ['lp'] for VIC/SA,
+    ['lp', 'np'] for NSW, ['lnp'] for QLD, ['lp', 'nat'] for WA. The senior
+    partner (first key) must be reported; a missing junior-partner column
+    counts as 0 (many polls fold it into the Liberal figure or "other").
     """
+    if coal_keys is None:
+        coal_keys = ["lp"]
     alp  = poll.get("alp")
-    coal = poll.get(coal_key)
     grn  = poll.get("grn")
-    if any(v is None for v in [alp, coal, grn]):
+    if any(v is None for v in [alp, poll.get(coal_keys[0]), grn]):
         return None
+    coal = sum(poll.get(k) or 0.0 for k in coal_keys)
 
     ind   = poll.get("ind",  0.0) or 0.0
     on    = poll.get("on",   0.0) or 0.0
@@ -432,7 +481,7 @@ def run_state(
     in_path  = input_path  or cfg["polls_file"]
     out_path = output_path or cfg["output_file"]
     pref_flows = cfg["pref_flows"]
-    coal_key   = cfg["coal_key"]
+    coal_keys  = cfg["coal_keys"]
     primary_parties = cfg["primary_parties"]
 
     if not in_path.exists():
@@ -464,7 +513,7 @@ def run_state(
     n_imputed = 0
     for p in polls:
         if p.get("tpp") is None:
-            imputed = _impute_state_tpp(p, pref_flows, coal_key)
+            imputed = _impute_state_tpp(p, pref_flows, coal_keys)
             if imputed is not None:
                 p["tpp_imputed"] = imputed
                 n_imputed += 1
@@ -521,7 +570,7 @@ def run_state(
             "smoothing_window_days": SMOOTHING_WINDOW_DAYS,
             "trend_step_days":       TREND_STEP_DAYS,
             "tpp_pref_flows":        pref_flows,
-            "coalition_key":         coal_key,
+            "coalition_keys":        coal_keys,
         },
         "house_effects":          he_summary,
         "house_effect_converged": he_converged,
@@ -1081,7 +1130,7 @@ if __name__ == "__main__":
         else:
             result = run_state(state_arg, in_path, out_path, verbose=args.verbose)
         if args.plot and result:
-            primary_parties = cfg.get("primary_parties", ["alp", cfg["coal_key"], "grn", "ind"])
+            primary_parties = cfg.get("primary_parties", ["alp", *cfg["coal_keys"], "grn", "ind"])
             print(f"\n=== {state_arg.upper()} Current Aggregate (house-effect corrected, last 60 days) ===")
             current = result.get("current", {})
             for m in primary_parties + ["tpp_eff"]:

@@ -1,0 +1,156 @@
+{
+  "generated": "2026-03-21",
+  "jurisdiction": "sa_state",
+  "election_date": "2030-03-16",
+  "source": "SA state-level polls (manual collection)",
+  "methodology": {
+    "half_life_days": 90,
+    "smoothing_window_days": 14,
+    "trend_step_days": 7,
+    "tpp_pref_flows": {
+      "grn_alp": 0.84,
+      "ind_alp": 0.52,
+      "on_alp": 0.22,
+      "other_alp": 0.45
+    },
+    "coalition_keys": [
+      "lp"
+    ]
+  },
+  "house_effects": {
+    "alp": {},
+    "lp": {},
+    "grn": {},
+    "ind": {},
+    "on": {},
+    "tpp_eff": {}
+  },
+  "house_effect_converged": {
+    "alp": true,
+    "lp": true,
+    "grn": true,
+    "ind": true,
+    "on": true,
+    "tpp_eff": true
+  },
+  "current": {
+    "alp": {
+      "mean": 39.1,
+      "lo95": 35.18,
+      "hi95": 43.02,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "lp": {
+      "mean": 18.7,
+      "lo95": 14.78,
+      "hi95": 22.62,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "grn": {
+      "mean": 11.1,
+      "lo95": 7.18,
+      "hi95": 15.02,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "ind": {
+      "mean": 4.7,
+      "lo95": 0.78,
+      "hi95": 8.62,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "on": {
+      "mean": 21.6,
+      "lo95": 17.68,
+      "hi95": 25.52,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    },
+    "tpp_eff": {
+      "mean": 57.4,
+      "lo95": 53.48,
+      "hi95": 61.32,
+      "std": 0.0,
+      "n": 1,
+      "n_eff": 1.0
+    }
+  },
+  "trend": [
+    {
+      "date": "2026-03-21",
+      "alp": {
+        "mean": 39.1,
+        "lo95": 35.18,
+        "hi95": 43.02,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "lp": {
+        "mean": 18.7,
+        "lo95": 14.78,
+        "hi95": 22.62,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "grn": {
+        "mean": 11.1,
+        "lo95": 7.18,
+        "hi95": 15.02,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "ind": {
+        "mean": 4.7,
+        "lo95": 0.78,
+        "hi95": 8.62,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "on": {
+        "mean": 21.6,
+        "lo95": 17.68,
+        "hi95": 25.52,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      },
+      "tpp_eff": {
+        "mean": 57.4,
+        "lo95": 53.48,
+        "hi95": 61.32,
+        "std": 0.0,
+        "n": 1,
+        "n_eff": 1.0
+      }
+    }
+  ],
+  "polls": [
+    {
+      "scope": "SA",
+      "pollster": "2026 Election Result",
+      "date": "2026-03-21",
+      "alp": 39.1,
+      "lp": 18.7,
+      "grn": 11.1,
+      "ind": 4.7,
+      "on": 21.6,
+      "tpp": 57.4,
+      "n": null,
+      "note": "ECSA 2026 provisional count (6 seats still in doubt at capture) — matches SA_BL/SA_2PP in App.jsx.",
+      "tpp_imputed": null,
+      "tpp_eff": 57.4
+    }
+  ]
+}
