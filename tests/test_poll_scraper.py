@@ -343,12 +343,24 @@ def test_cli_states_all_missing_pages_exits_zero(monkeypatch):
 
 def test_cli_default_scrapes_federal_plus_all_states(monkeypatch):
     scraped = []
-    monkeypatch.setattr(poll_scraper, "scrape_federal",
+    monkeypatch.setattr(poll_scraper, "scrape_bludgertrack",
                         lambda: scraped.append("federal") or [{"pollster": "Newspoll"}])
+    monkeypatch.setattr(poll_scraper, "scrape_federal",
+                        lambda: pytest.fail("Wikipedia fallback must not run when the feed yields records"))
     monkeypatch.setattr(poll_scraper, "scrape_state",
                         lambda s: (scraped.append(s), ([], False))[1])
     assert poll_scraper._main(["--dry-run"]) == 0
     assert scraped == ["federal", "vic", "nsw", "qld", "wa", "sa"]
+
+
+def test_cli_federal_falls_back_to_wikipedia_when_feed_empty(monkeypatch):
+    scraped = []
+    monkeypatch.setattr(poll_scraper, "scrape_bludgertrack",
+                        lambda: scraped.append("feed") or [])
+    monkeypatch.setattr(poll_scraper, "scrape_federal",
+                        lambda: scraped.append("wiki") or [{"pollster": "Newspoll"}])
+    assert poll_scraper._main(["--federal-only", "--dry-run"]) == 0
+    assert scraped == ["feed", "wiki"]
 
 
 # ── Merge: append-only, dedup by (pollster, date) ─────────────────────────────
@@ -425,3 +437,118 @@ def test_merge_empty_input_is_noop(tmp_path):
 def test_scrape_federal_returns_empty_on_network_error(monkeypatch):
     monkeypatch.setattr(poll_scraper, "fetch_html", lambda *a, **kw: None)
     assert scrape_federal() == []
+
+
+# ── BludgerTrack XML feed ─────────────────────────────────────────────────────
+BLUDGERTRACK_XML = """<?xml version="1.0"?>
+<root date="2026-07-14 16:07:59+00:00">
+  <leaders>
+    <table>
+      <point Id="1" start="14/07/2026" end="17/07/2026" median="16/07/2026"
+             pollster="Newspoll" mode="Online" scope="NAT" sample="1264">
+        <pmSAT>47</pmSAT><pmDIS>47</pmDIS>
+      </point>
+    </table>
+    <table>
+      <point Id="1" start="03/05/2025" end="03/05/2025" median="03/05/2025"
+             pollster="Election" mode="" scope="NAT" sample="">
+        <ALP>34.6</ALP><LNC>31.8</LNC><GRN>12.2</GRN><PHON>6.4</PHON>
+        <ALP2>55.2</ALP2><LNC2>44.8</LNC2>
+      </point>
+      <point Id="2" start="06/07/2026" end="12/07/2026" median="09/07/2026"
+             pollster="Roy Morgan" mode="SMS" scope="NAT" sample="1,612">
+        <ALP>27.5</ALP><LNC>20</LNC><GRN>12.5</GRN><PHON>28</PHON>
+        <ALP2>52.5</ALP2><LNC2>47.5</LNC2>
+      </point>
+      <point Id="3" start="03/07/2026" end="10/07/2026" median="10/07/2026"
+             pollster="YouGov" mode="Online" scope="NAT" sample="1468">
+        <ALP>28</ALP><LNC>20</LNC><GRN>12</GRN><PHON>26</PHON>
+        <ALP2 /><LNC2 />
+      </point>
+      <point Id="4" start="03/07/2026" end="10/07/2026" median="10/07/2026"
+             pollster="YouGov" mode="Online" scope="Rent" sample="">
+        <ALP>30</ALP><LNC>10</LNC><GRN>18</GRN><PHON>22</PHON>
+        <ALP2 /><LNC2 />
+      </point>
+      <point Id="5" start="03/07/2026" end="10/07/2026" median="10/07/2026"
+             pollster="YouGov" mode="Online" scope="VIC" sample="">
+        <ALP>30</ALP><LNC>22</LNC><GRN>12</GRN><PHON>24</PHON>
+        <ALP2 /><LNC2 />
+      </point>
+    </table>
+  </leaders>
+</root>
+"""
+
+
+def test_parse_bludgertrack_xml_nat_records():
+    records = poll_scraper.parse_bludgertrack_xml(BLUDGERTRACK_XML)
+    # NAT voting-intention points only: Election anchor, demographic ("Rent")
+    # and state ("VIC") crosstabs are all dropped.
+    # Dates are the fieldwork END attribute (the file's keying convention),
+    # not the median.
+    assert [(r["pollster"], r["date"]) for r in records] == [
+        ("Roy Morgan", "2026-07-12"),
+        ("YouGov", "2026-07-10"),
+    ]
+    rm = records[0]
+    assert rm["alp"] == 27.5 and rm["coal"] == 20.0 and rm["grn"] == 12.5
+    assert rm["on"] == 28.0 and rm["tpp"] == 52.5
+    assert rm["n"] == 1612                 # comma-grouped sample parsed
+    assert rm["scope"] == "NAT" and rm["teal"] == 0.0
+
+
+def test_parse_bludgertrack_xml_empty_tpp_is_none():
+    records = poll_scraper.parse_bludgertrack_xml(BLUDGERTRACK_XML)
+    yg = records[1]
+    assert yg["tpp"] is None               # <ALP2 /> empty element
+    assert yg["n"] == 1468
+
+
+def test_parse_bludgertrack_xml_ignores_leadership_table():
+    # The leadership table's Newspoll point has no <ALP> children and must not
+    # surface as a voting-intention record.
+    records = poll_scraper.parse_bludgertrack_xml(BLUDGERTRACK_XML)
+    assert all(r["date"] != "2026-07-16" for r in records)
+
+
+def test_scrape_bludgertrack_returns_empty_on_network_error(monkeypatch):
+    monkeypatch.setattr(poll_scraper, "fetch_html", lambda *a, **kw: None)
+    assert poll_scraper.scrape_bludgertrack() == []
+
+
+def test_scrape_bludgertrack_returns_empty_on_bad_xml(monkeypatch):
+    monkeypatch.setattr(poll_scraper, "fetch_html", lambda *a, **kw: "<not-xml")
+    assert poll_scraper.scrape_bludgertrack() == []
+
+
+def test_merge_near_days_skips_redated_twin(tmp_path):
+    # Existing Newspoll is dated 2026-03-17; the same poll arriving from the
+    # feed dated two days earlier must be treated as a duplicate, while a
+    # different-pollster record on the same day must not be.
+    path = _seed_federal(tmp_path)
+    new_records = [
+        {"scope": "NAT", "pollster": "Newspoll", "date": "2026-03-15",
+         "alp": 34, "coal": 30, "grn": 12, "on": 8, "teal": 0,
+         "tpp": 54.0, "n": 1200},
+        {"scope": "NAT", "pollster": "Roy Morgan", "date": "2026-03-15",
+         "alp": 35, "coal": 30, "grn": 12, "on": 7, "teal": 0,
+         "tpp": 55.0, "n": 1500},
+    ]
+    appended = merge_into_file(path, new_records, near_days=3)
+    assert appended == 1
+    data = json.loads(path.read_text())
+    assert [(p["pollster"], p["date"]) for p in data["polls"]] == [
+        ("Roy Morgan", "2026-03-15"),
+        ("Newspoll", "2026-03-17"),
+    ]
+
+
+def test_merge_near_days_zero_keeps_old_behaviour(tmp_path):
+    path = _seed_federal(tmp_path)
+    new_records = [
+        {"scope": "NAT", "pollster": "Newspoll", "date": "2026-03-15",
+         "alp": 34, "coal": 30, "grn": 12, "on": 8, "teal": 0,
+         "tpp": 54.0, "n": 1200},
+    ]
+    assert merge_into_file(path, new_records) == 1
