@@ -1,10 +1,11 @@
 """
-Wikipedia poll scraper for aus-poll.
+Poll scraper for aus-poll.
 
-Fetches the latest federal and state (VIC/NSW/QLD/WA/SA) opinion polls from
-Wikipedia tables and appends new entries to data/polls/bludgertrack.json and
-data/polls/{state}_polls.json in place. The existing pipeline.poll_aggregator
-then reads those files unchanged.
+Fetches the latest federal polls from the BludgerTrack XML feed (falling back
+to the Wikipedia federal polling page if the feed is unavailable) and state
+(VIC/NSW/QLD/WA/SA) opinion polls from Wikipedia tables, appending new entries
+to data/polls/bludgertrack.json and data/polls/{state}_polls.json in place.
+The existing pipeline.poll_aggregator then reads those files unchanged.
 
 Soft-fail design: any network or parse error returns an empty list and logs a
 warning; a state whose polling page has not been created yet (404 on every URL
@@ -27,7 +28,8 @@ import json
 import logging
 import re
 import sys
-from datetime import date
+import xml.etree.ElementTree as ET
+from datetime import date, datetime
 from pathlib import Path
 from typing import Iterable
 
@@ -50,6 +52,9 @@ SA_JSON          = BASE_DIR / "data" / "polls" / "sa_polls.json"
 # ── Sources ───────────────────────────────────────────────────────────────────
 WIKI_FEDERAL_URL = "https://en.wikipedia.org/wiki/Opinion_polling_for_the_next_Australian_federal_election"
 WIKI_VIC_URL     = "https://en.wikipedia.org/wiki/Opinion_polling_for_the_2026_Victorian_state_election"
+# BludgerTrack's structured feed — primary federal source. data/polls/
+# bludgertrack.json was originally seeded from this feed (see its url field).
+BLUDGERTRACK_XML_URL = "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml"
 
 USER_AGENT = "aus-poll/1.0 (+https://github.com/leifsmith01-ai/aus-poll)"
 
@@ -555,6 +560,77 @@ def parse_federal(html: str) -> list[dict]:
     return filter_plausible(records, kind="federal", logger=logger)
 
 
+# ── BludgerTrack XML feed (primary federal source) ────────────────────────────
+def _xml_float(point: ET.Element, tag: str) -> float | None:
+    text = point.findtext(tag)
+    if text is None or not text.strip():
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def parse_bludgertrack_xml(xml_text: str) -> list[dict]:
+    """Extract national voting-intention records from the BludgerTrack feed.
+
+    The feed carries several <table> elements (leadership ratings, voting
+    intention); the voting-intention one is identified by its <point>s having
+    <ALP> children. Non-NAT scopes (state and demographic crosstabs like
+    "Rent" or "University") are dropped, as is the anchored "Election" row —
+    the election result is already a curated entry in bludgertrack.json.
+    """
+    root = ET.fromstring(xml_text)
+    records: list[dict] = []
+    for table in root.iter("table"):
+        points = list(table.iter("point"))
+        if not points or points[0].find("ALP") is None:
+            continue                       # leadership-ratings table
+        for p in points:
+            if p.get("scope") != "NAT":
+                continue
+            pollster = normalise_pollster(p.get("pollster") or "")
+            if pollster is None:
+                continue                   # "Election" anchor rows, unknowns
+            # Use the fieldwork END date: bludgertrack.json keys records by the
+            # last day of fieldwork (parse_fieldwork_date's convention), and the
+            # feed's median dates would re-add every existing poll under a
+            # shifted date.
+            raw_date = p.get("end") or p.get("median") or ""
+            try:
+                iso_date = datetime.strptime(raw_date, "%d/%m/%Y").date().isoformat()
+            except ValueError:
+                logger.warning("bludgertrack: bad date %r for %s — skipped",
+                               raw_date, pollster)
+                continue
+            sample = (p.get("sample") or "").replace(",", "").strip()
+            records.append({
+                "scope":    "NAT",
+                "pollster": pollster,
+                "date":     iso_date,
+                "alp":      _xml_float(p, "ALP"),
+                "coal":     _xml_float(p, "LNC"),
+                "grn":      _xml_float(p, "GRN"),
+                "on":       _xml_float(p, "PHON"),
+                "teal":     0.0,
+                "tpp":      _xml_float(p, "ALP2"),
+                "n":        int(sample) if sample.isdigit() else None,
+            })
+    return filter_plausible(records, kind="federal", logger=logger)
+
+
+def scrape_bludgertrack() -> list[dict]:
+    """Fetch and parse the BludgerTrack XML feed. Soft-fails to []."""
+    xml_text = fetch_html(BLUDGERTRACK_XML_URL)
+    if xml_text is None:
+        return []
+    try:
+        return parse_bludgertrack_xml(xml_text)
+    except Exception as exc:                                       # noqa: BLE001
+        logger.warning("parse_bludgertrack_xml failed: %s", exc)
+        return []
+
+
 _HEADING_YEAR_RE = re.compile(r"^\s*(20\d{2})\b")
 
 
@@ -748,10 +824,17 @@ def scrape_vic() -> list[dict]:
 
 
 # ── Append-only merge ─────────────────────────────────────────────────────────
-def merge_into_file(path: Path, new_records: list[dict]) -> int:
+def merge_into_file(path: Path, new_records: list[dict],
+                    near_days: int = 0) -> int:
     """Merge new_records into the JSON file at path. Returns the count of
     records actually appended (0 if nothing new). Existing rows are NEVER
-    overwritten — dedup is keyed by (pollster, date)."""
+    overwritten — dedup is keyed by (pollster, date).
+
+    near_days > 0 additionally treats a record as a duplicate when the file
+    already has a same-pollster entry within that many days. Sources date the
+    same poll differently (Wikipedia end-of-fieldwork vs. feed publication
+    dates can drift by a day), and no tracked pollster fields more than one
+    national poll a week, so a small window only ever catches re-dated twins."""
     if not new_records:
         logger.warning("no new records to merge into %s", path)
         return 0
@@ -762,13 +845,33 @@ def merge_into_file(path: Path, new_records: list[dict]) -> int:
     existing = data.get("polls", [])
     existing_keys = {(p.get("pollster"), p.get("date")) for p in existing}
 
+    def is_near_duplicate(rec: dict) -> bool:
+        if near_days <= 0:
+            return False
+        try:
+            d = date.fromisoformat(rec.get("date", ""))
+        except ValueError:
+            return False
+        for p in existing:
+            if p.get("pollster") != rec.get("pollster"):
+                continue
+            try:
+                delta = abs((d - date.fromisoformat(p.get("date", ""))).days)
+            except ValueError:
+                continue
+            if delta <= near_days:
+                logger.info("skipping near-duplicate %s %s (existing entry %s)",
+                            rec.get("pollster"), rec.get("date"), p.get("date"))
+                return True
+        return False
+
     # Deduplicate within new_records too (state-level tables can yield multiple
     # rows for the same pollster+date with different state breakdowns; keep the
     # entry with the largest sample size, or the first one if n is missing).
     seen_new: dict[tuple, dict] = {}
     for r in new_records:
         key = (r.get("pollster"), r.get("date"))
-        if key in existing_keys:
+        if key in existing_keys or is_near_duplicate(r):
             continue
         if key not in seen_new:
             seen_new[key] = r
@@ -839,14 +942,26 @@ def _main(argv: list[str] | None = None) -> int:
     total_fetched = 0
     pages_found = 0
     if do_federal:
-        records = scrape_federal()
+        # BludgerTrack's structured feed is authoritative; the Wikipedia table
+        # scrape is the fallback (its crosstab tables can shear into bogus
+        # rows), used only when the feed yields nothing.
+        records = scrape_bludgertrack()
+        if records:
+            logger.info("scraped %d federal records from BludgerTrack feed",
+                        len(records))
+        else:
+            logger.warning("BludgerTrack feed yielded no records — "
+                           "falling back to Wikipedia scrape")
+            records = scrape_federal()
         total_fetched += len(records)
         pages_found += 1 if records else 0
         logger.info("scraped %d federal records", len(records))
         if args.dry_run:
             print(json.dumps(records, indent=2))
         else:
-            appended += merge_into_file(FEDERAL_JSON, records)
+            # near_days guards against the feed and Wikipedia dating the same
+            # poll a day or two apart across scrapes.
+            appended += merge_into_file(FEDERAL_JSON, records, near_days=3)
 
     for state in states:
         records, page_found = scrape_state(state)
