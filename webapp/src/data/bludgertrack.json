@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-07-19",
+  "retrieved": "2026-07-20",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2395,6 +2395,18 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1468
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2026-07-16",
+      "alp": 30.0,
+      "coal": 19.0,
+      "grn": 12.0,
+      "on": 30.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1238
     }
   ]
 }
