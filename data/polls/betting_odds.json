@@ -2,12 +2,12 @@
   "source": "smarkets",
   "national": {
     "coalition_majority": {
-      "decimal_odds": 3.67,
-      "implied_prob": 0.2721
+      "decimal_odds": 3.71,
+      "implied_prob": 0.2697
     },
     "alp_majority": {
       "decimal_odds": 1.65,
-      "implied_prob": 0.6062,
+      "implied_prob": 0.6052,
       "implied_2pp": 50.4
     }
   },
@@ -54,7 +54,7 @@
     }
   },
   "national_market_name": "Party to Provide the Next Prime Minister of Australia",
-  "generated": "2026-07-24",
+  "generated": "2026-07-25",
   "sigma_per_seat": 2.5,
   "sigma_national": 1.5
 }
