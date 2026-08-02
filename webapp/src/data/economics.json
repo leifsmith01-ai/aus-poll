@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-02",
+  "generated": "2026-08-02",
   "source": "ABS (abs.gov.au) and RBA (rba.gov.au); refresh via: python pipeline/fetch_economics.py",
   "note": "CPI and unemployment sourced from ABS; RBA cash rate from rba.gov.au. Cameron & Crosby model uses CPI annual change and unemployment change to estimate structural incumbent vote effect.",
   "election_reference": {
