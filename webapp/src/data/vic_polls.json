@@ -707,7 +707,19 @@
       "on": 27.0,
       "tpp": null,
       "n": 6500
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Newspoll",
+      "date": "2026-07-26",
+      "alp": 28.0,
+      "lp": 31.0,
+      "grn": 13.0,
+      "ind": 9.0,
+      "on": 19.0,
+      "tpp": 48.0,
+      "n": 1035
     }
   ],
-  "retrieved": "2026-07-27"
+  "retrieved": "2026-08-03"
 }
