@@ -719,7 +719,43 @@
       "on": 19.0,
       "tpp": 48.0,
       "n": 1035
+    },
+    {
+      "scope": "VIC",
+      "pollster": "RedBridge Group",
+      "date": "2026-08-01",
+      "alp": 23.0,
+      "lp": 30.0,
+      "grn": 14.0,
+      "ind": 11.0,
+      "on": 22.0,
+      "tpp": 43.0,
+      "n": 1014
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Freshwater Strategy",
+      "date": "2026-08-03",
+      "alp": 25.0,
+      "lp": 30.0,
+      "grn": 14.0,
+      "ind": 9.0,
+      "on": 22.0,
+      "tpp": 48.0,
+      "n": 1020
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Roy Morgan",
+      "date": "2026-08-07",
+      "alp": 26.0,
+      "lp": 26.0,
+      "grn": 12.5,
+      "ind": 8.0,
+      "on": 23.5,
+      "tpp": 49.0,
+      "n": 2084
     }
   ],
-  "retrieved": "2026-08-03"
+  "retrieved": "2026-08-10"
 }

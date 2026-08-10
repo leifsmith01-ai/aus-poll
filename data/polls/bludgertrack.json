@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-08-03",
+  "retrieved": "2026-08-10",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2467,6 +2467,30 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1519
+    },
+    {
+      "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2026-07-30",
+      "alp": 29.0,
+      "coal": 22.0,
+      "grn": 10.0,
+      "on": 31.0,
+      "teal": 0.0,
+      "tpp": 50.0,
+      "n": 1001
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-08-02",
+      "alp": 27.5,
+      "coal": 23.5,
+      "grn": 15.0,
+      "on": 24.0,
+      "teal": 0.0,
+      "tpp": 52.5,
+      "n": 1531
     }
   ]
 }
