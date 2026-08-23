@@ -182,6 +182,15 @@ preference-flow or sourcing change puts a thumb on the scale, this suite fails
 where the baseline suite would not. `vic-on-scenarios.test.jsx` and
 `state-on-scenarios.test.jsx` cover ON-surge behaviour per jurisdiction.
 
+`seat-distribution.test.jsx` covers the uncertainty engines. `computeSeatDistribution()`
+is a seeded Monte Carlo, so the suite pins structural properties rather than values:
+determinism across calls, party counts partitioning the chamber, ordered percentiles,
+the point projection falling inside each party's 90% interval, ranges widening with σ,
+and each seat's confidence band matching the group the seat table projects. It also
+asserts the simulation agrees with the analytic `computeUncertainty()` on Labor at every
+σ the slider offers — the guard that keeps the two engines from drifting apart. Run it
+after any change to `resolveSeatContest()`, the σ constants, or either engine.
+
 Tests are in `tests/test_parse.py` and cover the AEC CSV parsing functions using synthetic data:
 - `_iter_aec_csv` — skips AEC metadata header rows
 - `parse_candidates` — candidate list parsing
@@ -311,6 +320,35 @@ A previous bug caused a white screen when `STYLES` was defined inside the compon
 - **Teal seats:** 6 identified — Warringah, Wentworth, Bradfield, Mackellar, Kooyong, Goldstein. Handled separately with teal-specific preference flows.
 - **`ON_FP_2022` / `ON_FP_2025`:** Per-seat One Nation first preference constants for regional strongholds (e.g., Hunter 16.4%, Hinkler 13.8%).
 - **NaN propagation guard:** Seats where `hasTeal && hasAlp` used to produce NaN. Always guard against NaN in 2PP calculations, especially in independent/ALP race branches.
+
+### Uncertainty: two engines, one contest resolver
+
+`resolveSeatContest(seat, useElasticity)` is the single place that decides which race a
+seat actually is: the deciding axis, the two contending groups, the per-seat σ
+components, and `alpSide` (+1 Labor is the projected winner, −1 Labor is the challenger,
+0 Labor is not a contender). Both uncertainty engines consume it, which is what keeps
+them consistent:
+
+- **`computeUncertainty()`** — analytic, Labor-only. A 50×50 grid over national swing ×
+  correlated preference-flow shift, plus a within-state covariance term. Drives the
+  "Seat-count uncertainty" panel and the seat table's ALP% column.
+- **`computeSeatDistribution()`** — seeded Monte Carlo (mulberry32, 2,000 draws) over the
+  same error components, tallying the winning *group* per seat per draw. Produces
+  per-party seat ranges, per-seat probabilities across all groups, the
+  Safe/Likely/Lean/Toss-up bands (`SEAT_BANDS`, `IN_PLAY_P`), and P(majority)/P(hung)
+  from one joint set of draws. Drives `SeatRangePanel`, the `TallyBar`/`GroupDeltaCards`
+  ranges, `HeroBanner`, the seat tables' Confidence column and "In play" filter, and
+  `SeatOutcomeOdds` in the expanded seat rows.
+
+The seed is fixed deliberately: the simulation must be a pure function of its inputs, or
+an unchanged scenario would show different ranges on every React render.
+
+Before `resolveSeatContest()` existed, `computeUncertainty()` read every non-classic seat
+as "winner vs Labor", giving Labor ~50% in teal-vs-Liberal seats such as Bradfield and
+Goldstein and running about 2.6 seats high on the federal projection. The 2025 baseline
+now reports Labor at ~91.7 seats, not ~94.4; a **median below the seat table's point count
+is expected**, not a bug — a party holding a stack of marginals wins fewer of them than it
+holds once the seats are allowed to move.
 
 ---
 
