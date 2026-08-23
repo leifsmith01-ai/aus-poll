@@ -1328,21 +1328,46 @@ const SEAT_RESIDUAL_MAP = {
 // points without blowing through natural ceilings as the share saturates. Bases
 // are clamped to [0.1, 60]% before the logit so degenerate inputs can't produce
 // ±Infinity/NaN. Zero swing returns the seat base exactly.
-function logitShiftOnFp(seatBase, refBase, onSwing) {
+function logitShiftOnFp(seatBase, refBase, onSwing, kappa = 1) {
   if (!onSwing) return seatBase;
   const clampPct = (v) => Math.min(60, Math.max(0.1, v));
   const logit = (p) => Math.log(p / (100 - p));
   const invlogit = (x) => 100 / (1 + Math.exp(-x));
-  const shift = logit(clampPct(refBase + onSwing)) - logit(clampPct(refBase));
-  const est = invlogit(logit(clampPct(seatBase)) + shift);
+  // The seat's log-odds displacement from the reference level, scaled by kappa. At
+  // kappa = 1 this is a pure parallel shift on the logit scale (the original
+  // behaviour); below 1 the seat is shrunk toward the new statewide level.
+  const displacement = logit(clampPct(seatBase)) - logit(clampPct(refBase));
+  const est = invlogit(logit(clampPct(refBase + onSwing)) + kappa * displacement);
   return Number.isFinite(est) ? est : seatBase;
+}
+
+// Shrinkage factor applied to the per-seat ON log-odds displacement as the statewide
+// ON vote grows (see logitShiftOnFp's `kappa`).
+//
+// The seat-level ON priors (VIC_SEAT_ON_FP, SEAT_FP_*.on, …) were measured in a regime
+// where ON polled 1-5% — a range where the seat spread is dominated by whether ON even
+// fielded a candidate, plus rounding noise. VIC's prior spans 0.2%-3.3%, a 16x ratio.
+// Shifted unshrunk to a 22% statewide level that ratio projects 4% ON in Hawthorn and
+// 42% in Morwell, which is well outside anything ON has recorded in a single district
+// and pushes most of the chamber into spurious ON-vs-major finals. A vote that has
+// become mainstream is also more evenly spread, so the displacement is scaled down
+// linearly from 1 at the reference level to onDispersionFloor at onDispersionFullLevel.
+// Returns exactly 1 whenever the projected level is at or below the reference, so
+// zero-swing baselines and low-ON jurisdictions are untouched.
+function onDispersionKappaFor(projectedOnLevel, refOnLevel) {
+  const floor = MODEL_PARAMS.onDispersionFloor;
+  const full = MODEL_PARAMS.onDispersionFullLevel;
+  if (!(projectedOnLevel > refOnLevel) || !(full > refOnLevel)) return 1;
+  const w = Math.min(1, (projectedOnLevel - refOnLevel) / (full - refOnLevel));
+  return 1 - (1 - floor) * w;
 }
 
 // Estimate seat-level ON first preference using the 2025 seat baseline plus the
 // national ON swing applied on the logit scale (see logitShiftOnFp).
 function estimateSeatOnFp(seatId, swings) {
   const base = SEAT_FP_2025[seatId]?.on ?? ON_FP_2025[seatId] ?? BASELINE_2025.on;
-  return logitShiftOnFp(base, BASELINE_2025.on, swings.on ?? 0);
+  const kappa = onDispersionKappaFor(BASELINE_2025.on + Math.max(0, swings.on ?? 0), BASELINE_2025.on);
+  return logitShiftOnFp(base, BASELINE_2025.on, swings.on ?? 0, kappa);
 }
 
 // ── State poll helpers (data/polls/{state}_polls.json → state scenario builders) ──
@@ -2524,8 +2549,9 @@ const safePct = (x, total) => (total > 0 && Number.isFinite(x / total)) ? (x / t
 // is drawn proportionally from the "free" (non-locked) named parties so user-set /
 // overridden parties keep their values; if the free pool can't absorb it (or all
 // parties are locked), every named party is scaled proportionally to 100.
-function normalizePrimaries(fp, locked = []) {
-  const keys = ["alp", "coal", "grn", "teal", "on"];
+// `keys` names the party columns to treat as "named"; the default is the federal set
+// (teal), and the state models pass the ind-based set instead.
+function normalizePrimaries(fp, locked = [], keys = ["alp", "coal", "grn", "teal", "on"]) {
   const v = {};
   for (const k of keys) v[k] = Math.max(0, fp[k] ?? 0);
   const named = keys.reduce((s, k) => s + v[k], 0);
@@ -2544,14 +2570,47 @@ function normalizePrimaries(fp, locked = []) {
   return { ...v, other: Math.max(0, 100 - newNamed) };
 }
 
+// Party columns treated as "named" by the mass accounting in extraCoalCutFor.
+// Covers both the federal (teal) and state (ind) vocabularies; absent keys read 0.
+const PRIMARY_KEYS_ALL = ["alp", "coal", "grn", "teal", "ind", "on", "undecided"];
+
+// normalizePrimaries for the state models, whose third bloc is `ind` rather than the
+// federal `teal`. Returns the same shape (named parties plus the `other` residual).
+function normalizeStatePrimaries(fp, locked = []) {
+  return normalizePrimaries(fp, locked, ["alp", "coal", "grn", "ind", "on"]);
+}
+
 // Extra reduction to the Coalition primary that sources a rising ON vote from
-// ex-Coalition defectors. Total Coalition reduction we want = onFromCoalShare × ON's
-// rise; the explicit coal swing already cuts some, so only the shortfall is taken
-// additionally. Zero when ON is flat or falling, so zero-swing baselines are unchanged.
-function extraCoalCutFor(sw, onFromCoalShare) {
-  const onRise = Math.max(0, sw.on ?? 0);
-  const uniformCoalCut = Math.max(0, -(sw.coal ?? 0));
-  return Math.max(0, onFromCoalShare * onRise - uniformCoalCut);
+// ex-Coalition defectors.
+//
+// A rising ON vote has to come from somewhere. When the user drags the ON slider on
+// its own, nothing else in the primary vector moves, so the model has to nominate a
+// source: onFromCoalShare of the rise is taken off the Coalition and the rest is
+// absorbed by the residual "other". But when the primaries arrive from a poll, every
+// source is already specified — the poll reports the Coalition and the minor-party
+// residual directly. Cutting the Coalition again on top of that double-counts the
+// surge and teleports ex-Coalition vote into "other", which preferences far more
+// favourably to Labor (43-50%) than ON does (18-25%).
+//
+// So only the *unsourced* part of the rise is charged to the Coalition: ON's increase
+// less every decline already visible in the entered primaries — the named parties plus
+// the residual "other", which can only give up the mass it actually had. Returns 0
+// when ON is flat or falling, and 0 when the entered vector already accounts for the
+// whole rise, so zero-swing baselines and poll-driven scenarios are both left alone.
+function extraCoalCutFor(basePrim, newPrim, onFromCoalShare) {
+  const at = (p, k) => Math.max(0, p?.[k] ?? 0);
+  const onRise = at(newPrim, "on") - at(basePrim, "on");
+  if (onRise <= 0) return 0;
+  const sumNamed = (p) => PRIMARY_KEYS_ALL.reduce((t, k) => t + at(p, k), 0);
+  // Mass the residual "other" pool has already given up (it cannot give up more).
+  const drawnFromOther = Math.max(0, Math.max(0, 100 - sumNamed(basePrim))
+                                   - Math.max(0, 100 - sumNamed(newPrim)));
+  // Mass the other named parties have already given up.
+  const namedDeclines = PRIMARY_KEYS_ALL
+    .filter(k => k !== "on")
+    .reduce((t, k) => t + Math.max(0, at(basePrim, k) - at(newPrim, k)), 0);
+  const unsourced = Math.max(0, onRise - drawnFromOther - namedDeclines);
+  return Math.min(onFromCoalShare * unsourced, at(newPrim, "coal"));
 }
 
 // Apply per-party swings to a seat's baseline primaries, sourcing a share of any ON
@@ -2562,14 +2621,15 @@ function extraCoalCutFor(sw, onFromCoalShare) {
 // zero-swing 2025 baseline is unchanged. `onFromCoalShare` is the Coalition source share.
 // `locked` parties keep their swung value during normalization (passed through).
 function applySeatSwings(base, sw, onFromCoalShare = 0, locked = []) {
-  const extraCoalCut = extraCoalCutFor(sw, onFromCoalShare);
-  return normalizePrimaries({
+  const swung = {
     alp: base.alp + (sw.alp ?? 0),
-    coal: base.coal + (sw.coal ?? 0) - extraCoalCut,
+    coal: base.coal + (sw.coal ?? 0),
     grn: base.grn + (sw.grn ?? 0),
     teal: (base.teal ?? 0) + (sw.teal ?? 0),
     on: base.on + (sw.on ?? 0),
-  }, locked);
+  };
+  const extraCoalCut = extraCoalCutFor(base, swung, onFromCoalShare);
+  return normalizePrimaries({ ...swung, coal: swung.coal - extraCoalCut }, locked);
 }
 
 // Compute implied national ALP 2PP from primary votes and preference flows.
@@ -2654,6 +2714,16 @@ const MODEL_PARAMS = {
   // Coalition keeps the seat distribution consistent with the national 2PP. No effect
   // when ON is flat or falling, so the zero-swing 2025 baseline is preserved.
   onFromCoalShare: 0.6,
+
+  // Per-seat ON dispersion shrinkage (see onDispersionKappaFor / logitShiftOnFp).
+  // onDispersionFloor is the log-odds displacement scale applied once the projected
+  // statewide ON vote reaches onDispersionFullLevel; between the seat prior's own
+  // reference level and that point it ramps down linearly from 1. 0.6 at a 20%
+  // statewide level roughly halves the projected seat spread, keeping the strongest
+  // seat inside the range ON has actually recorded in a single district while the
+  // enrolment-blind mean stays close to the statewide figure.
+  onDispersionFloor: 0.6,
+  onDispersionFullLevel: 20,
 };
 
 // ── State-level swing overlay ────────────────────────────────────────────────
@@ -3286,7 +3356,14 @@ function computeVic2pp(primaries, prefFlows, onTcpMatchup = null) {
     const c = coal + alp * (1 - prefFlows.alp_on_v_coal) + grn * (1 - prefFlows.grn_on_v_coal) + ind * (1 - prefFlows.ind_on_v_coal) + others * (1 - prefFlows.other_on_v_coal);
     return onTcp / (onTcp + c) * 100;
   }
-  return alp + grn * prefFlows.grn_alp + ind * prefFlows.ind_alp + onV * prefFlows.on_alp + others * prefFlows.other_alp;
+  // Normalised rather than returned as a bare sum: the bare sum is only a percentage
+  // when the primaries total exactly 100, and a projected seat vector can overshoot
+  // (a strong-ON regional seat under a large ON swing) — where `others` floors at 0
+  // and the unnormalised total exceeds 100.
+  const a = alp + grn * prefFlows.grn_alp + ind * prefFlows.ind_alp + onV * prefFlows.on_alp + others * prefFlows.other_alp;
+  const c = coal + grn * (1 - prefFlows.grn_alp) + ind * (1 - prefFlows.ind_alp)
+          + onV * (1 - prefFlows.on_alp) + others * (1 - prefFlows.other_alp);
+  return safePct(a, a + c);
 }
 
 // VIC swing model — applies region-differentiated 2CP swing to each seat's 2022 margin.
@@ -3298,19 +3375,23 @@ function computeVic2pp(primaries, prefFlows, onTcpMatchup = null) {
 // onThreshold is only a pre-filter — the binding condition is the projected ON primary
 // overtaking a major party's, which self-adjusts to VIC's low (~1.3%) statewide ON base.
 function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing = true, onTcpMatchup = null, baseline2pp = VIC_2PP_2022, seatOverrides = null, seatFpMap = null, onFpLookup = null, onThreshold = MODEL_PARAMS.onThresholdDefault) {
-  // Source a share of any ON *rise* from the Coalition primary (federal-model parity —
-  // see MODEL_PARAMS.onFromCoalShare). Without this, a high ON primary wrongly inflates
-  // Coalition 2PP via ON's ~75% back-flow. The cut mass lands in the residual "others"
+  // Source the *unsourced* part of any ON rise from the Coalition primary (federal-model
+  // parity — see MODEL_PARAMS.onFromCoalShare and extraCoalCutFor). When the primaries
+  // come from a poll the rise is already sourced and the cut is zero; when the user
+  // moves the ON slider alone it fires. The cut mass lands in the residual "others"
   // because computeVic2pp derives others as 100 − sum. Zero when swings.on ≤ 0.
   const onFromCoalShare = prefFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare;
-  const extraCoalCut = extraCoalCutFor(swings, onFromCoalShare);
-  const newPrim = {
+  const swungPrim = {
     alp: Math.max(0, VIC_BASELINE_2022.alp + swings.alp),
-    coal: Math.max(0, VIC_BASELINE_2022.coal + (swings.coal ?? 0) - extraCoalCut),
+    coal: Math.max(0, VIC_BASELINE_2022.coal + (swings.coal ?? 0)),
     grn: Math.max(0, VIC_BASELINE_2022.grn + swings.grn),
     ind: Math.max(0, VIC_BASELINE_2022.ind + swings.ind),
     on: Math.max(0, VIC_BASELINE_2022.on + (swings.on ?? 0)),
   };
+  const extraCoalCut = extraCoalCutFor(VIC_BASELINE_2022, swungPrim, onFromCoalShare);
+  const newPrim = { ...swungPrim, coal: Math.max(0, swungPrim.coal - extraCoalCut) };
+  // Statewide ON level the per-seat dispersion prior is shrunk toward (see kappa below).
+  const onDispersionKappa = onDispersionKappaFor(newPrim.on, VIC_BASELINE_2022.on);
   const new2pp = computeVic2pp(newPrim, prefFlows, onTcpMatchup);
   const vic2ppSwing = new2pp - baseline2pp;
 
@@ -3367,14 +3448,18 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
     let sfEff = null, projSf = null;
     if (seatFpMap?.[seat.id]) {
       const sf = seatFpMap[seat.id];
-      sfEff = { alp: sf.alp, coal: sf.coal, grn: sf.grn, ind: sf.ind, on: onBase ?? sf.on ?? 0 };
-      projSf = {
+      sfEff = normalizeStatePrimaries({ alp: sf.alp, coal: sf.coal, grn: sf.grn, ind: sf.ind, on: onBase ?? sf.on ?? 0 });
+      // Normalised so a seat whose swung primaries overshoot 100% (a strong-ON regional
+      // seat under a large ON swing) cannot be scored on an over-100 base, and so a
+      // seat that undershoots does not accumulate phantom "other" — which preferences
+      // to ALP far more favourably than the parties the mass actually came from.
+      projSf = normalizeStatePrimaries({
         alp:  Math.max(0, sfEff.alp  + swings.alp),
         coal: Math.max(0, sfEff.coal + (swings.coal ?? 0) - extraCoalCut),
         grn:  Math.max(0, sfEff.grn  + swings.grn),
         ind:  Math.max(0, sfEff.ind  + swings.ind),
-        on:   Math.max(0, logitShiftOnFp(sfEff.on, VIC_BASELINE_2022.on, swings.on ?? 0)),
-      };
+        on:   Math.max(0, logitShiftOnFp(sfEff.on, VIC_BASELINE_2022.on, swings.on ?? 0, onDispersionKappa)),
+      });
     }
 
     // ── ON-final auto-detection for ALP-vs-Coalition seats ──────────────────────
@@ -3383,7 +3468,7 @@ function computeModelledSeatsVic(vicSeats, swings, prefFlows, useRegionalSwing =
     // when a statewide ON final is forced (onTcpMatchup) — forced mode wins.
     const isAlpVsCoal = (t1 === "ALP" && ["LP", "NP"].includes(t2)) || (["LP", "NP"].includes(t1) && t2 === "ALP");
     if (isAlpVsCoal && onTcpMatchup == null && ov?.tcpPct == null && !ov?.forceGroup) {
-      const estOn = ov?.on ?? (onBase != null ? logitShiftOnFp(onBase, VIC_BASELINE_2022.on, swings.on ?? 0) : null);
+      const estOn = ov?.on ?? (onBase != null ? logitShiftOnFp(onBase, VIC_BASELINE_2022.on, swings.on ?? 0, onDispersionKappa) : null);
       let activeTcp = (ov?.tcpMatchup === "on_v_alp" || ov?.tcpMatchup === "on_v_coal") ? ov.tcpMatchup : null;
       // Auto-promote ON into the final two only on a positive ON swing: the seat's
       // recorded TCP pair is the actual result and must be reproduced at zero swing.
@@ -3615,6 +3700,9 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
     // figures), then the seat's real FP data. Null when neither exists.
     const onBase = onFpLookup?.[seat.id] ?? seatFpMap?.[seat.id]?.on ?? null;
     const refOn = baselinePrim?.on ?? newPrim.on ?? 0;
+    // Shrink the per-seat ON dispersion prior as the statewide ON vote grows
+    // (see onDispersionKappaFor). 1 — i.e. unchanged — at zero/negative ON swing.
+    const onKappa = onDispersionKappaFor(refOn + Math.max(0, swings.on ?? 0), refOn);
     let effectiveSwing2pp = swing2pp;
     let sfEff = null, projSf = null;
     if (seatFpMap?.[seat.id]) {
@@ -3623,18 +3711,31 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
       // The ON base substitution happens on BOTH sides so zero swing stays a no-op; the ON
       // swing distributes on the logit scale (logitShiftOnFp) so it lands where ON is strong.
       const sf = seatFpMap[seat.id];
-      // Source the ON increase largely from the Coalition primary (rest from residual),
-      // matching the federal model — a rising ON vote is mostly ex-Coalition defection.
+      // Source the unsourced part of any ON increase from the Coalition primary (rest
+      // from the residual), matching the federal model — a rising ON vote is mostly
+      // ex-Coalition defection, but only to the extent the entered primaries have not
+      // already accounted for it (see extraCoalCutFor).
       const onFromCoalShare = prefFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare;
-      const extraCoalCut = extraCoalCutFor(swings, onFromCoalShare);
-      sfEff = { ...sf, on: onBase ?? sf.on ?? 0 };
-      projSf = {
+      const stateBase = baselinePrim ?? sf;
+      const stateSwung = {
+        alp: Math.max(0, (stateBase.alp ?? 0) + (swings.alp ?? 0)),
+        coal: Math.max(0, (stateBase.coal ?? 0) + (swings.coal ?? 0)),
+        grn: Math.max(0, (stateBase.grn ?? 0) + (swings.grn ?? 0)),
+        ind: Math.max(0, (stateBase.ind ?? 0) + (swings.ind ?? 0)),
+        on: Math.max(0, (stateBase.on ?? 0) + (swings.on ?? 0)),
+      };
+      const extraCoalCut = extraCoalCutFor(stateBase, stateSwung, onFromCoalShare);
+      sfEff = normalizeStatePrimaries({ ...sf, on: onBase ?? sf.on ?? 0 });
+      // Normalised so a seat whose swung primaries overshoot 100% cannot be scored on
+      // an over-100 base, and so a seat that undershoots does not accumulate phantom
+      // "other" — which preferences to ALP more favourably than its true sources.
+      projSf = normalizeStatePrimaries({
         alp:  Math.max(0, sfEff.alp  + swings.alp),
         coal: Math.max(0, sfEff.coal + swings.coal - extraCoalCut),
         grn:  Math.max(0, sfEff.grn  + swings.grn),
         ind:  Math.max(0, (sfEff.ind ?? 0) + (swings.ind ?? 0)),
-        on:   Math.max(0, logitShiftOnFp(sfEff.on ?? 0, refOn, swings.on ?? 0)),
-      };
+        on:   Math.max(0, logitShiftOnFp(sfEff.on ?? 0, refOn, swings.on ?? 0, onKappa)),
+      });
       const mergedFlows = seatFlowOverride ? { ...prefFlows, ...seatFlowOverride } : prefFlows;
       effectiveSwing2pp = compute2ppFn(projSf, mergedFlows) - compute2ppFn(sfEff, mergedFlows);
     } else if (seatFlowOverride && baselinePrim) {
@@ -3676,7 +3777,7 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
       // Check if a per-seat ON estimate exists (either from lookup/FP data or manual override)
       const estOnFp = ov?.on != null
         ? ov.on
-        : (onBase != null ? logitShiftOnFp(onBase, refOn, swings.on ?? 0) : null);
+        : (onBase != null ? logitShiftOnFp(onBase, refOn, swings.on ?? 0, onKappa) : null);
 
       let activeTcp = ov?.tcpMatchup ?? null;
       // Only auto-promote ON into the final two on a positive ON swing. The seat's
@@ -3702,7 +3803,7 @@ function computeModelledSeatsState(seats, newPrim, compute2ppFn, baseline2pp, pr
       if (activeTcp) {
         // Compute TCP using the seat's projected primaries where available (statewide
         // proxies otherwise) with the per-seat ON estimate.
-        const estOn = estOnFp ?? (onBase != null ? logitShiftOnFp(onBase, refOn, swings.on ?? 0) : newPrim.on);
+        const estOn = estOnFp ?? (onBase != null ? logitShiftOnFp(onBase, refOn, swings.on ?? 0, onKappa) : newPrim.on);
         const fpAlp = projSf?.alp ?? newPrim.alp;
         const fpCoal = projSf?.coal ?? newPrim.coal;
         const fpGrn = projSf?.grn ?? newPrim.grn;
@@ -5524,10 +5625,16 @@ export default function App() {
     vicPrefFlows.grn_alp !== 0.85 || vicPrefFlows.ind_alp !== 0.60 || vicPrefFlows.on_alp !== 0.25 || vicPrefFlows.other_alp !== 0.43 ||
     !useVicRegionalSwing || vicOnTcp !== null || Object.keys(vicSeatOverrides).length > 0;
 
-  const vicNat2ppSwing = useMemo(() => {
-    const baseline = vicOnTcp ? computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp) : VIC_2PP_2022;
-    return computeVic2pp(vicPrimaries, vicPrefFlows, vicOnTcp) - baseline;
-  }, [vicPrimaries, vicPrefFlows, vicOnTcp]);
+  // Anchored on the model's own flow-derived 2022 baseline (57.2 under the default
+  // flows), not the published VIC_2PP_2022 constant (57.3) — computeModelledSeatsVic
+  // self-anchors the same way, so the displayed swing, the uncertainty bands and the
+  // seat projections all move on one number rather than three near-but-not-equal ones.
+  const vicBaseline2pp = useMemo(
+    () => computeVic2pp(VIC_BASELINE_2022, vicPrefFlows, vicOnTcp),
+    [vicPrefFlows, vicOnTcp]);
+  const vicNat2ppSwing = useMemo(
+    () => computeVic2pp(vicPrimaries, vicPrefFlows, vicOnTcp) - vicBaseline2pp,
+    [vicPrimaries, vicPrefFlows, vicOnTcp, vicBaseline2pp]);
   const vicUncertainty = useMemo(
     () => computeUncertainty(vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity, 45),
     [vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity]
@@ -5547,7 +5654,7 @@ export default function App() {
     // Source a share of any ON rise from the Coalition primary (federal/VIC parity — see
     // MODEL_PARAMS.onFromCoalShare); the cut mass lands in the residual "other" inside
     // makeStateCompute2pp. No-op at zero/negative ON swing, so the baseline is unchanged.
-    const prim = { ...nswPrim, coal: Math.max(0, nswPrim.coal - extraCoalCutFor(s, nswFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
+    const prim = { ...nswPrim, coal: Math.max(0, nswPrim.coal - extraCoalCutFor(NSW_BL, nswPrim, nswFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
     const compute2pp = makeStateCompute2pp({ ind: nswPrim.ind, onTcp: nswOnTcp, swings: s });
     const baseline2pp = compute2pp(NSW_BL, nswFlows);
     return computeModelledSeatsState(NSW_SEATS, prim, compute2pp, baseline2pp, nswFlows, NSW_COAL, s,
@@ -5594,7 +5701,7 @@ export default function App() {
     const nswCoalToOnXfer = (nswOnSwing > 0 && nswCoalSwing < 0) ? Math.max(0, Math.min(1, -nswCoalSwing / nswOnSwing)) : 0;
     const nswEffOnAlp = nswFlows.on_alp + (nswFlows.onCoalOriginFactor ?? 0) * nswCoalToOnXfer * (1 - nswFlows.on_alp);
     // Coalition-sourcing of the ON rise, matching the seat model (cut mass moves to other).
-    const nswCoalAdj = Math.max(0, nswPrim.coal - extraCoalCutFor({ on: nswOnSwing, coal: nswCoalSwing }, nswFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
+    const nswCoalAdj = Math.max(0, nswPrim.coal - extraCoalCutFor(NSW_BL, nswPrim, nswFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
     const nswOtherAdj = other + (nswPrim.coal - nswCoalAdj);
     const a = nswPrim.alp + nswPrim.ind * nswFlows.ind_alp + nswPrim.grn * nswFlows.grn_alp + onV * nswEffOnAlp + nswOtherAdj * nswFlows.other_alp;
     const c = nswCoalAdj + nswPrim.ind * (1 - nswFlows.ind_alp) + nswPrim.grn * (1 - nswFlows.grn_alp) + onV * (1 - nswEffOnAlp) + nswOtherAdj * (1 - nswFlows.other_alp);
@@ -5618,7 +5725,7 @@ export default function App() {
   const qldModelledSeats = useMemo(() => {
     const s = { alp: qldPrim.alp - QLD_BL.alp, coal: qldPrim.coal - QLD_BL.coal, grn: qldPrim.grn - QLD_BL.grn, on: qldPrim.on - QLD_BL.on };
     // Source a share of any ON rise from the Coalition primary (see MODEL_PARAMS.onFromCoalShare).
-    const prim = { ...qldPrim, coal: Math.max(0, qldPrim.coal - extraCoalCutFor(s, qldFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
+    const prim = { ...qldPrim, coal: Math.max(0, qldPrim.coal - extraCoalCutFor(QLD_BL, qldPrim, qldFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
     const compute2pp = makeStateCompute2pp({ ind: qldPrim.ind, onTcp: qldOnTcp, swings: s });
     const baseline2pp = compute2pp(QLD_BL, qldFlows);
     return computeModelledSeatsState(QLD_SEATS, prim, compute2pp, baseline2pp, qldFlows, QLD_COAL, s,
@@ -5663,7 +5770,7 @@ export default function App() {
     const qldCoalToOnXfer = (qldOnSwing > 0 && qldCoalSwing < 0) ? Math.max(0, Math.min(1, -qldCoalSwing / qldOnSwing)) : 0;
     const qldEffOnAlp = qldFlows.on_alp + (qldFlows.onCoalOriginFactor ?? 0) * qldCoalToOnXfer * (1 - qldFlows.on_alp);
     // Coalition-sourcing of the ON rise, matching the seat model (cut mass moves to other).
-    const qldCoalAdj = Math.max(0, qldPrim.coal - extraCoalCutFor({ on: qldOnSwing, coal: qldCoalSwing }, qldFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
+    const qldCoalAdj = Math.max(0, qldPrim.coal - extraCoalCutFor(QLD_BL, qldPrim, qldFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
     const qldOtherAdj = other + (qldPrim.coal - qldCoalAdj);
     const a = qldPrim.alp + qldPrim.ind * qldFlows.ind_alp + qldPrim.grn * qldFlows.grn_alp + onV * qldEffOnAlp + qldOtherAdj * qldFlows.other_alp;
     const c = qldCoalAdj + qldPrim.ind * (1 - qldFlows.ind_alp) + qldPrim.grn * (1 - qldFlows.grn_alp) + onV * (1 - qldEffOnAlp) + qldOtherAdj * (1 - qldFlows.other_alp);
@@ -5682,7 +5789,7 @@ export default function App() {
   const waModelledSeats = useMemo(() => {
     const s = { alp: waPrim.alp - WA_BL.alp, coal: waPrim.coal - WA_BL.coal, grn: waPrim.grn - WA_BL.grn, on: waPrim.on - WA_BL.on };
     // Source a share of any ON rise from the Coalition primary (see MODEL_PARAMS.onFromCoalShare).
-    const prim = { ...waPrim, coal: Math.max(0, waPrim.coal - extraCoalCutFor(s, waFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
+    const prim = { ...waPrim, coal: Math.max(0, waPrim.coal - extraCoalCutFor(WA_BL, waPrim, waFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
     const compute2pp = makeStateCompute2pp({ ind: waPrim.ind, onTcp: waOnTcp, swings: s });
     const baseline2pp = compute2pp(WA_BL, waFlows);
     return computeModelledSeatsState(WA_SEATS, prim, compute2pp, baseline2pp, waFlows, WA_COAL, s,
@@ -5727,7 +5834,7 @@ export default function App() {
     const waCoalToOnXfer = (waOnSwing > 0 && waCoalSwing < 0) ? Math.max(0, Math.min(1, -waCoalSwing / waOnSwing)) : 0;
     const waEffOnAlp = waFlows.on_alp + (waFlows.onCoalOriginFactor ?? 0) * waCoalToOnXfer * (1 - waFlows.on_alp);
     // Coalition-sourcing of the ON rise, matching the seat model (cut mass moves to other).
-    const waCoalAdj = Math.max(0, waPrim.coal - extraCoalCutFor({ on: waOnSwing, coal: waCoalSwing }, waFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
+    const waCoalAdj = Math.max(0, waPrim.coal - extraCoalCutFor(WA_BL, waPrim, waFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
     const waOtherAdj = other + (waPrim.coal - waCoalAdj);
     const a = waPrim.alp + waPrim.ind * waFlows.ind_alp + waPrim.grn * waFlows.grn_alp + onV * waEffOnAlp + waOtherAdj * waFlows.other_alp;
     const c = waCoalAdj + waPrim.ind * (1 - waFlows.ind_alp) + waPrim.grn * (1 - waFlows.grn_alp) + onV * (1 - waEffOnAlp) + waOtherAdj * (1 - waFlows.other_alp);
@@ -5755,7 +5862,7 @@ export default function App() {
     // When ON rises at Coalition's expense, ex-LP defectors preference ALP at a higher rate than
     // baseline ON voters. onCoalOriginFactor (0–1) scales this adjustment up when the signal is clear.
     // Additionally source a share of any ON rise from the Coalition primary (see MODEL_PARAMS.onFromCoalShare).
-    const prim = { ...saPrim, coal: Math.max(0, saPrim.coal - extraCoalCutFor(s, saFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
+    const prim = { ...saPrim, coal: Math.max(0, saPrim.coal - extraCoalCutFor(SA_BL, saPrim, saFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
     const compute2pp = makeStateCompute2pp({ ind: saPrim.ind, onTcp: saOnTcp, swings: s });
     const baseline2pp = compute2pp(SA_BL, saFlows);
     return computeModelledSeatsState(SA_SEATS, prim, compute2pp, baseline2pp, saFlows, SA_COAL, s,
@@ -5800,7 +5907,7 @@ export default function App() {
     const saCoalToOnXfer = (onSwing > 0 && coalSwing < 0) ? Math.max(0, Math.min(1, -coalSwing / onSwing)) : 0;
     const saEffOnAlp = saFlows.on_alp + (saFlows.onCoalOriginFactor ?? 0) * saCoalToOnXfer * (1 - saFlows.on_alp);
     // Coalition-sourcing of the ON rise, matching the seat model (cut mass moves to other).
-    const saCoalAdj = Math.max(0, saPrim.coal - extraCoalCutFor({ on: onSwing, coal: coalSwing }, saFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
+    const saCoalAdj = Math.max(0, saPrim.coal - extraCoalCutFor(SA_BL, saPrim, saFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
     const saOtherAdj = other + (saPrim.coal - saCoalAdj);
     const a = saPrim.alp + saPrim.ind * saFlows.ind_alp + saPrim.grn * saFlows.grn_alp + onV * saEffOnAlp + saOtherAdj * saFlows.other_alp;
     const c = saCoalAdj + saPrim.ind * (1 - saFlows.ind_alp) + saPrim.grn * (1 - saFlows.grn_alp) + onV * (1 - saEffOnAlp) + saOtherAdj * (1 - saFlows.other_alp);
@@ -5821,7 +5928,7 @@ export default function App() {
   const ntModelledSeats = useMemo(() => {
     const s = { alp: ntPrim.alp - NT_BL.alp, coal: ntPrim.coal - NT_BL.coal, grn: ntPrim.grn - NT_BL.grn, on: ntPrim.on - NT_BL.on };
     // Source a share of any ON rise from the Coalition primary (see MODEL_PARAMS.onFromCoalShare).
-    const prim = { ...ntPrim, coal: Math.max(0, ntPrim.coal - extraCoalCutFor(s, ntFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
+    const prim = { ...ntPrim, coal: Math.max(0, ntPrim.coal - extraCoalCutFor(NT_BL, ntPrim, ntFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
     const compute2pp = makeStateCompute2pp({ ind: ntPrim.ind, onTcp: ntOnTcp, swings: s, exhaust: ntExhaustRate });
     const baseline2pp = compute2pp(NT_BL, ntFlows);
     return computeModelledSeatsState(NT_SEATS, prim, compute2pp, baseline2pp, ntFlows, NT_COAL, s,
@@ -5860,7 +5967,7 @@ export default function App() {
     const ntCoalToOnXfer = (ntOnSwing > 0 && ntCoalSwing < 0) ? Math.max(0, Math.min(1, -ntCoalSwing / ntOnSwing)) : 0;
     const ntEffOnAlp = ntFlows.on_alp + (ntFlows.onCoalOriginFactor ?? 0) * ntCoalToOnXfer * (1 - ntFlows.on_alp);
     // Coalition-sourcing of the ON rise, matching the seat model (cut mass moves to other).
-    const ntCoalAdj = Math.max(0, ntPrim.coal - extraCoalCutFor({ on: ntOnSwing, coal: ntCoalSwing }, ntFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
+    const ntCoalAdj = Math.max(0, ntPrim.coal - extraCoalCutFor(NT_BL, ntPrim, ntFlows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare));
     const ntOtherAdj = other + (ntPrim.coal - ntCoalAdj);
     const a = ntPrim.alp + (1 - ef) * (ntPrim.ind * ntFlows.ind_alp + ntPrim.grn * ntFlows.grn_alp + onV * ntEffOnAlp + ntOtherAdj * ntFlows.other_alp);
     const c = ntCoalAdj + (1 - ef) * (ntPrim.ind * (1 - ntFlows.ind_alp) + ntPrim.grn * (1 - ntFlows.grn_alp) + onV * (1 - ntEffOnAlp) + ntOtherAdj * (1 - ntFlows.other_alp));
@@ -8838,7 +8945,10 @@ export default function App() {
                       <>
                         <div style={{ fontSize: 30, fontWeight: 800, color: vicImplied2pp >= 50 ? "#059669" : "#DC2626" }}>{vicImplied2pp.toFixed(1)}%</div>
                         <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
-                          {vicImplied2pp >= 50 ? `▲ +${(vicImplied2pp - VIC_RIGHT_BLOC_2PP_2022).toFixed(1)} vs 2022` : `▼ ${(vicImplied2pp - VIC_RIGHT_BLOC_2PP_2022).toFixed(1)} vs 2022`}
+                          {/* vs the like-for-like ALP-vs-Coalition 2022 baseline. Comparing against
+                              VIC_RIGHT_BLOC_2PP_2022 (ALP vs Coalition+ON) mixed two different
+                              2PP definitions and understated the swing by ~0.5pp. */}
+                          {vicImplied2pp >= 50 ? `▲ +${(vicImplied2pp - VIC_2PP_2022).toFixed(1)} vs 2022` : `▼ ${(vicImplied2pp - VIC_2PP_2022).toFixed(1)} vs 2022`}
                         </div>
                       </>
                     ) : <div style={{ fontSize: 20, color: "var(--text-4)" }}>—</div>}
@@ -11639,6 +11749,10 @@ export {
   makeStateCompute2pp,
   computeVic2pp,
   computeNat2pp,
+  normalizeStatePoll,
+  statePollAverage,
+  normalizePrimaries,
+  onDispersionKappaFor,
   getParty,
   getSeatGroup,
   mapSeatFpById,

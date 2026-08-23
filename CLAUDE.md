@@ -171,6 +171,17 @@ Coalition 28, NSW 2023 ALP 45, QLD 2024 LNP 52, WA 2025 ALP 46). Run it after
 ANY change to the model functions, calibration constants, seat data, or
 `state_seat_fp.js`; the Pages deploy workflow runs it as a gate.
 
+Zero-swing alignment alone cannot catch a model that is right at the baseline and
+drifts as the scenario moves, so `vic-poll-consistency.test.jsx` pins the VIC model
+to external ground truth: the pollsters' own published 2PP, computed by them from
+the same primaries the model is handed. It asserts no systematic lean over every
+poll in `vic_polls.json` (and separately over the high-One-Nation subset), that the
+seat engine's internal 2PP matches the dashboard's headline card, and that "Apply
+latest polls" lands within 2.5pp of the recency-weighted published figure. If a
+preference-flow or sourcing change puts a thumb on the scale, this suite fails
+where the baseline suite would not. `vic-on-scenarios.test.jsx` and
+`state-on-scenarios.test.jsx` cover ON-surge behaviour per jurisdiction.
+
 Tests are in `tests/test_parse.py` and cover the AEC CSV parsing functions using synthetic data:
 - `_iter_aec_csv` — skips AEC metadata header rows
 - `parse_candidates` — candidate list parsing
@@ -322,6 +333,23 @@ These are the 2025 defaults actually used in `poll_aggregator.py` / `PREF_FLOWS_
 | Teal independents | ~62.0% |
 | One Nation (ON) | ~25.5% (74.5% to Coalition) |
 | Other minor | ~50% |
+
+**Sourcing an ON rise (`extraCoalCutFor`, `MODEL_PARAMS.onFromCoalShare`):** a rising
+ON primary has to come from somewhere. When only the ON slider moves, the model
+charges `onFromCoalShare` of the rise to the Coalition — otherwise ON's ~75%
+back-flow inflates Coalition 2PP. It must charge only the part the entered primaries
+leave **unsourced**: when the primaries come from a poll, the Coalition and the
+minor-party residual are already reported, and cutting again double-counts the surge
+and moves ex-Coalition vote into the residual "other" pool, which preferences ~43% to
+ALP against ON's ~25%. On the Aug 2026 VIC polling that unconditional cut was worth
++4.3pp of ALP 2PP and 15 seats. Any change here must keep
+`vic-poll-consistency.test.jsx` green.
+
+**Per-seat ON dispersion (`MODEL_PARAMS.onDispersionFloor`):** the seat-level ON priors
+were measured where ON polled 1–5%, so their spread (16x across VIC districts) is
+mostly candidate-availability and rounding noise. `logitShiftOnFp`'s `kappa` shrinks
+that displacement as the statewide ON vote grows; without it a 22% statewide ON
+projected 42% in a single district and threw most of the chamber into ON finals.
 
 **One Nation → ALP has shifted every election** (AEC DOP; Antony Green): 2016 ~49.6%,
 2019 34.7%, 2022 35.7%, 2025 25.5% (the highest-ever flow to the Coalition). A rising ON

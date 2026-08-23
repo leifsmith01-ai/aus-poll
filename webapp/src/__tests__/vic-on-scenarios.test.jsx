@@ -93,27 +93,55 @@ describe("logitShiftOnFp", () => {
 });
 
 describe("Coalition-sourcing of ON rises (extraCoalCutFor)", () => {
+  // The cut answers "where did the extra ON vote come from?" — and only for the part
+  // the entered primaries have not already answered. Charging the Coalition for a rise
+  // the vector already sources double-counts it and moves ex-Coalition vote into the
+  // residual "other" pool, which preferences far more favourably to Labor. See the
+  // "tracks the pollsters' own published 2PP" suite for the empirical case.
+  const withOn = (on, over = {}) => ({ ...VIC_BASELINE_2022, on, ...over });
+  const share = 0.6;
+
   it("is zero at zero or negative ON swing", () => {
-    expect(extraCoalCutFor({ on: 0, coal: 0 }, 0.6)).toBe(0);
-    expect(extraCoalCutFor({ on: -3, coal: 0 }, 0.6)).toBe(0);
+    expect(extraCoalCutFor(VIC_BASELINE_2022, VIC_BASELINE_2022, share)).toBe(0);
+    expect(extraCoalCutFor(VIC_BASELINE_2022, withOn(VIC_BASELINE_2022.on - 3), share)).toBe(0);
   });
 
-  it("cuts only the shortfall beyond an explicit Coalition swing", () => {
-    expect(extraCoalCutFor({ on: 8, coal: 0 }, 0.6)).toBeCloseTo(4.8, 10);
-    expect(extraCoalCutFor({ on: 8, coal: -3 }, 0.6)).toBeCloseTo(1.8, 10);
-    expect(extraCoalCutFor({ on: 12, coal: -8 }, 0.6)).toBe(0);
+  it("is zero while the residual 'other' pool can supply the whole rise", () => {
+    // VIC 2022 leaves 11.8pp in "other" (right-wing micros, mostly). An ON rise of 8
+    // inside that is fully sourced — the Coalition primary is not implicated.
+    expect(extraCoalCutFor(VIC_BASELINE_2022, withOn(VIC_BASELINE_2022.on + 8), share)).toBe(0);
   });
 
-  it("raises statewide ALP 2PP versus the uncut distribution (ON no longer inflates the Coalition)", () => {
+  it("charges the Coalition once the rise outgrows every other source", () => {
+    // ON +20.5 with nothing else moved: "other" can only supply its 11.8, leaving
+    // 8.7 unsourced, of which onFromCoalShare is taken off the Coalition.
+    const cut = extraCoalCutFor(VIC_BASELINE_2022, withOn(VIC_BASELINE_2022.on + 20.5), share);
+    expect(cut).toBeCloseTo(share * 8.7, 6);
+  });
+
+  it("is zero when the entered primaries already state where the rise came from", () => {
+    // The Aug 2026 VIC polling shape: ALP and the Coalition both down, "other"
+    // collapsed into ON. Every point of the rise is accounted for, so cutting the
+    // Coalition below the figure the poll reports would be inventing a decline.
+    const polled = { alp: 25.4, coal: 28.7, grn: 13.1, ind: 9.4, on: 21.8 };
+    expect(extraCoalCutFor(VIC_BASELINE_2022, polled, share)).toBe(0);
+  });
+
+  it("never cuts the Coalition primary below zero", () => {
+    const collapsed = { alp: 20, coal: 2, grn: 10, ind: 5, on: 45 };
+    const cut = extraCoalCutFor(VIC_BASELINE_2022, collapsed, share);
+    expect(cut).toBeLessThanOrEqual(collapsed.coal);
+    expect(cut).toBeGreaterThanOrEqual(0);
+  });
+
+  it("lowers ALP 2PP when it fires (the cut moves Coalition vote into 'other')", () => {
     const flows = VIC_DEFAULT_PREF_FLOWS;
-    const onRise = 8;
-    const uncut = computeVic2pp({ ...VIC_BASELINE_2022, on: VIC_BASELINE_2022.on + onRise }, flows, null);
-    const cut = computeVic2pp({
-      ...VIC_BASELINE_2022,
-      coal: VIC_BASELINE_2022.coal - extraCoalCutFor({ on: onRise, coal: 0 }, flows.onFromCoalShare),
-      on: VIC_BASELINE_2022.on + onRise,
-    }, flows, null);
-    expect(cut).toBeGreaterThan(uncut);
+    const raw = { ...VIC_BASELINE_2022, on: VIC_BASELINE_2022.on + 20.5 };
+    const cut = { ...raw, coal: raw.coal - extraCoalCutFor(VIC_BASELINE_2022, raw, flows.onFromCoalShare) };
+    // "other" preferences to ALP (43%) more strongly than ON does (25%), so sourcing
+    // the rise from the Coalition is a pro-ALP adjustment. That is exactly why it must
+    // only fire on genuinely unsourced mass.
+    expect(computeVic2pp(cut, flows, null)).toBeGreaterThan(computeVic2pp(raw, flows, null));
   });
 });
 
@@ -139,10 +167,23 @@ describe("VIC model under a rising ON primary", () => {
     expect(modelled.filter((s) => s.modelled.isOnRace)).toEqual([]);
   });
 
-  it("does not increase the Coalition seat tally on an ON-only rise", () => {
+  it("does not increase the Coalition seat tally when the ON rise comes off the Coalition", () => {
+    // The scenario that actually matters: ON up, Coalition down by the same order.
+    // A rising ON vote fed by Coalition defection must never hand the Coalition seats.
+    const base = tally(runVic(ZERO));
+    const t = tally(runVic({ on: 8, coal: -6 }));
+    expect(t.coalition ?? 0).toBeLessThanOrEqual(base.coalition);
+  });
+
+  it("lets the Coalition gain slightly when ON grows purely out of the minor-party pool", () => {
+    // ON +8 with nothing else moved means the vote came from the residual micro-party
+    // bucket, which preferences 57% to the Coalition against ON's 75%. The Coalition
+    // genuinely gains a little. Suppressing that with an unconditional Coalition
+    // haircut is what put a ~5pp pro-Labor bias into the ON-era projections.
     const base = tally(runVic(ZERO));
     const t = tally(runVic({ on: 8 }));
-    expect(t.coalition ?? 0).toBeLessThanOrEqual(base.coalition);
+    expect(t.coalition ?? 0).toBeGreaterThanOrEqual(base.coalition);
+    expect((t.coalition ?? 0) - base.coalition).toBeLessThanOrEqual(6);
   });
 
   it("auto-detects regional ON finals under a genuine ON surge, but not inner-metro ones", () => {
