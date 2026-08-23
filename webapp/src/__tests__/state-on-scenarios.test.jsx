@@ -3,9 +3,11 @@
 //
 // Ports the VIC ON fixes (PR #164) to the generic state path and pins the
 // fixed behaviour:
-//  1. Coalition-sourcing of ON rises at the statewide level (extraCoalCutFor
-//     applied to the primaries passed into the model) — previously a rising ON
-//     primary wrongly inflated Coalition 2PP via the on_alp back-flow;
+//  1. Coalition-sourcing of the *unsourced* part of an ON rise at the statewide
+//     level (extraCoalCutFor applied to the primaries passed into the model) —
+//     an ON rise nothing else pays for wrongly inflated Coalition 2PP via the
+//     on_alp back-flow, while charging the Coalition for a rise the entered
+//     primaries already account for double-counted it the other way;
 //  2. logit-scale ON swing distribution in the per-seat detection (previously
 //     additive);
 //  3. detection requires ON to out-poll the seat's Greens/independents.
@@ -99,9 +101,13 @@ describe.each(Object.entries(STATES))("%s model with ON sourcing armed", (name, 
     expect(autoOnSeats(m)).toEqual([]);
   });
 
-  it("does not increase the Coalition seat tally on an ON-only rise", () => {
+  it("does not increase the Coalition seat tally when the ON rise comes off the Coalition", () => {
+    // The scenario that matters: ON up, Coalition down. A rising ON vote fed by
+    // Coalition defection must never hand the Coalition seats. (An ON rise drawn
+    // purely from the residual micro-party pool legitimately can — those micros
+    // preference to the Coalition less strongly than ON does.)
     const base = projectedTally(runState(cfg, {}));
-    const t = projectedTally(runState(cfg, { on: 6 }));
+    const t = projectedTally(runState(cfg, { on: 6, coal: -5 }));
     expect(t.coalition ?? 0).toBeLessThanOrEqual(base.coalition ?? 0);
   });
 
@@ -116,14 +122,43 @@ describe.each(Object.entries(STATES))("%s model with ON sourcing armed", (name, 
 });
 
 describe("Coalition-sourcing direction (statewide 2PP)", () => {
-  it("raises ALP 2PP versus the uncut distribution when ON rises", () => {
+  it("fires only on the part of an ON rise the primaries leave unsourced", () => {
     for (const [name, cfg] of Object.entries(STATES)) {
       const { bl, flows } = cfg;
-      const s = { alp: 0, coal: 0, grn: 0, on: 6 };
+      const share = flows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare;
+      const named = ["alp", "coal", "grn", "ind", "on"];
+      const blOther = Math.max(0, 100 - named.reduce((t, k) => t + (bl[k] ?? 0), 0));
+
+      // A rise the residual pool can absorb entirely is already sourced — no cut.
+      const small = { ...bl, on: (bl.on ?? 0) + Math.max(0, blOther - 0.5) };
+      expect(extraCoalCutFor(bl, small, share), `${name} small`).toBe(0);
+
+      // A rise beyond it charges the Coalition for the shortfall, which raises ALP
+      // 2PP (the cut mass lands in "other", which preferences better to Labor).
+      const bigRise = blOther + 10;
+      const raw = { ...bl, on: (bl.on ?? 0) + bigRise };
+      const cutAmt = extraCoalCutFor(bl, raw, share);
+      expect(cutAmt, `${name} big`).toBeGreaterThan(0);
+      const s = { alp: 0, coal: 0, grn: 0, on: bigRise };
       const compute2pp = makeStateCompute2pp({ ind: bl.ind, onTcp: null, swings: s, exhaust: cfg.exhaust ?? 0 });
-      const raw = { ...bl, on: bl.on + 6 };
-      const cut = { ...raw, coal: Math.max(0, raw.coal - extraCoalCutFor(s, flows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare)) };
+      const cut = { ...raw, coal: Math.max(0, raw.coal - cutAmt) };
       expect(compute2pp(cut, flows), name).toBeGreaterThan(compute2pp(raw, flows));
+    }
+  });
+
+  it("does not cut the Coalition when the primaries already state the source", () => {
+    // Every bloc specified and summing to ~100 with ON's rise offset by real
+    // declines: nothing is left to infer, so the stated Coalition primary stands.
+    for (const [name, cfg] of Object.entries(STATES)) {
+      const { bl, flows } = cfg;
+      const share = flows.onFromCoalShare ?? MODEL_PARAMS.onFromCoalShare;
+      const stated = {
+        ...bl,
+        alp: Math.max(0, (bl.alp ?? 0) - 8),
+        coal: Math.max(0, (bl.coal ?? 0) - 6),
+        on: (bl.on ?? 0) + 14,
+      };
+      expect(extraCoalCutFor(bl, stated, share), name).toBe(0);
     }
   });
 });
