@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-08-17",
+  "retrieved": "2026-08-24",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2527,6 +2527,30 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1511
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2026-08-15",
+      "alp": 28.0,
+      "coal": 23.0,
+      "grn": 12.0,
+      "on": 26.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 2256
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-08-16",
+      "alp": 28.5,
+      "coal": 23.5,
+      "grn": 12.5,
+      "on": 25.0,
+      "teal": 0.0,
+      "tpp": 51.5,
+      "n": 1576
     }
   ]
 }

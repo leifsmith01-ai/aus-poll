@@ -767,7 +767,19 @@
       "on": 22.0,
       "tpp": 45.0,
       "n": 1007
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Resolve Strategic",
+      "date": "2026-08-16",
+      "alp": 25.0,
+      "lp": 27.0,
+      "grn": 12.0,
+      "ind": 13.0,
+      "on": 23.0,
+      "tpp": null,
+      "n": 1000
     }
   ],
-  "retrieved": "2026-08-17"
+  "retrieved": "2026-08-24"
 }

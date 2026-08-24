@@ -191,7 +191,19 @@
       "on": 24.0,
       "tpp": 44.0,
       "n": 868
+    },
+    {
+      "scope": "QLD",
+      "pollster": "Resolve Strategic",
+      "date": "2026-08-15",
+      "alp": 26.0,
+      "lnp": 34.0,
+      "grn": 10.0,
+      "ind": 6.0,
+      "on": 20.0,
+      "tpp": 44.8,
+      "n": 681
     }
   ],
-  "retrieved": "2026-08-17"
+  "retrieved": "2026-08-24"
 }
