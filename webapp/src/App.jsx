@@ -2356,58 +2356,96 @@ const LATE_DECIDER_SPLIT = { alp: 0.38, coal: 0.34, grn: 0.12, teal: 0.06, on: 0
 // Default 0.5 blends evidence with the proportional baseline symmetrically.
 const LATE_DECIDER_WEIGHT = 0.5;
 
-function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majority = 76) {
-  const COALITION = new Set(["LP", "LNP", "NP", "CLP"]);
+// Resolve a seat to the two-horse contest both uncertainty engines model, so the
+// analytic and simulated views cannot drift apart on what a seat's race actually is.
+// Returns the deciding axis (`pct` = the projected winner's share of it, so >50 means
+// the projection holds), the two contending groups, and the per-seat σ components.
+//
+// `alpSide` records where Labor sits in that contest: +1 when Labor is the projected
+// winner, −1 when Labor is the challenger, 0 when Labor is not a contender at all.
+// That last case is the one the earlier analytic code got wrong: it read every
+// non-classic seat as "winner vs Labor", which handed Labor a ~50% chance of winning
+// Bradfield and Goldstein — teal-vs-Liberal contests Labor does not figure in — and
+// inflated the projected Labor seat count by roughly two and a half seats.
+function resolveSeatContest(seat, useElasticity) {
+  const COALITION_AB = new Set(["LP", "LNP", "NP", "CLP"]);
+  const parties = seat.tcp.map(t => t.party);
+  const isClassic = parties.includes("ALP") && parties.some(p => COALITION_AB.has(p))
+    && !(seat.modelled?.isAutoMatchup === true);
 
-  // Φ-function applies only to ALP/Coal seats that were NOT rerouted to an ON TCP race.
-  const alpCoalSeats = seats.filter(s => {
-    const parties = s.tcp.map(t => t.party);
-    const isAlpCoal = parties.includes("ALP") && parties.some(p => COALITION.has(p));
-    return isAlpCoal && !(s.modelled?.isAutoMatchup === true);
-  });
-  // Non-ALP/Coal seats (teal, Greens, independents, ON-detected): apply probabilistic
-  // uncertainty using projWinnerPct and NON_ALP_COAL_STD, rather than treating them
-  // as deterministic (0 or 1). This reflects genuine uncertainty in these races.
-  const nonAlpCoalSeats = seats.filter(s => {
-    const parties = s.tcp.map(t => t.party);
-    const isAlpCoal = parties.includes("ALP") && parties.some(p => COALITION.has(p));
-    return !(isAlpCoal && !(s.modelled?.isAutoMatchup === true));
-  });
-
-  // Per-seat win probabilities
-  const seatWinProbs = {};
-  // ALP/Coal seats: use Φ with combined correlated + independent σ
-  alpCoalSeats.forEach(seat => {
+  let out;
+  if (isClassic) {
     const rawBase = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
     const base = seat.modelled?.projAlp2pp ?? rawBase;
-    // Use SEAT_DEMO_MULT (demographic regression) when available; fall back to margin-based logistic.
-    const eps = useElasticity
-      ? (SEAT_DEMO_MULT[seat.id] ?? seatElasticityMult(base))
-      : 1.0;
-    // Combined σ: national-correlated (elasticity-scaled) + independent residual + independent pref-flow.
-    // SEAT_RESIDUAL_MAP provides per-seat σ from historical backtest residuals + demographic
-    // volatility adjustment (outer-suburban volatile seats get wider bands than stable inner-city seats).
-    const seatResidualSigma = SEAT_RESIDUAL_MAP[seat.id] ?? SEAT_RESIDUAL_STD;
+    const rSigma = SEAT_RESIDUAL_MAP[seat.id] ?? SEAT_RESIDUAL_STD;
+    out = {
+      classic: true,
+      pct: base,                                   // axis = ALP 2PP
+      winGroup: "alp",
+      loseGroup: getSeatGroup(seat, parties.find(p => COALITION_AB.has(p))),
+      eps: useElasticity ? (SEAT_DEMO_MULT[seat.id] ?? seatElasticityMult(base)) : 1.0,
+      indSigma: Math.sqrt(rSigma ** 2 + PREF_FLOW_IND_STD ** 2),
+    };
+  } else {
+    // Teal, Greens, independent, or a seat the model has rerouted to a One Nation
+    // two-candidate race. The contest is the projected winner against the other party
+    // of the historical TCP pair; if the model has already moved the seat away from
+    // both, the historical winner is the challenger.
+    const winGroup = seat.modelled?.winnerGroup ?? getSeatGroup(seat);
+    const wPct = seat.modelled?.winnerPct;
+    const histGroup = getSeatGroup(seat);
+    const tcpGroups = seat.tcp.map(t => getSeatGroup(seat, t.party));
+    out = {
+      classic: false,
+      // winnerPct === null marks a seat the user has forced to a group: it has no
+      // modelled margin, so it is held outright rather than given a spurious one.
+      pct: wPct == null ? 100 : wPct,
+      winGroup,
+      loseGroup: tcpGroups.find(g => g !== winGroup)
+        ?? (histGroup !== winGroup ? histGroup : "coalition"),
+      eps: 0,                                      // does not track the national 2PP swing
+      indSigma: wPct == null ? 0 : NON_ALP_COAL_STD,
+    };
+  }
+
+  out.id = seat.id;
+  out.state = seat.state ?? "?";
+  out.alpSide = out.winGroup === "alp" ? 1 : out.loseGroup === "alp" ? -1 : 0;
+  return out;
+}
+
+function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majority = 76) {
+  // resolveSeatContest() decides which race each seat actually is, and where (if
+  // anywhere) Labor sits in it. Classic ALP-vs-Coalition seats ride the national swing
+  // grid below; every other seat is a two-horse race on its own axis, and only counts
+  // toward Labor when Labor is one of the two contenders (alpSide !== 0).
+  const contests = seats.map(seat => resolveSeatContest(seat, useElasticity));
+  const alpCoalSeats = contests.filter(c => c.classic);
+  const nonAlpCoalSeats = contests.filter(c => !c.classic);
+
+  // Per-seat Labor win probabilities
+  const seatWinProbs = {};
+  // ALP/Coal seats: use Φ with combined correlated + independent σ.
+  // Combined σ: national-correlated (elasticity-scaled) + independent residual + independent pref-flow.
+  // SEAT_RESIDUAL_MAP provides per-seat σ from historical backtest residuals + demographic
+  // volatility adjustment (outer-suburban volatile seats get wider bands than stable inner-city seats).
+  alpCoalSeats.forEach(c => {
     const seatSigma = Math.sqrt(
-      eps * eps * swingStd * swingStd +
-      eps * eps * PREF_FLOW_CORR_STD * PREF_FLOW_CORR_STD +
+      c.eps * c.eps * swingStd * swingStd +
+      c.eps * c.eps * PREF_FLOW_CORR_STD * PREF_FLOW_CORR_STD +
       STATE_SHOCK_STD ** 2 +
-      seatResidualSigma ** 2 +
-      PREF_FLOW_IND_STD ** 2
+      c.indSigma ** 2
     );
-    seatWinProbs[seat.id] = Math.round(normCDF((base - 50) / seatSigma) * 1000) / 1000;
+    seatWinProbs[c.id] = Math.round(normCDF((c.pct - 50) / seatSigma) * 1000) / 1000;
   });
-  // Non-ALP/Coal seats: use projWinnerPct with NON_ALP_COAL_STD
-  // projWinnerPct is the winner's TCP% (>50 always), so we check if ALP is the winner
-  nonAlpCoalSeats.forEach(seat => {
-    const wg = seat.modelled?.winnerGroup ?? getParty(seat.winner.party).group;
-    const wPct = seat.modelled?.winnerPct ?? 50;
-    // For ALP-won seats (ALP/GRN or ALP/Teal TCP): the ALP "2PP" is projAlp2pp or winnerPct
-    // For non-ALP won seats: ALP win prob = 1 - winnerPct probability
-    const isAlpWinner = wg === "alp";
-    const alpBase = isAlpWinner ? wPct : (100 - wPct);
-    const p = normCDF((alpBase - 50) / NON_ALP_COAL_STD);
-    seatWinProbs[seat.id] = Math.round(p * 1000) / 1000;
+  // Non-ALP/Coal seats: probabilistic on the winner's own TCP axis with
+  // NON_ALP_COAL_STD, rather than deterministic (0 or 1). Where Labor is not a
+  // contender its probability is 0 — not 1 − P(winner), which is the challenger's.
+  nonAlpCoalSeats.forEach(c => {
+    if (c.alpSide === 0) { seatWinProbs[c.id] = 0; return; }
+    const pWinner = normCDF((c.pct - 50) / NON_ALP_COAL_STD);
+    const p = c.alpSide > 0 ? pWinner : 1 - pWinner;
+    seatWinProbs[c.id] = Math.round(p * 1000) / 1000;
   });
 
   let alpMeanSeats = 0;
@@ -2434,15 +2472,6 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
   );
   const totalPdf = swingPdfs.reduce((s, p) => s + p, 0) * pfPdfs.reduce((s, p) => s + p, 0);
 
-  // Independent per-seat noise σ (seat-level residual + independent pref-flow).
-  // Pre-compute per-seat indepSigma using SEAT_RESIDUAL_MAP when available,
-  // falling back to the uniform SEAT_RESIDUAL_STD for seats without per-seat data.
-  const seatIndepSigmas = {};
-  alpCoalSeats.forEach(seat => {
-    const rSigma = SEAT_RESIDUAL_MAP[seat.id] ?? SEAT_RESIDUAL_STD;
-    seatIndepSigmas[seat.id] = Math.sqrt(rSigma ** 2 + PREF_FLOW_IND_STD ** 2);
-  });
-
   // Standard normal pdf (state-shock sensitivity terms below).
   const normPdf = (x) => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
 
@@ -2465,35 +2494,28 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
       let expectedCount = 0;
       const stateShockSums = {}; // per state: Σ s_i and Σ s_i²
       // ALP/Coal seats: shift by national swing + correlated pref-flow
-      alpCoalSeats.forEach(seat => {
-        const rawBase = seat.tcp[0].party === "ALP" ? seat.tcp[0].pct : seat.tcp[1].pct;
-        const base = seat.modelled?.projAlp2pp ?? rawBase;
-        const eps = useElasticity
-          ? (SEAT_DEMO_MULT[seat.id] ?? seatElasticityMult(base))
-          : 1.0;
-        const seatBase = base + eps * (delta - nat2ppSwing) + pfDelta;
-        const sig = seatIndepSigmas[seat.id] ?? 0;
-        const sigTot = Math.sqrt(sig * sig + STATE_SHOCK_STD * STATE_SHOCK_STD);
+      alpCoalSeats.forEach(c => {
+        const seatBase = c.pct + c.eps * (delta - nat2ppSwing) + pfDelta;
+        const sigTot = Math.sqrt(c.indSigma * c.indSigma + STATE_SHOCK_STD * STATE_SHOCK_STD);
         const m = seatBase - 50;
         const pWin = sigTot > 0 ? normCDF(m / sigTot) : (m >= 0 ? 1 : 0);
         expectedCount += pWin;
         if (sigTot > 0) {
-          const s = normPdf(m / sigTot) * STATE_SHOCK_STD / sigTot;
-          const grp = stateShockSums[seat.state ?? "?"] ?? (stateShockSums[seat.state ?? "?"] = { sum: 0, sumSq: 0 });
-          grp.sum += s;
-          grp.sumSq += s * s;
+          const sens = normPdf(m / sigTot) * STATE_SHOCK_STD / sigTot;
+          const grp = stateShockSums[c.state] ?? (stateShockSums[c.state] = { sum: 0, sumSq: 0 });
+          grp.sum += sens;
+          grp.sumSq += sens * sens;
         }
       });
-      // Non-ALP/Coal seats: apply correlated pref-flow shift, independent residual only
-      nonAlpCoalSeats.forEach(seat => {
-        const wg = seat.modelled?.winnerGroup ?? getParty(seat.winner.party).group;
-        const wPct = seat.modelled?.winnerPct ?? 50;
-        const isAlpWinner = wg === "alp";
-        const alpBase = isAlpWinner ? wPct : (100 - wPct);
-        // Pref-flow shift applies here too (correlated), independent residual is NON_ALP_COAL_STD
-        const seatBase = alpBase + pfDelta;
-        const pWin = normCDF((seatBase - 50) / NON_ALP_COAL_STD);
-        expectedCount += pWin;
+      // Non-ALP/Coal seats: correlated pref-flow shift, independent residual only.
+      // Seats Labor is not contesting add nothing to the Labor count.
+      nonAlpCoalSeats.forEach(c => {
+        if (c.alpSide === 0) return;
+        // A pro-Labor pref-flow shift raises the winner's share when Labor is the
+        // winner and lowers it when Labor is the challenger.
+        const winnerPct = c.pct + (c.alpSide > 0 ? pfDelta : -pfDelta);
+        const pWinner = normCDF((winnerPct - 50) / NON_ALP_COAL_STD);
+        expectedCount += c.alpSide > 0 ? pWinner : 1 - pWinner;
       });
       const count = Math.round(expectedCount);
       seatCountCdf[count] = (seatCountCdf[count] ?? 0) + w;
@@ -2533,6 +2555,185 @@ function computeUncertainty(seats, nat2ppSwing, swingStd, useElasticity, majorit
     alpP95: quantile(0.95),
     pMajority: Math.round(pMajority * 100),
     seatWinProbs,
+  };
+}
+
+// ── Per-party seat-count distribution (Monte Carlo) ───────────────────────────
+// computeUncertainty() above answers "how many seats does Labor win?" analytically.
+// That works because every classic seat is a binary on one axis, so the answer is a
+// sum of Φ terms. It cannot answer the same question for the Coalition, Greens,
+// teals, independents or One Nation: those contests are not ALP-vs-Coalition, and
+// the analytic grid collapses every one of them into an ALP-vs-field binary.
+//
+// This simulator draws from the identical error decomposition and tallies the
+// *winning group* of every seat on every draw. That yields three things the
+// analytic engine cannot produce:
+//   • a seat-count distribution for each party group, not just the ALP;
+//   • per-seat probabilities over all groups, so each seat can be labelled by how
+//     confident the call is (see SEAT_BANDS) — the seats that generate the range;
+//   • P(ALP majority), P(Coalition majority) and P(hung) from one joint set of
+//     draws, rather than two marginals that need not be consistent.
+//
+// Error components per draw — the same σ constants computeUncertainty() uses, so
+// the two engines agree on Labor to within Monte Carlo noise:
+//   national swing   N(0, swingStd)             shared; scaled by seat elasticity ε
+//   pref-flow shift  N(0, PREF_FLOW_CORR_STD)   shared across every seat
+//   state shock      N(0, STATE_SHOCK_STD)      shared within a state, classic seats
+//   seat residual    N(0, σ_res ⊕ σ_pf_ind)     independent per seat
+// Non-classic seats take NON_ALP_COAL_STD as their independent residual and do not
+// track the national 2PP swing, matching computeUncertainty()'s treatment of them.
+
+// Deterministic PRNG (mulberry32). The simulation must not re-roll on every React
+// render: an unchanged scenario has to show the same range twice, and a σ slider
+// drag must not make the numbers shimmer. Draws therefore come from a fixed seed
+// rather than Math.random(), so the output is a pure function of its inputs.
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Box–Muller over a supplied uniform generator, caching the second variate so the
+// pair costs one log and one sqrt rather than two (the inner loop draws ~10^6 of
+// these). Module-scope gaussRandom() below is the Math.random() equivalent used by
+// the Hare-Clark simulator.
+function makeGauss(rand) {
+  let spare = null;
+  return () => {
+    if (spare !== null) { const s = spare; spare = null; return s; }
+    const u = 1 - rand(), v = rand();
+    const r = Math.sqrt(-2 * Math.log(u));
+    spare = r * Math.sin(2 * Math.PI * v);
+    return r * Math.cos(2 * Math.PI * v);
+  };
+}
+
+// How confident the projected winner's hold on a seat is, from its simulated win
+// probability. Thresholds follow the convention US and Australian forecasters use
+// (Safe / Likely / Lean / Toss-up) so the labels read the way people expect.
+// Ordered strongest-first; seatBandFor() takes the first band the probability clears.
+const SEAT_BANDS = [
+  { key: "safe",   label: "Safe",    min: 0.95, color: "var(--text-3)", bg: "var(--subtle-bg)" },
+  { key: "likely", label: "Likely",  min: 0.80, color: "#059669",       bg: "rgba(5,150,105,0.12)" },
+  { key: "lean",   label: "Lean",    min: 0.65, color: "#D97706",       bg: "rgba(217,119,6,0.15)" },
+  { key: "tossup", label: "Toss-up", min: 0,    color: "#DC2626",       bg: "rgba(220,38,38,0.13)" },
+];
+// A seat is "in play" — i.e. it is one of the seats the party ranges are made of —
+// when the projected winner is below this probability (Lean and Toss-up bands).
+const IN_PLAY_P = 0.80;
+const seatBandFor = (p) => SEAT_BANDS.find(b => p >= b.min) ?? SEAT_BANDS[SEAT_BANDS.length - 1];
+
+// 2,000 draws puts the Monte Carlo standard error on a party's mean seat count at
+// roughly σ/√N ≈ 0.1 seats and on a percentile at well under one seat — below the
+// resolution the UI displays — while keeping the whole simulation inside a few
+// milliseconds for a 151-seat chamber.
+const SEAT_DIST_DRAWS = 2000;
+
+function computeSeatDistribution(seats, nat2ppSwing, swingStd, useElasticity, majority = 76, N = SEAT_DIST_DRAWS) {
+  // Same contest resolution as computeUncertainty(), so the analytic Labor interval
+  // and these simulated ranges are describing the same races.
+  const prepared = seats.map(seat => resolveSeatContest(seat, useElasticity));
+
+  const groupTallies = Object.fromEntries(GROUP_ORDER.map(g => [g, new Array(N).fill(0)]));
+  const seatWins = {};
+  prepared.forEach(p => { seatWins[p.id] = {}; });
+
+  const gauss = makeGauss(mulberry32(0x5EA7C0DE));
+  const stateKeys = [...new Set(prepared.map(p => p.state))];
+  const stateShock = {};
+  let alpMaj = 0, coalMaj = 0, hung = 0;
+
+  for (let i = 0; i < N; i++) {
+    const swingShock = gauss() * swingStd;
+    const pfShock = gauss() * PREF_FLOW_CORR_STD;
+    for (const st of stateKeys) stateShock[st] = gauss() * STATE_SHOCK_STD;
+
+    const counts = {};
+    for (const p of prepared) {
+      // pfShock is signed on the Labor axis, so it lifts the projected winner's share
+      // only when that winner is Labor; where Labor is the challenger it cuts it.
+      const pct = p.pct
+        + p.eps * swingShock
+        + (p.alpSide < 0 ? -pfShock : pfShock)
+        + (p.classic ? stateShock[p.state] : 0)
+        + (p.indSigma > 0 ? gauss() * p.indSigma : 0);
+      const g = pct > 50 ? p.winGroup : p.loseGroup;
+      counts[g] = (counts[g] ?? 0) + 1;
+      seatWins[p.id][g] = (seatWins[p.id][g] ?? 0) + 1;
+    }
+    for (const g of GROUP_ORDER) groupTallies[g][i] = counts[g] ?? 0;
+
+    const a = counts.alp ?? 0, c = counts.coalition ?? 0;
+    if (a >= majority) alpMaj++;
+    else if (c >= majority) coalMaj++;
+    else hung++;
+  }
+
+  // Percentile of an ascending array, nearest-rank.
+  const q = (arr, p) => arr[Math.min(arr.length - 1, Math.max(0, Math.round(p * (arr.length - 1))))];
+  const groups = {};
+  GROUP_ORDER.forEach(g => {
+    const s = [...groupTallies[g]].sort((a, b) => a - b);
+    const mean = s.reduce((x, v) => x + v, 0) / N;
+    const varc = s.reduce((x, v) => x + (v - mean) ** 2, 0) / N;
+    groups[g] = {
+      mean: Math.round(mean * 10) / 10,
+      std: Math.round(Math.sqrt(varc) * 10) / 10,
+      p05: q(s, 0.05), p10: q(s, 0.10), p25: q(s, 0.25), p50: q(s, 0.50),
+      p75: q(s, 0.75), p90: q(s, 0.90), p95: q(s, 0.95),
+      min: s[0], max: s[N - 1],
+    };
+  });
+
+  // Per-seat outlook. `p` is the probability of the group the point projection
+  // shows, not of the simulation's modal winner, so the confidence label can never
+  // contradict the "Projected" column beside it. When the two disagree the seat is a
+  // coin-flip by construction, and `modal` records which way the draws leant.
+  const seatProbs = {};
+  const seatOutlook = {};
+  let expectedMisses = 0, inPlay = 0;
+  prepared.forEach(p => {
+    const probs = {};
+    Object.entries(seatWins[p.id]).forEach(([g, n]) => { probs[g] = n / N; });
+    seatProbs[p.id] = probs;
+
+    const projGroup = p.pct > 50 ? p.winGroup : p.loseGroup;
+    const pProj = probs[projGroup] ?? 0;
+    const ranked = Object.entries(probs).sort((a, b) => b[1] - a[1]);
+    const challenger = ranked.find(([g]) => g !== projGroup);
+    seatOutlook[p.id] = {
+      group: projGroup,
+      p: pProj,
+      modal: ranked[0]?.[0] ?? projGroup,
+      challenger: challenger?.[0] ?? null,
+      challengerP: challenger?.[1] ?? 0,
+      band: seatBandFor(pProj),
+    };
+    expectedMisses += 1 - pProj;
+    if (pProj < IN_PLAY_P) inPlay++;
+  });
+
+  return {
+    n: N,
+    majority,
+    total: prepared.length,
+    groups,
+    seatProbs,
+    seatOutlook,
+    inPlay,
+    // Expected number of seats the point projection calls wrong — Σ(1 − p) over all
+    // seats. Unlike the count of "in play" seats it has no arbitrary threshold in it,
+    // so it is the honest one-number summary of how much the projection can move.
+    expectedMisses: Math.round(expectedMisses * 10) / 10,
+    pMajority: {
+      alp: Math.round(alpMaj / N * 100),
+      coalition: Math.round(coalMaj / N * 100),
+      hung: Math.round(hung / N * 100),
+    },
   };
 }
 
@@ -4357,7 +4558,178 @@ const CHART = {
   tooltip: { fontSize: 12, borderRadius: 3, border: "1px solid var(--border-2)", boxShadow: "none", background: "var(--panel-bg)", color: "var(--text-1)" },
 };
 
-function TallyBar({ seats, useModelled = false }) {
+// Compact band label for a seat ("Lean", "Toss-up", …) with its win probability.
+// Rendered in the seat tables so the seats that generate the party ranges are
+// identifiable seat by seat, not just in aggregate.
+function ConfidenceChip({ outlook, compact = false }) {
+  if (!outlook) return <span style={{ fontSize: 11, color: "var(--text-4)" }}>—</span>;
+  const { band, p } = outlook;
+  return (
+    <span title={`${Math.round(p * 100)}% chance the projected winner holds this seat`}
+      style={{
+        display: "inline-block", fontSize: 10, fontWeight: 700, letterSpacing: "0.02em",
+        color: band.color, background: band.bg, padding: compact ? "1px 5px" : "2px 6px",
+        borderRadius: 8, whiteSpace: "nowrap",
+      }}>
+      {band.label}{compact ? "" : ` ${Math.round(p * 100)}%`}
+    </span>
+  );
+}
+
+// Per-party seat-count ranges from computeSeatDistribution(). One row per group,
+// all drawn on a shared 0..total axis so the rows are directly comparable and the
+// majority line lands in the same place on every one: the light bar is the 90%
+// interval, the solid bar the 50% interval, the tick the median.
+function SeatRangePanel({ dist, total, majority, title = "Seat-count range by party", note = null }) {
+  if (!dist) return null;
+  const axis = total ?? dist.total;
+  const rows = GROUP_ORDER.filter(g => (dist.groups[g]?.max ?? 0) > 0);
+  const pos = (v) => `${Math.max(0, Math.min(100, v / axis * 100))}%`;
+  return (
+    <div style={{ ...STYLES.panel, marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>{title}</span>
+        <span style={{ fontSize: 11, color: "var(--text-3)", background: "var(--subtle-bg)", padding: "2px 7px", borderRadius: 10 }}>
+          {dist.n.toLocaleString()} simulations
+        </span>
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 12, lineHeight: 1.5 }}>
+        Bar spans the 90% interval; the solid centre is the 50% interval and the tick is the median.
+        The dashed line is the {majority} seats needed for a majority.
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "110px 58px 1fr 72px", gap: 10, marginBottom: 6 }}>
+        {["Party", "Median", "", "90% range"].map((h, i) => (
+          <span key={i} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-4)", textAlign: i === 3 ? "right" : "left" }}>{h}</span>
+        ))}
+      </div>
+
+      {rows.map(g => {
+        const d = dist.groups[g];
+        const cfg = GROUP_CONFIG[g];
+        const crossesMajority = d.p05 < majority && d.p95 >= majority;
+        return (
+          <div key={g} style={{ display: "grid", gridTemplateColumns: "110px 58px 1fr 72px", gap: 10, alignItems: "center", marginBottom: 9 }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-2)", minWidth: 0 }}>
+              <span style={{ width: 10, height: 10, borderRadius: 3, background: cfg.color, flexShrink: 0 }} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cfg.label}</span>
+            </span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: "var(--text-1)", fontVariantNumeric: "tabular-nums" }}>
+              {Math.round(d.p50)}
+            </span>
+            <div style={{ position: "relative", height: 14, background: "var(--subtle-bg)", borderRadius: 4 }}>
+              <div style={{ position: "absolute", left: pos(d.p05), width: pos(d.p95 - d.p05), top: 3, height: 8, background: cfg.color, opacity: 0.25, borderRadius: 4 }} />
+              <div style={{ position: "absolute", left: pos(d.p25), width: pos(d.p75 - d.p25), top: 1, height: 12, background: cfg.color, opacity: 0.55, borderRadius: 3 }} />
+              <div style={{ position: "absolute", left: pos(d.p50), width: 2, top: 0, height: "100%", background: cfg.color }} />
+              <div style={{ position: "absolute", left: pos(majority), width: 0, top: -2, bottom: -2, borderLeft: "1px dashed var(--text-3)" }} />
+            </div>
+            <span style={{
+              fontSize: 11, fontVariantNumeric: "tabular-nums", textAlign: "right",
+              color: crossesMajority ? cfg.color : "var(--text-3)",
+              fontWeight: crossesMajority ? 700 : 400,
+            }}>
+              {d.p05}–{d.p95}
+            </span>
+          </div>
+        );
+      })}
+
+      <div style={{ borderTop: "1px solid var(--border-3)", marginTop: 12, paddingTop: 10, display: "flex", flexWrap: "wrap", gap: "6px 18px", fontSize: 12, color: "var(--text-2)" }}>
+        <span><span style={{ color: "var(--text-3)" }}>Seats in play: </span><strong>{dist.inPlay}</strong> <span style={{ color: "var(--text-4)" }}>of {dist.total}</span></span>
+        <span><span style={{ color: "var(--text-3)" }}>Expected wrong calls: </span><strong>±{dist.expectedMisses}</strong></span>
+        <span><span style={{ color: "var(--text-3)" }}>Majority: </span>
+          <strong style={{ color: "#DC2626" }}>ALP {dist.pMajority.alp}%</strong>
+          <span style={{ color: "var(--text-4)" }}> · </span>
+          <strong style={{ color: "#1D4ED8" }}>Coal {dist.pMajority.coalition}%</strong>
+          <span style={{ color: "var(--text-4)" }}> · </span>
+          <strong>hung {dist.pMajority.hung}%</strong>
+        </span>
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, lineHeight: 1.5 }}>
+        "In play" = the projected winner holds with under {Math.round(IN_PLAY_P * 100)}% probability (Lean or Toss-up).
+        Those seats are flagged individually in the seat-at-risk table below. A median below the seat
+        table's projected count is not an inconsistency: a party sitting on a stack of marginals wins
+        fewer of them than it holds, once the seats are allowed to move.
+        {note ? ` ${note}` : ""}
+      </div>
+    </div>
+  );
+}
+
+// Outcome breakdown for one seat, shown when its row is expanded: how the simulation
+// splits between the projected winner and the parties that could take the seat off
+// them. This is the seat-level counterpart of the party ranges — the same draws,
+// read down a column instead of across a row.
+function SeatOutcomeOdds({ outlook, probs }) {
+  if (!outlook || !probs) return null;
+  const ranked = Object.entries(probs)
+    .filter(([, p]) => p >= 0.005)
+    .sort((a, b) => b[1] - a[1]);
+  return (
+    <div>
+      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 6 }}>
+        Simulated outcome
+      </div>
+      <div style={{ marginBottom: 6 }}><ConfidenceChip outlook={outlook} /></div>
+      {ranked.map(([g, p]) => (
+        <div key={g} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+          <span style={{ width: 8, height: 8, borderRadius: 2, background: GROUP_CONFIG[g]?.color ?? "var(--text-3)", flexShrink: 0 }} />
+          <span style={{ fontSize: 11, color: "var(--text-2)", minWidth: 84 }}>{GROUP_CONFIG[g]?.label ?? g}</span>
+          <span style={{ position: "relative", flex: 1, height: 6, background: "var(--subtle-bg)", borderRadius: 3, minWidth: 40 }}>
+            <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${p * 100}%`, background: GROUP_CONFIG[g]?.color ?? "var(--text-3)", borderRadius: 3 }} />
+          </span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-1)", minWidth: 30, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+            {Math.round(p * 100)}%
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Baseline-vs-projected count card per party group, with the projection's 90% seat
+// interval when a computeSeatDistribution() result is supplied. Replaces the block
+// that was copy-pasted into the federal, VIC and generic-state composition panels.
+function GroupDeltaCards({ base, proj, dist = null, hideEmpty = true }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 12, marginTop: 8 }}>
+      {GROUP_ORDER.map(g => {
+        const b = base[g] || 0;
+        const pv = proj[g] || 0;
+        if (hideEmpty && !b && !pv) return null;
+        const delta = pv - b;
+        const d = dist?.groups?.[g];
+        return (
+          <div key={g} style={STYLES.metricCard}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+              <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>{GROUP_CONFIG[g].label}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+              <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{pv}</span>
+              <span style={{ fontSize: 12, color: "var(--text-3)" }}>/ {b} base</span>
+            </div>
+            {d && (
+              <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
+                90% range {d.p05}–{d.p95}
+              </div>
+            )}
+            {delta !== 0 && (
+              <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? "#059669" : "#DC2626", marginTop: 2 }}>
+                {delta > 0 ? "+" : ""}{delta} seats
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// `dist` (optional) is a computeSeatDistribution() result. When supplied, each
+// legend entry carries the party's 90% seat-count interval beside its point count,
+// so the composition bar is never read as a set of exact numbers.
+function TallyBar({ seats, useModelled = false, dist = null }) {
   const counts = {};
   seats.forEach(s => {
     const g = useModelled ? (s.modelled?.winnerGroup ?? getSeatGroup(s)) : getSeatGroup(s);
@@ -4390,6 +4762,11 @@ function TallyBar({ seats, useModelled = false }) {
           <span key={g} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-2)" }}>
             <span style={{ width: 11, height: 11, borderRadius: 3, background: GROUP_CONFIG[g].color, display: "inline-block", flexShrink: 0 }} />
             {GROUP_CONFIG[g].label} <strong style={{ fontWeight: 700, color: "var(--text-1)" }}>{counts[g]}</strong>
+            {useModelled && dist?.groups?.[g] && (
+              <span style={{ color: "var(--text-4)", fontVariantNumeric: "tabular-nums" }}>
+                ({dist.groups[g].p05}–{dist.groups[g].p95})
+              </span>
+            )}
           </span>
         ))}
       </div>
@@ -4399,7 +4776,7 @@ function TallyBar({ seats, useModelled = false }) {
 
 // Hero projection banner under the header. Pure render over App()'s projCounts /
 // seatAvg2pp; stays at module scope (same constraint as STYLES).
-function HeroBanner({ counts, avg2pp, isMobile }) {
+function HeroBanner({ counts, avg2pp, isMobile, dist = null }) {
   const alp = counts.alp ?? 0;
   const coalition = counts.coalition ?? 0;
   const greens = counts.greens ?? 0;
@@ -4417,6 +4794,17 @@ function HeroBanner({ counts, avg2pp, isMobile }) {
     minWidth: "1.6ch",
   };
   const bigLabel = { fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--header-muted)" };
+  // 90% seat-count interval beneath each headline number, so the hero never presents
+  // the projection as a single exact figure.
+  const range = (g) => {
+    const d = dist?.groups?.[g];
+    if (!d) return null;
+    return (
+      <span style={{ fontSize: 10, color: "var(--header-muted)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+        {d.p05}–{d.p95}
+      </span>
+    );
+  };
   return (
     <div style={{ background: "var(--header-bg)", color: "var(--header-fg)", padding: isMobile ? "12px 16px 0" : "16px 24px 0" }}>
       <div style={{ maxWidth: 1400, margin: "0 auto" }}>
@@ -4433,11 +4821,17 @@ function HeroBanner({ counts, avg2pp, isMobile }) {
         <div style={{ display: "flex", alignItems: "flex-end", gap: isMobile ? 16 : 28, flexWrap: "wrap", marginBottom: isMobile ? 10 : 12 }}>
           <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
             <span style={{ ...bigNum, color: "#E5484D" }}>{alpAnim}</span>
-            <span style={bigLabel}>Labor</span>
+            <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <span style={bigLabel}>Labor</span>
+              {range("alp")}
+            </span>
           </span>
           <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
             <span style={{ ...bigNum, color: "#5B8DEF" }}>{coalAnim}</span>
-            <span style={bigLabel}>Coalition</span>
+            <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <span style={bigLabel}>Coalition</span>
+              {range("coalition")}
+            </span>
           </span>
           <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
             <span style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? 17 : 22, fontWeight: 600, lineHeight: 1, color: "#34B27B", fontVariantNumeric: "tabular-nums" }}>{greens}</span>
@@ -5340,7 +5734,7 @@ export default function App() {
   const [showStateSwings, setShowStateSwings] = useState(false); // show/hide per-state swing controls
 
   // ── Seat-at-risk table state ──
-  const [riskFilter, setRiskFilter] = useState("all"); // "all" | "changing" | "marginal"
+  const [riskFilter, setRiskFilter] = useState("all"); // "all" | "changing" | "marginal" | "inplay"
   const [modelStateFilter, setModelStateFilter] = useState(""); // "" = All States
   const [expandedModelSeatId, setExpandedModelSeatId] = useState(null);
   const [expandedSeatTabDemogId, setExpandedSeatTabDemogId] = useState(null);
@@ -5361,7 +5755,7 @@ export default function App() {
   const [useNtRegionalSwing,  setUseNtRegionalSwing]  = useState(true);
 
   // ── State model seat-filter / expand / override state ──
-  const [stateRiskFilter, setStateRiskFilter] = useState("all"); // "all" | "changing" | "marginal"
+  const [stateRiskFilter, setStateRiskFilter] = useState("all"); // "all" | "changing" | "marginal" | "inplay"
   const [expandedStateSeatId, setExpandedStateSeatId] = useState(null);
   const [vicSeatOverrides, setVicSeatOverrides] = useState({});
   const [vicOverrideSearch, setVicOverrideSearch] = useState("");
@@ -5503,6 +5897,12 @@ export default function App() {
     computeUncertainty(modelledSeats, nat2ppSwing, undecAdjStd, useElasticity),
     [modelledSeats, nat2ppSwing, undecAdjStd, useElasticity]);
 
+  // Per-party seat-count ranges + per-seat confidence bands, from the same error
+  // components as `uncertainty` above (which stays the analytic authority on Labor).
+  const seatDist = useMemo(() =>
+    computeSeatDistribution(modelledSeats, nat2ppSwing, undecAdjStd, useElasticity, 76),
+    [modelledSeats, nat2ppSwing, undecAdjStd, useElasticity]);
+
   // ── Live Results (election-night counting) ──────────────────────────────────
   // Fetches the normalized Electoral Commission feed, projects each seat's final
   // outcome via swing vs the prior-election baseline, and quantifies confidence.
@@ -5639,6 +6039,10 @@ export default function App() {
     () => computeUncertainty(vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity, 45),
     [vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity]
   );
+  const vicSeatDist = useMemo(
+    () => computeSeatDistribution(vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity, 45),
+    [vicModelledSeats, vicNat2ppSwing, swingStd, useElasticity]
+  );
 
   // ── NSW 2023 model state ──────────────────────────────────────────────────
   // Baselines: ALP 37.6  Coalition 37.0 (LP 28.6 + NP 8.4)  GRN 10.4  IND 8.5  ON 2.0  other 4.5  2PP 53.2
@@ -5711,6 +6115,10 @@ export default function App() {
     () => computeUncertainty(nswModelledSeats, nswNat2ppSwing, swingStd, useElasticity, 47),
     [nswModelledSeats, nswNat2ppSwing, swingStd, useElasticity]
   );
+  const nswSeatDist = useMemo(
+    () => computeSeatDistribution(nswModelledSeats, nswNat2ppSwing, swingStd, useElasticity, 47),
+    [nswModelledSeats, nswNat2ppSwing, swingStd, useElasticity]
+  );
 
   // ── QLD 2024 model state ──────────────────────────────────────────────────
   // Baselines: ALP 33.4  Coalition (LNP) 40.3  GRN 11.5  IND 6.6  ON 8.2  ALP 2PP 46.3
@@ -5780,6 +6188,10 @@ export default function App() {
     () => computeUncertainty(qldModelledSeats, qldNat2ppSwing, swingStd, useElasticity, 47),
     [qldModelledSeats, qldNat2ppSwing, swingStd, useElasticity]
   );
+  const qldSeatDist = useMemo(
+    () => computeSeatDistribution(qldModelledSeats, qldNat2ppSwing, swingStd, useElasticity, 47),
+    [qldModelledSeats, qldNat2ppSwing, swingStd, useElasticity]
+  );
 
   // ── WA 2025 model state ───────────────────────────────────────────────────
   const [waPrim, setWaPrim] = useState({ ...WA_BL, undecided: 0 });
@@ -5842,6 +6254,10 @@ export default function App() {
   }, [waPrim, waFlows, waOnTcp]);
   const waUncertainty = useMemo(
     () => computeUncertainty(waModelledSeats, waNat2ppSwing, swingStd, useElasticity, 30),
+    [waModelledSeats, waNat2ppSwing, swingStd, useElasticity]
+  );
+  const waSeatDist = useMemo(
+    () => computeSeatDistribution(waModelledSeats, waNat2ppSwing, swingStd, useElasticity, 30),
     [waModelledSeats, waNat2ppSwing, swingStd, useElasticity]
   );
 
@@ -5917,6 +6333,10 @@ export default function App() {
     () => computeUncertainty(saModelledSeats, saNat2ppSwing, swingStd, useElasticity, 24),
     [saModelledSeats, saNat2ppSwing, swingStd, useElasticity]
   );
+  const saSeatDist = useMemo(
+    () => computeSeatDistribution(saModelledSeats, saNat2ppSwing, swingStd, useElasticity, 24),
+    [saModelledSeats, saNat2ppSwing, swingStd, useElasticity]
+  );
 
   // ── NT 2024 model state ───────────────────────────────────────────────────
   const [ntExhaustRate, setNtExhaustRate] = useState(NT_EXHAUST_DEFAULT);
@@ -5975,6 +6395,10 @@ export default function App() {
   }, [ntPrim, ntFlows, ntOnTcp, ntExhaustRate]);
   const ntUncertainty = useMemo(
     () => computeUncertainty(ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity, 13),
+    [ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity]
+  );
+  const ntSeatDist = useMemo(
+    () => computeSeatDistribution(ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity, 13),
     [ntModelledSeats, ntNat2ppSwing, swingStd, useElasticity]
   );
 
@@ -6620,7 +7044,7 @@ export default function App() {
       </div>
 
       {/* ── Hero projection banner ── */}
-      <HeroBanner counts={projCounts} avg2pp={seatAvg2pp} isMobile={isMobile} />
+      <HeroBanner counts={projCounts} avg2pp={seatAvg2pp} isMobile={isMobile} dist={seatDist} />
 
       {/* Keyed wrapper re-mounts on tab change → editorial rise-in transition */}
       <div key={activeTab} style={{ animation: "riseIn 0.22s ease-out" }}>
@@ -8165,35 +8589,16 @@ export default function App() {
                       <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
                       {hasChanges && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
                     </div>
-                    <TallyBar seats={modelledSeats} useModelled={true} />
+                    <TallyBar seats={modelledSeats} useModelled={true} dist={seatDist} />
                   </div>
 
                   {/* Delta table */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 12, marginTop: 8 }}>
-                    {GROUP_ORDER.map(g => {
-                      const base = baseCounts[g] || 0;
-                      const proj = projCounts[g] || 0;
-                      const delta = proj - base;
-                      return (
-                        <div key={g} style={STYLES.metricCard}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                            <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
-                            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>{GROUP_CONFIG[g].label}</span>
-                          </div>
-                          <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                            <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{proj}</span>
-                            <span style={{ fontSize: 12, color: "var(--text-3)" }}>/ {base} base</span>
-                          </div>
-                          {delta !== 0 && (
-                            <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? "#059669" : "#DC2626", marginTop: 2 }}>
-                              {delta > 0 ? "+" : ""}{delta} seats
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <GroupDeltaCards base={baseCounts} proj={projCounts} dist={seatDist} hideEmpty={false} />
                 </div>
+
+                {/* ── Per-party seat-count ranges (simulation) ── */}
+                <SeatRangePanel dist={seatDist} majority={76}
+                  note="Labor's row is the simulated equivalent of the analytic interval below: both are built from the same error components." />
 
                 {/* ── Uncertainty / confidence interval panel ── */}
                 <div style={{ ...STYLES.panel, marginBottom: 14 }}>
@@ -8313,7 +8718,8 @@ export default function App() {
                   });
                   const filtered = (riskFilter === "all" ? seatsByRisk
                     : riskFilter === "changing" ? seatsByRisk.filter(s => s.modelled.changed)
-                      : seatsByRisk.filter(s => getModelledMargin(s) < 5))
+                      : riskFilter === "inplay" ? seatsByRisk.filter(s => (seatDist.seatOutlook[s.id]?.p ?? 1) < IN_PLAY_P)
+                        : seatsByRisk.filter(s => getModelledMargin(s) < 5))
                     .filter(s => !modelStateFilter || s.state === modelStateFilter);
 
                   return (
@@ -8326,7 +8732,7 @@ export default function App() {
                           {STATES.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                         <div style={{ display: "flex", gap: 4 }}>
-                          {[["all", "All 151"], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"]].map(([val, label]) => (
+                          {[["all", "All 151"], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"], ["inplay", `In play (${seatDist.inPlay})`]].map(([val, label]) => (
                             <button key={val} onClick={() => setRiskFilter(val)} style={filterBtnStyle(riskFilter === val)}>{label}</button>
                           ))}
                         </div>
@@ -8335,8 +8741,8 @@ export default function App() {
                       {/* Column headers + rows — wrapped for horizontal scroll on mobile */}
                       <div style={{ overflowX: "auto" }}>
                       {/* Column headers */}
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 450 }}>
-                        {[["Seat", "var(--text-2)"], ["State", "var(--text-3)"], ["2025", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP win%", "var(--text-3)"], ["", "var(--text-3)"]].map(([label, color], i) => (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 42px 94px 94px 60px 42px 78px 48px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 580 }}>
+                        {[["Seat", "var(--text-2)"], ["State", "var(--text-3)"], ["2025", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP%", "var(--text-3)"], ["Confidence", "var(--text-3)"], ["", "var(--text-3)"]].map(([label, color], i) => (
                           <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                         ))}
                       </div>
@@ -8352,6 +8758,7 @@ export default function App() {
                           const d = getDemog(seat.id);
 
                           const seatWinProb = uncertainty.seatWinProbs[seat.id];
+                          const outlook = seatDist.seatOutlook[seat.id];
                           const ov = seatOverrides[seat.id] ?? {};
                           const seatPrefFlows = ov.prefFlows ?? {};
                           const hasSeatOverrides = Object.keys(ov).some(k => k !== "prefFlows" && ov[k] != null)
@@ -8360,7 +8767,7 @@ export default function App() {
                             <div key={seat.id}>
                               <div onClick={() => setExpandedModelSeatId(prev => prev === seat.id ? null : seat.id)}
                                 style={{
-                                  display: "grid", gridTemplateColumns: "1fr 48px 80px 80px 80px 52px 60px", gap: 4, alignItems: "center", minWidth: 450,
+                                  display: "grid", gridTemplateColumns: "1fr 42px 94px 94px 60px 42px 78px 48px", gap: 4, alignItems: "center", minWidth: 580,
                                   padding: "5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
                                   borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
                                   opacity: isSafe ? 0.55 : 1,
@@ -8371,8 +8778,8 @@ export default function App() {
                                   {isExpanded ? "▾ " : "▸ "}{seat.name}
                                 </span>
                                 <span style={{ fontSize: 11, color: "var(--text-3)" }}>{seat.state}</span>
-                                <div><PartyBadge party={seat.winner.party} /></div>
-                                <div>
+                                <div style={{ minWidth: 0, overflow: "hidden" }}><PartyBadge party={seat.winner.party} /></div>
+                                <div style={{ minWidth: 0, overflow: "hidden" }}>
                                   {changed
                                     ? <PartyBadge party={seat.modelled.winnerParty} />
                                     : <span style={{ fontSize: 11, color: "var(--text-4)" }}>holds</span>
@@ -8391,6 +8798,7 @@ export default function App() {
                                 }}>
                                   {seatWinProb != null ? `${Math.round(seatWinProb * 100)}%` : "—"}
                                 </span>
+                                <span><ConfidenceChip outlook={outlook} /></span>
                                 <span style={{ fontSize: 10, color: changed ? projColor : "var(--text-4)", fontWeight: 600 }}>
                                   {changed ? "CHANGED" : ""}
                                   {hasSeatOverrides && <span style={{ marginLeft: 4, fontSize: 9, color: "var(--text-3)", fontWeight: 700 }}>⚙</span>}
@@ -8398,7 +8806,8 @@ export default function App() {
                               </div>
                               {isExpanded && (
                                 <div style={{ background: "var(--metric-bg)", borderBottom: "1px solid var(--border-1)", padding: "12px 16px", marginBottom: 2 }}>
-                                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+                                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 16 }}>
+                                    <SeatOutcomeOdds outlook={outlook} probs={seatDist.seatProbs[seat.id]} />
                                     <div>
                                       <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 6 }}>Income</div>
                                       <div style={{ fontSize: 12, lineHeight: 1.8 }}>
@@ -8996,34 +9405,12 @@ export default function App() {
                       <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
                       {vicHasChanges && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
                     </div>
-                    <TallyBar seats={vicModelledSeats} useModelled={true} />
+                    <TallyBar seats={vicModelledSeats} useModelled={true} dist={vicSeatDist} />
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 12, marginTop: 8 }}>
-                    {GROUP_ORDER.map(g => {
-                      const base = vicBaseCounts[g] || 0;
-                      const proj = vicProjCounts[g] || 0;
-                      const delta = proj - base;
-                      if (!base && !proj) return null;
-                      return (
-                        <div key={g} style={STYLES.metricCard}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                            <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
-                            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>{GROUP_CONFIG[g].label}</span>
-                          </div>
-                          <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                            <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{proj}</span>
-                            <span style={{ fontSize: 12, color: "var(--text-3)" }}>/ {base} base</span>
-                          </div>
-                          {delta !== 0 && (
-                            <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? "#059669" : "#DC2626", marginTop: 2 }}>
-                              {delta > 0 ? "+" : ""}{delta} seats
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <GroupDeltaCards base={vicBaseCounts} proj={vicProjCounts} dist={vicSeatDist} />
                 </div>
+
+                <SeatRangePanel dist={vicSeatDist} majority={45} />
 
                 {/* VIC Uncertainty panel */}
                 <div style={{ ...STYLES.panel, marginBottom: 14 }}>
@@ -9090,19 +9477,20 @@ export default function App() {
                   });
                   if (stateRiskFilter === "changing") vicFiltered = vicFiltered.filter(s => s.modelled.changed);
                   if (stateRiskFilter === "marginal") vicFiltered = vicFiltered.filter(s => Math.abs((s.modelled.projAlp2pp ?? 50) - 50) < 5);
+                  if (stateRiskFilter === "inplay") vicFiltered = vicFiltered.filter(s => (vicSeatDist.seatOutlook[s.id]?.p ?? 1) < IN_PLAY_P);
                   return (
                     <div style={panelStyle}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                         <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", flex: 1 }}>Seat-at-risk rankings</span>
                         <div style={{ display: "flex", gap: 4 }}>
-                          {[["all", `All 88`], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"]].map(([val, label]) => (
+                          {[["all", `All 88`], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"], ["inplay", `In play (${vicSeatDist.inPlay})`]].map(([val, label]) => (
                             <button key={val} onClick={() => setStateRiskFilter(val)} style={filterBtnStyle(stateRiskFilter === val)}>{label}</button>
                           ))}
                         </div>
                       </div>
                       <div style={{ overflowX: "auto" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 400 }}>
-                          {[["Seat", "var(--text-2)"], ["2022", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP%", "var(--text-3)"], ["", ""]].map(([label, color], i) => (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 86px 86px 58px 42px 78px 46px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 500 }}>
+                          {[["Seat", "var(--text-2)"], ["2022", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP%", "var(--text-3)"], ["Confidence", "var(--text-3)"], ["", ""]].map(([label, color], i) => (
                             <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                           ))}
                         </div>
@@ -9112,6 +9500,7 @@ export default function App() {
                             const changed = seat.modelled.changed;
                             const projColor = GROUP_CONFIG[seat.modelled.winnerGroup]?.color ?? "var(--text-3)";
                             const winProb = vicUncertainty.seatWinProbs[seat.id];
+                            const outlook = vicSeatDist.seatOutlook[seat.id];
                             const isExpanded = expandedStateSeatId === seat.id;
                             const d = getStateDemog(seat.id);
                             const hasOv = vicSeatOverrides[seat.id] != null;
@@ -9120,7 +9509,7 @@ export default function App() {
                               <div key={seat.id}>
                                 <div onClick={() => setExpandedStateSeatId(prev => prev === seat.id ? null : seat.id)}
                                   style={{
-                                    display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, alignItems: "center", minWidth: 400,
+                                    display: "grid", gridTemplateColumns: "1fr 86px 86px 58px 42px 78px 46px", gap: 4, alignItems: "center", minWidth: 500,
                                     padding: "5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
                                     borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
                                     background: hasOv ? "rgba(16,185,129,0.10)" : isExpanded ? "var(--row-highlight)" : changed ? "rgba(217,119,6,0.08)" : "transparent",
@@ -9139,12 +9528,16 @@ export default function App() {
                                   <span style={{ fontSize: 11, fontWeight: 700, color: winProb == null ? "var(--text-4)" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "var(--text-3)" : "#1D4ED8" }}>
                                     {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
                                   </span>
+                                  <span><ConfidenceChip outlook={outlook} compact /></span>
                                   <span style={{ fontSize: 10, color: changed ? projColor : hasOv ? "#059669" : onRace ? "#B45309" : "var(--text-4)", fontWeight: 600 }}>
                                     {changed ? "CHANGED" : hasOv ? "OVERRIDE" : onRace ? "ON RACE" : ""}
                                   </span>
                                 </div>
                                 {isExpanded && (
                                   <div style={{ background: "var(--metric-bg)", borderBottom: "1px solid var(--border-1)", padding: "10px 14px", marginBottom: 2 }}>
+                                    <div style={{ maxWidth: 340, marginBottom: 10 }}>
+                                      <SeatOutcomeOdds outlook={outlook} probs={vicSeatDist.seatProbs[seat.id]} />
+                                    </div>
                                     {Object.keys(d).length > 0 && d.medianAge != null ? (
                                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
                                         <div>
@@ -9331,15 +9724,15 @@ export default function App() {
             {/* ── Reusable state builder (NSW, QLD, WA, SA, NT) ── */}
             {(() => {
               const cfgs = {
-                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, seatOverrides: nswSeatOverrides, setSeatOverrides: setNswSeatOverrides, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80", pollsJson: NSW_STATE_POLLS, pollCoalKeys: ["lp", "np"] },
-                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, seatOverrides: qldSeatOverrides, setSeatOverrides: setQldSeatOverrides, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75", pollsJson: QLD_STATE_POLLS, pollCoalKeys: ["lnp"] },
-                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, seatOverrides: waSeatOverrides, setSeatOverrides: setWaSeatOverrides, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: WA_SEATS, uncertainty: waUncertainty, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75", pollsJson: WA_STATE_POLLS, pollCoalKeys: ["lp", "nat"] },
-                sa_2026: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, seatOverrides: saSeatOverrides, setSeatOverrides: setSaSeatOverrides, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2026 provisional results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: SA_SEATS, uncertainty: saUncertainty, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80", pollsJson: SA_STATE_POLLS, pollCoalKeys: ["lp"], caveat: "Provisional baseline: this model is built on the 21 March 2026 provisional ECSA count (6 seats were still in doubt at capture). Statewide primaries, 2PP, per-seat ON figures and seat winners may shift at the final declaration — refresh the SA constants once ECSA publishes the declared result (see docs/ELECTION_UPDATE_CHECKLIST.md)." },
-                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, seatOverrides: ntSeatOverrides, setSeatOverrides: setNtSeatOverrides, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70", exhaust: { rate: ntExhaustRate, set: setNtExhaustRate, def: NT_EXHAUST_DEFAULT } },
+                nsw_2023: { prim: nswPrim, setPrim: setNswPrim, flows: nswFlows, setFlows: setNswFlows, onTcp: nswOnTcp, setOnTcp: setNswOnTcp, seatOverrides: nswSeatOverrides, setSeatOverrides: setNswSeatOverrides, modelled: nswModelledSeats, proj: nswProjCounts, base: nswBaseCounts, changed: nswChanged, implied2pp: nswImplied2pp, hasChanges: nswHasChanges, bl: NSW_BL, baseline2pp: NSW_2PP, coalLabel: "Coalition", seats: "NSW_SEATS", totalSeats: 93, majority: 47, source: "NSWEC 2023 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.88, ind_alp: 0.55, on_alp: 0.20, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.88, ind_alp_v_on: 0.70, other_alp_v_on: 0.58, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: NSW_SEATS, uncertainty: nswUncertainty, dist: nswSeatDist, useRegionalSwing: useNswRegionalSwing, setUseRegionalSwing: setUseNswRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.80", pollsJson: NSW_STATE_POLLS, pollCoalKeys: ["lp", "np"] },
+                qld_2024: { prim: qldPrim, setPrim: setQldPrim, flows: qldFlows, setFlows: setQldFlows, onTcp: qldOnTcp, setOnTcp: setQldOnTcp, seatOverrides: qldSeatOverrides, setSeatOverrides: setQldSeatOverrides, modelled: qldModelledSeats, proj: qldProjCounts, base: qldBaseCounts, changed: qldChanged, implied2pp: qldImplied2pp, hasChanges: qldHasChanges, bl: QLD_BL, baseline2pp: QLD_2PP, coalLabel: "Coalition", seats: "QLD_SEATS", totalSeats: 93, majority: 47, source: "ECQ 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.82, ind_alp: 0.50, on_alp: 0.18, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.86, ind_alp_v_on: 0.65, other_alp_v_on: 0.55, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: QLD_SEATS, uncertainty: qldUncertainty, dist: qldSeatDist, useRegionalSwing: useQldRegionalSwing, setUseRegionalSwing: setUseQldRegionalSwing, regionLabel: "inner-metro ×1.10 · outer-metro ×1.00 · regional ×0.75", pollsJson: QLD_STATE_POLLS, pollCoalKeys: ["lnp"] },
+                wa_2025: { prim: waPrim, setPrim: setWaPrim, flows: waFlows, setFlows: setWaFlows, onTcp: waOnTcp, setOnTcp: setWaOnTcp, seatOverrides: waSeatOverrides, setSeatOverrides: setWaSeatOverrides, modelled: waModelledSeats, proj: waProjCounts, base: waBaseCounts, changed: waChanged, implied2pp: waImplied2pp, hasChanges: waHasChanges, bl: WA_BL, baseline2pp: WA_2PP, coalLabel: "Coalition", seats: "WA_SEATS", totalSeats: 59, majority: 30, source: "WAEC 2025 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.86, ind_alp: 0.58, on_alp: 0.22, other_alp: 0.44, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: WA_SEATS, uncertainty: waUncertainty, dist: waSeatDist, useRegionalSwing: useWaRegionalSwing, setUseRegionalSwing: setUseWaRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.75", pollsJson: WA_STATE_POLLS, pollCoalKeys: ["lp", "nat"] },
+                sa_2026: { prim: saPrim, setPrim: setSaPrim, flows: saFlows, setFlows: setSaFlows, onTcp: saOnTcp, setOnTcp: setSaOnTcp, seatOverrides: saSeatOverrides, setSeatOverrides: setSaSeatOverrides, modelled: saModelledSeats, proj: saProjCounts, base: saBaseCounts, changed: saChanged, implied2pp: saImplied2pp, hasChanges: saHasChanges, bl: SA_BL, baseline2pp: SA_2PP, coalLabel: "Coalition", seats: "SA_SEATS", totalSeats: 47, majority: 24, source: "ECSA 2026 provisional results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.84, ind_alp: 0.52, on_alp: 0.22, other_alp: 0.45, coal_alp_v_on: 0.12, grn_alp_v_on: 0.87, ind_alp_v_on: 0.68, other_alp_v_on: 0.57, alp_on_v_coal: 0.20, grn_on_v_coal: 0.07, ind_on_v_coal: 0.12, other_on_v_coal: 0.22, onCoalOriginFactor: 0.0 }, allSeats: SA_SEATS, uncertainty: saUncertainty, dist: saSeatDist, useRegionalSwing: useSaRegionalSwing, setUseRegionalSwing: setUseSaRegionalSwing, regionLabel: "inner-metro ×1.05 · outer-metro ×1.00 · regional ×0.80", pollsJson: SA_STATE_POLLS, pollCoalKeys: ["lp"], caveat: "Provisional baseline: this model is built on the 21 March 2026 provisional ECSA count (6 seats were still in doubt at capture). Statewide primaries, 2PP, per-seat ON figures and seat winners may shift at the final declaration — refresh the SA constants once ECSA publishes the declared result (see docs/ELECTION_UPDATE_CHECKLIST.md)." },
+                nt_2024: { prim: ntPrim, setPrim: setNtPrim, flows: ntFlows, setFlows: setNtFlows, onTcp: ntOnTcp, setOnTcp: setNtOnTcp, seatOverrides: ntSeatOverrides, setSeatOverrides: setNtSeatOverrides, modelled: ntModelledSeats, proj: ntProjCounts, base: ntBaseCounts, changed: ntChanged, implied2pp: null, hasChanges: ntHasChanges, bl: NT_BL, baseline2pp: NT_2PP, coalLabel: "Coalition", seats: "NT_SEATS", totalSeats: 25, majority: 13, source: "NTEC 2024 official results", parties: [{ k: "alp", l: "ALP", c: "#DC2626" }, { k: "coal", l: "Coalition", c: "#1D4ED8" }, { k: "grn", l: "Greens", c: "#059669" }, { k: "ind", l: "Independents", c: "#0891B2" }, { k: "on", l: "One Nation", c: "#B45309" }], resetFlows: { grn_alp: 0.80, ind_alp: 0.45, on_alp: 0.20, other_alp: 0.40, coal_alp_v_on: 0.10, grn_alp_v_on: 0.82, ind_alp_v_on: 0.55, other_alp_v_on: 0.50, alp_on_v_coal: 0.22, grn_on_v_coal: 0.06, ind_on_v_coal: 0.15, other_on_v_coal: 0.28, onCoalOriginFactor: 0.0 }, allSeats: NT_SEATS, uncertainty: ntUncertainty, dist: ntSeatDist, useRegionalSwing: useNtRegionalSwing, setUseRegionalSwing: setUseNtRegionalSwing, regionLabel: "metro ×1.00 · regional ×0.70", exhaust: { rate: ntExhaustRate, set: setNtExhaustRate, def: NT_EXHAUST_DEFAULT } },
               };
               const cfg = cfgs[selectedModelId];
               if (!el.modelEnabled || !cfg) return null;
-              const { prim, setPrim, flows, setFlows, onTcp, setOnTcp, seatOverrides, setSeatOverrides, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty, useRegionalSwing, setUseRegionalSwing, regionLabel, pollsJson, pollCoalKeys, caveat, exhaust } = cfg;
+              const { prim, setPrim, flows, setFlows, onTcp, setOnTcp, seatOverrides, setSeatOverrides, modelled, proj, base, changed, implied2pp, hasChanges, bl, baseline2pp, coalLabel, totalSeats, majority, source, parties, resetFlows, allSeats, uncertainty, dist, useRegionalSwing, setUseRegionalSwing, regionLabel, pollsJson, pollCoalKeys, caveat, exhaust } = cfg;
               // Recent state polls (election-result baseline rows excluded) and the
               // recency-weighted average used by the "Apply latest polls" action.
               const statePollList = (pollsJson?.polls ?? [])
@@ -9578,30 +9971,12 @@ export default function App() {
                         <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
                         {hasChanges && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
                       </div>
-                      <TallyBar seats={modelled} useModelled={true} />
+                      <TallyBar seats={modelled} useModelled={true} dist={dist} />
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 12, marginTop: 8 }}>
-                      {GROUP_ORDER.map(g => {
-                        const bv = base[g] || 0;
-                        const pv = proj[g] || 0;
-                        const delta = pv - bv;
-                        if (!bv && !pv) return null;
-                        return (
-                          <div key={g} style={STYLES.metricCard}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                              <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
-                              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>{GROUP_CONFIG[g].label}</span>
-                            </div>
-                            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                              <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{pv}</span>
-                              <span style={{ fontSize: 12, color: "var(--text-3)" }}>/ {bv} base</span>
-                            </div>
-                            {delta !== 0 && <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? "#059669" : "#DC2626", marginTop: 2 }}>{delta > 0 ? "+" : ""}{delta} seats</div>}
-                          </div>
-                        );
-                      })}
-                    </div>
+                    <GroupDeltaCards base={base} proj={proj} dist={dist} />
                   </div>
+
+                  <SeatRangePanel dist={dist} majority={majority} />
 
                   {/* Uncertainty panel */}
                   <div style={{ ...STYLES.panel, marginBottom: 14 }}>
@@ -9668,19 +10043,20 @@ export default function App() {
                     });
                     if (stateRiskFilter === "changing") stateFiltered = stateFiltered.filter(s => s.modelled.changed);
                     if (stateRiskFilter === "marginal") stateFiltered = stateFiltered.filter(s => Math.abs((s.modelled.projAlp2pp ?? 50) - 50) < 5);
+                    if (stateRiskFilter === "inplay") stateFiltered = stateFiltered.filter(s => (dist.seatOutlook[s.id]?.p ?? 1) < IN_PLAY_P);
                     return (
                       <div style={panelStyle}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                           <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", flex: 1 }}>Seat-at-risk rankings</span>
                           <div style={{ display: "flex", gap: 4 }}>
-                            {[["all", `All ${totalSeats}`], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"]].map(([val, label]) => (
+                            {[["all", `All ${totalSeats}`], ["changing", "Changing"], ["marginal", "Marginal (<5pp)"], ["inplay", `In play (${dist.inPlay})`]].map(([val, label]) => (
                               <button key={val} onClick={() => setStateRiskFilter(val)} style={filterBtnStyle(stateRiskFilter === val)}>{label}</button>
                             ))}
                           </div>
                         </div>
                         <div style={{ overflowX: "auto" }}>
-                          <div style={{ display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 400 }}>
-                            {[["Seat", "var(--text-2)"], ["Baseline", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP%", "var(--text-3)"], ["", ""]].map(([label, color], i) => (
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 86px 86px 58px 42px 78px 46px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 500 }}>
+                            {[["Seat", "var(--text-2)"], ["Baseline", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP%", "var(--text-3)"], ["Confidence", "var(--text-3)"], ["", ""]].map(([label, color], i) => (
                               <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                             ))}
                           </div>
@@ -9690,6 +10066,7 @@ export default function App() {
                               const chg = seat.modelled.changed;
                               const projColor = GROUP_CONFIG[seat.modelled.winnerGroup]?.color ?? "var(--text-3)";
                               const winProb = uncertainty.seatWinProbs[seat.id];
+                              const outlook = dist.seatOutlook[seat.id];
                               const isExpanded = expandedStateSeatId === seat.id;
                               const d = getStateDemog(seat.id);
                               const hasOv = seatOverrides?.[seat.id] != null;
@@ -9698,7 +10075,7 @@ export default function App() {
                                 <div key={seat.id}>
                                   <div onClick={() => setExpandedStateSeatId(prev => prev === seat.id ? null : seat.id)}
                                     style={{
-                                      display: "grid", gridTemplateColumns: "1fr 80px 80px 70px 52px 56px", gap: 4, alignItems: "center", minWidth: 400,
+                                      display: "grid", gridTemplateColumns: "1fr 86px 86px 58px 42px 78px 46px", gap: 4, alignItems: "center", minWidth: 500,
                                       padding: "5px 2px", borderLeft: `4px solid ${chg ? projColor : "transparent"}`,
                                       borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
                                       background: hasOv ? "rgba(16,185,129,0.10)" : isExpanded ? "var(--row-highlight)" : chg ? "rgba(217,119,6,0.08)" : "transparent",
@@ -9717,12 +10094,16 @@ export default function App() {
                                     <span style={{ fontSize: 11, fontWeight: 700, color: winProb == null ? "var(--text-4)" : winProb >= 0.85 ? "#DC2626" : winProb >= 0.60 ? "#F59E0B" : winProb >= 0.40 ? "var(--text-3)" : "#1D4ED8" }}>
                                       {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
                                     </span>
+                                    <span><ConfidenceChip outlook={outlook} compact /></span>
                                     <span style={{ fontSize: 10, color: chg ? projColor : hasOv ? "#059669" : autoOn ? "#B45309" : "var(--text-4)", fontWeight: 600 }}>
                                       {chg ? "CHANGED" : hasOv ? "OVERRIDE" : autoOn ? "ON AUTO" : ""}
                                     </span>
                                   </div>
                                   {isExpanded && (
                                     <div style={{ background: "var(--metric-bg)", borderBottom: "1px solid var(--border-1)", padding: "10px 14px", marginBottom: 2 }}>
+                                      <div style={{ maxWidth: 340, marginBottom: 10 }}>
+                                        <SeatOutcomeOdds outlook={outlook} probs={dist.seatProbs[seat.id]} />
+                                      </div>
                                       {Object.keys(d).length > 0 && d.medianAge != null ? (
                                         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
                                           <div>
@@ -11743,6 +12124,10 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
 // (src/__tests__/baseline-alignment.test.jsx), which asserts that every model at
 // zero swing reproduces the actual election result. Not used by the UI.
 export {
+  computeSeatDistribution,
+  computeUncertainty,
+  SEAT_BANDS,
+  IN_PLAY_P,
   computeModelledSeats,
   computeModelledSeatsVic,
   computeModelledSeatsState,
