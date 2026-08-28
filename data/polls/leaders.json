@@ -1,60 +1,88 @@
 {
-  "generated": "2026-04-01",
-  "source": "Newspoll / Essential Research — manual data entry from published tables",
-  "note": "Net approval = approve% - disapprove%. Preferred PM = respondents preferring each leader as PM. Data covers post-2025 election period.",
+  "generated": "2026-08-28",
+  "source": "Newspoll (published via The Australian; figures as reported by The Poll Bludger and The Conversation)",
+  "note": "Net approval = satisfied% - dissatisfied%. Preferred PM = Newspoll's 'better prime minister' question, Albanese vs the Leader of the Opposition of the day. Angus Taylor replaced Sussan Ley as Liberal leader (and Opposition Leader) on 13 February 2026; Ley subsequently resigned from parliament, triggering the Farrer by-election. Her series is retained for history and flagged current:false. Entries carrying only 'net' are polls where the source reported the net figure but not the satisfied/dissatisfied split.",
   "leaders": [
     {
       "name": "Anthony Albanese",
       "role": "Prime Minister",
       "party": "ALP",
       "party_color": "#DC2626",
+      "current": true,
       "data": [
-        { "date": "2025-05-16", "approve": 62, "disapprove": 27, "net": 35, "pollster": "Newspoll", "n": 1507, "note": "post-election honeymoon" },
-        { "date": "2025-06-06", "approve": 59, "disapprove": 28, "net": 31, "pollster": "Essential Research", "n": 1100 },
-        { "date": "2025-07-04", "approve": 57, "disapprove": 30, "net": 27, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2025-07-18", "approve": 55, "disapprove": 31, "net": 24, "pollster": "Essential Research", "n": 1100 },
-        { "date": "2025-08-01", "approve": 54, "disapprove": 32, "net": 22, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2025-09-05", "approve": 52, "disapprove": 33, "net": 19, "pollster": "Essential Research", "n": 1100 },
-        { "date": "2025-10-03", "approve": 51, "disapprove": 35, "net": 16, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2025-11-07", "approve": 49, "disapprove": 36, "net": 13, "pollster": "Essential Research", "n": 1100 },
-        { "date": "2025-12-05", "approve": 48, "disapprove": 37, "net": 11, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2026-01-09", "approve": 47, "disapprove": 38, "net": 9, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2026-02-06", "approve": 46, "disapprove": 39, "net": 7, "pollster": "Essential Research", "n": 1100 },
-        { "date": "2026-03-06", "approve": 45, "disapprove": 40, "net": 5, "pollster": "Newspoll", "n": 1507 }
+        { "date": "2025-07-18", "approve": 47, "disapprove": 47, "net": 0, "pollster": "Newspoll", "n": 1200 },
+        { "date": "2025-09-11", "approve": 45, "disapprove": 50, "net": -5, "pollster": "Newspoll", "n": 1264 },
+        { "date": "2025-10-02", "approve": 47, "disapprove": 48, "net": -1, "pollster": "Newspoll", "n": 1264 },
+        { "date": "2025-10-30", "approve": 46, "disapprove": 51, "net": -5, "pollster": "Newspoll", "n": 1265 },
+        { "date": "2025-11-20", "approve": 47, "disapprove": 47, "net": 0, "pollster": "Newspoll", "n": 1245 },
+        { "date": "2026-01-15", "approve": 42, "disapprove": 53, "net": -11, "pollster": "Newspoll", "n": 1224 },
+        { "date": "2026-02-08", "approve": 43, "disapprove": 53, "net": -10, "pollster": "Newspoll", "n": 1234 },
+        { "date": "2026-02-26", "approve": 40, "disapprove": 55, "net": -15, "pollster": "Newspoll", "note": "first poll after the Liberal leadership spill" },
+        { "date": "2026-04-16", "approve": 40, "disapprove": 57, "net": -17, "pollster": "Newspoll", "n": 1235 },
+        { "date": "2026-06-04", "approve": 36, "disapprove": 60, "net": -24, "pollster": "Newspoll", "n": 1240, "note": "second-term low" },
+        { "date": "2026-06-25", "approve": 40, "disapprove": 57, "net": -17, "pollster": "Newspoll", "n": 1235 },
+        { "date": "2026-07-16", "approve": 39, "disapprove": 57, "net": -18, "pollster": "Newspoll", "n": 1238 },
+        { "date": "2026-08-07", "approve": 37, "disapprove": 59, "net": -22, "pollster": "Newspoll", "n": 1242 }
+      ]
+    },
+    {
+      "name": "Angus Taylor",
+      "role": "Leader of the Opposition",
+      "party": "LP",
+      "party_color": "#1D4ED8",
+      "current": true,
+      "since": "2026-02-13",
+      "note": "Elected Liberal leader on 13 February 2026, defeating Sussan Ley 34-17.",
+      "data": [
+        { "date": "2026-02-26", "approve": 35, "disapprove": 38, "net": -3, "pollster": "Newspoll", "note": "first ratings as leader" },
+        { "date": "2026-04-16", "approve": 33, "disapprove": 46, "net": -13, "pollster": "Newspoll", "n": 1235 },
+        { "date": "2026-06-04", "approve": 35, "disapprove": 45, "net": -10, "pollster": "Newspoll", "n": 1240 },
+        { "date": "2026-06-25", "approve": 31, "disapprove": 51, "net": -20, "pollster": "Newspoll", "n": 1235 },
+        { "date": "2026-07-16", "approve": 30, "disapprove": 51, "net": -21, "pollster": "Newspoll", "n": 1238 },
+        { "date": "2026-08-07", "approve": 34, "disapprove": 46, "net": -12, "pollster": "Newspoll", "n": 1242 }
       ]
     },
     {
       "name": "Sussan Ley",
-      "role": "Leader of the Opposition",
+      "role": "Leader of the Opposition (May 2025 – Feb 2026)",
       "party": "LP",
-      "party_color": "#1D4ED8",
-      "note": "Became Liberal leader following Peter Dutton's defeat in Dickson at the 2025 election.",
+      "party_color": "#93C5FD",
+      "current": false,
+      "until": "2026-02-13",
+      "note": "Liberal leader after Peter Dutton's defeat in Dickson at the 2025 election; replaced by Angus Taylor on 13 February 2026 and resigned from parliament, triggering the 2026 Farrer by-election.",
       "data": [
-        { "date": "2025-06-06", "approve": 28, "disapprove": 38, "net": -10, "pollster": "Essential Research", "n": 1100, "note": "new leader, low recognition" },
-        { "date": "2025-07-04", "approve": 31, "disapprove": 38, "net": -7, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2025-08-01", "approve": 32, "disapprove": 37, "net": -5, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2025-09-05", "approve": 33, "disapprove": 37, "net": -4, "pollster": "Essential Research", "n": 1100 },
-        { "date": "2025-10-03", "approve": 34, "disapprove": 37, "net": -3, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2025-11-07", "approve": 35, "disapprove": 37, "net": -2, "pollster": "Essential Research", "n": 1100 },
-        { "date": "2025-12-05", "approve": 35, "disapprove": 38, "net": -3, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2026-01-09", "approve": 34, "disapprove": 39, "net": -5, "pollster": "Newspoll", "n": 1507 },
-        { "date": "2026-02-06", "approve": 34, "disapprove": 39, "net": -5, "pollster": "Essential Research", "n": 1100 },
-        { "date": "2026-03-06", "approve": 35, "disapprove": 38, "net": -3, "pollster": "Newspoll", "n": 1507 }
+        { "date": "2025-07-18", "approve": 35, "disapprove": 42, "net": -7, "pollster": "Newspoll", "n": 1200 },
+        { "date": "2025-09-11", "net": -17, "pollster": "Newspoll", "n": 1264 },
+        { "date": "2025-10-02", "net": -20, "pollster": "Newspoll", "n": 1264 },
+        { "date": "2025-10-30", "approve": 25, "disapprove": 58, "net": -33, "pollster": "Newspoll", "n": 1265 },
+        { "date": "2025-11-20", "approve": 26, "disapprove": 55, "net": -29, "pollster": "Newspoll", "n": 1245 },
+        { "date": "2026-01-15", "approve": 28, "disapprove": 56, "net": -28, "pollster": "Newspoll", "n": 1224 },
+        { "date": "2026-02-08", "approve": 23, "disapprove": 62, "net": -39, "pollster": "Newspoll", "n": 1234, "note": "worst rating for a major-party leader in 23 years; spill followed on 13 Feb" }
       ]
     }
   ],
   "preferred_pm": {
-    "description": "Which leader do you prefer as Prime Minister?",
+    "description": "Newspoll 'better prime minister': Anthony Albanese vs the Leader of the Opposition",
     "data": [
-      { "date": "2025-05-16", "alp_pct": 61, "opp_pct": 25, "undecided_pct": 14, "pollster": "Newspoll" },
-      { "date": "2025-07-04", "alp_pct": 57, "opp_pct": 28, "undecided_pct": 15, "pollster": "Newspoll" },
-      { "date": "2025-10-03", "alp_pct": 54, "opp_pct": 30, "undecided_pct": 16, "pollster": "Newspoll" },
-      { "date": "2025-12-05", "alp_pct": 52, "opp_pct": 31, "undecided_pct": 17, "pollster": "Newspoll" },
-      { "date": "2026-03-06", "alp_pct": 51, "opp_pct": 33, "undecided_pct": 16, "pollster": "Newspoll" }
+      { "date": "2025-07-18", "alp_pct": 52, "opp_pct": 32, "undecided_pct": 16, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Sussan Ley" },
+      { "date": "2025-09-11", "alp_pct": 51, "opp_pct": 31, "undecided_pct": 18, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Sussan Ley" },
+      { "date": "2025-10-02", "alp_pct": 52, "opp_pct": 30, "undecided_pct": 18, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Sussan Ley" },
+      { "date": "2025-10-30", "alp_pct": 54, "opp_pct": 27, "undecided_pct": 19, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Sussan Ley" },
+      { "date": "2025-11-20", "alp_pct": 54, "opp_pct": 27, "undecided_pct": 19, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Sussan Ley" },
+      { "date": "2026-01-15", "alp_pct": 51, "opp_pct": 31, "undecided_pct": 18, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Sussan Ley" },
+      { "date": "2026-02-08", "alp_pct": 49, "opp_pct": 30, "undecided_pct": 21, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Sussan Ley" },
+      { "date": "2026-02-26", "alp_pct": 45, "opp_pct": 37, "undecided_pct": 18, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Angus Taylor" },
+      { "date": "2026-04-16", "alp_pct": 46, "opp_pct": 37, "undecided_pct": 17, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Angus Taylor" },
+      { "date": "2026-06-04", "alp_pct": 44, "opp_pct": 38, "undecided_pct": 18, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Angus Taylor" },
+      { "date": "2026-06-25", "alp_pct": 47, "opp_pct": 36, "undecided_pct": 17, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Angus Taylor" },
+      { "date": "2026-07-16", "alp_pct": 44, "opp_pct": 36, "undecided_pct": 20, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Angus Taylor" },
+      { "date": "2026-08-07", "alp_pct": 44, "opp_pct": 37, "undecided_pct": 19, "pollster": "Newspoll", "alp_leader": "Anthony Albanese", "opp_leader": "Angus Taylor" }
     ]
   },
   "government_satisfaction": {
     "description": "Satisfied / Dissatisfied with the performance of the Federal Government",
+    "unverified": true,
+    "note": "Placeholder series — not yet re-sourced against published pollster tables. Treat as illustrative only.",
     "data": [
       { "date": "2025-06-06", "satisfied": 55, "dissatisfied": 34, "net": 21, "pollster": "Essential Research" },
       { "date": "2025-08-01", "satisfied": 52, "dissatisfied": 36, "net": 16, "pollster": "Newspoll" },

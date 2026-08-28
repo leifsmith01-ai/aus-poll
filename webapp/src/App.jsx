@@ -7748,6 +7748,23 @@ export default function App() {
             if (!leaders.length) return null;
             const latestGovtSat = govtSat[govtSat.length - 1];
             const latestPrefPm = prefPm[prefPm.length - 1];
+            // Leaders who have since been replaced (e.g. Sussan Ley, Liberal leader
+            // until the 13 Feb 2026 spill) stay in the trend chart for history but
+            // must not be shown as the incumbent in the summary cards or the
+            // preferred-PM card.
+            const currentLeaders = leaders.filter(l => l.current !== false);
+            // Fixed axis bounds went off-scale once leader ratings moved deep negative,
+            // so derive the domain from the series actually plotted.
+            const netValues = leaders.flatMap(l => l.data.map(d => d.net)).filter(v => v != null);
+            const netDomain = netValues.length
+              ? [Math.floor((Math.min(...netValues) - 5) / 10) * 10, Math.ceil((Math.max(...netValues) + 5) / 10) * 10]
+              : [-20, 40];
+            // The preferred-PM card names whoever the poll actually asked about, so a
+            // leadership change can never leave it captioned with the old leader.
+            const prefPmName = (party, fallback) => {
+              const fromPoll = party === "ALP" ? latestPrefPm?.alp_leader : latestPrefPm?.opp_leader;
+              return fromPoll ?? currentLeaders.find(l => l.party === party)?.name ?? fallback;
+            };
             return (
               <div style={{ ...panelStyle, marginTop: 16 }}>
                 <div style={STYLES.panelTitle}>Leader Approval Ratings</div>
@@ -7756,7 +7773,7 @@ export default function App() {
                 </p>
                 {/* Summary cards */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12, marginBottom: 16 }}>
-                  {leaders.map(leader => {
+                  {currentLeaders.map(leader => {
                     const latest = leader.data[leader.data.length - 1];
                     if (!latest) return null;
                     const net = latest.net;
@@ -7769,9 +7786,11 @@ export default function App() {
                           <span style={{ fontSize: 22, fontWeight: 800, color: netColor }}>{net >= 0 ? "+" : ""}{net}</span>
                           <span style={{ fontSize: 11, color: "var(--text-3)" }}>net approval</span>
                         </div>
-                        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 3 }}>
-                          Approve {latest.approve}% · Disapprove {latest.disapprove}%
-                        </div>
+                        {latest.approve != null && latest.disapprove != null && (
+                          <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 3 }}>
+                            Approve {latest.approve}% · Disapprove {latest.disapprove}%
+                          </div>
+                        )}
                         <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 2 }}>
                           {latest.pollster} · {new Date(latest.date).toLocaleDateString("en-AU", { month: "short", year: "numeric" })}
                         </div>
@@ -7803,11 +7822,11 @@ export default function App() {
                       <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
                         <div>
                           <span style={{ fontSize: 18, fontWeight: 800, color: "#DC2626" }}>{latestPrefPm.alp_pct}%</span>
-                          <div style={{ fontSize: 10, color: "var(--text-3)" }}>ALP leader</div>
+                          <div style={{ fontSize: 10, color: "var(--text-3)" }}>{prefPmName("ALP", "ALP leader")}</div>
                         </div>
                         <div>
                           <span style={{ fontSize: 18, fontWeight: 800, color: "#1D4ED8" }}>{latestPrefPm.opp_pct}%</span>
-                          <div style={{ fontSize: 10, color: "var(--text-3)" }}>Opp leader</div>
+                          <div style={{ fontSize: 10, color: "var(--text-3)" }}>{prefPmName("LP", "Opp leader")}</div>
                         </div>
                       </div>
                       <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 4 }}>
@@ -7824,7 +7843,7 @@ export default function App() {
                       <XAxis dataKey="date" type="category" allowDuplicatedCategory={false}
                         tick={{ fontSize: 11, fill: chartTickColor }}
                         tickFormatter={d => new Date(d).toLocaleDateString("en-AU", { month: "short", year: "2-digit" })} />
-                      <YAxis tick={{ fontSize: 11, fill: chartTickColor }} domain={[-20, 40]}
+                      <YAxis tick={{ fontSize: 11, fill: chartTickColor }} domain={netDomain}
                         tickFormatter={v => `${v > 0 ? "+" : ""}${v}`} />
                       <Tooltip formatter={(v, name) => [`${v > 0 ? "+" : ""}${v}pp net`, name]} contentStyle={CHART.tooltip} />
                       <ReferenceLine y={0} stroke="var(--text-4)" strokeDasharray="4 2" />
