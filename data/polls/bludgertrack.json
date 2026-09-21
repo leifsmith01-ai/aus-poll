@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-09-14",
+  "retrieved": "2026-09-21",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2659,6 +2659,54 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1510
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2026-09-12",
+      "alp": 28.0,
+      "coal": 24.0,
+      "grn": 11.0,
+      "on": 27.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 2250
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-09-13",
+      "alp": 25.0,
+      "coal": 21.5,
+      "grn": 16.0,
+      "on": 25.0,
+      "teal": 0.0,
+      "tpp": 53.0,
+      "n": 1583
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2026-09-14",
+      "alp": 28.0,
+      "coal": 20.0,
+      "grn": 13.0,
+      "on": 26.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1583
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2026-09-17",
+      "alp": 27.0,
+      "coal": 19.0,
+      "grn": 13.0,
+      "on": 30.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1244
     }
   ]
 }
