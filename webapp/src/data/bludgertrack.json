@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-09-21",
+  "retrieved": "2026-09-28",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2707,6 +2707,30 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1244
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-09-20",
+      "alp": 25.0,
+      "coal": 21.5,
+      "grn": 15.5,
+      "on": 25.5,
+      "teal": 0.0,
+      "tpp": 52.0,
+      "n": 1561
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-09-22",
+      "alp": 26.0,
+      "coal": 21.0,
+      "grn": 14.0,
+      "on": 27.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1471
     }
   ]
 }
