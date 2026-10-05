@@ -803,7 +803,31 @@
       "on": 25.0,
       "tpp": 44.0,
       "n": 2371
+    },
+    {
+      "scope": "VIC",
+      "pollster": "DemosAU",
+      "date": "2026-09-20",
+      "alp": 25.0,
+      "lp": 30.0,
+      "grn": 14.0,
+      "ind": 11.0,
+      "on": 20.0,
+      "tpp": 48.0,
+      "n": 1020
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Freshwater Strategy",
+      "date": "2026-09-28",
+      "alp": 24.0,
+      "lp": 29.0,
+      "grn": 14.0,
+      "ind": 11.0,
+      "on": 22.0,
+      "tpp": 47.0,
+      "n": 1030
     }
   ],
-  "retrieved": "2026-09-28"
+  "retrieved": "2026-10-05"
 }
