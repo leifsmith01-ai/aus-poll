@@ -827,7 +827,31 @@
       "on": 22.0,
       "tpp": 47.0,
       "n": 1030
+    },
+    {
+      "scope": "VIC",
+      "pollster": "RedBridge Group",
+      "date": "2026-10-08",
+      "alp": 24.0,
+      "lp": 30.0,
+      "grn": 16.0,
+      "ind": 6.0,
+      "on": 24.0,
+      "tpp": 44.0,
+      "n": 1008
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Resolve Strategic",
+      "date": "2026-10-10",
+      "alp": 25.0,
+      "lp": 28.0,
+      "grn": 15.0,
+      "ind": 4.0,
+      "on": 23.0,
+      "tpp": null,
+      "n": 1000
     }
   ],
-  "retrieved": "2026-10-05"
+  "retrieved": "2026-10-12"
 }

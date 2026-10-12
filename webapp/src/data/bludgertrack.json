@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-10-05",
+  "retrieved": "2026-10-12",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2755,6 +2755,54 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1008
+    },
+    {
+      "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2026-10-02",
+      "alp": 28.0,
+      "coal": 21.0,
+      "grn": 11.0,
+      "on": 29.0,
+      "teal": 0.0,
+      "tpp": 50.0,
+      "n": 1000
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-10-06",
+      "alp": 25.0,
+      "coal": 21.0,
+      "grn": 15.0,
+      "on": 28.0,
+      "teal": 0.0,
+      "tpp": 52.0,
+      "n": 1505
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2026-10-08",
+      "alp": 29.0,
+      "coal": 20.0,
+      "grn": 14.0,
+      "on": 28.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1241
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2026-10-10",
+      "alp": 29.0,
+      "coal": 23.0,
+      "grn": 12.0,
+      "on": 25.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 2250
     }
   ]
 }
