@@ -215,7 +215,19 @@
       "on": 21.0,
       "tpp": 44.0,
       "n": 1291
+    },
+    {
+      "scope": "QLD",
+      "pollster": "Resolve Strategic",
+      "date": "2026-10-15",
+      "alp": 24.0,
+      "lnp": 32.0,
+      "grn": 11.0,
+      "ind": 7.0,
+      "on": 21.0,
+      "tpp": null,
+      "n": 868
     }
   ],
-  "retrieved": "2026-10-12"
+  "retrieved": "2026-10-19"
 }
