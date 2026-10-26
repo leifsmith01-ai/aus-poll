@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-10-19",
+  "retrieved": "2026-10-26",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2827,6 +2827,18 @@
       "teal": 0.0,
       "tpp": 53.5,
       "n": 2655
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-10-20",
+      "alp": 24.0,
+      "coal": 23.0,
+      "grn": 14.0,
+      "on": 27.0,
+      "teal": 0.0,
+      "tpp": 50.0,
+      "n": 1542
     }
   ]
 }

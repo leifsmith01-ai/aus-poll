@@ -227,7 +227,19 @@
       "on": 21.0,
       "tpp": null,
       "n": 868
+    },
+    {
+      "scope": "QLD",
+      "pollster": "DemosAU",
+      "date": "2026-10-21",
+      "alp": 25.0,
+      "lnp": 34.0,
+      "grn": 11.0,
+      "ind": 0.0,
+      "on": 23.0,
+      "tpp": 43.0,
+      "n": 1200
     }
   ],
-  "retrieved": "2026-10-19"
+  "retrieved": "2026-10-26"
 }

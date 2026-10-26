@@ -851,7 +851,19 @@
       "on": 23.0,
       "tpp": null,
       "n": 1000
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Newspoll",
+      "date": "2026-10-22",
+      "alp": 24.0,
+      "lp": 33.0,
+      "grn": 14.0,
+      "ind": 9.0,
+      "on": 20.0,
+      "tpp": 45.0,
+      "n": 1017
     }
   ],
-  "retrieved": "2026-10-19"
+  "retrieved": "2026-10-26"
 }
