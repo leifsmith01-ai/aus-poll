@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-10-26",
+  "retrieved": "2026-11-02",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2839,6 +2839,54 @@
       "teal": 0.0,
       "tpp": 50.0,
       "n": 1542
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-10-25",
+      "alp": 26.0,
+      "coal": 23.5,
+      "grn": 15.5,
+      "on": 22.5,
+      "teal": 0.0,
+      "tpp": 53.0,
+      "n": 2711
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Essential Research",
+      "date": "2026-10-26",
+      "alp": 28.0,
+      "coal": 23.0,
+      "grn": 12.0,
+      "on": 28.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1008
+    },
+    {
+      "scope": "NAT",
+      "pollster": "DemosAU",
+      "date": "2026-10-26",
+      "alp": 26.0,
+      "coal": 24.0,
+      "grn": 13.0,
+      "on": 26.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1500
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2026-10-29",
+      "alp": 27.0,
+      "coal": 21.0,
+      "grn": 13.0,
+      "on": 28.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1200
     }
   ]
 }
