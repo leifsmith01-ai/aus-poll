@@ -2,12 +2,12 @@
   "source": "smarkets",
   "national": {
     "coalition_majority": {
-      "decimal_odds": 3.36,
-      "implied_prob": 0.2976
+      "decimal_odds": 3.35,
+      "implied_prob": 0.2989
     },
     "alp_majority": {
       "decimal_odds": 2.03,
-      "implied_prob": 0.4927,
+      "implied_prob": 0.4926,
       "implied_2pp": 49.97
     }
   },
@@ -22,16 +22,16 @@
       "total_seats": 88,
       "majority": 45,
       "other_any_other": {
-        "decimal_odds": 11.39,
-        "implied_prob": 0.0878
+        "decimal_odds": 37.17,
+        "implied_prob": 0.0269
       },
       "coalition_win": {
-        "decimal_odds": 1.21,
-        "implied_prob": 0.8247
+        "decimal_odds": 1.1,
+        "implied_prob": 0.9109
       },
       "alp_win": {
-        "decimal_odds": 11.42,
-        "implied_prob": 0.0875
+        "decimal_odds": 16.08,
+        "implied_prob": 0.0622
       }
     },
     "nsw": {
@@ -54,7 +54,7 @@
     }
   },
   "national_market_name": "Party to Provide the Next Prime Minister of Australia",
-  "generated": "2026-11-04",
+  "generated": "2026-11-05",
   "sigma_per_seat": 2.5,
   "sigma_national": 1.5
 }
