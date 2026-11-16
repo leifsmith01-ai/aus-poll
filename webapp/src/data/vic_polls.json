@@ -899,7 +899,31 @@
       "on": 21.0,
       "tpp": 44.0,
       "n": 1562
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Resolve Strategic",
+      "date": "2026-11-07",
+      "alp": 22.0,
+      "lp": 30.0,
+      "grn": 13.0,
+      "ind": 6.0,
+      "on": 23.0,
+      "tpp": null,
+      "n": 1000
+    },
+    {
+      "scope": "VIC",
+      "pollster": "RedBridge Group",
+      "date": "2026-11-10",
+      "alp": 23.0,
+      "lp": 31.0,
+      "grn": 15.0,
+      "ind": 9.0,
+      "on": 22.0,
+      "tpp": 43.0,
+      "n": 1008
     }
   ],
-  "retrieved": "2026-11-09"
+  "retrieved": "2026-11-16"
 }

@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-11-09",
+  "retrieved": "2026-11-16",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2887,6 +2887,54 @@
       "teal": 0.0,
       "tpp": null,
       "n": 1200
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Spectre Strategy",
+      "date": "2026-11-03",
+      "alp": 25.0,
+      "coal": 24.0,
+      "grn": 13.0,
+      "on": 28.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 2093
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Resolve Strategic",
+      "date": "2026-11-07",
+      "alp": 28.0,
+      "coal": 22.0,
+      "grn": 13.0,
+      "on": 25.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 2250
+    },
+    {
+      "scope": "NAT",
+      "pollster": "RedBridge Group",
+      "date": "2026-11-07",
+      "alp": 26.0,
+      "coal": 25.0,
+      "grn": 13.0,
+      "on": 28.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 2250
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-11-08",
+      "alp": 25.5,
+      "coal": 22.0,
+      "grn": 15.0,
+      "on": 24.5,
+      "teal": 0.0,
+      "tpp": 52.5,
+      "n": 2574
     }
   ]
 }
