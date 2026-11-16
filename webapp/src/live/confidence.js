@@ -38,6 +38,11 @@ const NON_ALP_COAL_SAMPLE = 0.6;  //  more booth heterogeneity, so the late/skew
 const NON_ALP_COAL_LATE = 2.32;   //  term dominates their curve)
 const CORR_BASE = 3.0;          // statewide correlated swing sigma at 0 % counted (→0 at 100 %)
 
+// A seat the commission has DECLARED is settled: no residual uncertainty.
+const DECLARED_SIGMA = 1e-6;
+const sigAlpCoal = (s) => (s.declared ? DECLARED_SIGMA : seatSigma(s.countedFraction));
+const sigOther = (s) => (s.declared ? DECLARED_SIGMA : nonAlpCoalSigma(s.countedFraction));
+
 // Per-seat winner-margin sigma, driven by how much of THIS seat is counted.
 function seatSigma(f) {
   const r = Math.max(0, 1 - f);
@@ -74,13 +79,13 @@ export function computeLiveConfidence(projected, cfg) {
   const seatWinProbs = {}; // P(projected winner holds)
   const alpWinProbs = {};  // P(ALP wins the seat)
   for (const s of alpCoal) {
-    const sig = seatSigma(s.countedFraction);
+    const sig = sigAlpCoal(s);
     const pAlp = clamp01(normCDF((s.projAlp2pp - 50) / sig));
     alpWinProbs[s.seatId] = round3(pAlp);
     seatWinProbs[s.seatId] = round3(s.winnerGroup === "alp" ? pAlp : 1 - pAlp);
   }
   for (const s of others) {
-    const sig = nonAlpCoalSigma(s.countedFraction);
+    const sig = sigOther(s);
     const pHold = clamp01(normCDF((s.leaderPct - 50) / sig));
     seatWinProbs[s.seatId] = round3(pHold);
     // ALP win prob for an "other" seat: pHold if ALP leads, (1-pHold) if ALP is runner-up.
@@ -125,7 +130,7 @@ export function computeLiveConfidence(projected, cfg) {
     let alpCount = otherAlp;
     let coalCount = otherCoal;
     for (const s of alpCoal) {
-      const sig = seatSigma(s.countedFraction);
+      const sig = sigAlpCoal(s);
       const pAlp = clamp01(normCDF((s.projAlp2pp - 50 + delta) / sig));
       alpCount += pAlp;
       coalCount += 1 - pAlp;
@@ -165,7 +170,7 @@ export function computeLiveConfidence(projected, cfg) {
 function expectedFromAlpCoal(alpCoal, which) {
   let n = 0;
   for (const s of alpCoal) {
-    const sig = seatSigma(s.countedFraction);
+    const sig = sigAlpCoal(s);
     const pAlp = clamp01(normCDF((s.projAlp2pp - 50) / sig));
     n += which === "alp" ? pAlp : 1 - pAlp;
   }

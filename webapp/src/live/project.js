@@ -20,19 +20,39 @@ import { tcpLeader, normalizeFp } from "./contract.js";
 export function projectSeats(feed, baseline, cfg) {
   if (!feed || !Array.isArray(feed.seats)) return [];
   const baseSeats = baseline?.seats || {};
-  return feed.seats.map((seat) => projectSeat(seat, baseSeats[seat.seatId], feed.meta, cfg));
+  const out = feed.seats.map((seat) => projectSeat(seat, baseSeats[seat.seatId], feed.meta, cfg));
+  // A feed that omits districts must not shrink the chamber: carry every missing
+  // baseline seat as "not started" (held at its 2022 result) so totals stay out of 88.
+  const seen = new Set(feed.seats.map((s) => s.seatId));
+  for (const [seatId, base] of Object.entries(baseSeats)) {
+    if (seen.has(seatId)) continue;
+    const stub = { seatId, name: base.name, region: base.region, countedPct: 0, fp: [], tcp: null,
+      status: "not_started", lastUpdated: null };
+    out.push({ ...projectSeat(stub, base, feed.meta, cfg), missingFromFeed: true });
+  }
+  return out;
 }
 
 function projectSeat(seat, base, meta, cfg) {
-  const countedFraction = clamp01((seat.countedPct ?? 0) / 100);
+  const fpFraction = clamp01((seat.countedPct ?? 0) / 100);
   const fp = normalizeFp(seat.fp);
+  // The uncertainty must follow the count the projection is actually built on. The 2CP
+  // count lags first preferences on the night, so a 2CP from one booth is NOT as solid
+  // as the FP progress suggests. Old feeds without tcp.countedPct fall back to FP progress.
+  const usesTcp = !!tcpLeader(seat.tcp);
+  const tcpFraction = usesTcp && seat.tcp.countedPct != null
+    ? clamp01(Number(seat.tcp.countedPct) / 100) : fpFraction;
+  let countedFraction = usesTcp ? Math.min(fpFraction, tcpFraction) : fpFraction;
 
   // The contest pair we project onto: prefer the EC's published live pair, fall back to the
   // baseline pair, then to the top two first-preference parties.
   const pair = pickPair(seat, base, fp);
   // Orientation party: project the 2CP relative to a single fixed party so swings are signed
   // consistently. Prefer ALP if present (lets us emit a 2PP), else the baseline leader / pair[0].
-  const refParty = pair.includes("ALP") ? "ALP" : (base?.tcp?.pair?.[0] ?? pair[0]);
+  // The reference party MUST be one of the two contenders, or the winner test below
+  // picks the wrong side whenever the baseline leader is not in tonight's final pair.
+  const baseLead = base?.tcp?.pair?.[0];
+  const refParty = pair.includes("ALP") ? "ALP" : (pair.includes(baseLead) ? baseLead : pair[0]);
   const otherParty = pair[0] === refParty ? pair[1] : pair[0];
 
   const liveRef = liveRefPct(seat, fp, pair, refParty, cfg); // live 2CP % for refParty (or null)
@@ -63,18 +83,29 @@ function projectSeat(seat, base, meta, cfg) {
   const projAlp2pp = pair.includes("ALP")
     ? (refParty === "ALP" ? projRef : 100 - projRef)
     : null;
-  const baselineLeaderParty = base?.tcp?.pair?.[0] ?? null;
+  const baselineLeaderParty = base?.winnerParty ?? base?.tcp?.pair?.[0] ?? null;
   const baselineWinnerGroup = baselineLeaderParty ? cfg.groupOf(baselineLeaderParty) : winnerGroup;
 
-  const swing2cp = baseRef != null ? +(projRef - baseRef).toFixed(2) : null;
-  const status = classify(seat, countedFraction, margin2cp, cfg);
+  // A swing only means something when the live contest is the same two parties as the
+  // baseline one (e.g. not LP-v-IND tonight against an LP-v-ALP baseline figure).
+  const basePair = base?.tcp?.pair || [];
+  const samePair = basePair.length === 2 && pair.every((p) => basePair.includes(p));
+  const swing2cp = baseRef != null && samePair && liveRef != null ? +(projRef - baseRef).toFixed(2) : null;
+  const hasEstimate = liveRef != null;
+  // No live estimate (e.g. 2CP withheld in a non-classic seat): the seat is still sitting
+  // on its 2022 result, so it carries start-of-night uncertainty however many FPs are in.
+  if (!hasEstimate) countedFraction = 0;
+  const status = classify(seat, countedFraction, margin2cp, cfg, fpFraction);
 
   return {
     seatId: seat.seatId,
     name: seat.name,
     region: seat.region,
     countedPct: seat.countedPct ?? 0,
-    countedFraction,
+    countedFraction,                    // share of expected votes behind the PROJECTION (drives sigma)
+    declared: seat.status === "ec_called",   // the commission has declared the seat
+    basis: usesTcp ? "tcp" : (hasEstimate ? "fp" : "baseline"),   // what the projection rests on
+    tcpState: seat.tcpState ?? (seat.tcp ? "published" : "none"),
     lastUpdated: seat.lastUpdated,
     granularity,
     pair,
@@ -115,6 +146,10 @@ function liveRefPct(seat, fp, pair, refParty, cfg) {
   // No published 2CP yet — estimate from FP if this is a standard ALP/Coalition contest.
   const isAlpCoal = pair.includes("ALP") && pair.some((p) => cfg.coalitionParties.has(p));
   if (!isAlpCoal || !fp.length) return null;
+  // Both sides must actually be on tonight's ballot with votes counted — the pair may have
+  // come from the 2022 baseline, and a flow estimate without one side is meaningless.
+  const has = (g) => fp.some((r) => cfg.groupOf(r.party) === g && r.votes > 0);
+  if (!has("alp") || !has("coalition")) return null;
   const est = estimate2ppFromFp(fp, cfg);
   if (est == null) return null;
   return refParty === "ALP" ? est : 100 - est;
@@ -171,17 +206,20 @@ function boothMatchedSwing(liveBooths, baseBooths, base, refParty, cfg) {
 
 function fpShares(fp) {
   const out = {};
-  for (const r of fp) out[r.party] = r.pct ?? 0;
+  for (const r of fp) out[r.party] = (out[r.party] || 0) + (r.pct ?? 0);
   return out;
 }
 
-function classify(seat, f, margin2cp, cfg) {
+// f = share of expected votes behind the projection (0 when there is no live estimate yet);
+// fpFraction = first-preference progress, used only to tell "not started" from "counting".
+function classify(seat, f, margin2cp, cfg, fpFraction = f) {
   if (seat.status === "ec_called") return "called";
-  if (seat.status === "not_started" || f <= 0) return "not_started";
+  if (seat.status === "not_started" || fpFraction <= 0) return "not_started";
   const called = cfg.calledMargin ?? 8;
   const likely = cfg.likelyMargin ?? 4;
+  const minLikely = cfg.minCountedForLikely ?? 0.1;
+  if (f < minLikely) return "in_doubt";         // too little counted to say anything
   if (f >= 0.85 && margin2cp >= called) return "called";
-  if (f >= 0.5 && margin2cp >= called) return "likely";
   if (margin2cp >= likely) return "likely";
   return "in_doubt";
 }

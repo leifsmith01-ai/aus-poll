@@ -48,6 +48,7 @@ export function normalizeFp(fp) {
     .map((r) => ({
       party: r.party,
       name: r.name || "",
+      candidateId: r.candidateId ?? null,
       votes: Number(r.votes) || 0,
       pct: total > 0 ? +(((Number(r.votes) || 0) / total) * 100).toFixed(2) : (r.pct ?? null),
     }))
@@ -100,6 +101,9 @@ export function validateFeed(json) {
       lastUpdated: s.lastUpdated || meta.asAt || null,
       fp: normalizeFp(s.fp),
       tcp: s.tcp || null,
+      tcpState: s.tcpState || (s.tcp ? "published" : "none"),   // published | withheld | none
+      boothsReturned: s.boothsReturned ?? null,
+      boothsExpected: s.boothsExpected ?? null,
       status: s.status || "in_progress",
       booths: Array.isArray(s.booths) ? s.booths : null,
     });
@@ -116,6 +120,9 @@ export function validateFeed(json) {
       majority: meta.majority ?? Math.floor((meta.totalSeats ?? seats.length) / 2) + 1,
       boothLevel: !!meta.boothLevel,
       source: meta.source || "unknown",
+      eventName: meta.eventName || null,
+      test: !!meta.test || meta.source === "sample",   // fictitious data — UI must say so
+      phase: meta.phase || null,
       baselineElectionId: meta.baselineElectionId || null,
       countedPct: clampPct(meta.countedPct ?? meanCounted(seats)),
     },

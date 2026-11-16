@@ -480,7 +480,7 @@ The frontend is fully static — no API calls at runtime. All election data is e
 | `update-economics.yml` | Monthly (2nd) | ABS/RBA indicators → `economics.json` |
 | `data-health.yml` | Tue 03:00 UTC | Freshness assertions — a red run means a data workflow silently stopped (stale VIC polls are a hard failure until the Nov 2026 election) |
 | `generate-state-fp.yml` | manual only | `webapp/src/data/state_seat_fp.js` (run after a state election is loaded) |
-| `live-feed.yml` | manual only | Election-night CORS proxy: polls the VEC, normalizes via `scripts/fetch_live_vec.py`, force-pushes snapshots to the `live-feed` branch for the Live tab's `vec_proxy_2026` source (blank URL = sample replay rehearsal) |
+| `live-feed.yml` | manual only | Election-night proxy: `scripts/fetch_live_vec.py` reads the VEC's EML XML (verbose Lower House ZIP) into the live contract and force-pushes snapshots to the `live-feed` branch for the Live tab's `vec_proxy_2026` source. Blank URL = replay of the VEC's sample files in `tests/fixtures/vec_sample`. The real SharePoint download step is NOT wired yet — see `webapp/src/live/README.md` |
 
 Conventions for these workflows: `data/polls/` is the source of truth and webapp
 copies are derived; commit steps stage first then use `git diff --cached --quiet`

@@ -7,14 +7,26 @@ name: Live Feed Proxy
 # the live contract (scripts/fetch_live_vec.py — all VEC-shape knowledge lives
 # there), and force-pushes the snapshot as the single-commit `live-feed`
 # branch. raw.githubusercontent.com serves that file with `CORS: *`, and the
-# dashboard's `vec_proxy_2026` source polls it (the fetch loop cache-busts, so
-# the CDN's 5-minute cache does not delay updates... each poll URL is unique).
+# dashboard's `vec_proxy_2026` source polls it .
 #
-# On the night:  Actions -> Live Feed Proxy -> Run workflow, paste the VEC
-# feed URL, leave the rest default. Re-dispatch when the 6-hour job limit
-# ends a run. Leave feed_url BLANK for a replay rehearsal that steps through
-# the committed sample snapshots (0% -> 35% -> 80% -> 100%) — end-to-end
-# practice of proxy -> branch -> dashboard with no VEC dependency.
+# REHEARSAL (works today): leave feed_url BLANK. The job steps through the
+# VEC's published SE2026 sample snapshots (tests/fixtures/vec_sample — real
+# feed format, fictitious data, 23 steps) through the full
+# reader -> branch -> dashboard path. The page labels it "TEST DATA".
+#
+# ON THE NIGHT — NOT YET WIRED. The real feed is ZIP files on a SharePoint
+# site behind a shared access token (VEC user guide, Sept 2026), not a plain
+# URL. Still to do once access is granted:
+#   1. add the download step (token from a repository SECRET, never an input —
+#      inputs are printed in this public repo's logs), saving ZIPs to a folder
+#      and calling `fetch_live_vec.py --dir <folder>`;
+#   2. confirm with the VEC that publishing a derived snapshot on a public
+#      branch is allowed (terms of use cl. 1.2 bars releasing the feed "in
+#      either its original or any modified form").
+# feed_url only works for a directly downloadable ZIP/XML.
+#
+# Lag: the VEC publishes every 5 minutes, and raw.githubusercontent.com caches
+# for up to 5 more (it ignores cache-busting query strings — tested).
 #
 # This never touches main; the live-feed branch is disposable afterwards.
 
@@ -22,7 +34,7 @@ on:
   workflow_dispatch:
     inputs:
       feed_url:
-        description: "VEC live feed URL (leave blank for replay rehearsal)"
+        description: "Direct ZIP/XML URL (leave blank for the VEC-sample rehearsal)"
         required: false
         default: ""
       interval_seconds:
@@ -69,7 +81,7 @@ jobs:
             if [ -n "$FEED_URL" ]; then
               src_args=(--url "$FEED_URL")
             else
-              src_args=(--replay "$step")
+              src_args=(--replay "$step" --replay-dir tests/fixtures/vec_sample --allow-partial)
             fi
             if python scripts/fetch_live_vec.py "${src_args[@]}" \
                  --out publish/live/vec-latest.json; then
