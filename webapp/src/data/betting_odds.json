@@ -2,13 +2,13 @@
   "source": "smarkets",
   "national": {
     "coalition_majority": {
-      "decimal_odds": 2.35,
-      "implied_prob": 0.4259
+      "decimal_odds": 2.36,
+      "implied_prob": 0.4229
     },
     "alp_majority": {
       "decimal_odds": 2.33,
-      "implied_prob": 0.4295,
-      "implied_2pp": 49.73
+      "implied_prob": 0.4301,
+      "implied_2pp": 49.74
     }
   },
   "seats": {},
@@ -22,16 +22,16 @@
       "total_seats": 88,
       "majority": 45,
       "other_any_other": {
-        "decimal_odds": 77.93,
+        "decimal_odds": 77.83,
         "implied_prob": 0.0128
       },
       "coalition_win": {
         "decimal_odds": 1.05,
-        "implied_prob": 0.9493
+        "implied_prob": 0.9505
       },
       "alp_win": {
-        "decimal_odds": 26.42,
-        "implied_prob": 0.0379
+        "decimal_odds": 27.31,
+        "implied_prob": 0.0366
       },
       "seats": {
         "Kew": {
