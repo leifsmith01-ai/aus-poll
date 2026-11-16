@@ -5021,7 +5021,7 @@ function fmtTime(iso) {
 
 function LivePage({
   meta, projected, confidence, status, error, lastFetched, refresh,
-  isMobile, devSnapshots, snapshotUrl, onPickSnapshot, sourceLabel,
+  isMobile, devSnapshots, snapshotUrl, onPickSnapshot, sourceLabel, polling,
 }) {
   const [sortKey, setSortKey] = useState("countedPct");
   const [sortDir, setSortDir] = useState("desc");
@@ -5070,20 +5070,33 @@ function LivePage({
 
   const majority = meta?.majority ?? LIVE_CONFIG.active.majority;
 
+  // Age of the DATA (the feed's own timestamp), not of our last fetch — a proxy that has
+  // died keeps serving the same file, and "fetched a minute ago" would hide that.
+  const asAtMs = meta?.asAt ? Date.parse(meta.asAt) : NaN;
+  const ageMs = isFinite(asAtMs) ? Date.now() - asAtMs : null;
+  const isStale = !!polling && !meta?.test && ageMs != null
+    && ageMs > (LIVE_CONFIG.active.cfg.staleAfterMs ?? 20 * 60_000);
+  const isTest = !!meta?.test;
+  const liveBarOrder = [...GROUP_ORDER, "other"];
+  const groupCfg = (g) => GROUP_CONFIG[g] || { label: "Other", color: "#64748B" };
+
   // ── Header / status row ──
   const header = (
     <div style={{ ...STYLES.panel, marginBottom: 14, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 800, color: "#DC2626" }}>
-        <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#DC2626", display: "inline-block",
-          animation: status === "ok" ? "livePulse 1.6s ease-in-out infinite" : "none" }} />
-        LIVE
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 800,
+        color: isTest || isStale ? "var(--text-3)" : "#DC2626" }}>
+        <span style={{ width: 9, height: 9, borderRadius: "50%", display: "inline-block",
+          background: isTest || isStale ? "var(--text-3)" : "#DC2626",
+          animation: status === "ok" && !isTest && !isStale ? "livePulse 1.6s ease-in-out infinite" : "none" }} />
+        {isTest ? "TEST DATA" : isStale ? "STALE" : "LIVE"}
       </span>
       <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>
         {LIVE_CONFIG.active.label} · {meta?.chamber || LIVE_CONFIG.active.chamber}
       </span>
       <span style={{ fontSize: 12, color: "var(--text-3)" }}>
-        {hasData ? `${(confidence.asOfCounted).toFixed(1)}% counted` : "awaiting data"}
-        {lastFetched ? ` · updated ${fmtTime(lastFetched)}` : ""}
+        {hasData ? `${(meta?.countedPct ?? confidence.asOfCounted).toFixed(1)}% counted` : "awaiting data"}
+        {meta?.asAt ? ` · results as at ${fmtTime(meta.asAt)}` : ""}
+        {lastFetched ? ` · checked ${fmtTime(lastFetched)}` : ""}
         {` · ${sourceLabel}`}
       </span>
       <span style={{ flex: 1 }} />
@@ -5116,7 +5129,7 @@ function LivePage({
 
   // ── Headline projection cards ──
   const card = (group, dist) => {
-    const cfg = GROUP_CONFIG[group] || { label: group, color: "#64748B" };
+    const cfg = groupCfg(group);
     const pMaj = group === "alp" ? confidence.pMajority.alp
       : group === "coalition" ? confidence.pMajority.coalition : null;
     return (
@@ -5148,8 +5161,8 @@ function LivePage({
   const seatBar = (
     <div style={{ position: "relative", marginTop: 4 }}>
       <div style={{ display: "flex", height: 34, borderRadius: 6, overflow: "hidden", gap: 2 }}>
-        {GROUP_ORDER.filter(g => projCounts[g]).map(g => (
-          <div key={g} style={{ flex: projCounts[g], background: GROUP_CONFIG[g].color, display: "flex",
+        {liveBarOrder.filter(g => projCounts[g]).map(g => (
+          <div key={g} style={{ flex: projCounts[g], background: groupCfg(g).color, display: "flex",
             alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>
             {projCounts[g] >= 2 ? projCounts[g] : ""}
           </div>
@@ -5170,6 +5183,29 @@ function LivePage({
     <div style={{ maxWidth: 1400, margin: "0 auto", padding: 16 }}>
       <style>{"@keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.25}}"}</style>
       {header}
+      {isTest && (
+        <div style={{ ...STYLES.panel, marginBottom: 14, background: "#FEF3C7", color: "#92400E",
+          border: "1px solid #F59E0B", fontSize: 13, fontWeight: 600 }}>
+          Test data — these are not real election results.{" "}
+          <span style={{ fontWeight: 400 }}>
+            {meta?.eventName ? `Source: ${meta.eventName}. ` : ""}
+            The numbers are fictitious and are shown only to rehearse the live count for{" "}
+            {LIVE_CONFIG.active.date}.
+          </span>
+        </div>
+      )}
+      {isStale && (
+        <div style={{ ...STYLES.panel, marginBottom: 14, background: "#FEE2E2", color: "#991B1B",
+          border: "1px solid #DC2626", fontSize: 13, fontWeight: 600 }}>
+          Results have not updated since {fmtTime(meta.asAt)} ({Math.round(ageMs / 60000)} minutes ago).{" "}
+          <span style={{ fontWeight: 400 }}>The feed may have stopped — check the VEC website for the latest count.</span>
+        </div>
+      )}
+      {error && status === "ok" && (
+        <div style={{ fontSize: 12, color: "#B91C1C", margin: "-6px 0 12px 4px" }}>
+          Last refresh failed ({error}) — showing the previous results.
+        </div>
+      )}
 
       <div style={{ ...STYLES.panel, marginBottom: 14 }}>
         <div style={STYLES.sectionHead}>Projected outcome</div>
@@ -5178,6 +5214,8 @@ function LivePage({
           {card("coalition", confidence.coalition)}
           {card("greens", null)}
           {card("ind", null)}
+          {projCounts.one_nation ? card("one_nation", null) : null}
+          {projCounts.other ? card("other", null) : null}
         </div>
         {seatBar}
         <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 18 }}>
@@ -5229,7 +5267,11 @@ function LivePage({
             </thead>
             <tbody>
               {sortedSeats.map(s => {
-                const cfg = GROUP_CONFIG[s.winnerGroup] || { label: s.winnerParty, color: "#64748B" };
+                const cfg = groupCfg(s.winnerGroup);
+                const basisNote = s.status === "not_started" ? null
+                  : s.tcpState === "withheld" ? "2CP withheld by VEC"
+                  : s.basis === "fp" ? "est. from first preferences"
+                  : s.basis === "baseline" ? "no 2CP yet — holding 2022 result" : null;
                 const st = LIVE_STATUS_STYLE[s.status] || LIVE_STATUS_STYLE.in_doubt;
                 const wp = confidence.seatWinProbs?.[s.seatId];
                 const swing = s.swing2cp;
@@ -5245,9 +5287,10 @@ function LivePage({
                     <td style={{ ...STYLES.tableCell }}>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                         <span style={{ width: 9, height: 9, borderRadius: 2, background: cfg.color }} />
-                        <span style={{ fontWeight: 600 }}>{s.winnerParty}</span>
+                        <span style={{ fontWeight: 600 }}>{String(s.winnerParty).split("#")[0]}</span>
                         {s.changed && <span style={{ fontSize: 10, color: "#B45309", fontWeight: 700 }}>GAIN</span>}
                       </span>
+                      {basisNote && <div style={{ fontSize: 10, color: "var(--text-3)" }}>{basisNote}</div>}
                     </td>
                     <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
                       {s.margin.toFixed(1)}
@@ -5271,9 +5314,10 @@ function LivePage({
         </div>
         <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 10 }}>
           Margin and swing are projected final two-candidate-preferred (pp). Swing is vs the{" "}
-          {meta?.baselineElectionId === "vic_2022" ? "2022" : "previous"} result. VEC publishes
-          district-level counts, so projections use district swing; booth-matched swing is used
-          automatically where booth-level feeds are available.
+          {meta?.baselineElectionId === "vic_2022" ? "2022" : "previous"} result, shown only where
+          tonight's final two are the same parties as last time. "Counted" is first-preference
+          votes as a share of expected turnout. Win probability follows the two-candidate count,
+          which lags first preferences on the night.
         </div>
       </div>
     </div>
@@ -7200,6 +7244,7 @@ export default function App() {
           snapshotUrl={liveSnapshotUrl}
           onPickSnapshot={setLiveSnapshotUrl}
           sourceLabel={live.source?.label || "live"}
+          polling={(live.source?.pollMs || 0) > 0}
         />
       )}
 

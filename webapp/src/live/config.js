@@ -14,8 +14,13 @@ const GROUP_OF = {
   IND: "ind", CA: "ind", TEAL: "ind",
   ON: "one_nation",
 };
+// Party codes can carry a "#n" suffix when two candidates in a seat share a code
+// (e.g. two independents: "IND", "IND#2") — the suffix only disambiguates.
+export function baseParty(party) {
+  return String(party || "").split("#")[0];
+}
 export function groupOf(party) {
-  return GROUP_OF[party] || "other";
+  return GROUP_OF[baseParty(party)] || "other";
 }
 
 const COALITION_PARTIES = new Set(["LP", "LNP", "NP", "CLP"]);
@@ -32,6 +37,10 @@ export const LIVE_CFG = {
   totalSeats: 88,
   calledMargin: 8,
   likelyMargin: 4,
+  // Below this share of expected votes a seat is never labelled better than "In doubt".
+  minCountedForLikely: 0.1,
+  // A polled feed whose own timestamp is older than this is flagged as stale.
+  staleAfterMs: 20 * 60_000,
 };
 
 // Registered feed sources. `url` is the same-origin (sample/proxy) or EC endpoint to fetch;
@@ -65,7 +74,9 @@ export const LIVE_SOURCES = {
     // VEC, normalizes via scripts/fetch_live_vec.py, and force-pushes the
     // snapshot to the live-feed branch. raw.githubusercontent.com serves it
     // with CORS: * — the primary election-night path (no CORS dependency on
-    // the VEC). The fetch loop cache-busts through the raw CDN's ~5 min cache.
+    // the VEC). NOTE: raw.githubusercontent.com caches for ~5 minutes and
+    // ignores query strings (verified Nov 2026), so this path can lag the
+    // proxy by up to 5 minutes; the page shows the feed's own timestamp.
     url: "https://raw.githubusercontent.com/leifsmith01-ai/aus-poll/live-feed/live/vec-latest.json",
     adapter: "vec",
     pollMs: 90_000,
