@@ -72,7 +72,7 @@ export function computeLiveConfidence(projected, cfg) {
   }
 
   const meanCounted = seats.length
-    ? seats.reduce((a, s) => a + (s.countedFraction || 0), 0) / seats.length
+    ? seats.reduce((a, s) => a + (s.declared ? 1 : (s.countedFraction || 0)), 0) / seats.length
     : 0;
 
   // ── Per-seat probabilities (for the table) ─────────────────────────────────
@@ -131,7 +131,8 @@ export function computeLiveConfidence(projected, cfg) {
     let coalCount = otherCoal;
     for (const s of alpCoal) {
       const sig = sigAlpCoal(s);
-      const pAlp = clamp01(normCDF((s.projAlp2pp - 50 + delta) / sig));
+      // A declared seat is settled — the statewide "what if" shift does not move it.
+      const pAlp = clamp01(normCDF((s.projAlp2pp - 50 + (s.declared ? 0 : delta)) / sig));
       alpCount += pAlp;
       coalCount += 1 - pAlp;
     }

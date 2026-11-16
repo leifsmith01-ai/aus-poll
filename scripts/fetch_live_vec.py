@@ -167,6 +167,92 @@ PARTY_KEYWORDS = [
 ]
 
 
+# Booth-matched swing ----------------------------------------------------------
+# 2022 booth-level first preferences, built by scripts/build_live_booth_baseline.py.
+BOOTH_BASELINE = REPO_ROOT / "data" / "live" / "vic_2022_booths.json"
+_booth_baseline_cache = None
+
+# Party code -> the Live tab's party groups (must match webapp/src/live/config.js).
+GROUP_OF = {"ALP": "alp", "LP": "coalition", "NP": "coalition", "LNP": "coalition",
+            "GRN": "greens", "ON": "one_nation", "IND": "ind"}
+
+# District-level VotesByType -> baseline vote-type parcel. Election-day booths
+# ("Ordinary") are matched one by one instead; in 2026 early voting is reported
+# per centre, so its three types are summed back into the single 2022 lump.
+VOTE_TYPE_PARCEL = {"EVCEarly": "vt:early", "MobileVotingEarly": "vt:early", "Early": "vt:early",
+                    "Postal": "vt:postal", "Absent": "vt:absent",
+                    "Provisional": "vt:provisional", "MarkedAsVoted": "vt:marked"}
+
+
+def group_of(code: str) -> str:
+    return GROUP_OF.get(str(code).split("#")[0], "other")
+
+
+def booth_key(name: str) -> str:
+    """MUST match scripts/build_live_booth_baseline.py booth_key."""
+    return "pp:" + re.sub(r"[^a-z0-9]+", " ", str(name or "").strip().lower()).strip()
+
+
+def booth_baseline() -> dict:
+    global _booth_baseline_cache
+    if _booth_baseline_cache is None:
+        _booth_baseline_cache = (json.loads(BOOTH_BASELINE.read_text())
+                                 if BOOTH_BASELINE.exists() else {})
+    return _booth_baseline_cache
+
+
+def matched_block(parcels_now: dict, base: dict | None) -> dict | None:
+    """Compare tonight's counted parcels with the SAME parcels in 2022.
+
+    parcels_now: {key: {group: votes}} for every parcel with votes tonight.
+    Returns the sums the browser needs for a matched swing:
+      formal  votes tonight in parcels that also existed in 2022
+      now     those votes by party group
+      then    what the same parcels would have given at their 2022 shares
+      base    the full 2022 district result (% by group)
+      coverage  share of the 2022 district vote those parcels represented
+    Swing for a group = (now - then) / formal; projected share = base + swing.
+    """
+    if not base or not base.get("formal"):
+        return None
+    now, then, formal, cover, n = {}, {}, 0, 0.0, 0
+    for key, groups in parcels_now.items():
+        bp = base["parcels"].get(key)
+        f_now = sum(groups.values())
+        if not bp or bp["formal"] <= 0 or f_now <= 0:
+            continue
+        n += 1
+        formal += f_now
+        for g, v in groups.items():
+            now[g] = now.get(g, 0) + v
+        for g, v in bp["groups"].items():
+            then[g] = then.get(g, 0.0) + f_now * v / bp["formal"]
+        # A booth is one count; a vote-type lump fills up over days.
+        share = 1.0 if key.startswith("pp:") else min(1.0, f_now / bp["formal"])
+        cover += share * bp["formal"]
+    if formal <= 0:
+        return None
+    return {
+        "parcels": n,
+        "formal": formal,
+        "now": now,
+        "then": {g: round(v, 1) for g, v in then.items()},
+        "base": {g: round(100.0 * v / base["formal"], 2) for g, v in base["groups"].items()},
+        "coverage": round(100.0 * cover / base["formal"], 1),
+    }
+
+
+def _votes_by_type(cand) -> dict:
+    vbt = _child(cand, "VotesByType")
+    out = {}
+    for v in (vbt if vbt is not None else []):
+        try:
+            out[v.attrib.get("Type")] = int((v.text or "0").strip())
+        except ValueError:
+            pass
+    return out
+
+
 def party_code(registered_name, independent: bool) -> str:
     if independent or not registered_name:
         return "IND"
@@ -280,6 +366,49 @@ def normalize_vec_xml(data: bytes, now_iso: str, source: str = "vec") -> dict:
                 fp.append(row)
                 by_id[cid] = row
 
+        # ── Parcels for booth-matched swing and observed preference flows ──
+        parcels_fp: dict[str, dict] = {}       # baseline key -> {group: votes}
+        flow_fp: dict[str, dict] = {}          # any parcel id -> {candidateId: fp votes}
+        flow_tcp: dict[str, dict] = {}         # same parcel id -> {candidateId: 2CP votes}
+        if fp_el is not None:
+            for cand in _children(fp_el, "Candidate"):
+                row = by_id.get(_cand_id(cand))
+                for vtype, v in _votes_by_type(cand).items():
+                    key = VOTE_TYPE_PARCEL.get(vtype)
+                    if not key or v <= 0 or row is None:
+                        continue
+                    g = group_of(row["party"])
+                    parcels_fp.setdefault(key, {})
+                    parcels_fp[key][g] = parcels_fp[key].get(g, 0) + v
+                    if vtype not in ("EVCEarly", "MobileVotingEarly"):   # those are booths below
+                        flow_fp.setdefault("vt:" + vtype, {})[row["candidateId"]] = v
+        pps = _child(contest, "PollingPlaces")
+        for pp in (_children(pps, "PollingPlace") if pps is not None else []):
+            ident = _child(pp, "PollingPlaceIdentifier")
+            if ident is None:
+                continue
+            pp_fp = _child(pp, "FirstPreferences")
+            votes = {}
+            if pp_fp is not None and pp_fp.attrib.get("Updated"):
+                votes = {_cand_id(c): _int(c) for c in _children(pp_fp, "Candidate")}
+            if sum(votes.values()) <= 0:
+                continue
+            pid = "pp:" + str(ident.attrib.get("Id"))
+            flow_fp[pid] = votes
+            if ident.attrib.get("Classification") == "VotingCentre":
+                key = booth_key(ident.attrib.get("Name"))
+                for cid, v in votes.items():
+                    if cid in by_id and v > 0:
+                        g = group_of(by_id[cid]["party"])
+                        parcels_fp.setdefault(key, {})
+                        parcels_fp[key][g] = parcels_fp[key].get(g, 0) + v
+            pp_tcp = _child(pp, "TwoCandidatePreferred")
+            if (pp_tcp is not None and pp_tcp.attrib.get("Updated")
+                    and pp_tcp.attrib.get("Maverick", "").lower() != "true"):
+                flow_tcp[pid] = {_cand_id(c): _int(c) for c in _children(pp_tcp, "Candidate")}
+
+        matched = matched_block(parcels_fp, booth_baseline().get(slugify(name)))
+
         expected = round(enrolment * EXPECTED_TURNOUT) if enrolment else None
         counted = min(100.0, round(100.0 * total / expected, 2)) if expected else 0.0
 
@@ -310,6 +439,28 @@ def normalize_vec_xml(data: bytes, now_iso: str, source: str = "vec") -> dict:
                                       if expected else 0.0,
                     }
                     tcp_state = "published"
+                    # Observed preference flow: in parcels where BOTH counts are
+                    # in, how the two finalists' votes grew from first preferences
+                    # to 2CP. Lets the browser apply tonight's real flows to the
+                    # full (booth-matched) first-preference projection, instead of
+                    # trusting a 2CP count that lags well behind.
+                    ids = [_cand_id(c) for c in cands]
+                    for c in cands:                      # vote-type 2CP parcels
+                        for vtype, v in _votes_by_type(c).items():
+                            if vtype in VOTE_TYPE_PARCEL and vtype not in ("EVCEarly", "MobileVotingEarly"):
+                                flow_tcp.setdefault("vt:" + vtype, {})[_cand_id(c)] = v
+                    f_fp, f_tcp, f_formal = [0, 0], [0, 0], 0
+                    for pid, tv in flow_tcp.items():
+                        fv = flow_fp.get(pid)
+                        if not fv or sum(tv.get(i, 0) for i in ids) <= 0:
+                            continue
+                        f_formal += sum(fv.values())
+                        for k, i in enumerate(ids):
+                            f_fp[k] += fv.get(i, 0)
+                            f_tcp[k] += tv.get(i, 0)
+                    if f_formal > 0:
+                        tcp["flow"] = {"formal": f_formal,
+                                       "fp": dict(zip(pair, f_fp)), "tcp": dict(zip(pair, f_tcp))}
 
         seats.append({
             "seatId": slugify(name),
@@ -326,6 +477,7 @@ def normalize_vec_xml(data: bytes, now_iso: str, source: str = "vec") -> dict:
             "fp": fp,
             "tcp": tcp,
             "tcpState": tcp_state,      # published | withheld | none
+            "matched": matched,         # booth-matched first-preference sums (or None)
             "status": "ec_called" if declared else ("not_started" if total <= 0 else "in_progress"),
         })
 
@@ -340,7 +492,7 @@ def normalize_vec_xml(data: bytes, now_iso: str, source: str = "vec") -> dict:
             "asAt": as_at,
             "totalSeats": TOTAL_SEATS,
             "majority": MAJORITY,
-            "boothLevel": False,
+            "boothLevel": any(s["matched"] for s in seats),
             "source": source,
             "eventName": event_name,
             # VEC sample + election-night-trial files are fictitious; the page

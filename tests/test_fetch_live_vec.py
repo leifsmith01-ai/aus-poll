@@ -238,3 +238,101 @@ def test_lite_file_is_rejected_with_a_clear_message():
     with pytest.raises(SystemExit, match="verboselhv2"):
         flv.normalize_vec_xml(
             b'<MediaFeed xmlns="http://www.vec.vic.gov.au" Verbose="false"/>', NOW)
+
+
+# ── Booth-matched swing ───────────────────────────────────────────────────────
+
+def _project_shares(m):
+    """Python mirror of matchedGroupShares() in webapp/src/live/project.js."""
+    groups = ["alp", "coalition", "greens", "one_nation", "ind", "other"]
+    out = {g: max(0.0, m["base"].get(g, 0) + 100.0 * (m["now"].get(g, 0) - m["then"].get(g, 0)) / m["formal"])
+           for g in groups}
+    tot = sum(out.values())
+    return {g: 100.0 * v / tot for g, v in out.items()}
+
+
+def test_booth_baseline_matches_the_2022_statewide_result():
+    base = flv.booth_baseline()
+    assert len(base) == 87                       # Narracan's election was held separately
+    tot = {}
+    for seat in base.values():
+        for g, v in seat["groups"].items():
+            tot[g] = tot.get(g, 0) + v
+    formal = sum(tot.values())
+    assert abs(100 * tot["alp"] / formal - 37.0) < 0.1          # VEC 2022: ALP 37.0%
+    assert abs(100 * tot["coalition"] / formal - 34.4) < 0.2    # LIB 29.7 + NAT 4.8
+    assert abs(100 * tot["greens"] / formal - 11.5) < 0.1
+
+
+def test_matched_block_zero_swing_reproduces_the_full_result():
+    """If tonight's booths vote exactly as in 2022, the projection must equal
+    the full 2022 result however few (or unrepresentative) the booths are."""
+    seat = flv.booth_baseline()["bass"]
+    booths = [k for k in seat["parcels"] if k.startswith("pp:")][:4]
+    now = {k: dict(seat["parcels"][k]["groups"]) for k in booths}
+    m = flv.matched_block(now, seat)
+    assert m["parcels"] == 4 and 0 < m["coverage"] < 100
+    proj = _project_shares(m)
+    for g, pct in m["base"].items():
+        assert abs(proj[g] - pct) < 0.05, g
+
+
+def test_matched_swing_beats_the_raw_count_on_a_partial_night():
+    """Replay every district with a known swing (ALP -5, Coalition +3, others
+    +2) plus booth-level noise, reveal a random 30% of election-day booths, and
+    compare the error in Labor's final first-preference share."""
+    import random
+    rng = random.Random(20261128)
+    raw_err, matched_err = [], []
+    for seat in flv.booth_baseline().values():
+        tonight, final = {}, {}
+        for key, p in seat["parcels"].items():
+            f = p["formal"]
+            if f < 50:
+                continue
+            # Booth-to-booth scatter around the swing: 2pp for a single booth, 0.5pp
+            # for a whole early/postal lump (tens of thousands of votes average out).
+            sd = 0.02 if key.startswith("pp:") else 0.005
+            a = max(0.02, p["groups"].get("alp", 0) / f - 0.05 + rng.gauss(0, sd))
+            c = max(0.02, p["groups"].get("coalition", 0) / f + 0.03 + rng.gauss(0, sd))
+            o = max(0.02, 1 - a - c)
+            tot = a + c + o
+            votes = {"alp": round(f * a / tot), "coalition": round(f * c / tot), "other": round(f * o / tot)}
+            for g, v in votes.items():
+                final[g] = final.get(g, 0) + v
+            if key.startswith("pp:") and rng.random() < 0.3:
+                tonight[key] = votes
+        if not tonight:
+            continue
+        truth = 100 * final["alp"] / sum(final.values())
+        counted = {g: sum(v[g] for v in tonight.values()) for g in ("alp", "coalition", "other")}
+        raw = 100 * counted["alp"] / sum(counted.values())
+        # 2022 groups other than alp/coalition are folded into "other" tonight.
+        base = {"formal": seat["formal"], "groups": {}, "parcels": {}}
+        fold = lambda gs: {"alp": gs.get("alp", 0), "coalition": gs.get("coalition", 0),
+                           "other": sum(v for g, v in gs.items() if g not in ("alp", "coalition"))}
+        base["groups"] = fold(seat["groups"])
+        base["parcels"] = {k: {"formal": p["formal"], "groups": fold(p["groups"])}
+                           for k, p in seat["parcels"].items()}
+        proj = _project_shares(flv.matched_block(tonight, base))
+        raw_err.append(abs(raw - truth))
+        matched_err.append(abs(proj["alp"] - truth))
+    mae = lambda xs: sum(xs) / len(xs)
+    assert len(raw_err) > 80
+    print(f"raw MAE {mae(raw_err):.2f}pp, booth-matched MAE {mae(matched_err):.2f}pp")
+    assert mae(matched_err) < 1.5
+    assert mae(matched_err) < 0.5 * mae(raw_err)        # at least twice as good as raw
+
+
+def test_vec_sample_booths_match_2022_and_flows_are_extracted():
+    bass = _seat(_snap("20260926_142544"), "bass")
+    m = bass["matched"]
+    # Bass, Clyde, Grantville, San Remo + early + postal lumps; "Rolling Hills" is new.
+    assert m["parcels"] == 6
+    assert m["formal"] == sum(m["now"].values()) <= 190
+    assert abs(sum(m["then"].values()) - m["formal"]) < 1
+    flow = bass["tcp"]["flow"]
+    assert set(flow["fp"]) == set(flow["tcp"]) == {"IND", "ON"}
+    assert flow["tcp"]["IND"] >= flow["fp"]["IND"]       # 2CP adds preferences
+    # A recount publishes no booth or vote-type detail -> no matched block.
+    assert _seat(_snap("20261002_175814"), "monbulk")["matched"] is None

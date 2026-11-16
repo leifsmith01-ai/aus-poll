@@ -25,7 +25,8 @@ import SA_STATE_POLLS from "./data/sa_polls.json";
 import VIC_STATE_POLLS from "./data/vic_polls.json";
 import * as STATE_SEAT_FP from "./data/state_seat_fp.js";
 import { useLiveResults } from "./live/useLiveResults.js";
-import { projectSeats } from "./live/project.js";
+import { projectSeats, observedSwing } from "./live/project.js";
+import { slugify as liveSlug } from "./live/contract.js";
 import { computeLiveConfidence } from "./live/confidence.js";
 import { LIVE_CONFIG, SAMPLE_SNAPSHOTS } from "./live/config.js";
 
@@ -4874,6 +4875,198 @@ function HeroBanner({ counts, avg2pp, isMobile, dist = null }) {
   );
 }
 
+// ─── Pre-election polls model, for the Live tab's comparison ──────────────────
+// Exactly what the VIC scenario builder's "Apply latest polls" button produces at its
+// default settings: recency-weighted poll average -> primary swings -> the seat model ->
+// the seeded seat-distribution simulation. Pure and independent of the user's scenario
+// sliders, so the Live tab always compares the count against the same fixed benchmark.
+const LIVE_COMPARE_GROUPS = ["alp", "coalition", "greens", "one_nation", "others"];
+const toCompareGroup = (g) => (["alp", "coalition", "greens", "one_nation"].includes(g) ? g : "others");
+
+function computeVicPollsModel(swingStd = 1.5) {
+  const polls = (VIC_STATE_POLLS?.polls ?? [])
+    .map((p) => normalizeStatePoll(p, ["lp"]))
+    .filter(Boolean)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  const avg = statePollAverage(polls);
+  if (!avg) return null;
+  const prim = {
+    alp: avg.alp, coal: avg.coal,
+    grn: avg.grn ?? VIC_BASELINE_2022.grn,
+    ind: avg.ind ?? VIC_BASELINE_2022.ind,
+    on: avg.on ?? VIC_BASELINE_2022.on,
+  };
+  const swings = Object.fromEntries(Object.keys(prim).map((k) => [k, +(prim[k] - VIC_BASELINE_2022[k]).toFixed(2)]));
+  const flows = VIC_DEFAULT_PREF_FLOWS;
+  const baseline2pp = computeVic2pp(VIC_BASELINE_2022, flows, null);
+  const alp2pp = computeVic2pp(prim, flows, null);
+  const modelled = computeModelledSeatsVic(VIC_SEATS, swings, flows, true, null, baseline2pp, null,
+    VIC_SEAT_FP_2022, VIC_SEAT_ON_FP, MODEL_PARAMS.onThresholdDefault);
+  const dist = computeSeatDistribution(modelled, alp2pp - baseline2pp, swingStd, false, 45);
+
+  const counts = Object.fromEntries(LIVE_COMPARE_GROUPS.map((g) => [g, 0]));
+  const seats = {};
+  modelled.forEach((s) => {
+    const g = toCompareGroup(s.modelled.winnerGroup);
+    counts[g] += 1;
+    seats[liveSlug(s.name)] = {
+      group: g,
+      party: s.modelled.winnerParty,
+      margin: +(2 * (s.modelled.winnerPct - 50)).toFixed(1),     // gap between the final two (pp)
+      alp2pp: s.modelled.projAlp2pp,
+      p: dist.seatOutlook?.[s.id]?.p ?? null,
+    };
+  });
+  return {
+    pollCount: polls.length,
+    latestDate: polls[0]?.date ?? null,
+    primaries: prim,
+    alp2pp: +alp2pp.toFixed(1),
+    swing2pp: +(alp2pp - baseline2pp).toFixed(1),
+    counts,
+    ranges: dist.groups,          // { alp: {p05,p50,p95,...}, coalition: ..., greens: ..., one_nation: ... }
+    pMajority: dist.pMajority,
+    swingStd,
+    seats,
+  };
+}
+
+// "Count so far vs the polls" — the Live tab's comparison panel.
+function LiveVsPollsPanel({ model, projCounts, confidence, liveSwing, majority, totalSeats }) {
+  if (!model) return null;
+  const liveCounts = Object.fromEntries(LIVE_COMPARE_GROUPS.map((g) => [g, 0]));
+  Object.entries(projCounts).forEach(([g, n]) => { liveCounts[toCompareGroup(g)] += n; });
+  const liveRange = { alp: confidence.alp, coalition: confidence.coalition };
+  const labels = { alp: "Labor", coalition: "Coalition", greens: "Greens", one_nation: "One Nation", others: "Independents / other" };
+  const colour = (g) => (GROUP_CONFIG[g] || { color: "#64748B" }).color;
+
+  // Enough counted to say how the night is tracking against the polls? (about two full
+  // seats' worth of Labor-v-Coalition counting, spread over at least five seats)
+  const enough = liveSwing?.swing != null && liveSwing.weight >= 2 && liveSwing.seats >= 5;
+  const gap = enough ? liveSwing.swing - model.swing2pp : null;
+  const fmt = (v) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(1)}`;
+  // The polls' own typical miss on 2PP (the model's swing sigma) frames what counts as a surprise.
+  const verdict = !enough ? "Too early to compare — not enough Labor-v-Coalition seats have a count yet."
+    : Math.abs(gap) < model.swingStd ? "The count is tracking close to what the polls implied."
+    : `Labor is running ${Math.abs(gap).toFixed(1)} points ${gap > 0 ? "better" : "worse"} than the polls implied.`;
+
+  // Axis long enough for the widest range on show, so no bar is clipped.
+  const scaleMax = Math.max(majority + 15, 3 + Math.max(
+    ...LIVE_COMPARE_GROUPS.map((g) => Math.max(model.ranges?.[g]?.p95 ?? 0, liveRange[g]?.p95 ?? 0, model.counts[g], liveCounts[g]))));
+  const pos = (n) => `${Math.min(100, (n / scaleMax) * 100)}%`;
+  const band = (range, point, color, top, solid) => (
+    <>
+      {range && (
+        <div style={{ position: "absolute", top, height: 8, borderRadius: 4, left: pos(range.p05),
+          width: `calc(${pos(range.p95)} - ${pos(range.p05)})`, minWidth: 2,
+          background: color, opacity: solid ? 0.35 : 0.18 }} />
+      )}
+      <div title={String(point)} style={{ position: "absolute", top: top - 1, left: pos(point), width: 10, height: 10,
+        marginLeft: -5, borderRadius: "50%", background: solid ? color : "var(--panel-bg, #fff)",
+        border: `2px solid ${color}`, boxSizing: "border-box" }} />
+    </>
+  );
+  const rangeText = (r) => (r ? `${r.p05}–${r.p95}` : "—");
+
+  return (
+    <div style={{ ...STYLES.panel, marginBottom: 14 }}>
+      <div style={STYLES.panelTitle}>Count so far vs the polls</div>
+      <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 12 }}>
+        Polls model: average of {model.pollCount} polls to {model.latestDate} — Labor {model.primaries.alp},
+        Coalition {model.primaries.coal}, Greens {model.primaries.grn}, One Nation {model.primaries.on} —
+        giving Labor {model.alp2pp}% two-party-preferred. It is fixed before the count and never uses tonight's votes.
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+        <div style={{ ...STYLES.statCard, flex: "1 1 200px" }}>
+          <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700 }}>LABOR 2PP SWING SINCE 2022 — POLLS</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{fmt(model.swing2pp)}</div>
+          <div style={{ fontSize: 11, color: "var(--text-3)" }}>± {model.swingStd.toFixed(1)} typical polling miss</div>
+        </div>
+        <div style={{ ...STYLES.statCard, flex: "1 1 200px" }}>
+          <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700 }}>LABOR 2PP SWING SINCE 2022 — COUNT SO FAR</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>
+            {liveSwing?.swing != null ? fmt(liveSwing.swing) : "—"}
+          </div>
+          <div style={{ fontSize: 11, color: "var(--text-3)" }}>
+            {liveSwing?.seats ? `from ${liveSwing.seats} Labor-v-Coalition seat${liveSwing.seats === 1 ? "" : "s"} with a count` : "no seats counted yet"}
+          </div>
+        </div>
+        <div style={{ ...STYLES.statCard, flex: "2 1 280px", display: "flex", alignItems: "center" }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-1)" }}>{verdict}</div>
+        </div>
+      </div>
+
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 620 }}>
+          <thead>
+            <tr>
+              <th style={{ ...STYLES.tableHead, textAlign: "left" }}>Seats</th>
+              <th style={{ ...STYLES.tableHead, textAlign: "right" }}>Polls model</th>
+              <th style={{ ...STYLES.tableHead, textAlign: "right" }}>Live projection</th>
+              <th style={{ ...STYLES.tableHead, textAlign: "right" }}>Difference</th>
+              <th style={{ ...STYLES.tableHead, textAlign: "left", width: "38%" }}>
+                Likely range <span style={{ fontWeight: 400 }}>(hollow = polls, solid = live)</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {LIVE_COMPARE_GROUPS.map((g) => {
+              const diff = liveCounts[g] - model.counts[g];
+              const mRange = g === "others" ? null : model.ranges?.[g];
+              return (
+                <tr key={g} style={{ borderTop: "1px solid var(--border-2)" }}>
+                  <td style={STYLES.tableCell}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600 }}>
+                      <span style={{ width: 9, height: 9, borderRadius: 2, background: colour(g) }} />{labels[g]}
+                    </span>
+                  </td>
+                  <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+                    <b>{model.counts[g]}</b> <span style={{ color: "var(--text-3)", fontSize: 11 }}>{rangeText(mRange)}</span>
+                  </td>
+                  <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+                    <b>{liveCounts[g]}</b> <span style={{ color: "var(--text-3)", fontSize: 11 }}>{rangeText(liveRange[g])}</span>
+                  </td>
+                  <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums",
+                    fontWeight: 700, color: diff === 0 ? "var(--text-3)" : "var(--text-1)" }}>
+                    {diff === 0 ? "0" : fmt(diff).replace(".0", "")}
+                  </td>
+                  <td style={STYLES.tableCell}>
+                    <div style={{ position: "relative", height: 26 }}>
+                      <div style={{ position: "absolute", left: 0, right: 0, top: 12, height: 1, background: "var(--border-2)" }} />
+                      <div style={{ position: "absolute", top: 0, bottom: 0, left: pos(majority), width: 1, background: "var(--text-3)" }} />
+                      {band(mRange, model.counts[g], colour(g), 2, false)}
+                      {band(liveRange[g], liveCounts[g], colour(g), 15, true)}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            <tr style={{ borderTop: "1px solid var(--border-2)" }}>
+              <td style={{ ...STYLES.tableCell, fontWeight: 600 }}>Chance of a majority</td>
+              <td style={{ ...STYLES.tableCell, textAlign: "right" }}>
+                Labor {model.pMajority.alp}% · Coalition {model.pMajority.coalition}%
+              </td>
+              <td style={{ ...STYLES.tableCell, textAlign: "right" }}>
+                Labor {confidence.pMajority.alp}% · Coalition {confidence.pMajority.coalition}%
+              </td>
+              <td style={STYLES.tableCell} />
+              <td style={{ ...STYLES.tableCell, fontSize: 11, color: "var(--text-3)" }}>
+                vertical line = {majority} of {totalSeats} for a majority
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 10 }}>
+        Ranges cover 90% of simulated outcomes. The polls range reflects polling error; the live range reflects
+        votes still to be counted and narrows through the night. Live ranges are calculated for Labor and the
+        Coalition only. Seats with no count yet are projected from 2022 plus the swing seen so far.
+      </div>
+    </div>
+  );
+}
+
 // ─── Live Results page ────────────────────────────────────────────────────────
 // Presentational component for the Live tab. All data is computed in App() (the
 // useLiveResults hook + projection/confidence memos) and passed in as props, so this
@@ -4895,6 +5088,7 @@ function fmtTime(iso) {
 function LivePage({
   meta, projected, confidence, status, error, lastFetched, refresh,
   isMobile, devSnapshots, snapshotUrl, onPickSnapshot, sourceLabel, polling,
+  pollModel, liveSwing,
 }) {
   const [sortKey, setSortKey] = useState("countedPct");
   const [sortDir, setSortDir] = useState("desc");
@@ -5099,6 +5293,9 @@ function LivePage({
         </div>
       </div>
 
+      <LiveVsPollsPanel model={pollModel} projCounts={projCounts} confidence={confidence}
+        liveSwing={liveSwing} majority={majority} totalSeats={meta?.totalSeats || totalShown} />
+
       <div style={{ ...STYLES.panel, marginBottom: 14 }}>
         <div style={STYLES.panelTitle}>Labor seat total — probability distribution</div>
         <ResponsiveContainer width="100%" height={220}>
@@ -5135,16 +5332,19 @@ function LivePage({
                 <Th k="margin" align="right">Margin</Th>
                 <Th k="swing" align="right">Swing</Th>
                 <Th k="winProb" align="right">Win prob</Th>
+                {pollModel && <th style={{ ...STYLES.tableHead, textAlign: "left", whiteSpace: "nowrap" }}>Polls model</th>}
                 <th style={{ ...STYLES.tableHead, textAlign: "center" }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {sortedSeats.map(s => {
                 const cfg = groupCfg(s.winnerGroup);
-                const basisNote = s.status === "not_started" ? null
+                const basisNote = s.basis === "swing" ? "no count yet — 2022 plus swing so far"
+                  : s.status === "not_started" ? null
                   : s.tcpState === "withheld" ? "2CP withheld by VEC"
                   : s.basis === "fp" ? "est. from first preferences"
-                  : s.basis === "baseline" ? "no 2CP yet — holding 2022 result" : null;
+                  : s.basis === "baseline" ? "no 2CP yet — holding 2022 result"
+                  : s.granularity === "booth" ? "booth-matched" : null;
                 const st = LIVE_STATUS_STYLE[s.status] || LIVE_STATUS_STYLE.in_doubt;
                 const wp = confidence.seatWinProbs?.[s.seatId];
                 const swing = s.swing2cp;
@@ -5175,6 +5375,19 @@ function LivePage({
                     <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
                       {wp == null ? "—" : `${Math.round(wp * 100)}%`}
                     </td>
+                    {pollModel && (() => {
+                      const pm = pollModel.seats[s.seatId];
+                      if (!pm) return <td style={{ ...STYLES.tableCell, color: "var(--text-3)" }}>—</td>;
+                      // Only call a seat "different" once tonight's count, not 2022, drives it.
+                      const counted = s.basis === "tcp" || s.basis === "fp";
+                      const differs = counted && toCompareGroup(s.winnerGroup) !== pm.group;
+                      return (
+                        <td style={{ ...STYLES.tableCell, whiteSpace: "nowrap", color: "var(--text-2)" }}>
+                          {pm.party} {pm.margin.toFixed(1)}
+                          {differs && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: "#B45309" }}>DIFFERS</span>}
+                        </td>
+                      );
+                    })()}
                     <td style={{ ...STYLES.tableCell, textAlign: "center" }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color: st.fg, background: st.bg,
                         borderRadius: 5, padding: "2px 8px", whiteSpace: "nowrap" }}>{st.label}</span>
@@ -5955,6 +6168,10 @@ export default function App() {
   const liveProjected = useMemo(
     () => (live.feed ? projectSeats(live.feed, live.baseline, LIVE_CONFIG.active.cfg) : null),
     [live.feed, live.baseline]);
+  const vicPollsModel = useMemo(() => computeVicPollsModel(), []);
+  const liveSwing = useMemo(
+    () => (liveProjected ? observedSwing(liveProjected, live.baseline?.seats, LIVE_CONFIG.active.cfg) : null),
+    [liveProjected, live.baseline]);
   const liveConfidence = useMemo(
     () => (liveProjected ? computeLiveConfidence(liveProjected, LIVE_CONFIG.active.cfg) : null),
     [liveProjected]);
@@ -7109,6 +7326,8 @@ export default function App() {
           onPickSnapshot={setLiveSnapshotUrl}
           sourceLabel={live.source?.label || "live"}
           polling={(live.source?.pollMs || 0) > 0}
+          pollModel={LIVE_CONFIG.active.jurisdiction === "vic" ? vicPollsModel : null}
+          liveSwing={liveSwing}
         />
       )}
 
@@ -12188,6 +12407,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
 // (src/__tests__/baseline-alignment.test.jsx), which asserts that every model at
 // zero swing reproduces the actual election result. Not used by the UI.
 export {
+  computeVicPollsModel,
   computeSeatDistribution,
   computeUncertainty,
   SEAT_BANDS,

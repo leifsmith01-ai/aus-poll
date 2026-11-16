@@ -80,3 +80,86 @@ describe("live engine on VEC-shaped feeds", () => {
     expect(run([seat()], { source: "vec" }).feed.meta.test).toBe(false);
   });
 });
+
+// ── Booth-matched projection + the polls benchmark ───────────────────────────
+import { matchedGroupShares, observedSwing } from "../live/project.js";
+import { computeVicPollsModel } from "../App.jsx";
+
+describe("booth-matched projection", () => {
+  const base = { alp: 40, coalition: 40, greens: 12, other: 8 };
+
+  it("returns the full 2022 result when the counted booths show no swing", () => {
+    // Counted booths are far more Labor than the seat (60% v 40%) — but they were in 2022 too.
+    const shares = matchedGroupShares({ formal: 1000, base,
+      now: { alp: 600, coalition: 250, greens: 100, other: 50 },
+      then: { alp: 600, coalition: 250, greens: 100, other: 50 } });
+    expect(shares.alp).toBeCloseTo(40, 5);
+    expect(shares.coalition).toBeCloseTo(40, 5);
+  });
+
+  it("applies the swing seen in matched booths to the whole seat", () => {
+    const shares = matchedGroupShares({ formal: 1000, base,
+      now: { alp: 550, coalition: 300, greens: 100, other: 50 },
+      then: { alp: 600, coalition: 250, greens: 100, other: 50 } });
+    expect(shares.alp).toBeCloseTo(35, 5);          // -5 in the booths -> -5 overall
+    expect(shares.coalition).toBeCloseTo(45, 5);
+    expect(Object.values(shares).reduce((a, b) => a + b, 0)).toBeCloseTo(100, 5);
+  });
+
+  it("projects the 2CP from tonight's observed preference flow, not the raw early 2CP", () => {
+    // Labor-heavy booths are in first: raw 2CP says ALP 62, but those booths were ALP 64 in
+    // 2022 terms. Greens/others are flowing 75% to Labor where both counts are in.
+    const matched = { formal: 1000, base,
+      now: { alp: 500, coalition: 300, greens: 150, other: 50 },
+      then: { alp: 520, coalition: 290, greens: 140, other: 50 } };
+    const r = run([seat({ countedPct: 30, matched,
+      fp: [{ party: "ALP", votes: 500 }, { party: "LP", votes: 300 }, { party: "GRN", votes: 150 }, { party: "FFV", votes: 50 }],
+      tcp: { pair: ["ALP", "LP"], votes: { ALP: 310, LP: 190 }, pct: { ALP: 62, LP: 38 }, countedPct: 15,
+        flow: { formal: 500, fp: { ALP: 250, LP: 150 }, tcp: { ALP: 325, LP: 175 } } } })]);
+    const bass = r.get("bass");
+    expect(bass.granularity).toBe("booth");
+    // FP: ALP 40-2=38, LP 40+1=41, others 21; flow to ALP = 75/100 -> 38 + 0.75*21 = 53.75
+    expect(bass.projAlp2pp).toBeCloseTo(53.75, 1);
+    expect(bass.observedTcpPct).toBe(62);           // raw figure kept for reference
+  });
+
+  it("moves seats with no count by the swing seen elsewhere, and reports that swing", () => {
+    // Every counted Labor-v-Coalition seat shows Labor 5 points down on 2022.
+    const counted = Object.entries(baseline.seats)
+      .filter(([, b]) => b.tcp.pair.includes("ALP") && b.tcp.pair.some((p) => p === "LP" || p === "NP"))
+      .slice(0, 30)
+      .map(([seatId, b]) => {
+        const alp = b.tcp.pct.ALP - 5, other = b.tcp.pair.find((p) => p !== "ALP");
+        return { seatId, name: b.name, countedPct: 50, status: "in_progress",
+          fp: [{ party: "ALP", votes: 500 }, { party: other, votes: 500 }],
+          tcp: { pair: ["ALP", other], votes: {}, pct: { ALP: alp, [other]: 100 - alp }, countedPct: 50 } };
+      });
+    const r = run(counted);
+    const obs = observedSwing(r.projected, baseline.seats, LIVE_CFG);
+    expect(obs.seats).toBe(30);
+    expect(obs.swing).toBeCloseTo(-5, 1);
+    const uncounted = r.projected.filter((s) => s.basis === "swing");
+    expect(uncounted.length).toBeGreaterThan(40);
+    // 15 seats' worth counted -> shrink 15/17 -> about -4.4 applied
+    for (const s of uncounted) expect(s.swing2cp).toBeCloseTo(-5 * (15 / 17), 1);
+    // Non-classic seats (e.g. Greens v Labor) are left on their 2022 result.
+    expect(r.get("melbourne").basis).toBe("baseline");
+  });
+});
+
+describe("polls benchmark for the Live tab", () => {
+  const m = computeVicPollsModel();
+  it("covers all 88 seats and joins to the live seat ids", () => {
+    expect(Object.keys(m.seats).sort()).toEqual(Object.keys(baseline.seats).sort());
+    expect(Object.values(m.counts).reduce((a, b) => a + b, 0)).toBe(88);
+  });
+  it("is deterministic and carries ranges that contain the point count", () => {
+    expect(computeVicPollsModel()).toEqual(m);
+    for (const g of ["alp", "coalition"]) {
+      expect(m.ranges[g].p05).toBeLessThanOrEqual(m.counts[g]);
+      expect(m.ranges[g].p95).toBeGreaterThanOrEqual(m.counts[g]);
+    }
+    const pm = m.pMajority;
+    expect(pm.alp + pm.coalition + pm.hung).toBeGreaterThanOrEqual(99);
+  });
+});

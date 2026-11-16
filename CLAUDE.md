@@ -482,6 +482,14 @@ The frontend is fully static — no API calls at runtime. All election data is e
 | `generate-state-fp.yml` | manual only | `webapp/src/data/state_seat_fp.js` (run after a state election is loaded) |
 | `live-feed.yml` | manual only | Election-night proxy: `scripts/fetch_live_vec.py` reads the VEC's EML XML (verbose Lower House ZIP) into the live contract and force-pushes snapshots to the `live-feed` branch for the Live tab's `vec_proxy_2026` source. Blank URL = replay of the VEC's sample files in `tests/fixtures/vec_sample`. The real SharePoint download step is NOT wired yet — see `webapp/src/live/README.md` |
 
+**Live tab model (`webapp/src/live/`):** projections are booth-matched (tonight's booths
+vs the same booths in 2022, from `data/live/vic_2022_booths.json` — rebuild with
+`scripts/build_live_booth_baseline.py`), the 2CP comes from tonight's observed preference
+flows, and uncounted Labor-v-Coalition seats move by the swing seen so far. The tab's
+"Count so far vs the polls" panel compares against `computeVicPollsModel()`, which must
+stay independent of the live count. Tests: `tests/test_fetch_live_vec.py`,
+`webapp/src/__tests__/live-engine.test.js`, `node webapp/scripts/live-check.mjs`.
+
 Conventions for these workflows: `data/polls/` is the source of truth and webapp
 copies are derived; commit steps stage first then use `git diff --cached --quiet`
 (plain `git diff` misses newly created files); all share the `data-autocommit`
