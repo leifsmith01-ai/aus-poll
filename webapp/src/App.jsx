@@ -4580,7 +4580,7 @@ function ConfidenceChip({ outlook, compact = false }) {
 // all drawn on a shared 0..total axis so the rows are directly comparable and the
 // majority line lands in the same place on every one: the light bar is the 90%
 // interval, the solid bar the 50% interval, the tick the median.
-function SeatRangePanel({ dist, total, majority, title = "Seat-count range by party", note = null }) {
+function SeatRangePanel({ dist, total, majority, title = "Likely seat ranges", note = null }) {
   if (!dist) return null;
   const axis = total ?? dist.total;
   const rows = GROUP_ORDER.filter(g => (dist.groups[g]?.max ?? 0) > 0);
@@ -4593,10 +4593,7 @@ function SeatRangePanel({ dist, total, majority, title = "Seat-count range by pa
           {dist.n.toLocaleString()} simulations
         </span>
       </div>
-      <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 12, lineHeight: 1.5 }}>
-        Bar spans the 90% interval; the solid centre is the 50% interval and the tick is the median.
-        The dashed line is the {majority} seats needed for a majority.
-      </div>
+      <div style={{ marginBottom: 12 }} />
 
       <div style={{ display: "grid", gridTemplateColumns: "110px 58px 1fr 72px", gap: 10, marginBottom: 6 }}>
         {["Party", "Median", "", "90% range"].map((h, i) => (
@@ -4645,13 +4642,18 @@ function SeatRangePanel({ dist, total, majority, title = "Seat-count range by pa
           <strong>hung {dist.pMajority.hung}%</strong>
         </span>
       </div>
-      <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 8, lineHeight: 1.5 }}>
-        "In play" = the projected winner holds with under {Math.round(IN_PLAY_P * 100)}% probability (Lean or Toss-up).
-        Those seats are flagged individually in the seat-at-risk table below. A median below the seat
-        table's projected count is not an inconsistency: a party sitting on a stack of marginals wins
-        fewer of them than it holds, once the seats are allowed to move.
-        {note ? ` ${note}` : ""}
-      </div>
+      <details style={{ marginTop: 8 }}>
+        <summary style={{ fontSize: 11, color: "var(--text-3)", cursor: "pointer" }}>How to read this</summary>
+        <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 6, lineHeight: 1.5 }}>
+          Each bar spans the 90% interval; the solid centre is the 50% interval and the tick is the median.
+          The dashed line is the {majority} seats needed for a majority.
+          "In play" = the projected winner holds with under {Math.round(IN_PLAY_P * 100)}% probability (Lean or Toss-up).
+          Those seats are flagged individually in the seat table below. A median below the seat
+          table's projected count is not an inconsistency: a party sitting on a stack of marginals wins
+          fewer of them than it holds, once the seats are allowed to move.
+          {note ? ` ${note}` : ""}
+        </div>
+      </details>
     </div>
   );
 }
@@ -4687,6 +4689,48 @@ function SeatOutcomeOdds({ outlook, probs }) {
   );
 }
 
+// Hand-entered bookmaker prices per Victorian district (data/polls/vic_seat_odds.csv,
+// via pipeline/betting_odds.py). Keyed by district name; empty until prices are added.
+const VIC_SEAT_MARKETS = BETTING_ODDS?.state_elections?.vic?.seats ?? {};
+
+// The betting market for one seat, set beside the model's own probabilities for the
+// same parties. `probs` is that seat's computeSeatDistribution() breakdown.
+function SeatMarketOdds({ market, probs = null }) {
+  if (!market) {
+    return (
+      <div>
+        <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 6 }}>Betting market</div>
+        <div style={{ fontSize: 11, color: "var(--text-4)" }}>No price entered for this seat yet.</div>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-4)", marginBottom: 6 }}>Betting market</div>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 46px 46px 46px", gap: "3px 8px", alignItems: "center", fontSize: 11 }}>
+        {["", "Price", "Market", "Model"].map((h, i) => (
+          <span key={i} style={{ fontSize: 10, color: "var(--text-4)", textAlign: i ? "right" : "left" }}>{h}</span>
+        ))}
+        {market.runners.map((r, i) => {
+          const modelP = probs?.[r.group];
+          return [
+            <span key={`n${i}`} style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, color: "var(--text-2)" }}>
+              <span style={{ width: 8, height: 8, borderRadius: 2, background: GROUP_CONFIG[r.group]?.color ?? "var(--text-3)", flexShrink: 0 }} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.candidate ? `${r.candidate} (${r.party})` : r.party}</span>
+            </span>,
+            <span key={`o${i}`} style={{ textAlign: "right", color: "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>${r.decimal_odds.toFixed(2)}</span>,
+            <span key={`p${i}`} style={{ textAlign: "right", fontWeight: 700, color: "var(--text-1)", fontVariantNumeric: "tabular-nums" }}>{Math.round(r.implied_prob * 100)}%</span>,
+            <span key={`m${i}`} style={{ textAlign: "right", color: "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>{modelP != null ? `${Math.round(modelP * 100)}%` : "—"}</span>,
+          ];
+        })}
+      </div>
+      <div style={{ fontSize: 10, color: "var(--text-4)", marginTop: 6 }}>
+        {market.bookmakers.join(", ")} · {market.as_of} · bookmaker margin removed
+      </div>
+    </div>
+  );
+}
+
 // Baseline-vs-projected count card per party group, with the projection's 90% seat
 // interval when a computeSeatDistribution() result is supplied. Replaces the block
 // that was copy-pasted into the federal, VIC and generic-state composition panels.
@@ -4705,20 +4749,15 @@ function GroupDeltaCards({ base, proj, dist = null, hideEmpty = true }) {
               <span style={{ width: 9, height: 9, borderRadius: 2, background: GROUP_CONFIG[g].color, display: "inline-block" }} />
               <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>{GROUP_CONFIG[g].label}</span>
             </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
               <span style={{ fontSize: 24, fontWeight: 800, color: "var(--text-1)" }}>{pv}</span>
-              <span style={{ fontSize: 12, color: "var(--text-3)" }}>/ {b} base</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: delta > 0 ? "#059669" : delta < 0 ? "#DC2626" : "var(--text-4)" }}>
+                {delta === 0 ? "no change" : `${delta > 0 ? "+" : "−"}${Math.abs(delta)}`}
+              </span>
             </div>
-            {d && (
-              <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
-                90% range {d.p05}–{d.p95}
-              </div>
-            )}
-            {delta !== 0 && (
-              <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? "#059669" : "#DC2626", marginTop: 2 }}>
-                {delta > 0 ? "+" : ""}{delta} seats
-              </div>
-            )}
+            <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>
+              {delta !== 0 ? `from ${b}` : ""}{delta !== 0 && d ? " · " : ""}{d ? `range ${d.p05}–${d.p95}` : ""}
+            </div>
           </div>
         );
       })}
@@ -4729,7 +4768,7 @@ function GroupDeltaCards({ base, proj, dist = null, hideEmpty = true }) {
 // `dist` (optional) is a computeSeatDistribution() result. When supplied, each
 // legend entry carries the party's 90% seat-count interval beside its point count,
 // so the composition bar is never read as a set of exact numbers.
-function TallyBar({ seats, useModelled = false, dist = null }) {
+function TallyBar({ seats, useModelled = false, dist = null, label = null, bare = false, thin = false }) {
   const counts = {};
   seats.forEach(s => {
     const g = useModelled ? (s.modelled?.winnerGroup ?? getSeatGroup(s)) : getSeatGroup(s);
@@ -4739,25 +4778,27 @@ function TallyBar({ seats, useModelled = false, dist = null }) {
   const majorityAt = Math.floor(total / 2) + 1;
   const majorityPct = total > 0 ? (majorityAt / total) * 100 : 50;
   return (
-    <div style={{ ...STYLES.panel, marginBottom: 14 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-3)", marginBottom: 8 }}>
-        {useModelled ? "Projected" : "2025 result"} — {total} seats shown
+    <div style={bare ? { marginBottom: thin ? 4 : 10 } : { ...STYLES.panel, marginBottom: 14 }}>
+      <div style={{ fontSize: bare ? 12 : 13, fontWeight: 600, color: "var(--text-3)", marginBottom: thin ? 4 : 8 }}>
+        {label ?? `${useModelled ? "Projected" : "2025 result"} — ${total} seats shown`}
       </div>
       <div style={{ position: "relative" }}>
-        <div style={{ display: "flex", height: 36, borderRadius: 6, overflow: "hidden", gap: 2 }}>
+        <div style={{ display: "flex", height: thin ? 18 : 36, borderRadius: thin ? 4 : 6, overflow: "hidden", gap: 2, opacity: thin ? 0.75 : 1 }}>
           {GROUP_ORDER.filter(g => counts[g]).map(g => (
-            <div key={g} style={{ flex: counts[g], background: GROUP_CONFIG[g].color, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>
-              {counts[g] >= 2 ? counts[g] : ""}
+            <div key={g} style={{ flex: counts[g], background: GROUP_CONFIG[g].color, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: thin ? 10 : 12, fontWeight: 700 }}>
+              {counts[g] >= (thin ? 4 : 2) ? counts[g] : ""}
             </div>
           ))}
         </div>
         {/* majority marker */}
         <div style={{ position: "absolute", top: 0, bottom: 0, left: `${majorityPct}%`, width: 2, background: "rgba(0,0,0,0.35)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", top: -18, left: `${majorityPct}%`, transform: "translateX(-50%)", fontSize: 10, fontWeight: 700, color: "var(--text-3)", whiteSpace: "nowrap" }}>
-          {majorityAt} needed
-        </div>
+        {!thin && (
+          <div style={{ position: "absolute", top: -18, left: `${majorityPct}%`, transform: "translateX(-50%)", fontSize: 10, fontWeight: 700, color: "var(--text-3)", whiteSpace: "nowrap" }}>
+            {majorityAt} needed
+          </div>
+        )}
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "7px 16px", marginTop: 12 }}>
+      {!bare && <div style={{ display: "flex", flexWrap: "wrap", gap: "7px 16px", marginTop: 12 }}>
         {GROUP_ORDER.filter(g => counts[g]).map(g => (
           <span key={g} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-2)" }}>
             <span style={{ width: 11, height: 11, borderRadius: 3, background: GROUP_CONFIG[g].color, display: "inline-block", flexShrink: 0 }} />
@@ -4769,20 +4810,100 @@ function TallyBar({ seats, useModelled = false, dist = null }) {
             )}
           </span>
         ))}
-      </div>
+      </div>}
     </div>
+  );
+}
+
+// One panel for "where the seats stand": the projected chamber, a thin strip of
+// the last result beneath it for comparison, and a card per party with its change.
+// Shared by the federal, Victorian and generic state models.
+function CompositionPanel({ baseSeats, modelledSeats, baseLabel, base, proj, dist = null, scenarioActive = false, hideEmpty = true, style = null }) {
+  return (
+    <div style={style ?? STYLES.panel}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 22 }}>
+        <span style={{ ...STYLES.panelTitle, marginBottom: 0 }}>Seat composition</span>
+        {scenarioActive && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
+      </div>
+      <TallyBar seats={modelledSeats} useModelled={true} label="Projected" bare />
+      <TallyBar seats={baseSeats} label={baseLabel} bare thin />
+      <GroupDeltaCards base={base} proj={proj} dist={dist} hideEmpty={hideEmpty} />
+    </div>
+  );
+}
+
+// Every seat the scenario moves, grouped by the party gaining it. Each chip carries
+// a dot in the colour of the party losing the seat, so "who takes what from whom"
+// reads at a glance without filtering the seat table.
+function SeatChangesPanel({ seats, style = null }) {
+  const changed = seats.filter(s => s.modelled?.changed);
+  if (changed.length === 0) return null;
+  const byGainer = {};
+  changed.forEach(s => { (byGainer[s.modelled.winnerGroup] ||= []).push(s); });
+  const gainers = GROUP_ORDER.filter(g => byGainer[g]).sort((a, b) => byGainer[b].length - byGainer[a].length);
+  const losers = GROUP_ORDER.filter(g => changed.some(s => getSeatGroup(s) === g));
+  return (
+    <div style={style ?? STYLES.panel}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
+        <span style={{ ...STYLES.panelTitle, marginBottom: 0 }}>Seats changing hands</span>
+        <span style={{ fontSize: 13, color: "var(--text-3)" }}>{changed.length} of {seats.length}</span>
+        <span style={{ marginLeft: "auto", display: "flex", gap: 10, flexWrap: "wrap", fontSize: 11, color: "var(--text-3)" }}>
+          <span>Taken from:</span>
+          {losers.map(g => (
+            <span key={g} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: GROUP_CONFIG[g].color }} />{GROUP_CONFIG[g].label}
+            </span>
+          ))}
+        </span>
+      </div>
+      {gainers.map(g => (
+        <div key={g} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "8px 0", borderTop: "1px solid var(--border-3)" }}>
+          <div style={{ width: 118, flexShrink: 0, fontSize: 12, fontWeight: 700, color: "var(--text-1)", borderLeft: `3px solid ${GROUP_CONFIG[g].color}`, paddingLeft: 8, lineHeight: 1.35 }}>
+            {GROUP_CONFIG[g].label}
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#059669" }}>gains {byGainer[g].length}</div>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, flex: 1 }}>
+            {[...byGainer[g]].sort((a, b) => a.name.localeCompare(b.name)).map(s => {
+              const from = getSeatGroup(s);
+              return (
+                <span key={s.id} title={`${s.name}: ${GROUP_CONFIG[from]?.label ?? from} → ${GROUP_CONFIG[g].label}`}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--text-2)", background: "var(--subtle-bg)", borderRadius: 10, padding: "2px 9px", whiteSpace: "nowrap" }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: GROUP_CONFIG[from]?.color ?? "var(--text-3)", flexShrink: 0 }} />
+                  {s.name}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// A panel that starts folded away: secondary controls and cross-checks that most
+// readers do not need on first view.
+function Collapsible({ title, hint = null, children }) {
+  return (
+    <details style={{ ...STYLES.panel, marginBottom: 14 }}>
+      <summary style={{ cursor: "pointer", fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>
+        {title}
+        {hint && <span style={{ fontSize: 11, fontWeight: 400, color: "var(--text-3)", marginLeft: 10 }}>{hint}</span>}
+      </summary>
+      <div style={{ marginTop: 14 }}>{children}</div>
+    </details>
   );
 }
 
 // Hero projection banner under the header. Pure render over App()'s projCounts /
 // seatAvg2pp; stays at module scope (same constraint as STYLES).
-function HeroBanner({ counts, avg2pp, isMobile, dist = null }) {
+function HeroBanner({ counts, avg2pp, isMobile, dist = null, title = "2025 Federal Projection", dataNote = "Data: 3 May 2025 final", majority = 76 }) {
   const alp = counts.alp ?? 0;
   const coalition = counts.coalition ?? 0;
   const greens = counts.greens ?? 0;
-  const crossbench = (counts.teal ?? 0) + (counts.ind ?? 0) + (counts.one_nation ?? 0) + (counts.crossbench ?? 0);
+  const oneNation = counts.one_nation ?? 0;
+  const crossbench = (counts.teal ?? 0) + (counts.ind ?? 0) + (counts.crossbench ?? 0);
   const total = GROUP_ORDER.reduce((sum, g) => sum + (counts[g] || 0), 0);
-  const majorityPct = total > 0 ? (76 / total) * 100 : 50;
+  const majorityPct = total > 0 ? (majority / total) * 100 : 50;
   const alpAnim = Math.round(useCountUp(alp));
   const coalAnim = Math.round(useCountUp(coalition));
   const bigNum = {
@@ -4811,10 +4932,10 @@ function HeroBanner({ counts, avg2pp, isMobile, dist = null }) {
         {/* Kicker row */}
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: isMobile ? 8 : 10 }}>
           <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--header-muted)" }}>
-            2025 Federal Projection
+            {title}
           </span>
           <span style={{ fontSize: 10, color: "var(--header-muted)", whiteSpace: "nowrap" }}>
-            Data: 3 May 2025 final
+            {dataNote}
           </span>
         </div>
         {/* Headline numbers */}
@@ -4837,6 +4958,12 @@ function HeroBanner({ counts, avg2pp, isMobile, dist = null }) {
             <span style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? 17 : 22, fontWeight: 600, lineHeight: 1, color: "#34B27B", fontVariantNumeric: "tabular-nums" }}>{greens}</span>
             <span style={bigLabel}>Greens</span>
           </span>
+          {oneNation > 0 && (
+            <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? 17 : 22, fontWeight: 600, lineHeight: 1, color: "#E0913F", fontVariantNumeric: "tabular-nums" }}>{oneNation}</span>
+              <span style={bigLabel}>One Nation</span>
+            </span>
+          )}
           <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
             <span style={{ fontFamily: "var(--font-display)", fontSize: isMobile ? 17 : 22, fontWeight: 600, lineHeight: 1, color: "var(--header-fg)", fontVariantNumeric: "tabular-nums" }}>{crossbench}</span>
             <span style={bigLabel}>Crossbench</span>
@@ -4860,7 +4987,7 @@ function HeroBanner({ counts, avg2pp, isMobile, dist = null }) {
           </div>
           <div style={{ position: "absolute", top: -3, bottom: -3, left: `${majorityPct}%`, width: 1, background: "var(--header-fg)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", top: -16, left: `${majorityPct}%`, transform: "translateX(-50%)", fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", color: "var(--header-muted)", whiteSpace: "nowrap" }}>
-            76 FOR MAJORITY
+            {majority} FOR MAJORITY
           </div>
         </div>
         {/* Newspaper double rule */}
@@ -5627,7 +5754,7 @@ export default function App() {
   const [sortKey, setSortKey] = useState("margin");
   const [sortDir, setSortDir] = useState("asc");
   const [seatsJurisdiction, setSeatsJurisdiction] = useState("federal_2025");
-  const [activeTab, setActiveTab] = useState("seats");
+  const [activeTab, setActiveTab] = useState("model");
   const [selectedModelId, setSelectedModelId] = useState("federal_2025");
 
   // ── Seats tab mobile state ──
@@ -7044,7 +7171,16 @@ export default function App() {
       </div>
 
       {/* ── Hero projection banner ── */}
-      <HeroBanner counts={projCounts} avg2pp={seatAvg2pp} isMobile={isMobile} dist={seatDist} />
+      {/* On the Model tab the banner follows the model on screen: Victoria gets its own,
+          and the other state models (whose projections are computed inside their own
+          views) show none rather than a federal banner over a state page. */}
+      {activeTab === "model" && selectedModelId === "vic_2022" ? (
+        <HeroBanner counts={vicProjCounts} avg2pp={vicImplied2pp != null ? { avg: vicImplied2pp } : null} isMobile={isMobile} dist={vicSeatDist}
+          title={vicHasChanges ? "Victoria — Model Projection" : "Victoria — 2022 Result (No Scenario Applied)"}
+          dataNote="Baseline: 26 Nov 2022 election" majority={45} />
+      ) : activeTab === "model" && selectedModelId !== "federal_2025" ? null : (
+        <HeroBanner counts={projCounts} avg2pp={seatAvg2pp} isMobile={isMobile} dist={seatDist} />
+      )}
 
       {/* Keyed wrapper re-mounts on tab change → editorial rise-in transition */}
       <div key={activeTab} style={{ animation: "riseIn 0.22s ease-out" }}>
@@ -8256,14 +8392,12 @@ export default function App() {
 
             {/* ── Model intro text (shown for federal 2025 scenario builder) ── */}
             {el.modelEnabled && selectedModelId === "federal_2025" && (
-              <div style={{ background: "var(--metric-bg)", border: "1px solid var(--border-1)", borderRadius: 8, padding: "14px 16px", marginBottom: 16 }}>
-                <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--text-2)", lineHeight: 1.65 }}>
-                  <strong>aus-poll</strong> is an open-source, seat-by-seat election modelling tool for Australian federal elections. Adjust the primary vote sliders on the left to explore how shifts in national party support translate to seat outcomes across all 151 House of Representatives electorates.
-                </p>
-                <p style={{ margin: 0, fontSize: 13, color: "var(--text-3)", lineHeight: 1.65 }}>
-                  The model uses per-seat first-preference baselines from the 2022 and 2025 AEC results — not a uniform national swing — and applies preference flows at the division level to compute projected two-candidate preferred (2PP) outcomes with uncertainty bands. See the <button onClick={() => setActiveTab("methodology")} style={{ background: "none", border: "none", padding: 0, color: "#1D4ED8", cursor: "pointer", fontSize: 13, textDecoration: "underline" }}>Methodology tab</button> for full technical details, or the <button onClick={() => setActiveTab("about")} style={{ background: "none", border: "none", padding: 0, color: "#1D4ED8", cursor: "pointer", fontSize: 13, textDecoration: "underline" }}>About tab</button> for FAQs and data sources.
-                </p>
-              </div>
+              <p style={{ margin: "0 0 16px", fontSize: 12, color: "var(--text-3)", lineHeight: 1.6 }}>
+                Seat-by-seat projection from per-seat first-preference baselines and preference flows, not a uniform national swing.{" "}
+                <button onClick={() => setActiveTab("methodology")} style={{ background: "none", border: "none", padding: 0, color: "#1D4ED8", cursor: "pointer", fontSize: 12, textDecoration: "underline" }}>How it works</button>
+                {" · "}
+                <button onClick={() => setActiveTab("about")} style={{ background: "none", border: "none", padding: 0, color: "#1D4ED8", cursor: "pointer", fontSize: 12, textDecoration: "underline" }}>FAQs and data sources</button>
+              </p>
             )}
 
             {/* ── State election results view ── */}
@@ -8597,36 +8731,16 @@ export default function App() {
                 </div>
 
                 {/* Tally comparison: 2022 vs projected */}
-                <div style={panelStyle}>
-                  <div style={STYLES.panelTitle}>Seat composition</div>
-                  <div style={{ marginBottom: 8 }}>
-                    <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>2025 result</div>
-                    <TallyBar seats={SEATS} />
-                  </div>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
-                      {hasChanges && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
-                    </div>
-                    <TallyBar seats={modelledSeats} useModelled={true} dist={seatDist} />
-                  </div>
-
-                  {/* Delta table */}
-                  <GroupDeltaCards base={baseCounts} proj={projCounts} dist={seatDist} hideEmpty={false} />
-                </div>
+                <CompositionPanel baseSeats={SEATS} modelledSeats={modelledSeats} baseLabel="2025 result"
+                  base={baseCounts} proj={projCounts} dist={seatDist} scenarioActive={hasChanges} style={panelStyle} />
+                <SeatChangesPanel seats={modelledSeats} style={panelStyle} />
 
                 {/* ── Per-party seat-count ranges (simulation) ── */}
                 <SeatRangePanel dist={seatDist} majority={76}
                   note="Labor's row is the simulated equivalent of the analytic interval below: both are built from the same error components." />
 
                 {/* ── Uncertainty / confidence interval panel ── */}
-                <div style={{ ...STYLES.panel, marginBottom: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-count uncertainty</span>
-                    <span style={{ fontSize: 11, color: "var(--text-3)", background: "var(--subtle-bg)", padding: "2px 7px", borderRadius: 10 }}>
-                      ±{swingStd}pp swing σ
-                    </span>
-                  </div>
+                <Collapsible title="Uncertainty settings" hint={`swing σ ±${swingStd}pp · Labor ${uncertainty.alpP05}–${uncertainty.alpP95} seats on the analytic cross-check`}>
 
                   {/* ALP seat count distribution */}
                   <div style={{ marginBottom: 12 }}>
@@ -8727,7 +8841,7 @@ export default function App() {
                       Typical Australian federal election polling MAE ≈ 1–2pp nationally.
                     </div>
                   </div>
-                </div>
+                </Collapsible>
 
                 {/* ── Seat-at-risk rankings ── */}
                 {(() => {
@@ -8930,64 +9044,6 @@ export default function App() {
                   );
                 })()}
 
-                {/* Seats changing hands */}
-                {changedSeats.length > 0 && (
-                  <div style={panelStyle}>
-                    <div style={STYLES.panelTitle}>Seats changing hands ({changedSeats.length})</div>
-                    {(() => {
-                      const alpGains = changedSeats.filter(s => s.modelled.winnerGroup === "alp" && getParty(s.winner.party).group !== "alp");
-                      const alpLosses = changedSeats.filter(s => getParty(s.winner.party).group === "alp" && s.modelled.winnerGroup !== "alp");
-                      const other = changedSeats.filter(s => s.modelled.winnerGroup !== "alp" && getParty(s.winner.party).group !== "alp");
-                      const SeatRow = ({ seat, direction }) => {
-                        const baseP = getParty(seat.winner.party);
-                        const projP = getParty(seat.modelled.winnerParty);
-                        const alp2pp = seat.modelled.projAlp2pp;
-                        return (
-                          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--border-3)" }}>
-                            <span style={{ fontSize: 14 }}>{direction}</span>
-                            <div style={{ flex: 1 }}>
-                              <span style={{ fontWeight: 600 }}>{seat.name}</span>
-                              <span style={{ color: "var(--text-4)", fontSize: 12, marginLeft: 6 }}>{seat.state}</span>
-                            </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12 }}>
-                              <PartyBadge party={seat.winner.party} />
-                              <span style={{ color: "var(--text-4)" }}>→</span>
-                              <PartyBadge party={seat.modelled.winnerParty} />
-                            </div>
-                            {alp2pp !== null && (
-                              <span style={{ fontSize: 12, color: "var(--text-3)", minWidth: 80, textAlign: "right" }}>
-                                ALP 2PP {alp2pp.toFixed(1)}%
-                              </span>
-                            )}
-                            {seat.modelled.isOverride && <span style={{ fontSize: 10, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 5px", borderRadius: 6, fontWeight: 600 }}>override</span>}
-                          </div>
-                        );
-                      };
-                      return (
-                        <div>
-                          {alpGains.length > 0 && (
-                            <div style={{ marginBottom: 12 }}>
-                              <div style={{ fontSize: 12, fontWeight: 700, color: "#059669", marginBottom: 6 }}>🟢 ALP gains ({alpGains.length})</div>
-                              {[...alpGains].sort((a, b) => (a.modelled.projAlp2pp || 50) - (b.modelled.projAlp2pp || 50)).map(s => <SeatRow key={s.id} seat={s} direction="↑" />)}
-                            </div>
-                          )}
-                          {alpLosses.length > 0 && (
-                            <div style={{ marginBottom: 12 }}>
-                              <div style={{ fontSize: 12, fontWeight: 700, color: "#DC2626", marginBottom: 6 }}>🔴 ALP losses ({alpLosses.length})</div>
-                              {[...alpLosses].sort((a, b) => (b.modelled.projAlp2pp || 50) - (a.modelled.projAlp2pp || 50)).map(s => <SeatRow key={s.id} seat={s} direction="↓" />)}
-                            </div>
-                          )}
-                          {other.length > 0 && (
-                            <div>
-                              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-3)", marginBottom: 6 }}>⚪ Other changes ({other.length})</div>
-                              {other.map(s => <SeatRow key={s.id} seat={s} direction="↔" />)}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
 
                 {/* Seat-level primary vote overrides */}
                 <div style={panelStyle}>
@@ -9413,30 +9469,14 @@ export default function App() {
                 </div>
 
                 {/* Tally comparison */}
-                <div style={panelStyle}>
-                  <div style={STYLES.panelTitle}>Seat composition</div>
-                  <div style={{ marginBottom: 8 }}>
-                    <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>2022 result</div>
-                    <TallyBar seats={VIC_SEATS} />
-                  </div>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
-                      {vicHasChanges && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
-                    </div>
-                    <TallyBar seats={vicModelledSeats} useModelled={true} dist={vicSeatDist} />
-                  </div>
-                  <GroupDeltaCards base={vicBaseCounts} proj={vicProjCounts} dist={vicSeatDist} />
-                </div>
+                <CompositionPanel baseSeats={VIC_SEATS} modelledSeats={vicModelledSeats} baseLabel="2022 result"
+                  base={vicBaseCounts} proj={vicProjCounts} dist={vicSeatDist} scenarioActive={vicHasChanges} style={panelStyle} />
+                <SeatChangesPanel seats={vicModelledSeats} style={panelStyle} />
 
                 <SeatRangePanel dist={vicSeatDist} majority={45} />
 
                 {/* VIC Uncertainty panel */}
-                <div style={{ ...STYLES.panel, marginBottom: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-count uncertainty</span>
-                    <span style={{ fontSize: 11, color: "var(--text-3)", background: "var(--subtle-bg)", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ</span>
-                  </div>
+                <Collapsible title="Uncertainty settings" hint={`swing σ ±${swingStd}pp · Labor ${vicUncertainty.alpP05}–${vicUncertainty.alpP95} seats on the analytic cross-check`}>
                   <div style={{ marginBottom: 12 }}>
                     <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
@@ -9481,7 +9521,7 @@ export default function App() {
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 4 }}>Shared across all elections. Typical Australian state polling MAE ≈ 1–2pp.</div>
                   </div>
-                </div>
+                </Collapsible>
 
                 {/* Seat-at-risk table — filterable */}
                 {(() => {
@@ -9489,11 +9529,11 @@ export default function App() {
                     padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid var(--border-2)",
                     background: active ? "var(--text-2)" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
                   });
-                  let vicFiltered = [...vicModelledSeats].sort((a, b) => {
-                    const ma = Math.abs((a.modelled.projAlp2pp ?? 50) - 50);
-                    const mb = Math.abs((b.modelled.projAlp2pp ?? 50) - 50);
-                    return ma - mb;
-                  });
+                  // Least certain first: the simulated probability that the projected winner
+                  // holds. (Sorting on the ALP 2PP margin put every seat without an
+                  // ALP-vs-Coalition final at "0.0pp", ahead of the real marginals.)
+                  const vicHoldP = (seat) => vicSeatDist.seatOutlook[seat.id]?.p ?? 1;
+                  let vicFiltered = [...vicModelledSeats].sort((a, b) => vicHoldP(a) - vicHoldP(b) || a.name.localeCompare(b.name));
                   if (stateRiskFilter === "changing") vicFiltered = vicFiltered.filter(s => s.modelled.changed);
                   if (stateRiskFilter === "marginal") vicFiltered = vicFiltered.filter(s => Math.abs((s.modelled.projAlp2pp ?? 50) - 50) < 5);
                   if (stateRiskFilter === "inplay") vicFiltered = vicFiltered.filter(s => (vicSeatDist.seatOutlook[s.id]?.p ?? 1) < IN_PLAY_P);
@@ -9508,14 +9548,15 @@ export default function App() {
                         </div>
                       </div>
                       <div style={{ overflowX: "auto" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 86px 86px 58px 42px 78px 46px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 500 }}>
-                          {[["Seat", "var(--text-2)"], ["2022", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP%", "var(--text-3)"], ["Confidence", "var(--text-3)"], ["", ""]].map(([label, color], i) => (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 86px 86px 58px 42px 78px 62px 46px", gap: 4, borderBottom: "2px solid #F3F4F6", paddingBottom: 4, marginBottom: 4, minWidth: 560 }}>
+                          {[["Seat", "var(--text-2)"], ["2022", "var(--text-3)"], ["Projected", "var(--text-3)"], ["Margin", "var(--text-3)"], ["ALP%", "var(--text-3)"], ["Confidence", "var(--text-3)"], ["Market", "var(--text-3)"], ["", ""]].map(([label, color], i) => (
                             <div key={i} style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color, paddingLeft: i === 0 ? 2 : 0 }}>{label}</div>
                           ))}
                         </div>
                         <div style={{ maxHeight: 440, overflowY: "auto" }}>
                           {vicFiltered.map(seat => {
-                            const margin = Math.abs((seat.modelled.projAlp2pp ?? 50) - 50);
+                            const margin = seat.modelled.projAlp2pp == null ? Infinity : Math.abs(seat.modelled.projAlp2pp - 50);
+                            const market = VIC_SEAT_MARKETS[seat.name];
                             const changed = seat.modelled.changed;
                             const projColor = GROUP_CONFIG[seat.modelled.winnerGroup]?.color ?? "var(--text-3)";
                             const winProb = vicUncertainty.seatWinProbs[seat.id];
@@ -9528,7 +9569,7 @@ export default function App() {
                               <div key={seat.id}>
                                 <div onClick={() => setExpandedStateSeatId(prev => prev === seat.id ? null : seat.id)}
                                   style={{
-                                    display: "grid", gridTemplateColumns: "1fr 86px 86px 58px 42px 78px 46px", gap: 4, alignItems: "center", minWidth: 500,
+                                    display: "grid", gridTemplateColumns: "1fr 86px 86px 58px 42px 78px 62px 46px", gap: 4, alignItems: "center", minWidth: 560,
                                     padding: "5px 2px", borderLeft: `4px solid ${changed ? projColor : "transparent"}`,
                                     borderBottom: isExpanded ? "none" : "1px solid #F9FAFB",
                                     background: hasOv ? "rgba(16,185,129,0.10)" : isExpanded ? "var(--row-highlight)" : changed ? "rgba(217,119,6,0.08)" : "transparent",
@@ -9548,14 +9589,21 @@ export default function App() {
                                     {winProb != null ? `${Math.round(winProb * 100)}%` : "—"}
                                   </span>
                                   <span><ConfidenceChip outlook={outlook} compact /></span>
+                                  <span title={market ? `Market favourite: ${GROUP_CONFIG[market.favourite_group]?.label} at ${Math.round(market.favourite_prob * 100)}%` : "No betting price entered"}
+                                    style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, color: market ? "var(--text-1)" : "var(--text-4)", fontVariantNumeric: "tabular-nums" }}>
+                                    {market && <span style={{ width: 8, height: 8, borderRadius: 2, background: GROUP_CONFIG[market.favourite_group]?.color ?? "var(--text-3)" }} />}
+                                    {market ? `${Math.round(market.favourite_prob * 100)}%` : "—"}
+                                    {market && market.favourite_group !== seat.modelled.winnerGroup && <span title="Market favourite differs from the model's projected winner" style={{ color: "#D97706" }}>≠</span>}
+                                  </span>
                                   <span style={{ fontSize: 10, color: changed ? projColor : hasOv ? "#059669" : onRace ? "#B45309" : "var(--text-4)", fontWeight: 600 }}>
                                     {changed ? "CHANGED" : hasOv ? "OVERRIDE" : onRace ? "ON RACE" : ""}
                                   </span>
                                 </div>
                                 {isExpanded && (
                                   <div style={{ background: "var(--metric-bg)", borderBottom: "1px solid var(--border-1)", padding: "10px 14px", marginBottom: 2 }}>
-                                    <div style={{ maxWidth: 340, marginBottom: 10 }}>
+                                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "minmax(0,1fr)" : "minmax(0,300px) minmax(0,1fr)", gap: 24, marginBottom: 10 }}>
                                       <SeatOutcomeOdds outlook={outlook} probs={vicSeatDist.seatProbs[seat.id]} />
+                                      <SeatMarketOdds market={market} probs={vicSeatDist.seatProbs[seat.id]} />
                                     </div>
                                     {Object.keys(d).length > 0 && d.medianAge != null ? (
                                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
@@ -9979,30 +10027,14 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div style={panelStyle}>
-                    <div style={STYLES.panelTitle}>Seat composition</div>
-                    <div style={{ marginBottom: 8 }}>
-                      <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>Baseline result</div>
-                      <TallyBar seats={allSeats} />
-                    </div>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                        <div style={{ fontSize: 12, color: "var(--text-3)" }}>Projected</div>
-                        {hasChanges && <span style={{ fontSize: 11, background: "rgba(217,119,6,0.15)", color: "var(--text-2)", padding: "1px 6px", borderRadius: 10, fontWeight: 600 }}>scenario active</span>}
-                      </div>
-                      <TallyBar seats={modelled} useModelled={true} dist={dist} />
-                    </div>
-                    <GroupDeltaCards base={base} proj={proj} dist={dist} />
-                  </div>
+                  <CompositionPanel baseSeats={allSeats} modelledSeats={modelled} baseLabel="Last election"
+                    base={base} proj={proj} dist={dist} scenarioActive={hasChanges} style={panelStyle} />
+                  <SeatChangesPanel seats={modelled} style={panelStyle} />
 
                   <SeatRangePanel dist={dist} majority={majority} />
 
                   {/* Uncertainty panel */}
-                  <div style={{ ...STYLES.panel, marginBottom: 14 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Seat-count uncertainty</span>
-                      <span style={{ fontSize: 11, color: "var(--text-3)", background: "var(--subtle-bg)", padding: "2px 7px", borderRadius: 10 }}>±{swingStd}pp swing σ</span>
-                    </div>
+                  <Collapsible title="Uncertainty settings" hint={`swing σ ±${swingStd}pp · Labor ${uncertainty.alpP05}–${uncertainty.alpP95} seats on the analytic cross-check`}>
                     <div style={{ marginBottom: 12 }}>
                       <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 4 }}>ALP projected seats (with uncertainty)</div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
@@ -10047,7 +10079,7 @@ export default function App() {
                       </div>
                       <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 4 }}>Shared across all elections. Typical Australian state polling MAE ≈ 1–2pp.</div>
                     </div>
-                  </div>
+                  </Collapsible>
 
                   {/* Seat-at-risk table — filterable */}
                   {(() => {
@@ -10055,11 +10087,9 @@ export default function App() {
                       padding: "4px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer", border: "1px solid var(--border-2)",
                       background: active ? "var(--text-2)" : "var(--panel-bg)", color: active ? "#fff" : "var(--text-2)",
                     });
-                    let stateFiltered = [...modelled].sort((a, b) => {
-                      const ma = Math.abs((a.modelled.projAlp2pp ?? 50) - 50);
-                      const mb = Math.abs((b.modelled.projAlp2pp ?? 50) - 50);
-                      return ma - mb;
-                    });
+                    // Least certain first — see the Victorian table for why not ALP 2PP margin.
+                    const holdP = (seat) => dist.seatOutlook[seat.id]?.p ?? 1;
+                    let stateFiltered = [...modelled].sort((a, b) => holdP(a) - holdP(b) || a.name.localeCompare(b.name));
                     if (stateRiskFilter === "changing") stateFiltered = stateFiltered.filter(s => s.modelled.changed);
                     if (stateRiskFilter === "marginal") stateFiltered = stateFiltered.filter(s => Math.abs((s.modelled.projAlp2pp ?? 50) - 50) < 5);
                     if (stateRiskFilter === "inplay") stateFiltered = stateFiltered.filter(s => (dist.seatOutlook[s.id]?.p ?? 1) < IN_PLAY_P);
@@ -10874,6 +10904,73 @@ export default function App() {
             </div>
 
 
+            {/* Victorian seat markets */}
+            {(() => {
+              const vicMkt = BETTING_ODDS?.state_elections?.vic ?? {};
+              const priced = vicModelledSeats.filter(seat => VIC_SEAT_MARKETS[seat.name])
+                .sort((a, b) => VIC_SEAT_MARKETS[a.name].favourite_prob - VIC_SEAT_MARKETS[b.name].favourite_prob);
+              const total = vicMkt.seats_total ?? VIC_SEATS.length;
+              const cols = "minmax(110px,1fr) minmax(150px,1.6fr) 60px 60px minmax(96px,0.9fr) 60px";
+              return (
+                <div style={{ ...panelStyle, marginBottom: 14 }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Victoria — seat betting</span>
+                    <span style={{ fontSize: 12, color: "var(--text-3)" }}>{priced.length} of {total} districts priced · election {vicMkt.date ?? "2026-11-28"}</span>
+                    <button onClick={() => { setSelectedModelId("vic_2022"); setActiveTab("model"); }}
+                      style={{ marginLeft: "auto", background: "none", border: "none", padding: 0, color: "#1D4ED8", cursor: "pointer", fontSize: 12, textDecoration: "underline" }}>
+                      Open the Victorian model
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 12, lineHeight: 1.5 }}>
+                    Bookmaker seat prices are entered by hand (bookmakers block automated access from outside Australia), with each
+                    bookmaker's margin removed. "Model" is the Victorian model's probability for the same party under the scenario currently
+                    set on the Model tab{vicHasChanges ? "" : " — at present the unadjusted 2022 result, so apply the latest polls there for a like-for-like comparison"}.
+                  </div>
+                  {priced.length === 0 ? (
+                    <div style={{ fontSize: 12, color: "var(--text-3)" }}>No seat prices entered yet — add rows to data/polls/vic_seat_odds.csv.</div>
+                  ) : (
+                    <div style={{ overflowX: "auto" }}>
+                      <div style={{ minWidth: 600 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: cols, gap: 8, borderBottom: "2px solid var(--border-2)", paddingBottom: 4, marginBottom: 2 }}>
+                          {["Seat", "Market favourite", "Price", "Market", "Model projects", "Model"].map((h, i) => (
+                            <span key={h + i} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-3)", textAlign: [2, 3, 5].includes(i) ? "right" : "left" }}>{h}</span>
+                          ))}
+                        </div>
+                        {priced.map(seat => {
+                          const m = VIC_SEAT_MARKETS[seat.name];
+                          const fav = m.runners[0];
+                          const modelP = vicSeatDist.seatProbs[seat.id]?.[fav.group];
+                          const agree = fav.group === seat.modelled.winnerGroup;
+                          const dot = (g) => <span style={{ width: 8, height: 8, borderRadius: 2, background: GROUP_CONFIG[g]?.color ?? "var(--text-3)", flexShrink: 0 }} />;
+                          return (
+                            <div key={seat.id} style={{ borderBottom: "1px solid var(--border-3)", padding: "7px 0" }}>
+                              <div style={{ display: "grid", gridTemplateColumns: cols, gap: 8, alignItems: "center", fontSize: 12 }}>
+                                <span style={{ fontWeight: 700, color: "var(--text-1)" }}>{seat.name}</span>
+                                <span style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0, color: "var(--text-2)" }}>
+                                  {dot(fav.group)}
+                                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fav.candidate ? `${fav.candidate} (${fav.party})` : fav.party}</span>
+                                </span>
+                                <span style={{ textAlign: "right", color: "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>${fav.decimal_odds.toFixed(2)}</span>
+                                <span style={{ textAlign: "right", fontWeight: 700, color: "var(--text-1)", fontVariantNumeric: "tabular-nums" }}>{Math.round(fav.implied_prob * 100)}%</span>
+                                <span style={{ display: "flex", alignItems: "center", gap: 6, color: agree ? "var(--text-2)" : "#B45309", fontWeight: agree ? 400 : 700 }}>
+                                  {dot(seat.modelled.winnerGroup)}{GROUP_CONFIG[seat.modelled.winnerGroup]?.label ?? "—"}{agree ? "" : " ≠"}
+                                </span>
+                                <span style={{ textAlign: "right", color: "var(--text-3)", fontVariantNumeric: "tabular-nums" }}>{modelP != null ? `${Math.round(modelP * 100)}%` : "—"}</span>
+                              </div>
+                              <div style={{ fontSize: 11, color: "var(--text-4)", marginTop: 3 }}>
+                                {m.runners.slice(1).map(r => `${r.candidate || r.party}${r.candidate ? ` (${r.party})` : ""} $${r.decimal_odds.toFixed(2)} · ${Math.round(r.implied_prob * 100)}%`).join("   ")}
+                                <span style={{ marginLeft: 10 }}>— {m.bookmakers.join(", ")}, {m.as_of}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* National government odds */}
             <div style={{ ...panelStyle, marginBottom: 14 }}>
               <div style={{ marginBottom: 12 }}>
@@ -11557,7 +11654,7 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
                   {[
                     ["AEC election results", <><a href="https://results.aec.gov.au" target="_blank" rel="noreferrer" style={{ color: "#1D4ED8" }}>results.aec.gov.au</a> — booth-level and division-level CSV exports for 2022 and 2025 federal elections (first preferences, TCP, DOP).</>],
                     ["Polling", "Newspoll, Resolve/SMH, RedBridge, DemosAU, Roy Morgan, Essential Research, YouGov — primary and 2PP figures as published."],
-                    ["Betting markets", "Sportsbet, Betfair Exchange — national government outcome odds and seat-level win markets."],
+                    ["Betting markets", "Smarkets Exchange — national and Victorian government markets, refreshed daily. Victorian seat prices are bookmaker odds entered by hand."],
                     ["Demographics", "ABS Census 2021 — SA1/SA2 level data mapped to electoral divisions."],
                   ].map(([title, desc], i) => (
                     <tr key={i} style={{ borderBottom: "1px solid var(--border-3)" }}>

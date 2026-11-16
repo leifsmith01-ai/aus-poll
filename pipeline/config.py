@@ -620,3 +620,24 @@ STATE_REGISTRY = {
         "booth_level":       True,   # NTEC publishes booth-level results
     },
 }
+
+
+# The 88 Victorian Legislative Assembly districts (2022 boundaries, also used for
+# the November 2026 election). pipeline/betting_odds.py checks hand-entered seat
+# betting odds against this list so a misspelt district is reported, not dropped.
+VIC_DISTRICTS: list[str] = [
+    "Albert Park", "Ashwood", "Bass", "Bayswater", "Bellarine", "Benambra", "Bendigo East",
+    "Bendigo West", "Bentleigh", "Berwick", "Box Hill", "Brighton", "Broadmeadows",
+    "Brunswick", "Bulleen", "Bundoora", "Carrum", "Caulfield", "Clarinda", "Cranbourne",
+    "Croydon", "Dandenong", "Eildon", "Eltham", "Essendon", "Eureka", "Euroa", "Evelyn",
+    "Footscray", "Frankston", "Geelong", "Gippsland East", "Gippsland South",
+    "Glen Waverley", "Greenvale", "Hastings", "Hawthorn", "Ivanhoe", "Kalkallo", "Kew",
+    "Kororoit", "Lara", "Laverton", "Lowan", "Macedon", "Malvern", "Melbourne", "Melton",
+    "Mildura", "Mill Park", "Monbulk", "Mordialloc", "Mornington", "Morwell", "Mulgrave",
+    "Murray Plains", "Narracan", "Narre Warren North", "Narre Warren South", "Nepean",
+    "Niddrie", "Northcote", "Oakleigh", "Ovens Valley", "Pakenham", "Pascoe Vale",
+    "Point Cook", "Polwarth", "Prahran", "Preston", "Richmond", "Ringwood", "Ripon",
+    "Rowville", "Sandringham", "Shepparton", "South Barwon", "South-West Coast",
+    "St Albans", "Sunbury", "Sydenham", "Tarneit", "Thomastown", "Warrandyte", "Wendouree",
+    "Werribee", "Williamstown", "Yan Yean",
+]

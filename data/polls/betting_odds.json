@@ -2,13 +2,13 @@
   "source": "smarkets",
   "national": {
     "coalition_majority": {
-      "decimal_odds": 2.47,
-      "implied_prob": 0.4055
+      "decimal_odds": 2.35,
+      "implied_prob": 0.4259
     },
     "alp_majority": {
-      "decimal_odds": 2.25,
-      "implied_prob": 0.444,
-      "implied_2pp": 49.79
+      "decimal_odds": 2.33,
+      "implied_prob": 0.4295,
+      "implied_2pp": 49.73
     }
   },
   "seats": {},
@@ -22,17 +22,100 @@
       "total_seats": 88,
       "majority": 45,
       "other_any_other": {
-        "decimal_odds": 67.13,
-        "implied_prob": 0.0149
+        "decimal_odds": 77.93,
+        "implied_prob": 0.0128
       },
       "coalition_win": {
         "decimal_odds": 1.05,
-        "implied_prob": 0.9513
+        "implied_prob": 0.9493
       },
       "alp_win": {
-        "decimal_odds": 29.62,
-        "implied_prob": 0.0338
-      }
+        "decimal_odds": 26.42,
+        "implied_prob": 0.0379
+      },
+      "seats": {
+        "Kew": {
+          "as_of": "2026-11-13",
+          "bookmakers": [
+            "MPNEWS (bookmaker unnamed)"
+          ],
+          "favourite_group": "coalition",
+          "favourite_prob": 0.891,
+          "runners": [
+            {
+              "group": "coalition",
+              "party": "Liberal",
+              "candidate": "Jess Wilson",
+              "decimal_odds": 1.04,
+              "implied_prob": 0.891
+            },
+            {
+              "group": "ind",
+              "party": "Independent",
+              "candidate": "Sophie Torney",
+              "decimal_odds": 8.5,
+              "implied_prob": 0.109
+            }
+          ]
+        },
+        "Mornington": {
+          "as_of": "2026-11-13",
+          "bookmakers": [
+            "MPNEWS (bookmaker unnamed)"
+          ],
+          "favourite_group": "coalition",
+          "favourite_prob": 0.8481,
+          "runners": [
+            {
+              "group": "coalition",
+              "party": "Liberal",
+              "candidate": "Chris Crewther",
+              "decimal_odds": 1.04,
+              "implied_prob": 0.8481
+            },
+            {
+              "group": "one_nation",
+              "party": "One Nation",
+              "candidate": "Ashli Beards",
+              "decimal_odds": 7.0,
+              "implied_prob": 0.126
+            },
+            {
+              "group": "alp",
+              "party": "Labor",
+              "candidate": "Kerry Macdonald",
+              "decimal_odds": 34.0,
+              "implied_prob": 0.0259
+            }
+          ]
+        },
+        "Niddrie": {
+          "as_of": "2026-11-13",
+          "bookmakers": [
+            "MPNEWS (bookmaker unnamed)"
+          ],
+          "favourite_group": "coalition",
+          "favourite_prob": 0.5455,
+          "runners": [
+            {
+              "group": "coalition",
+              "party": "Liberal",
+              "candidate": "Samantha Byrne",
+              "decimal_odds": 1.75,
+              "implied_prob": 0.5455
+            },
+            {
+              "group": "alp",
+              "party": "Labor",
+              "candidate": "Ben Carroll",
+              "decimal_odds": 2.1,
+              "implied_prob": 0.4545
+            }
+          ]
+        }
+      },
+      "seats_source": "manual",
+      "seats_total": 88
     },
     "nsw": {
       "source": "manual",
@@ -54,7 +137,7 @@
     }
   },
   "national_market_name": "Party to Provide the Next Prime Minister of Australia",
-  "generated": "2026-11-15",
+  "generated": "2026-11-16",
   "sigma_per_seat": 2.5,
   "sigma_national": 1.5
 }

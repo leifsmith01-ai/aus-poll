@@ -1,0 +1,32 @@
+# Victorian seat (district) betting odds - November 2026 state election.
+#
+# One row per candidate per bookmaker. Add rows for as many of the 88 districts as
+# you have prices for, then run:   python -m pipeline.betting_odds
+# (the daily "Fetch Betting Odds" workflow also picks this file up automatically).
+#
+#   district      Name as the VEC spells it, e.g. South-West Coast. A misspelt name is
+#                 reported as a warning and skipped, never silently dropped.
+#   party         Labor, Liberal, Nationals, Greens, One Nation, Independent, or any
+#                 other party name.
+#   candidate     Optional.
+#   decimal_odds  The dollar price, e.g. 1.75 (a leading $ is fine).
+#   bookmaker     Sportsbet, TAB, ... Prices from several bookmakers for one district
+#                 are averaged after each book's margin is removed.
+#   as_of         Date the price was read, YYYY-MM-DD.
+#
+# List every runner a bookmaker quotes in a district: the bookmaker's margin is
+# removed by scaling that district's prices so their probabilities sum to 100%.
+#
+# In R:  read.csv("data/polls/vic_seat_odds.csv", comment.char = "#")
+#
+# Rows below: prices quoted in MPNEWS, "Taking a punt on election outcomes",
+# 13 Nov 2026. The article does not name the bookmaker, and gives only the leading
+# two runners in Kew and Niddrie.
+district,party,candidate,decimal_odds,bookmaker,as_of
+Mornington,Liberal,Chris Crewther,1.04,MPNEWS (bookmaker unnamed),2026-11-13
+Mornington,One Nation,Ashli Beards,7.00,MPNEWS (bookmaker unnamed),2026-11-13
+Mornington,Labor,Kerry Macdonald,34.00,MPNEWS (bookmaker unnamed),2026-11-13
+Niddrie,Liberal,Samantha Byrne,1.75,MPNEWS (bookmaker unnamed),2026-11-13
+Niddrie,Labor,Ben Carroll,2.10,MPNEWS (bookmaker unnamed),2026-11-13
+Kew,Liberal,Jess Wilson,1.04,MPNEWS (bookmaker unnamed),2026-11-13
+Kew,Independent,Sophie Torney,8.50,MPNEWS (bookmaker unnamed),2026-11-13

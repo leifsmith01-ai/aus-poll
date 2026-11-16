@@ -321,6 +321,17 @@ A previous bug caused a white screen when `STYLES` was defined inside the compon
 - **`ON_FP_2022` / `ON_FP_2025`:** Per-seat One Nation first preference constants for regional strongholds (e.g., Hunter 16.4%, Hinkler 13.8%).
 - **NaN propagation guard:** Seats where `hasTeal && hasAlp` used to produce NaN. Always guard against NaN in 2PP calculations, especially in independent/ALP race branches.
 
+### Model tab layout
+
+The Model tab is the landing page (`activeTab` defaults to `"model"`). The federal,
+Victorian and generic state views share module-scope presentation components:
+`CompositionPanel` (projected bar, thin last-result strip, per-party change cards),
+`SeatChangesPanel` (every changed seat as a chip, grouped by gaining party, dot = party
+losing it), `SeatRangePanel`, and `Collapsible` (wraps the analytic Labor cross-check
+and the σ / elasticity controls as "Uncertainty settings", folded by default).
+`HeroBanner` follows the model on screen: federal by default, Victoria's own counts
+when the Victorian model is selected, and hidden for the other state models.
+
 ### Uncertainty: two engines, one contest resolver
 
 `resolveSeatContest(seat, useElasticity)` is the single place that decides which race a
@@ -421,6 +432,20 @@ Poll data lives in `data/polls/`:
 - **`bludgertrack.json`:** Historical polling tracker with ALP 2PP estimates over time
 - **`vic_polls.json`:** Victorian state polling
 - **`nsw_polls.json` / `qld_polls.json` / `wa_polls.json` / `sa_polls.json`:** Other state polls. Same schema as `vic_polls.json` but with state-specific Coalition keys (`lp`+`np` NSW, `lnp` QLD, `lp`+`nat` WA, `lp` SA). `pipeline/poll_scraper.py`'s `STATE_SCRAPER_REGISTRY` scrapes each state's Wikipedia polling page, soft-skipping states whose next-election page doesn't exist yet. The frontend Polls tab has a jurisdiction switcher (Federal/VIC/NSW/QLD/WA/SA) rendering these files directly (`POLLS_TAB_JURISDICTIONS` in App.jsx).
+
+### Seat-level betting odds (`data/polls/vic_seat_odds.csv`)
+
+Australian bookmakers (Sportsbet, TAB) refuse connections from outside Australia, so
+district markets cannot be fetched by the scheduled job or from a cloud session — do
+not try to work around the location block. Seat prices are entered by hand in
+`data/polls/vic_seat_odds.csv` (one row per runner per bookmaker; the file's header
+comments document the columns). `pipeline/betting_odds.py`'s `load_seat_odds()` removes
+each bookmaker's overround, averages across bookmakers, checks district names against
+`config.VIC_DISTRICTS`, and `attach_vic_seat_odds()` writes the result to
+`state_elections.vic.seats` in `betting_odds.json` whichever source supplied the
+headline markets. The frontend reads it as `VIC_SEAT_MARKETS`: the Market column and
+`SeatMarketOdds` block in the Victorian seat table, and the "Victoria — seat betting"
+panel on the Markets tab. Smarkets lists only the statewide "Winning Party" market.
 
 ### House effects in `poll_aggregator.py`
 

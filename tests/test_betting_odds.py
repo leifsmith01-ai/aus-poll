@@ -118,3 +118,80 @@ class TestClassifyParty:
         assert _classify_party("Liberal/National Coalition") == "coalition"
         assert _classify_party("The Greens") == "greens"
         assert _classify_party("Any Other Result") == "other"
+
+
+# ── Seat-level odds CSV ───────────────────────────────────────────────────────
+
+from pipeline.betting_odds import (  # noqa: E402
+    VIC_SEAT_ODDS_CSV,
+    classify_seat_party,
+    load_seat_odds,
+)
+from pipeline.config import VIC_DISTRICTS  # noqa: E402
+
+SEAT_CSV_HEADER = "district,party,candidate,decimal_odds,bookmaker,as_of\n"
+
+
+def _write(tmp_path, body):
+    p = tmp_path / "seat_odds.csv"
+    p.write_text("# a comment line\n" + SEAT_CSV_HEADER + body, encoding="utf-8")
+    return p
+
+
+def test_classify_seat_party():
+    assert classify_seat_party("Labor") == "alp"
+    assert classify_seat_party("Liberal Party") == "coalition"
+    assert classify_seat_party("The Nationals") == "coalition"
+    # "One Nation" must not be read as the Nationals.
+    assert classify_seat_party("One Nation") == "one_nation"
+    assert classify_seat_party("Greens") == "greens"
+    assert classify_seat_party("Independent") == "ind"
+    assert classify_seat_party("Legalise Cannabis") == "crossbench"
+
+
+def test_seat_odds_remove_overround(tmp_path):
+    p = _write(tmp_path, "Bass,Liberal,A,1.50,BookA,2026-11-10\nBass,Labor,B,2.50,BookA,2026-11-10\n")
+    seats, problems = load_seat_odds(p, ["Bass"])
+    assert problems == []
+    runners = seats["Bass"]["runners"]
+    assert sum(r["implied_prob"] for r in runners) == pytest.approx(1.0, abs=1e-3)
+    # 1/1.5 = 0.667, 1/2.5 = 0.400 → 0.625 / 0.375 once the 6.7% margin is removed.
+    assert runners[0]["group"] == "coalition"
+    assert runners[0]["implied_prob"] == pytest.approx(0.625, abs=1e-3)
+    assert seats["Bass"]["favourite_group"] == "coalition"
+
+
+def test_seat_odds_average_bookmakers_and_keep_best_price(tmp_path):
+    p = _write(tmp_path, (
+        "Bass,Liberal,A,1.50,BookA,2026-11-10\nBass,Labor,B,2.50,BookA,2026-11-10\n"
+        "Bass,Liberal,A,2.00,BookB,2026-11-12\nBass,Labor,B,2.00,BookB,2026-11-12\n"
+    ))
+    seats, _ = load_seat_odds(p, ["Bass"])
+    lib = next(r for r in seats["Bass"]["runners"] if r["group"] == "coalition")
+    assert lib["implied_prob"] == pytest.approx((0.625 + 0.5) / 2, abs=1e-3)
+    assert lib["decimal_odds"] == 2.0
+    assert seats["Bass"]["bookmakers"] == ["BookA", "BookB"]
+    assert seats["Bass"]["as_of"] == "2026-11-12"
+
+
+def test_seat_odds_report_bad_rows(tmp_path):
+    p = _write(tmp_path, (
+        "Bas,Liberal,A,1.50,BookA,2026-11-10\n"        # misspelt district
+        "Bass,Liberal,A,abc,BookA,2026-11-10\n"        # not a price
+        "Kew,Liberal,A,1.04,BookA,2026-11-10\n"        # only one runner
+    ))
+    seats, problems = load_seat_odds(p, ["Bass", "Kew"])
+    assert seats == {}
+    assert len(problems) == 3
+
+
+def test_config_lists_88_vic_districts():
+    assert len(VIC_DISTRICTS) == 88 == len(set(VIC_DISTRICTS))
+
+
+def test_committed_vic_seat_odds_are_clean():
+    """The CSV in the repo must load without a single skipped row."""
+    seats, problems = load_seat_odds(VIC_SEAT_ODDS_CSV, VIC_DISTRICTS)
+    assert problems == []
+    for market in seats.values():
+        assert sum(r["implied_prob"] for r in market["runners"]) == pytest.approx(1.0, abs=2e-3)

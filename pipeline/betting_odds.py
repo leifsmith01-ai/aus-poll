@@ -22,6 +22,7 @@ Math: win probability → implied 2PP
     Inverting: implied_2pp = 50 + sigma × Φ⁻¹(P_ALP_win)
 """
 
+import csv
 import json
 import logging
 import math
@@ -37,6 +38,10 @@ logger = logging.getLogger(__name__)
 BASE_DIR    = Path(__file__).parent.parent
 MANUAL_JSON = BASE_DIR / "data" / "polls" / "betting_odds_manual.json"
 OUTPUT_JSON = BASE_DIR / "data" / "polls" / "betting_odds.json"
+# Hand-entered seat (district) prices. Australian bookmakers refuse connections
+# from outside Australia, so the seat markets cannot be fetched by the scheduled
+# job (GitHub's runners are overseas) — they are typed or pasted into this CSV.
+VIC_SEAT_ODDS_CSV = BASE_DIR / "data" / "polls" / "vic_seat_odds.csv"
 
 # ── Model parameters ──────────────────────────────────────────────────────────
 # Seat-level σ from calibration_report.txt (historical prediction error)
@@ -697,6 +702,140 @@ def fetch_odds_api(api_key: str) -> dict:
 
 # ── Manual fallback ────────────────────────────────────────────────────────────
 
+# ── Seat-level odds (hand-entered CSV) ─────────────────────────────────────────
+
+# Party text as a bookmaker prints it → the dashboard's party-group key.
+_SEAT_PARTY_GROUPS: list[tuple[tuple[str, ...], str]] = [
+    (("labor", "alp"), "alp"),
+    (("one nation", "phon", "onp"), "one_nation"),
+    (("liberal", "national", "coalition", "lnp", "lib", "nat"), "coalition"),
+    (("green", "grn"), "greens"),
+    (("independent", "ind"), "ind"),
+]
+
+
+def classify_seat_party(name: str) -> str:
+    """Map a seat-market party label to a party-group key ("crossbench" if unknown)."""
+    n = name.strip().lower()
+    for terms, group in _SEAT_PARTY_GROUPS:
+        # Short codes must match the whole label ("nat" must not catch "One Nation");
+        # longer words may appear anywhere ("Liberal Party", "The Nationals").
+        if any(n == t if len(t) <= 4 else t in n for t in terms):
+            return group
+    return "crossbench"
+
+
+def load_seat_odds(csv_path: Path, valid_districts: list[str]) -> tuple[dict, list[str]]:
+    """
+    Read a seat-odds CSV into {district: market}, plus a list of problems found.
+
+    CSV columns: district, party, candidate, decimal_odds, bookmaker, as_of.
+    Lines starting with # are comments. One row per runner per bookmaker.
+
+    For each district and bookmaker the overround is removed so that book's
+    probabilities sum to 1; where several bookmakers price the same district the
+    normalised probabilities are averaged. decimal_odds in the output is the best
+    (longest) price on offer for the runner.
+
+    Rows that cannot be used (unknown district, price not above 1.0) are skipped
+    and reported in the returned problems list — never silently dropped.
+    """
+    if not csv_path.exists():
+        return {}, []
+
+    by_name = {d.lower(): d for d in valid_districts}
+    problems: list[str] = []
+    # district → bookmaker → runner key → row
+    books: dict[str, dict[str, dict[tuple[str, str], dict]]] = {}
+
+    with open(csv_path, encoding="utf-8", newline="") as f:
+        rows = csv.DictReader(line for line in f if line.strip() and not line.lstrip().startswith("#"))
+        for n, row in enumerate(rows, start=1):
+            row = {(k or "").strip(): (v or "").strip() for k, v in row.items()}
+            district = by_name.get(row.get("district", "").lower())
+            if district is None:
+                problems.append(f"row {n}: unknown district '{row.get('district', '')}'")
+                continue
+            try:
+                price = float(row.get("decimal_odds", "").lstrip("$"))
+            except ValueError:
+                price = 0.0
+            if price <= 1.0:
+                problems.append(f"row {n}: {district} — price '{row.get('decimal_odds', '')}' is not a decimal price above 1.0")
+                continue
+            party = row.get("party", "")
+            candidate = row.get("candidate", "")
+            book = row.get("bookmaker", "") or "unnamed"
+            key = (party.lower(), candidate.lower())
+            books.setdefault(district, {}).setdefault(book, {})[key] = {
+                "group": classify_seat_party(party),
+                "party": party,
+                "candidate": candidate,
+                "decimal_odds": price,
+                "as_of": row.get("as_of", ""),
+            }
+
+    seats: dict[str, dict] = {}
+    for district, by_book in sorted(books.items()):
+        usable = {b: r for b, r in by_book.items() if len(r) >= 2}
+        if not usable:
+            problems.append(f"{district}: needs at least two runners from one bookmaker")
+            continue
+        prob_sum: dict[tuple[str, str], float] = {}
+        quotes: dict[tuple[str, str], int] = {}
+        info: dict[tuple[str, str], dict] = {}
+        for runners in usable.values():
+            fair = remove_overround({k: r["decimal_odds"] for k, r in runners.items()})
+            for k, r in runners.items():
+                prob_sum[k] = prob_sum.get(k, 0.0) + fair[k]
+                quotes[k] = quotes.get(k, 0) + 1
+                if k not in info or r["decimal_odds"] > info[k]["decimal_odds"]:
+                    info[k] = r
+        mean = {k: prob_sum[k] / quotes[k] for k in prob_sum}
+        total = sum(mean.values())
+        runners_out = sorted(
+            (
+                {
+                    "group": info[k]["group"],
+                    "party": info[k]["party"],
+                    "candidate": info[k]["candidate"],
+                    "decimal_odds": info[k]["decimal_odds"],
+                    "implied_prob": round(mean[k] / total, 4),
+                }
+                for k in mean
+            ),
+            key=lambda r: -r["implied_prob"],
+        )
+        seats[district] = {
+            "as_of": max((r["as_of"] for rs in usable.values() for r in rs.values()), default=""),
+            "bookmakers": sorted(usable),
+            "favourite_group": runners_out[0]["group"],
+            "favourite_prob": runners_out[0]["implied_prob"],
+            "runners": runners_out,
+        }
+    return seats, problems
+
+
+def attach_vic_seat_odds(output: dict) -> None:
+    """Merge data/polls/vic_seat_odds.csv into output["state_elections"]["vic"]."""
+    from pipeline.config import VIC_DISTRICTS
+
+    seats, problems = load_seat_odds(VIC_SEAT_ODDS_CSV, VIC_DISTRICTS)
+    for msg in problems:
+        logger.warning("VIC seat odds: %s", msg)
+    vic = output.setdefault("state_elections", {}).setdefault("vic", dict(STATE_META["vic"]))
+    vic["seats"] = seats
+    vic["seats_source"] = "manual"
+    vic["seats_total"] = len(VIC_DISTRICTS)
+    if problems:
+        vic["seats_problems"] = problems
+    else:
+        vic.pop("seats_problems", None)
+    logger.info("VIC seat odds: %d of %d districts priced", len(seats), len(VIC_DISTRICTS))
+
+
+# ── Manual placeholder ─────────────────────────────────────────────────────────
+
 def load_manual() -> dict:
     """Load data/polls/betting_odds_manual.json as fallback."""
     with open(MANUAL_JSON, encoding="utf-8") as f:
@@ -826,6 +965,10 @@ def run(force_source: str | None = None) -> dict:
             logger.info("National: no live market — using manual placeholder")
 
     output.setdefault("state_elections", {})
+
+    # Seat-level prices are hand-entered (see VIC_SEAT_ODDS_CSV) and are attached
+    # whichever source supplied the headline markets.
+    attach_vic_seat_odds(output)
 
     # Attach metadata. Live sources are stamped with today's date. The manual
     # fallback keeps its own as-of date (already present in the loaded data) so
