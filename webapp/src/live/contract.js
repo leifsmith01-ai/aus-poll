@@ -101,6 +101,7 @@ export function validateFeed(json) {
       lastUpdated: s.lastUpdated || meta.asAt || null,
       fp: normalizeFp(s.fp),
       tcp: s.tcp || null,
+      matched: s.matched && s.matched.formal > 0 ? s.matched : null,   // booth-matched FP sums
       tcpState: s.tcpState || (s.tcp ? "published" : "none"),   // published | withheld | none
       boothsReturned: s.boothsReturned ?? null,
       boothsExpected: s.boothsExpected ?? null,

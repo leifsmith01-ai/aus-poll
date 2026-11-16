@@ -3,9 +3,11 @@
 // live count by measuring the swing against a prior-election baseline.
 //
 // Granularity is chosen per seat from whatever data is available:
-//   • "booth"    — booth-matched swing: mean swing across *counted* booths (turnout
-//                  weighted) applied to the full-electorate baseline. Corrects for which
-//                  booths have reported. Requires feed.meta.boothLevel + baseline booths.
+//   • "booth"    — booth-matched swing (VIC 2026): tonight's votes are compared only with
+//                  the SAME booths' 2022 votes (seat.matched, built by the feed reader),
+//                  and that swing is applied to the full 2022 district result. Corrects
+//                  for which booths have reported. The 2CP then comes from tonight's
+//                  observed preference flows applied to those projected first preferences.
 //   • "district" — district swing: the seat's current 2CP carried forward (uniform-swing
 //                  assumption). Used for VIC 2026 (VEC publishes district-level only).
 //   • "none"     — no baseline match: live shares projected flat.
@@ -30,7 +32,121 @@ export function projectSeats(feed, baseline, cfg) {
       status: "not_started", lastUpdated: null };
     out.push({ ...projectSeat(stub, base, feed.meta, cfg), missingFromFeed: true });
   }
+  applyStatewideSwing(out, baseSeats, cfg);
   return out;
+}
+
+// Seats with nothing usable counted yet should not sit on their 2022 result once the rest
+// of the state has shown its hand. Take the average swing in the Labor-v-Coalition seats
+// that DO have a live estimate (weighted by how much each has counted), shrink it while
+// the evidence is thin, and apply it to the Labor-v-Coalition seats still on the baseline.
+// The polls are deliberately NOT used here: the Live tab compares against them.
+const SWING_SHRINK_K = 2;   // "seats' worth" of counting at which the swing is half-trusted
+
+// Average Labor 2PP swing since the baseline election in the Labor-v-Coalition seats that
+// have a live estimate, weighted by how much each has counted. -> { swing, seats, weight }
+// (swing is null until something usable is counted). This is the night's headline signal
+// and is what the Live tab sets against the swing the polls implied.
+export function observedSwing(seats, baseSeats, cfg) {
+  const isCoal = (p) => cfg.groupOf(p) === "coalition";
+  let w = 0, sw = 0, n = 0;
+  for (const s of seats) {
+    const b = baseSeats?.[s.seatId];
+    if (s.basis === "baseline" || s.basis === "swing" || s.projAlp2pp == null) continue;
+    if (!classicBase(b, isCoal) || !s.pair.some(isCoal) || !(s.countedFraction > 0)) continue;
+    n += 1;
+    w += s.countedFraction;
+    sw += s.countedFraction * (s.projAlp2pp - Number(b.tcp.pct.ALP));
+  }
+  return { swing: w > 0 ? sw / w : null, seats: n, weight: w };
+}
+
+function classicBase(b, isCoal) {
+  return !!(b?.tcp?.pair?.includes("ALP") && b.tcp.pair.some(isCoal) && b.tcp.pct?.ALP != null);
+}
+
+function applyStatewideSwing(seats, baseSeats, cfg) {
+  const isCoal = (p) => cfg.groupOf(p) === "coalition";
+  const obs = observedSwing(seats, baseSeats, cfg);
+  if (obs.swing == null) return;
+  const w = obs.weight;
+  const swing = obs.swing * (w / (w + SWING_SHRINK_K));
+  for (const s of seats) {
+    const b = baseSeats[s.seatId];
+    if (s.basis !== "baseline" || !classicBase(b, isCoal) || s.tcpState === "published") continue;
+    const alp = clampPct(Number(b.tcp.pct.ALP) + swing);
+    const other = b.tcp.pair.find((p) => p !== "ALP");
+    s.pair = ["ALP", other];
+    s.refParty = "ALP";
+    s.projRef = +alp.toFixed(2);
+    s.projAlp2pp = s.projRef;
+    s.winnerParty = alp >= 50 ? "ALP" : other;
+    s.winnerGroup = cfg.groupOf(s.winnerParty);
+    s.leaderPct = +Math.max(alp, 100 - alp).toFixed(2);
+    s.margin = +Math.abs(2 * alp - 100).toFixed(2);
+    s.swing2cp = +swing.toFixed(2);
+    s.changed = s.winnerGroup !== cfg.groupOf(b.winnerParty ?? b.tcp.pair[0]);
+    s.basis = "swing";
+  }
+}
+
+// ── Booth-matched projection ─────────────────────────────────────────────────
+const LIVE_GROUPS = ["alp", "coalition", "greens", "one_nation", "ind", "other"];
+
+// Projected final first-preference % by party group: full 2022 result + the swing seen in
+// the booths counted so far (same booths, then vs now). Clamped at zero and rescaled to 100.
+export function matchedGroupShares(matched) {
+  if (!matched || !(matched.formal > 0)) return null;
+  const out = {};
+  let tot = 0;
+  for (const g of LIVE_GROUPS) {
+    const swing = (100 * ((matched.now?.[g] || 0) - (matched.then?.[g] || 0))) / matched.formal;
+    out[g] = Math.max(0, (matched.base?.[g] || 0) + swing);
+    tot += out[g];
+  }
+  if (tot <= 0) return null;
+  for (const g of LIVE_GROUPS) out[g] = (out[g] / tot) * 100;
+  return out;
+}
+
+// Split each group's projected share between its candidates in proportion to tonight's votes.
+function matchedPartyShares(fp, groupShares, cfg) {
+  const groupVotes = {}, groupRows = {};
+  for (const r of fp) {
+    const g = liveGroup(cfg.groupOf(r.party));
+    groupVotes[g] = (groupVotes[g] || 0) + r.votes;
+    groupRows[g] = (groupRows[g] || 0) + 1;
+  }
+  const out = {};
+  let tot = 0;
+  for (const r of fp) {
+    const g = liveGroup(cfg.groupOf(r.party));
+    const share = groupVotes[g] > 0 ? r.votes / groupVotes[g] : 1 / groupRows[g];
+    out[r.party] = (groupShares[g] || 0) * share;
+    tot += out[r.party];
+  }
+  // Groups with no candidate tonight drop out; rescale so the candidates sum to 100.
+  if (tot > 0) for (const k of Object.keys(out)) out[k] = (out[k] / tot) * 100;
+  return out;
+}
+
+function liveGroup(g) {
+  return LIVE_GROUPS.includes(g) ? g : (g === "teal" ? "ind" : "other");
+}
+
+// 2CP % for `refParty` from projected first preferences + tonight's observed preference flow
+// (the share of everyone else's votes that ended up with each finalist, in the booths where
+// both counts are in). Null when the flow cannot be measured yet.
+function flowProjectedRef(tcp, partyShares, refParty) {
+  const f = tcp?.flow;
+  if (!f || !tcp.pair || tcp.pair.length !== 2) return null;
+  const [a, b] = tcp.pair;
+  const prefs = (f.tcp?.[a] || 0) + (f.tcp?.[b] || 0) - (f.fp?.[a] || 0) - (f.fp?.[b] || 0);
+  if (!(prefs > 0)) return null;
+  const flowA = clamp01(((f.tcp[a] || 0) - (f.fp[a] || 0)) / prefs);
+  const pa = partyShares[a] || 0, pb = partyShares[b] || 0;
+  const projA = pa + flowA * Math.max(0, 100 - pa - pb);
+  return refParty === a ? projA : 100 - projA;
 }
 
 function projectSeat(seat, base, meta, cfg) {
@@ -43,6 +159,10 @@ function projectSeat(seat, base, meta, cfg) {
   const tcpFraction = usesTcp && seat.tcp.countedPct != null
     ? clamp01(Number(seat.tcp.countedPct) / 100) : fpFraction;
   let countedFraction = usesTcp ? Math.min(fpFraction, tcpFraction) : fpFraction;
+
+  // Booth-matched first preferences (when the feed carries the matched sums).
+  const groupShares = matchedGroupShares(seat.matched);
+  const partyShares = groupShares ? matchedPartyShares(fp, groupShares, cfg) : null;
 
   // The contest pair we project onto: prefer the EC's published live pair, fall back to the
   // baseline pair, then to the top two first-preference parties.
@@ -61,6 +181,26 @@ function projectSeat(seat, base, meta, cfg) {
   let granularity = "none";
   let projRef = liveRef ?? baseRef ?? 50;
   let projFp = fpShares(fp);
+  let boothRef = null;
+
+  if (partyShares) {
+    projFp = partyShares;
+    if (usesTcp) {
+      boothRef = flowProjectedRef(seat.tcp, partyShares, refParty);
+      // The projection now rests on the (much fuller) first-preference count, with the
+      // 2CP count only supplying the flow rate — so its solidity sits between the two.
+      if (boothRef != null) countedFraction = Math.min(fpFraction, Math.sqrt(fpFraction * tcpFraction));
+    } else if (liveRef != null) {
+      // No 2CP yet, Labor v Coalition: assumed flows on the booth-matched first preferences.
+      const rows = fp.map((r) => ({ ...r, pct: partyShares[r.party] ?? 0 }));
+      const est = estimate2ppFromFp(rows, cfg);
+      if (est != null) boothRef = refParty === "ALP" ? est : 100 - est;
+    }
+    if (boothRef != null) {
+      granularity = "booth";
+      projRef = clampPct(boothRef);
+    }
+  }
 
   if (meta?.boothLevel && Array.isArray(seat.booths) && seat.booths.length && base?.booths) {
     const booth = boothMatchedSwing(seat.booths, base.booths, base, refParty, cfg);
