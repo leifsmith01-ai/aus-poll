@@ -22,8 +22,15 @@ name: Live Feed Proxy
 #                  (tests/fixtures/vec_sample) through scripts/fetch_live_vec.py.
 #   feed-url       — a directly downloadable VEC data-feed ZIP/XML (feed_url).
 #
-# On the night: Actions -> Live Feed Proxy -> Run workflow, mode = website.
-# Re-dispatch when the 6-hour job limit ends a run.
+# AUTOMATIC ON THE NIGHT — nothing to start by hand. The schedule below (UTC;
+# Melbourne is UTC+11 in late November) runs website mode:
+#   Sat 28 Nov 17:41 AEDT  — long run, a pass every 5 min (~5h40m)
+#   Sat 28 Nov 23:23 AEDT  — second long run (queues if the first is late)
+#   29-30 Nov              — one pass every 2 hours (postal / declaration counting)
+#   1-12 Dec               — one pass every 3 hours (rechecks, declarations)
+# Cron has no year, so the job skips itself outside ELECTION_WINDOW below.
+# Delete the schedule block after the election. A manual dispatch still works
+# any time and cancels a running scheduled job.
 #
 # Load on the VEC: one pass is ~2 pages per district (~176 requests) with 4
 # parallel requests; at the default 5-minute interval that is under one request
@@ -37,6 +44,11 @@ name: Live Feed Proxy
 # This never touches main; the live-feed branch is disposable afterwards.
 
 on:
+  schedule:
+    - cron: "41 6 28 11 *"        # 17:41 AEDT election night — long run
+    - cron: "23 12 28 11 *"       # 23:23 AEDT — second long run
+    - cron: "17 */2 29,30 11 *"   # every 2h, Sun-Mon after the election
+    - cron: "17 */3 1-12 12 *"    # every 3h for the following fortnight
   workflow_dispatch:
     inputs:
       mode:
@@ -57,16 +69,23 @@ on:
         required: false
         default: "300"
       duration_minutes:
-        description: "How long to keep polling (max ~350; job limit is 6h)"
+        description: "How long to keep polling (max ~350; job limit is 6h; 0 = one pass)"
         required: false
         default: "330"
+
+env:
+  # Scheduled runs only act inside this window (dates in UTC).
+  ELECTION_WINDOW_START: "2026-11-28"
+  ELECTION_WINDOW_END: "2026-12-13"
 
 permissions:
   contents: write
 
 concurrency:
   group: live-feed-proxy
-  cancel-in-progress: true    # a re-dispatch supersedes the running proxy
+  # A manual dispatch supersedes whatever is running; scheduled runs queue
+  # behind each other so the second night run picks up when the first ends.
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
 
 jobs:
   proxy:
@@ -82,78 +101,26 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Poll, normalize, publish
-        env:
-          MODE: ${{ inputs.mode }}
-          RESULTS_URL: ${{ inputs.results_url }}
-          FEED_URL: ${{ inputs.feed_url }}
-          INTERVAL: ${{ inputs.interval_seconds }}
-          DURATION_MIN: ${{ inputs.duration_minutes }}
-          TOKEN: ${{ github.token }}
+      - name: Skip scheduled runs outside the election window
+        id: window
         run: |
-          set -u
-          if [ "$INTERVAL" -lt 60 ]; then INTERVAL=60; fi
-          deadline=$(( $(date +%s) + DURATION_MIN * 60 ))
-          out=publish/live/vec-latest.json
-          mkdir -p work publish/live
-          # Rehearsal-2022 steps through the night at these fractions, then holds.
-          reveal=(0.05 0.1 0.2 0.3 0.45 0.6 0.75 0.9 1.0)
-          step=0
-          failures=0
-          while [ "$(date +%s)" -lt "$deadline" ]; do
-            case "$MODE" in
-              website)
-                cmd=(python scripts/fetch_live_vec_web.py --index "$RESULTS_URL"
-                     --cache work/urls.json --previous work/last-good.json --out "$out") ;;
-              rehearsal-2022)
-                if [ ! -f work/html22/urls.json ]; then
-                  python scripts/fetch_live_vec_web.py \
-                    --index https://www.vec.vic.gov.au/results/state-election-results/2022-state-election-results \
-                    --save-html work/html22 --rehearsal --out /dev/null || true
-                fi
-                i=$(( step < ${#reveal[@]} ? step : ${#reveal[@]} - 1 ))
-                cmd=(python scripts/fetch_live_vec_web.py --from-html work/html22 --rehearsal
-                     --reveal "${reveal[$i]}" --out "$out") ;;
-              rehearsal-feed)
-                cmd=(python scripts/fetch_live_vec.py --replay "$step"
-                     --replay-dir tests/fixtures/vec_sample --allow-partial --out "$out") ;;
-              feed-url)
-                cmd=(python scripts/fetch_live_vec.py --url "$FEED_URL" --out "$out") ;;
-              *) echo "::error::unknown mode $MODE"; exit 1 ;;
-            esac
-            if "${cmd[@]}"; then
-              failures=0
-              cp "$out" work/last-good.json
-              # `set -e` inside the subshell so a failed push is not silently
-              # reported as published; the next pass self-heals, but the log
-              # must show it was lost.
-              if (
-                set -e
-                cd publish
-                rm -rf .git
-                git init -q -b live-feed
-                git -c user.name="github-actions[bot]" \
-                    -c user.email="github-actions[bot]@users.noreply.github.com" \
-                    add -A
-                git -c user.name="github-actions[bot]" \
-                    -c user.email="github-actions[bot]@users.noreply.github.com" \
-                    commit -qm "live snapshot $(date -u +%FT%TZ)"
-                git push -qf \
-                  "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-                  live-feed
-              ); then
-                echo "$(date -u +%T) published step $step"
-              else
-                echo "::warning::push of snapshot $step failed — retrying on the next pass"
-              fi
-            else
-              # Keep the previous good snapshot on the branch (e.g. before the VEC
-              # publishes the results index at 6pm, or a page failed validation).
-              failures=$((failures + 1))
-              cp work/last-good.json "$out" 2>/dev/null || true
-              echo "::warning::fetch/normalize failed (streak $failures) — keeping last good snapshot"
-            fi
-            step=$((step + 1))
-            sleep "$INTERVAL"
-          done
-          echo "duration elapsed — re-dispatch to continue"
+          today=$(date -u +%F)
+          if [ "${{ github.event_name }}" = schedule ] && \
+             { [[ "$today" < "$ELECTION_WINDOW_START" ]] || [[ "$today" > "$ELECTION_WINDOW_END" ]]; }; then
+            echo "Outside the election window ($ELECTION_WINDOW_START to $ELECTION_WINDOW_END) — nothing to do."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Poll, normalize, publish
+        if: steps.window.outputs.run == 'true'
+        env:
+          MODE: ${{ inputs.mode || 'website' }}
+          RESULTS_URL: ${{ inputs.results_url || 'https://www.vec.vic.gov.au/results/state-election-results/2026-state-election-results' }}
+          FEED_URL: ${{ inputs.feed_url }}
+          INTERVAL: ${{ inputs.interval_seconds || '300' }}
+          # The two election-night schedules poll for ~5h40m; the later ones do one pass.
+          DURATION_MIN: ${{ inputs.duration_minutes || ((github.event.schedule == '41 6 28 11 *' || github.event.schedule == '23 12 28 11 *') && '340' || '0') }}
+          TOKEN: ${{ github.token }}
+        run: bash scripts/live_feed_loop.sh

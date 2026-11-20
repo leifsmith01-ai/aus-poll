@@ -59,15 +59,28 @@ matched to 2022 booths, and the projection reproduces 2022 exactly (Labor 56, Co
 EML XML in ZIP snapshots. See its docstring; the download step from the VEC's SharePoint
 site is not written.
 
-## Election night
+## Election night — automatic
 
-1. GitHub → Actions → **Live Feed Proxy** → Run workflow → mode **website**. Leave
-   `results_url` as is unless the VEC uses a different address (if the default 404s, the
-   script searches the state-results landing page for the 2026 election). Before 6pm the
-   index does not exist yet; passes fail harmlessly until it does.
-2. Open the site with `?liveSource=vec_proxy_2026`, or set
-   `LIVE_CONFIG.active.sourceId = "vec_proxy_2026"` and deploy beforehand.
-3. Re-dispatch when the 6-hour job limit ends a run.
+Nothing needs starting by hand once this is on `main`:
+
+- **Proxy:** `live-feed.yml` is scheduled (UTC cron; Melbourne is UTC+11):
+  two ~5h40m runs from 5:41pm and 11:23pm AEDT on 28 Nov (a pass every 5 minutes),
+  then one pass every 2 hours on 29–30 Nov and every 3 hours to 12 Dec. Scheduled runs
+  skip themselves outside `ELECTION_WINDOW_START/END`, so the cron lines are harmless
+  in later years — delete them after the election anyway.
+- **Before results exist** the job publishes a `waiting` marker and retries each pass.
+  The 2026 index URL is a best guess; if it 404s the scraper searches the state-results
+  landing page for the 2026 election. A pass publishes once ≥ 80 districts load
+  (`--min-seats`); a district that fails later keeps its last figures.
+- **Each run starts from the snapshot already on `live-feed`** (unless it is rehearsal or
+  test data), so a fresh runner never blanks the night.
+- **Page:** from `LIVE_CONFIG.active.liveFrom` (5:30pm AEDT) the tab reads the live proxy
+  by itself (`defaultSourceId`), including in a tab left open from earlier. A 404 or the
+  waiting marker shows "Counting has not started yet"; rehearsal/test data on the proxy
+  is never shown as the night. `?liveSource=` still overrides.
+
+Manual control remains: Actions → Live Feed Proxy → Run workflow (cancels a running
+scheduled job). Watch the first passes after 6pm in the Actions log.
 
 ## Rehearsal (works today)
 

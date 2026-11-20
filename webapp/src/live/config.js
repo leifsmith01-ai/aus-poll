@@ -93,7 +93,11 @@ export const LIVE_CONFIG = {
     label: "Live: VIC 2026",
     chamber: "Legislative Assembly",
     date: "28 November 2026",
-    sourceId: "sample_vic_2026",   // switch to "vec_vic_2026" on the night
+    // Before liveFrom the tab shows the sample (labelled test data); from liveFrom it reads
+    // the live proxy automatically — no redeploy or URL parameter needed on the night.
+    sourceId: "sample_vic_2026",
+    liveSourceId: "vec_proxy_2026",
+    liveFrom: "2026-11-28T06:30:00Z",   // 5:30pm AEDT, half an hour before polls close
     baselineElectionId: "vic_2022",
     majority: 45,
     totalSeats: 88,

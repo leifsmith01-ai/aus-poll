@@ -623,6 +623,9 @@ def main() -> int:
                          "their figures from it (defaults to --out when that file exists)")
     ap.add_argument("--allow-partial", action="store_true",
                     help="do not fail when districts are missing")
+    ap.add_argument("--min-seats", type=int, default=80,
+                    help="publish once at least this many districts loaded (the page "
+                         "shows the rest as not started); fewer fails the pass")
     ap.add_argument("--out", default="-", help="output path, or - for stdout")
     args = ap.parse_args()
     if args.reveal is not None and not args.rehearsal:
@@ -635,13 +638,21 @@ def main() -> int:
     seats = carry_forward(seats, args)
     feed = assemble(seats, now_iso=now_iso, rehearsal=args.rehearsal, source="vec-website")
 
+    # A district name that does not join to the 2022 baseline is dropped (with a
+    # warning) rather than sinking the whole snapshot; a renamed district needs a
+    # baseline fix, but the other 87 should keep updating meanwhile.
+    known = core.baseline_seat_ids()
+    if known:
+        unknown = [s["seatId"] for s in feed["seats"] if s["seatId"] not in known]
+        for sid in unknown:
+            print(f"WARNING: {sid} is not in the 2022 baseline — left out", file=sys.stderr)
+        feed["seats"] = [s for s in feed["seats"] if s["seatId"] not in unknown]
     errors = core.validate(feed)
-    coverage = core.check_coverage(feed)
-    if args.allow_partial or args.rehearsal:
-        for c in coverage:
-            print(f"WARNING: {c}", file=sys.stderr)
-    else:
-        errors += coverage
+    for c in core.check_coverage(feed):
+        print(f"WARNING: {c}", file=sys.stderr)
+    if not (args.allow_partial or args.rehearsal) and len(feed["seats"]) < args.min_seats:
+        errors.append(f"only {len(feed['seats'])} districts loaded (need {args.min_seats}) "
+                      "— keeping the previous snapshot")
     if errors:
         for e in errors:
             print(f"VALIDATION: {e}", file=sys.stderr)

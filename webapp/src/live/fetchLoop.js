@@ -12,13 +12,26 @@ async function fetchJson(url, signal) {
   // the data's age — the UI uses feed.meta.asAt for that.
   const busted = url + (url.includes("?") ? "&" : "?") + "_=" + Date.now();
   const res = await fetch(busted, { signal, cache: "no-store" });
-  if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
+  if (!res.ok) {
+    const err = new Error(`HTTP ${res.status} fetching ${url}`);
+    err.status = res.status;
+    throw err;
+  }
   return res.json();
 }
 
 // One feed fetch. Returns { feed, errors, fetchedAt }. Throws on network/parse failure.
+// { waiting: true } means the source exists but counting has not started: the proxy
+// has published its "waiting" marker, or (404) has not published anything yet.
 export async function fetchOnce(source, { signal } = {}) {
-  const raw = await fetchJson(source.url, signal);
+  let raw;
+  try {
+    raw = await fetchJson(source.url, signal);
+  } catch (err) {
+    if (err?.status === 404 && source.pollMs > 0) return { waiting: true, fetchedAt: new Date().toISOString() };
+    throw err;
+  }
+  if (raw && raw.waiting) return { waiting: true, fetchedAt: new Date().toISOString() };
   const adapter = getAdapter(source.adapter);
   const normalized = adapter.parse(raw, {
     jurisdiction: source.jurisdiction,

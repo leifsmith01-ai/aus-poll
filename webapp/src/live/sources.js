@@ -13,13 +13,31 @@ function query() {
   return new URLSearchParams(window.location.search);
 }
 
+// The source the tab uses when nothing overrides it: the sample before
+// LIVE_CONFIG.active.liveFrom, the live proxy from then on.
+export function defaultSourceId(now = Date.now()) {
+  const a = LIVE_CONFIG.active;
+  const from = a.liveFrom ? Date.parse(a.liveFrom) : NaN;
+  return a.liveSourceId && isFinite(from) && now >= from ? a.liveSourceId : a.sourceId;
+}
+
+// Milliseconds until the automatic switch to the live source (null if it has passed).
+export function msUntilLive(now = Date.now()) {
+  const from = Date.parse(LIVE_CONFIG.active.liveFrom || "");
+  return isFinite(from) && from > now ? from - now : null;
+}
+
 // Precedence for the feed URL: explicit query override (operator on the night) >
 // in-app override (e.g. the dev snapshot selector) > the source's configured url.
-export function resolveSource(sourceId, overrideUrl) {
+// `auto` marks a source chosen by the clock rather than by anyone: such a source must
+// never show rehearsal/test data as if it were the real count.
+export function resolveSource(sourceId, overrideUrl, now = Date.now()) {
   const q = query();
-  const id = q.get("liveSource") || sourceId || LIVE_CONFIG.active.sourceId;
+  const explicit = q.get("liveSource") || sourceId;
+  const id = explicit || defaultSourceId(now);
+  const auto = !explicit && id === LIVE_CONFIG.active.liveSourceId;
   const base = LIVE_SOURCES[id] || LIVE_SOURCES[LIVE_CONFIG.active.sourceId];
   const url = q.get("liveSnapshot") || q.get("liveUrl") || overrideUrl || base.url;
   const adapter = q.get("liveAdapter") || base.adapter;
-  return { ...base, id, url, adapter };
+  return { ...base, id, url, adapter, auto };
 }

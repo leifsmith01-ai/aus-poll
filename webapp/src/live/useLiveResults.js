@@ -4,12 +4,12 @@
 // status, and a manual refresh.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPoller, fetchBaseline } from "./fetchLoop.js";
-import { resolveSource } from "./sources.js";
+import { resolveSource, msUntilLive } from "./sources.js";
 
 // useLiveResults(sourceId, overrideUrl) ->
 //   { feed, baseline, status, error, lastFetched, refresh, source }
 // overrideUrl lets the UI swap the feed URL (e.g. dev snapshot selector) without a reload.
-// status: "loading" | "ok" | "error"
+// status: "loading" | "ok" | "waiting" (source up, counting not started) | "error"
 export function useLiveResults(sourceId, overrideUrl) {
   const [feed, setFeed] = useState(null);
   const [baseline, setBaseline] = useState(null);
@@ -17,6 +17,16 @@ export function useLiveResults(sourceId, overrideUrl) {
   const [error, setError] = useState(null);
   const [lastFetched, setLastFetched] = useState(null);
   const pollerRef = useRef(null);
+
+  // Re-render at the automatic switch to the live source, so a page left open from the
+  // afternoon moves onto the live count by itself.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const ms = msUntilLive();
+    if (ms == null || ms > 2 ** 31 - 1) return undefined;
+    const t = setTimeout(() => setTick((n) => n + 1), ms + 1000);
+    return () => clearTimeout(t);
+  }, []);
 
   // Re-resolve when the configured source or any URL override changes. Including the live
   // search string lets a dev flip ?liveSnapshot= and re-run without a reload helper.
@@ -40,7 +50,15 @@ export function useLiveResults(sourceId, overrideUrl) {
     setError(null);
     const poller = createPoller({
       source,
-      onUpdate: ({ feed: f, fetchedAt }) => {
+      onUpdate: ({ feed: f, fetchedAt, waiting }) => {
+        // A clock-selected live source never shows rehearsal/test data as the night.
+        if (waiting || (source.auto && f?.meta?.test)) {
+          setFeed(null);
+          setLastFetched(fetchedAt);
+          setStatus("waiting");
+          setError(null);
+          return;
+        }
         setFeed(f);
         setLastFetched(fetchedAt);
         setStatus("ok");
@@ -48,14 +66,14 @@ export function useLiveResults(sourceId, overrideUrl) {
       },
       onError: (err) => {
         setError(err?.message || String(err));
-        setStatus((s) => (s === "ok" ? "ok" : "error")); // keep last good feed visible
+        setStatus((s) => (s === "ok" || s === "waiting" ? s : "error")); // keep last good state
       },
     });
     pollerRef.current = poller;
     poller.start();
     return () => poller.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source.url, source.adapter, search]);
+  }, [source.url, source.adapter, source.auto, search]);
 
   const refresh = useCallback(() => pollerRef.current?.refreshNow(), []);
 

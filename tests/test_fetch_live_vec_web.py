@@ -183,3 +183,45 @@ def test_district_that_fails_to_load_keeps_its_previous_figures(tmp_path):
     # ...but a rehearsal replay never mixes in old figures.
     assert len(web.carry_forward([seat("nepean-2026")],
                                  SimpleNamespace(previous=str(path), out="-", reveal=0.5))) == 1
+
+
+def _run_main(monkeypatch, tmp_path, extra):
+    out = tmp_path / "out.json"
+    monkeypatch.setattr(sys, "argv", ["x", "--from-html", str(tmp_path / "html"), "--out", str(out)] + extra)
+    return web.main(), out
+
+
+def _html_dir(tmp_path, names):
+    import json
+    d = tmp_path / "html"
+    d.mkdir()
+    urls = {}
+    for slug, fixture in names.items():
+        url = f"{SITE}/{slug}"
+        urls[url] = {"vc": url + "/vc", "tcp": url + "/2cp"}
+        (d / f"{slug}.vc.html").write_text(page(f"{fixture}.vc.html"), encoding="utf-8")
+        (d / f"{slug}.2cp.html").write_text(page(f"{fixture}.2cp.html"), encoding="utf-8")
+    (d / "urls.json").write_text(json.dumps(urls))
+
+
+def test_real_run_needs_most_districts_before_publishing(monkeypatch, tmp_path):
+    _html_dir(tmp_path, {"bass-district-results": "bass-2022", "nepean-district-results": "nepean-2026"})
+    code, out = _run_main(monkeypatch, tmp_path, [])
+    assert code == 1 and not out.exists()               # 2 of 88: keep the previous snapshot
+    code, out = _run_main(monkeypatch, tmp_path, ["--min-seats", "2"])
+    assert code == 0 and out.exists()                   # threshold met: publish, rest not started
+
+
+def test_unknown_district_is_dropped_not_fatal(monkeypatch, tmp_path, capsys):
+    import json
+    _html_dir(tmp_path, {"bass-district-results": "bass-2022"})
+    renamed = page("nepean-2026.vc.html").replace("Nepean District", "Westernport District")
+    (tmp_path / "html" / "x.vc.html").write_text(renamed, encoding="utf-8")
+    (tmp_path / "html" / "x.2cp.html").write_text(page("nepean-2026.2cp.html"), encoding="utf-8")
+    urls = json.loads((tmp_path / "html" / "urls.json").read_text())
+    urls[f"{SITE}/x"] = {"vc": "v", "tcp": "t"}
+    (tmp_path / "html" / "urls.json").write_text(json.dumps(urls))
+    code, out = _run_main(monkeypatch, tmp_path, ["--min-seats", "1"])
+    assert code == 0
+    assert [s["seatId"] for s in json.loads(out.read_text())["seats"]] == ["bass"]
+    assert "westernport is not in the 2022 baseline" in capsys.readouterr().err
