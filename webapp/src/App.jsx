@@ -5531,6 +5531,7 @@ function LivePage({
           tonight's final two are the same parties as last time. "Counted" is first-preference
           votes as a share of expected turnout. Win probability follows the two-candidate count,
           which lags first preferences on the night.
+          {meta?.attribution && <> Results data {meta.attribution}.</>}
         </div>
       </div>
     </div>

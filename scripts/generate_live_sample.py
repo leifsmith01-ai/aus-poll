@@ -9,8 +9,11 @@ and projection model are testable.
 
 This script builds, for the Victorian 2026 state election:
 
-  * baseline-vic-2026.json  — the 2022 result per seat (the swing baseline). Sourced from
-                              the real `_VS` table embedded in webapp/src/App.jsx.
+  * baseline-vic-2026.json  — the 2022 result per seat (the swing baseline). Winners come
+                              from the `_VS` table in webapp/src/App.jsx; the two-candidate
+                              pair and percentages come from the VEC's official 2022 2CP file
+                              (data/raw/vic/202211/VIC-2022-LA-2CP-Electorate.xlsx, Git LFS)
+                              where it is available, else from `_VS`.
   * sample-vic-2026-{000,035,080,100}.json — synthetic live snapshots at 0/35/80/100 %
                               counted, built by applying a statewide swing + per-seat noise
                               to the 2022 baseline and then biasing/sampling the partial
@@ -50,6 +53,43 @@ AEST = timezone(timedelta(hours=11))  # Melbourne daylight time in late November
 ELECTION_NIGHT = datetime(2026, 11, 28, 18, 0, tzinfo=AEST)
 
 COALITION = {"LP", "NP"}
+
+OFFICIAL_2CP = REPO_ROOT / "data" / "raw" / "vic" / "202211" / "VIC-2022-LA-2CP-Electorate.xlsx"
+VEC_PARTY = {"LIB": "LP", "NAT": "NP", "ALP": "ALP", "GRN": "GRN", "IND": "IND"}
+
+
+def apply_official_2cp(seats: list[dict]) -> int:
+    """Replace each seat's 2CP pair/margin with the VEC's official 2022 2CP count.
+
+    `_VS` stores ALP-v-Coalition 2PP figures for every seat (the scenario model's
+    axis); the live tab needs the 2CP that was actually counted — in ten 2022 seats
+    that was Labor v Greens or an Independent v the Coalition. Narracan (supplementary
+    election, Jan 2023) is not in the file and keeps its `_VS` figures. Returns the
+    number of seats updated; 0 when the LFS file has not been pulled."""
+    if not OFFICIAL_2CP.exists() or OFFICIAL_2CP.stat().st_size < 1000:
+        print("WARNING: official 2CP file missing (git lfs pull) — using _VS figures")
+        return 0
+    import openpyxl
+    wb = openpyxl.load_workbook(OFFICIAL_2CP, read_only=True)
+    rows = wb[wb.sheetnames[0]].iter_rows(values_only=True)
+    header = [str(c) for c in next(rows)]
+    ix = {n: header.index(n) for n in ("district_name", "party_code", "votes")}
+    by_seat: dict[str, list] = {}
+    for r in rows:
+        if r[ix["district_name"]] is None:
+            continue
+        by_seat.setdefault(slugify(r[ix["district_name"]]), []).append(
+            (VEC_PARTY.get(str(r[ix["party_code"]]), str(r[ix["party_code"]])), int(r[ix["votes"]] or 0)))
+    n = 0
+    for s in seats:
+        cands = by_seat.get(slugify(s["name"]))
+        if not cands or len(cands) != 2:
+            continue
+        (p1, v1), (p2, v2) = sorted(cands, key=lambda c: -c[1])
+        s["pair"] = [p1, p2]                         # leader first
+        s["margin"] = round(100.0 * v1 / (v1 + v2) - 50, 2)
+        n += 1
+    return n
 
 # Melbourne metro vs regional grouping for a light "region" label + early-count bias.
 # (Indicative only — real region mapping lives in App.jsx VIC_DISTRICT_REGION.)
@@ -109,9 +149,9 @@ def alp_2cp_2022(seat: dict) -> float | None:
     """ALP's 2022 two-party-preferred % for ALP-vs-Coalition seats, else None."""
     t1, t2 = seat["pair"]
     if t1 == "ALP" and t2 in COALITION:
-        return 50 + seat["margin"] / 2
+        return 50 + seat["margin"]
     if t2 == "ALP" and t1 in COALITION:
-        return 50 - seat["margin"] / 2
+        return 50 - seat["margin"]
     return None
 
 
@@ -119,7 +159,10 @@ def build_baseline(seats: list[dict], rng: random.Random) -> dict:
     out_seats = {}
     for s in seats:
         sid = slugify(s["name"])
-        leader_pct = 50 + s["margin"] / 2
+        # `margin` is the leader's lead over 50 (App.jsx convention: projAlp2pp = 50 + margin),
+        # not the gap between the two candidates. Halving it squeezed every baseline 2CP
+        # halfway to 50-50 (Dandenong showed ALP 59.6 instead of 69.1).
+        leader_pct = 50 + s["margin"]
         pair = s["pair"]
         # Synthesize a plausible first-preference split consistent with the 2CP leader.
         # FP is for display / early-count fallback only; projection prefers the 2CP swing.
@@ -185,7 +228,7 @@ def true_2026_final(seats: list[dict], rng: random.Random) -> dict:
             final_pair = [alp_party, coal_party] if pair[0] == "ALP" else [coal_party, alp_party]
         else:
             # Greens / Independent seat — small swing, rarely flips in the sample.
-            base_leader_pct = 50 + s["margin"] / 2
+            base_leader_pct = 50 + s["margin"]
             swing = GREENS_SWING if "GRN" in pair else rng.gauss(0, 1.2)
             leader_pct = min(92.0, max(50.5, base_leader_pct + swing + rng.gauss(0, 1.0)))
             leader = s["pair"][0]
@@ -309,6 +352,7 @@ def main() -> None:
 
     rng = random.Random(SEED)
     seats = parse_vs_table(APP_JSX)
+    print(f"official 2022 2CP applied to {apply_official_2cp(seats)} seats")
     baseline = build_baseline(seats, rng)
     finals = true_2026_final(seats, rng)
 

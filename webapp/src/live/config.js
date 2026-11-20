@@ -69,9 +69,10 @@ export const LIVE_SOURCES = {
   vec_proxy_2026: {
     id: "vec_proxy_2026",
     jurisdiction: "vic",
-    label: "VEC Live (proxy)",
-    // The Live Feed Proxy workflow (.github/workflows/live-feed.yml) polls the
-    // VEC, normalizes via scripts/fetch_live_vec.py, and force-pushes the
+    label: "VEC results website",
+    // The Live Feed Proxy workflow (.github/workflows/live-feed.yml) scrapes the
+    // public VEC results website (scripts/fetch_live_vec_web.py; CC BY 4.0) — or
+    // reads the VEC data feed via scripts/fetch_live_vec.py — and force-pushes the
     // snapshot to the live-feed branch. raw.githubusercontent.com serves it
     // with CORS: * — the primary election-night path (no CORS dependency on
     // the VEC). NOTE: raw.githubusercontent.com caches for ~5 minutes and

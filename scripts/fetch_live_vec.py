@@ -349,6 +349,7 @@ def normalize_vec_xml(data: bytes, now_iso: str, source: str = "vec") -> dict:
         fp_el = _child(contest, "FirstPreferences")
         fp, by_id, counts = [], {}, {}
         formal = total = 0
+        elected = None
         if fp_el is not None:
             formal = _int(_child(fp_el, "Formal"))
             total = _int(_child(fp_el, "Total"))
@@ -363,6 +364,8 @@ def normalize_vec_xml(data: bytes, now_iso: str, source: str = "vec") -> dict:
                 key = code if counts[code] == 1 else f"{code}#{counts[code]}"
                 row = {"party": key, "name": _desc_text(cand, "CandidateName") or "",
                        "candidateId": cid, "votes": _int(cand), "pct": None}
+                if (_desc_text(cand, "Elected") or "").lower() == "true":
+                    elected = key
                 fp.append(row)
                 by_id[cid] = row
 
@@ -467,6 +470,7 @@ def normalize_vec_xml(data: bytes, now_iso: str, source: str = "vec") -> dict:
             "name": name,
             "region": None,
             "districtId": district.attrib.get("Id") if district is not None else None,
+            "elected": elected,         # party code of the declared member (or None)
             "countedPct": counted,
             "expectedTotal": expected,
             "enrolment": enrolment,
@@ -500,7 +504,7 @@ def normalize_vec_xml(data: bytes, now_iso: str, source: str = "vec") -> dict:
             "test": event_name.lower().startswith("test"),
             "phase": root.attrib.get("Phase"),
             "baselineElectionId": "vic_2022",
-            "countedPct": round(100.0 * tot_counted / tot_expected, 1) if tot_expected else 0,
+            "countedPct": min(100.0, round(100.0 * tot_counted / tot_expected, 1)) if tot_expected else 0,
         },
         "seats": seats,
     }

@@ -505,14 +505,16 @@ The frontend is fully static — no API calls at runtime. All election data is e
 | `update-economics.yml` | Monthly (2nd) | ABS/RBA indicators → `economics.json` |
 | `data-health.yml` | Tue 03:00 UTC | Freshness assertions — a red run means a data workflow silently stopped (stale VIC polls are a hard failure until the Nov 2026 election) |
 | `generate-state-fp.yml` | manual only | `webapp/src/data/state_seat_fp.js` (run after a state election is loaded) |
-| `live-feed.yml` | manual only | Election-night proxy: `scripts/fetch_live_vec.py` reads the VEC's EML XML (verbose Lower House ZIP) into the live contract and force-pushes snapshots to the `live-feed` branch for the Live tab's `vec_proxy_2026` source. Blank URL = replay of the VEC's sample files in `tests/fixtures/vec_sample`. The real SharePoint download step is NOT wired yet — see `webapp/src/live/README.md` |
+| `live-feed.yml` | manual only | Election-night proxy for the Live tab's `vec_proxy_2026` source; force-pushes snapshots to the `live-feed` branch. Mode `website` (default) scrapes the public VEC results website with `scripts/fetch_live_vec_web.py` (CC BY 4.0 — credit "© Victorian Electoral Commission"); `rehearsal-2022` replays the real 2022 site as a night in progress; `rehearsal-feed` / `feed-url` use the restricted data feed via `scripts/fetch_live_vec.py`. See `webapp/src/live/README.md` |
 
 **Live tab model (`webapp/src/live/`):** projections are booth-matched (tonight's booths
 vs the same booths in 2022, from `data/live/vic_2022_booths.json` — rebuild with
-`scripts/build_live_booth_baseline.py`), the 2CP comes from tonight's observed preference
+`scripts/build_live_booth_baseline.py`; `baseline-vic-2026.json` comes from
+`scripts/generate_live_sample.py` using the official 2022 2CP file), the 2CP comes from tonight's observed preference
 flows, and uncounted Labor-v-Coalition seats move by the swing seen so far. The tab's
 "Count so far vs the polls" panel compares against `computeVicPollsModel()`, which must
-stay independent of the live count. Tests: `tests/test_fetch_live_vec.py`,
+stay independent of the live count. A declared member (website "Elected member" / feed `Elected`) overrides the indicative
+2CP. Tests: `tests/test_fetch_live_vec.py`, `tests/test_fetch_live_vec_web.py`,
 `webapp/src/__tests__/live-engine.test.js`, `node webapp/scripts/live-check.mjs`.
 
 Conventions for these workflows: `data/polls/` is the source of truth and webapp
