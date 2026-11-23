@@ -1,7 +1,7 @@
 {
   "source": "BludgerTrack (pollbludger.net)",
   "url": "https://www.pollbludger.net/fed2028/bludgertrack/xml/current.xml",
-  "retrieved": "2026-11-16",
+  "retrieved": "2026-11-23",
   "note": "NAT scope polls only. tpp=null means not reported by pollster. n=sample size (approx for some pollsters).",
   "polls": [
     {
@@ -2935,6 +2935,42 @@
       "teal": 0.0,
       "tpp": 52.5,
       "n": 2574
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Roy Morgan",
+      "date": "2026-11-15",
+      "alp": 24.5,
+      "coal": 25.5,
+      "grn": 14.5,
+      "on": 23.5,
+      "teal": 0.0,
+      "tpp": 50.0,
+      "n": 1595
+    },
+    {
+      "scope": "NAT",
+      "pollster": "YouGov",
+      "date": "2026-11-15",
+      "alp": 24.0,
+      "coal": 22.0,
+      "grn": 15.0,
+      "on": 26.0,
+      "teal": 0.0,
+      "tpp": 51.0,
+      "n": 1555
+    },
+    {
+      "scope": "NAT",
+      "pollster": "Newspoll",
+      "date": "2026-11-15",
+      "alp": 27.0,
+      "coal": 22.0,
+      "grn": 14.0,
+      "on": 27.0,
+      "teal": 0.0,
+      "tpp": null,
+      "n": 1229
     }
   ]
 }

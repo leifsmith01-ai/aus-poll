@@ -923,7 +923,43 @@
       "on": 22.0,
       "tpp": 43.0,
       "n": 1008
+    },
+    {
+      "scope": "VIC",
+      "pollster": "Roy Morgan",
+      "date": "2026-11-19",
+      "alp": 22.5,
+      "lp": 31.0,
+      "grn": 13.0,
+      "ind": 5.0,
+      "on": 20.0,
+      "tpp": 45.0,
+      "n": 1563
+    },
+    {
+      "scope": "VIC",
+      "pollster": "RedBridge Group",
+      "date": "2026-11-20",
+      "alp": 22.0,
+      "lp": 33.0,
+      "grn": 15.0,
+      "ind": 7.0,
+      "on": 23.0,
+      "tpp": 42.0,
+      "n": 1507
+    },
+    {
+      "scope": "VIC",
+      "pollster": "YouGov",
+      "date": "2026-11-23",
+      "alp": 20.0,
+      "lp": 31.0,
+      "grn": 16.0,
+      "ind": 4.0,
+      "on": 21.0,
+      "tpp": 42.0,
+      "n": 3890
     }
   ],
-  "retrieved": "2026-11-16"
+  "retrieved": "2026-11-23"
 }
