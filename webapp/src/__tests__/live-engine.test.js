@@ -206,3 +206,90 @@ describe("election-night switch-over", () => {
     await expect(fetchOnce(source)).rejects.toThrow("HTTP 500");
   });
 });
+
+// ── Projected status, call estimate, change log ──────────────────────────────
+import { withCallStatus, estimateCallAt, PROJECT_P } from "../live/confidence.js";
+import { seatEvents } from "../live/events.js";
+
+describe("projected status and call estimate", () => {
+  const tcp = (alp, c) => ({ pair: ["ALP", "LP"], votes: {}, pct: { ALP: alp, LP: 100 - alp }, countedPct: c });
+  const at = (alp, counted) => {
+    const r = run([seat({ countedPct: counted, tcp: tcp(alp, counted) })]);
+    return withCallStatus(r.projected, r.conf, LIVE_CFG).find((s) => s.seatId === "bass");
+  };
+
+  it("projects a seat whose lead is safe for its count, before the formal call", () => {
+    const s = at(60, 30);                       // 20-point margin at 30% counted
+    expect(s.winProb).toBeGreaterThanOrEqual(PROJECT_P);
+    expect(s.status).toBe("projected");
+    expect(s.callAt).toBeLessThanOrEqual(30);
+  });
+
+  it("keeps a close seat open and estimates when it could be called", () => {
+    const s = at(52, 30);                       // 4-point margin at 30% counted
+    expect(s.status).not.toBe("projected");
+    expect(s.callAt).toBeGreaterThan(30);
+    expect(s.callAt).toBeLessThanOrEqual(100);
+    expect(at(52, s.callAt + 1).status).toBe("projected");   // the estimate is consistent
+  });
+
+  it("has no call estimate for a dead heat or a seat with nothing counted", () => {
+    expect(at(50.02, 60).callAt).toBeNull();
+    const r = run([seat({ countedPct: 0, status: "not_started", fp: [] })]);
+    expect(withCallStatus(r.projected, r.conf, LIVE_CFG).find((s) => s.seatId === "bass").callAt).toBeNull();
+  });
+
+  it("never projects below the minimum count, however lopsided", () => {
+    expect(at(80, 3).status).toBe("in_doubt");
+  });
+
+  it("estimateCallAt ignores declared seats", () => {
+    expect(estimateCallAt({ declared: true, margin: 2, countedFraction: 0.5 }, LIVE_CFG)).toBeNull();
+  });
+});
+
+describe("change log between updates", () => {
+  const s = (id, party, status, extra = {}) => ({ seatId: id, name: id, winnerParty: party,
+    winnerGroup: groupOf(party), status, basis: "tcp", ...extra });
+
+  it("reports lead changes, calls, projections and seats falling into doubt", () => {
+    const prev = [s("a", "ALP", "likely"), s("b", "LP", "likely"), s("c", "ALP", "likely"),
+      s("d", "ALP", "projected"), s("e", "LP", "in_doubt")];
+    const cur = [s("a", "LP", "in_doubt"), s("b", "LP", "called"), s("c", "ALP", "projected"),
+      s("d", "ALP", "in_doubt"), s("e", "LP", "in_doubt")];
+    const ev = seatEvents(prev, cur).map((e) => `${e.seatId}:${e.kind}`);
+    expect(ev).toEqual(["a:lead", "b:called", "c:projected", "a:doubt", "d:doubt"]);
+  });
+
+  it("does not report seats merely starting to count, or estimates with no count behind them", () => {
+    const prev = [s("a", "ALP", "not_started"), s("b", "ALP", "likely", { basis: "swing" })];
+    const cur = [s("a", "LP", "in_doubt"), s("b", "LP", "likely", { basis: "swing" })];
+    expect(seatEvents(prev, cur)).toEqual([]);
+    expect(seatEvents(null, cur)).toEqual([]);
+  });
+});
+
+describe("chamber layout", () => {
+  it("places every seat exactly once, ordered from left to right", async () => {
+    const { chamberLayout } = await import("../App.jsx");
+    for (const n of [88, 93, 151]) {
+      const pts = chamberLayout(n, n > 100 ? 8 : 6);
+      expect(pts).toHaveLength(n);
+      for (let i = 1; i < n; i++) expect(pts[i].a).toBeLessThanOrEqual(pts[i - 1].a + 1e-9);
+      expect(pts[0].a).toBeCloseTo(Math.PI, 6);
+      expect(pts[n - 1].a).toBeCloseTo(0, 6);
+      expect(new Set(pts.map((p) => `${p.r.toFixed(4)}:${p.a.toFixed(4)}`)).size).toBe(n);
+    }
+  });
+});
+
+describe("tile labels", () => {
+  it("gives every Victorian district a unique, short label", async () => {
+    const { seatAbbrevs } = await import("../App.jsx");
+    const names = Object.values(baseline.seats).map((s) => s.name);
+    const ab = seatAbbrevs(names);
+    expect(new Set(Object.values(ab)).size).toBe(names.length);
+    for (const a of Object.values(ab)) expect(a.length).toBeLessThanOrEqual(4);
+    expect(ab.Mornington).not.toBe(ab.Mordialloc);
+  });
+});

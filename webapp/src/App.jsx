@@ -27,7 +27,8 @@ import * as STATE_SEAT_FP from "./data/state_seat_fp.js";
 import { useLiveResults } from "./live/useLiveResults.js";
 import { projectSeats, observedSwing } from "./live/project.js";
 import { slugify as liveSlug } from "./live/contract.js";
-import { computeLiveConfidence } from "./live/confidence.js";
+import { computeLiveConfidence, withCallStatus, PROJECT_P } from "./live/confidence.js";
+import { seatEvents } from "./live/events.js";
 import { LIVE_CONFIG, SAMPLE_SNAPSHOTS } from "./live/config.js";
 
 // VIC_SEATS_KNOWN removed — full 88-seat data is in _VS / VIC_SEATS below.
@@ -5200,6 +5201,7 @@ function LiveVsPollsPanel({ model, projCounts, confidence, liveSwing, majority, 
 // stays a pure render that closes over module-scope STYLES / GROUP_CONFIG.
 const LIVE_STATUS_STYLE = {
   called:      { label: "Called",   bg: "rgba(22,163,74,0.14)",  fg: "#16A34A" },
+  projected:   { label: "Projected", bg: "transparent", fg: "#15803D", border: "1px solid rgba(22,163,74,0.55)" },
   likely:      { label: "Likely",   bg: "rgba(217,119,6,0.14)",  fg: "#D97706" },
   in_doubt:    { label: "In doubt", bg: "rgba(220,38,38,0.14)",  fg: "#DC2626" },
   not_started: { label: "Not started", bg: "var(--subtle-bg)", fg: "var(--text-3)" },
@@ -5212,15 +5214,532 @@ function fmtTime(iso) {
   } catch { return "—"; }
 }
 
+// ─── Live: race to call ───────────────────────────────────────────────────────
+// Each seat by share counted (x) and projected margin (y). The shaded zone is where a
+// Labor-v-Coalition lead is big enough, for that much of the count, to reach PROJECT_P —
+// the same σ curve confidence.js uses, so a seat crosses into it as it becomes "Projected".
+const LIVE_Z_PROJECT = 2.326;
+const liveSigma = (f) => { const r = Math.max(0, 1 - f), q = Math.sqrt(r / Math.max(f, 0.02)); return 0.25 + 0.93 * q + 0.33 * r; };
+const LIVE_STATUS_ORDER = ["in_doubt", "likely", "projected", "called", "not_started"];
+
+function LiveRaceToCall({ seats, onPick, focusId, isMobile }) {
+  const W = 760, H = isMobile ? 320 : 340, L = 44, R = 16, T = 14, B = 40, YMAX = 30;
+  const x = (c) => L + (Math.min(100, Math.max(0, c)) / 100) * (W - L - R);
+  const y = (m) => T + (1 - Math.min(Math.max(m, 0), YMAX) / YMAX) * (H - T - B);
+  const pts = seats.filter((s) => s.status !== "not_started" && s.basis !== "baseline" && s.basis !== "swing");
+  let zone = `M ${x(3)} ${y(YMAX)}`;
+  for (let c = 3; c <= 100; c++) zone += ` L ${x(c)} ${y(2 * LIVE_Z_PROJECT * liveSigma(c / 100))}`;
+  zone += ` L ${x(100)} ${y(YMAX)} Z`;
+  // Label the closest open races, nudging labels apart so they do not overprint.
+  const placed = [];
+  const labels = pts.filter((s) => s.status === "in_doubt" || s.status === "likely")
+    .sort((a, b) => a.margin - b.margin).slice(0, isMobile ? 4 : 7)
+    .map((s) => {
+      const lx = x(s.countedPct) + 8;
+      let ly = y(s.margin) - 6;
+      for (let k = 0; k < 6 && placed.some((p) => Math.abs(p.y - ly) < 12 && Math.abs(p.x - lx) < 90); k++) ly -= 12;
+      placed.push({ x: lx, y: ly });
+      return { s, lx: Math.min(lx, W - R - 70), ly: Math.max(T + 10, ly) };
+    });
+  const groupColor = (g) => (GROUP_CONFIG[g] || { color: "#64748B" }).color;
+  return (
+    <div style={{ ...STYLES.panel, marginBottom: 0, minWidth: 0 }}>
+      <div style={STYLES.panelTitle}>Race to call</div>
+      <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 8 }}>
+        Each dot is a seat. Seats move right as they are counted and enter the green zone once
+        their lead is safe for that much of the count. Hollow dots are in doubt. Click a dot to
+        find the seat in the table.
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block" }}
+        role="img" aria-label="Seats by share counted and projected margin">
+        <rect x={L} y={T} width={W - L - R} height={H - T - B} fill="var(--subtle-bg)" />
+        <path d={zone} fill="rgba(22,163,74,0.14)" stroke="#16A34A" strokeWidth="1.2" />
+        {[0, 10, 20, 30].map((m) => (
+          <g key={m}>
+            <line x1={L} x2={W - R} y1={y(m)} y2={y(m)} stroke="var(--border-1)" />
+            <text x={L - 6} y={y(m) + 4} textAnchor="end" fontSize="11" fill="var(--text-3)">{m}{m === YMAX ? "+" : ""}</text>
+          </g>
+        ))}
+        {[0, 25, 50, 75, 100].map((c) => (
+          <text key={c} x={x(c)} y={H - B + 16} textAnchor="middle" fontSize="11" fill="var(--text-3)">{c}%</text>
+        ))}
+        <text x={(L + W - R) / 2} y={H - 6} textAnchor="middle" fontSize="11" fill="var(--text-3)">Share of the seat counted</text>
+        <text x={12} y={(T + H - B) / 2} textAnchor="middle" fontSize="11" fill="var(--text-3)"
+          transform={`rotate(-90 12 ${(T + H - B) / 2})`}>Projected margin (points)</text>
+        <text x={x(97)} y={y(27)} textAnchor="end" fontSize="12" fontWeight="700" fill="#16A34A">Projected</text>
+        {pts.map((s) => {
+          const doubt = s.status === "in_doubt", c = groupColor(s.winnerGroup), f = s.seatId === focusId;
+          return (
+            <circle key={s.seatId} cx={x(s.countedPct)} cy={y(s.margin)} r={f ? 8 : doubt ? 6 : 4.5}
+              fill={doubt ? "var(--panel-bg)" : c} fillOpacity={doubt ? 1 : 0.85}
+              stroke={f ? "var(--text-1)" : c} strokeWidth={f ? 2.5 : doubt ? 2.2 : 0}
+              style={{ cursor: "pointer" }} onClick={() => onPick(s.seatId)}>
+              <title>{`${s.name}: ${String(s.winnerParty).split("#")[0]} by ${s.margin.toFixed(1)}, ${s.countedPct.toFixed(0)}% counted`}</title>
+            </circle>
+          );
+        })}
+        {labels.map(({ s, lx, ly }) => (
+          <text key={s.seatId} x={lx} y={ly} fontSize="11" fontWeight="600" fill="var(--text-1)"
+            style={{ cursor: "pointer" }} onClick={() => onPick(s.seatId)}>{s.name}</text>
+        ))}
+        {!pts.length && (
+          <text x={(L + W - R) / 2} y={(T + H - B) / 2} textAnchor="middle" fontSize="13" fill="var(--text-3)">
+            No seats counting yet
+          </text>
+        )}
+      </svg>
+      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 6 }}>
+        The zone is drawn for Labor-v-Coalition contests. Greens and independent contests need a
+        larger lead, because late votes move them more.
+      </div>
+    </div>
+  );
+}
+
+// ─── Live: watch list and changes ─────────────────────────────────────────────
+const LIVE_EVENT_STYLE = {
+  lead:      { label: "Lead change", fg: "#B45309", bg: "rgba(217,119,6,0.14)" },
+  called:    { label: "Called",      fg: "#16A34A", bg: "rgba(22,163,74,0.14)" },
+  projected: { label: "Projected",   fg: "#15803D", bg: "rgba(22,163,74,0.08)" },
+  doubt:     { label: "In doubt",    fg: "#DC2626", bg: "rgba(220,38,38,0.14)" },
+};
+
+function LiveWatchPanel({ seats, log, onPick }) {
+  const watch = seats
+    .filter((s) => (s.status === "in_doubt" || s.status === "likely") && s.callAt != null)
+    .sort((a, b) => (a.callAt - a.countedPct) - (b.callAt - b.countedPct) || b.margin - a.margin)
+    .slice(0, 6);
+  const dot = (g) => <span style={{ width: 9, height: 9, borderRadius: 2, flex: "none",
+    background: (GROUP_CONFIG[g] || { color: "#64748B" }).color }} />;
+  const row = { display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left",
+    padding: "7px 8px", border: "none", borderRadius: 4, background: "var(--subtle-bg)",
+    color: "var(--text-1)", cursor: "pointer", font: "inherit" };
+  const head = { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em",
+    color: "var(--text-3)", margin: "0 0 6px" };
+  return (
+    <div style={{ ...STYLES.panel, marginBottom: 0, minWidth: 0, display: "grid", gap: 14, alignContent: "start" }}>
+      <div>
+        <div style={head}>Closest to a call</div>
+        <div style={{ display: "grid", gap: 5 }}>
+          {watch.length ? watch.map((s) => (
+            <button key={s.seatId} type="button" style={row} onClick={() => onPick(s.seatId)}>
+              {dot(s.winnerGroup)}
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>{s.name}</span>
+                <span style={{ display: "block", fontSize: 11, color: "var(--text-3)" }}>
+                  {String(s.winnerParty).split("#")[0]} by {s.margin.toFixed(1)} · {s.countedPct.toFixed(0)}% counted ·{" "}
+                  {s.callAt <= s.countedPct ? "callable now" : `callable at about ${s.callAt}% if the lead holds`}
+                </span>
+              </span>
+              <span style={{ width: 54, height: 6, borderRadius: 3, background: "var(--border-1)", flex: "none", overflow: "hidden" }}>
+                <span style={{ display: "block", height: "100%", background: "#16A34A",
+                  width: `${Math.min(100, (s.countedPct / Math.max(1, s.callAt)) * 100)}%` }} />
+              </span>
+            </button>
+          )) : <div style={{ fontSize: 12, color: "var(--text-3)" }}>No open seats close to a call.</div>}
+        </div>
+      </div>
+      <div>
+        <div style={head}>Latest changes</div>
+        <div style={{ display: "grid", gap: 5, maxHeight: 260, overflowY: "auto" }}>
+          {log.length ? log.map((e, i) => {
+            const st = LIVE_EVENT_STYLE[e.kind];
+            return (
+              <button key={`${e.at}-${e.seatId}-${e.kind}-${i}`} type="button" style={row} onClick={() => onPick(e.seatId)}>
+                {dot(e.group)}
+                <span style={{ flex: 1, minWidth: 0, fontSize: 13 }}>
+                  <span style={{ fontWeight: 600 }}>{e.name}</span>{" "}
+                  <span style={{ color: "var(--text-2)" }}>
+                    {e.kind === "lead" ? `${e.party} now leads (was ${e.prevParty})`
+                      : e.kind === "called" ? `called for ${e.party}`
+                      : e.kind === "projected" ? `projected for ${e.party}`
+                      : `${e.party} lead back in doubt`}
+                  </span>
+                  <span style={{ display: "block", fontSize: 11, color: "var(--text-3)" }}>{fmtTime(e.at)}</span>
+                </span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: st.fg, background: st.bg, borderRadius: 5,
+                  padding: "2px 7px", whiteSpace: "nowrap" }}>{st.label}</span>
+              </button>
+            );
+          }) : <div style={{ fontSize: 12, color: "var(--text-3)" }}>Changes will appear here as new results arrive.</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Live: seat table with filters and sorting ────────────────────────────────
+const LIVE_TABLE_SORTS = [
+  ["close", "Closest margin"], ["call", "Nearest to a call"], ["unc", "Least certain"],
+  ["counted", "Most counted"], ["swing", "Biggest swing"], ["name", "A to Z"],
+];
+
+function LiveSeatTable({ seats, pollModel, meta, focusId, filter, setFilter }) {
+  const [sort, setSort] = useState("close");
+  const differs = (s) => {
+    const pm = pollModel?.seats?.[s.seatId];
+    // Only call a seat "different" once tonight's count, not 2022, drives it.
+    return !!pm && (s.basis === "tcp" || s.basis === "fp") && toCompareGroup(s.winnerGroup) !== pm.group;
+  };
+  const filters = [
+    ["all", "All", () => true],
+    ["in_doubt", "In doubt", (s) => s.status === "in_doubt"],
+    ["likely", "Likely", (s) => s.status === "likely"],
+    ["projected", "Projected", (s) => s.status === "projected"],
+    ["called", "Called", (s) => s.status === "called"],
+    ["not_started", "Not started", (s) => s.status === "not_started"],
+    ["gain", "Changing hands", (s) => s.changed && s.status !== "not_started"],
+    ...(pollModel ? [["differs", "Differs from polls", differs]] : []),
+  ];
+  const test = (filters.find((f) => f[0] === filter) || filters[0])[2];
+  const key = {
+    close: (s) => (s.status === "not_started" ? 1e6 : s.margin),
+    call: (s) => (s.callAt == null ? 1e6 : s.callAt - s.countedPct),
+    unc: (s) => (s.status === "not_started" ? 2 : s.winProb ?? 1),
+    counted: (s) => -s.countedPct,
+    swing: (s) => -Math.abs(s.swing2cp ?? 0),
+  }[sort];
+  const rows = seats.filter(test).sort((a, b) =>
+    sort === "name" ? a.name.localeCompare(b.name) : key(a) - key(b) || a.name.localeCompare(b.name));
+  const chip = (on) => ({ padding: "5px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
+    border: `1px solid ${on ? "var(--text-1)" : "var(--border-2)"}`,
+    background: on ? "var(--text-1)" : "var(--panel-bg)", color: on ? "var(--panel-bg)" : "var(--text-2)" });
+  const bar = (w, color) => <span style={{ display: "inline-block", width: w, height: 7, borderRadius: 2, background: color }} />;
+  return (
+    <div style={{ ...STYLES.panel }}>
+      <div style={STYLES.panelTitle}>Seats</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 12 }}>
+        <div role="group" aria-label="Filter seats" style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {filters.map(([k, label, f]) => (
+            <button key={k} type="button" aria-pressed={filter === k} style={chip(filter === k)}
+              onClick={() => setFilter(k)}>{label} {seats.filter(f).length}</button>
+          ))}
+        </div>
+        <label htmlFor="live-sort" style={{ fontSize: 12, color: "var(--text-3)", marginLeft: "auto" }}>Sort by</label>
+        <select id="live-sort" value={sort} onChange={(e) => setSort(e.target.value)} style={{ ...STYLES.input, padding: "5px 8px" }}>
+          {LIVE_TABLE_SORTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+        </select>
+      </div>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 760 }}>
+          <thead>
+            <tr>
+              {["Seat", "Counted", "Leader", "Margin", "Swing", "Certainty", "Call at", ...(pollModel ? ["Polls model"] : []), "Status"]
+                .map((h) => <th key={h} style={{ ...STYLES.tableHead, whiteSpace: "nowrap" }}>{h}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((s) => {
+              const cfg = GROUP_CONFIG[s.winnerGroup] || { color: "#64748B" };
+              const st = LIVE_STATUS_STYLE[s.status] || LIVE_STATUS_STYLE.in_doubt;
+              const basisNote = s.basis === "swing" ? "no count yet — 2022 plus swing so far"
+                : s.status === "not_started" ? null
+                : s.tcpState === "withheld" ? "2CP withheld by VEC"
+                : s.basis === "fp" ? "est. from first preferences"
+                : s.basis === "baseline" ? "no 2CP yet — holding 2022 result"
+                : s.granularity === "booth" ? "booth-matched" : null;
+              const cert = s.winProb == null || s.status === "not_started" ? null : Math.round(s.winProb * 100);
+              const pm = pollModel?.seats?.[s.seatId];
+              const cell = { ...STYLES.tableCell, padding: "8px 10px" };
+              return (
+                <tr key={s.seatId} id={`live-seat-${s.seatId}`} style={{ borderTop: "1px solid var(--border-2)",
+                  background: s.seatId === focusId ? "var(--subtle-bg)" : undefined,
+                  boxShadow: s.seatId === focusId ? "inset 3px 0 0 var(--text-1)" : undefined }}>
+                  <td style={cell}>
+                    <div style={{ fontWeight: 600, color: "var(--text-1)" }}>{s.name}</div>
+                    {s.region && <div style={{ fontSize: 11, color: "var(--text-3)" }}>{s.region}</div>}
+                  </td>
+                  <td style={{ ...cell, color: "var(--text-2)" }}>{s.countedPct.toFixed(0)}%</td>
+                  <td style={cell}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ width: 9, height: 9, borderRadius: 2, background: cfg.color }} />
+                      <span style={{ fontWeight: 600 }}>{String(s.winnerParty).split("#")[0]}</span>
+                      {s.changed && <span style={{ fontSize: 10, color: "#B45309", fontWeight: 700 }}>GAIN</span>}
+                    </span>
+                    {basisNote && <div style={{ fontSize: 10, color: "var(--text-3)" }}>{basisNote}</div>}
+                  </td>
+                  <td style={cell}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      {bar(Math.max(2, Math.min(56, s.margin * 2)), cfg.color)}{s.margin.toFixed(1)}
+                    </span>
+                  </td>
+                  <td style={{ ...cell, color: s.swing2cp == null ? "var(--text-3)" : s.swing2cp >= 0 ? "#DC2626" : "#1D4ED8" }}>
+                    {s.swing2cp == null ? "—" : `${s.swing2cp >= 0 ? "+" : ""}${s.swing2cp.toFixed(1)}`}
+                  </td>
+                  <td style={cell}>
+                    {cert == null ? <span style={{ color: "var(--text-3)" }}>—</span> : (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ width: 56, height: 7, borderRadius: 2, background: "var(--border-1)", overflow: "hidden", display: "inline-block" }}>
+                          <span style={{ display: "block", height: "100%", width: `${cert}%`,
+                            background: cert >= PROJECT_P * 100 ? "#16A34A" : cert >= 80 ? "#D97706" : "#DC2626" }} />
+                        </span>{cert}%
+                      </span>
+                    )}
+                  </td>
+                  <td style={{ ...cell, color: "var(--text-2)", whiteSpace: "nowrap" }}>
+                    {s.status === "called" || s.status === "projected" ? "Done"
+                      : s.callAt == null ? "—" : s.callAt <= s.countedPct ? "Now" : `~${s.callAt}%`}
+                  </td>
+                  {pollModel && (
+                    <td style={{ ...cell, whiteSpace: "nowrap", color: "var(--text-2)" }}>
+                      {pm ? `${pm.party} ${pm.margin.toFixed(1)}` : "—"}
+                      {differs(s) && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: "#B45309" }}>DIFFERS</span>}
+                    </td>
+                  )}
+                  <td style={cell}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: st.fg, background: st.bg, border: st.border,
+                      borderRadius: 5, padding: "2px 8px", whiteSpace: "nowrap" }}>{st.label}</span>
+                  </td>
+                </tr>
+              );
+            })}
+            {!rows.length && (
+              <tr><td colSpan={9} style={{ ...STYLES.tableCell, color: "var(--text-3)" }}>No seats match this filter right now.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 10 }}>
+        Margin and swing are projected final two-candidate-preferred (pp). Swing is vs the{" "}
+        {meta?.baselineElectionId === "vic_2022" ? "2022" : "previous"} result, shown only where
+        tonight's final two are the same parties as last time. "Counted" is first-preference
+        votes as a share of expected turnout. Certainty is the chance the leader holds the seat;
+        "Projected" means at least {Math.round(PROJECT_P * 100)}%, our call before the formal one.
+        "Call at" estimates how much of the seat must be counted for that, if the lead holds.
+        {meta?.attribution && <> Results data {meta.attribution}.</>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Live: the chamber (path to 45) ───────────────────────────────────────────
+// All seats in a semicircle, ordered by Labor's chance of winning: safest Labor on the
+// left, crossbench in the middle, safest Coalition on the right. Labor has a majority
+// exactly when its colour reaches past the left-hand line (its 45th seat); the Coalition
+// when its colour reaches past the right-hand line. Between the lines, neither has 45.
+function chamberLayout(n, rows) {
+  const inner = 0.38, radii = Array.from({ length: rows }, (_, k) => inner + (1 - inner) * (k / (rows - 1)));
+  const total = radii.reduce((a, r) => a + r, 0);
+  const per = radii.map((r) => Math.max(2, Math.round((n * r) / total)));
+  let diff = n - per.reduce((a, b) => a + b, 0);
+  for (let k = rows - 1; diff !== 0; k = (k - 1 + rows) % rows) { per[k] += Math.sign(diff); diff -= Math.sign(diff); }
+  const pts = [];
+  radii.forEach((r, k) => {
+    for (let j = 0; j < per[k]; j++) pts.push({ r, a: Math.PI - (Math.PI * j) / (per[k] - 1) });
+  });
+  // Seat order follows the angle, so "the first 45 seats" is a wedge from the left.
+  return pts.sort((p1, p2) => p2.a - p1.a || p1.r - p2.r);
+}
+
+function LiveChamber({ seats, confidence, majority, onPick, focusId }) {
+  const n = seats.length, rows = n > 100 ? 8 : 6;
+  const W = 640, H = 350, cx = W / 2, cy = 318, R = 290;
+  const layout = chamberLayout(n, rows);
+  const dotR = Math.min(13, (R * 0.62) / rows / 2.2);
+  const side = { greens: 0.02, ind: 0, teal: 0, one_nation: -0.02 };
+  const keyOf = (s) => {
+    const pAlp = confidence.alpWinProbs?.[s.seatId];
+    if (s.winnerGroup === "alp" || s.winnerGroup === "coalition") return pAlp ?? (s.winnerGroup === "alp" ? 0.75 : 0.25);
+    return 0.5 + (side[s.winnerGroup] ?? -0.01);
+  };
+  const ordered = [...seats].sort((a, b) => keyOf(b) - keyOf(a) || a.margin - b.margin);
+  const color = (g) => (GROUP_CONFIG[g] || { color: "#64748B" }).color;
+  const lineAt = (i) => {                       // boundary between seat i-1 and seat i (0-based)
+    const a = (layout[i - 1].a + layout[i].a) / 2;
+    return { x1: cx + Math.cos(a) * R * 0.30, y1: cy - Math.sin(a) * R * 0.30,
+             x2: cx + Math.cos(a) * (R + 14), y2: cy - Math.sin(a) * (R + 14), a };
+  };
+  const labLine = lineAt(majority), coalLine = lineAt(n - majority);
+  const counts = {};
+  seats.forEach((s) => { counts[s.winnerGroup] = (counts[s.winnerGroup] || 0) + 1; });
+  const others = n - (counts.alp || 0) - (counts.coalition || 0);
+  return (
+    <div style={{ ...STYLES.panel, marginBottom: 14 }}>
+      <div style={STYLES.panelTitle}>The chamber</div>
+      <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 6 }}>
+        Every seat, from safest Labor (left) to safest Coalition (right). A party has a majority
+        when its colour passes its dashed line. Between the two lines, neither side has {majority}.
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", maxWidth: 760, height: "auto", display: "block", margin: "0 auto" }}
+        role="img" aria-label={`Projected chamber: Labor ${counts.alp || 0}, Coalition ${counts.coalition || 0}, others ${others}`}>
+        <path d={`M ${cx} ${cy} L ${labLine.x2} ${labLine.y2} A ${R + 14} ${R + 14} 0 0 1 ${coalLine.x2} ${coalLine.y2} Z`}
+          fill="var(--subtle-bg)" />
+        <text x={labLine.x2 - 6} y={labLine.y2 - 4} textAnchor="end" fontSize="11" fontWeight="700" fill={color("alp")}>Labor {majority}</text>
+        <text x={coalLine.x2 + 6} y={coalLine.y2 - 4} fontSize="11" fontWeight="700" fill={color("coalition")}>Coalition {majority}</text>
+        {ordered.map((s, i) => {
+          const pt = layout[i], c = color(s.winnerGroup);
+          const x = cx + Math.cos(pt.a) * pt.r * R, y = cy - Math.sin(pt.a) * pt.r * R;
+          const done = s.status === "projected" || s.status === "called";
+          const fill = s.status === "in_doubt" ? "var(--panel-bg)" : c;
+          const op = s.status === "not_started" ? 0.25 : s.status === "likely" ? 0.6 : 1;
+          return (
+            <circle key={s.seatId} cx={x} cy={y} r={s.seatId === focusId ? dotR + 2 : dotR}
+              fill={fill} fillOpacity={op} stroke={s.seatId === focusId ? "var(--text-1)" : c}
+              strokeWidth={s.seatId === focusId ? 3 : s.status === "in_doubt" ? 2.2 : done ? 0 : 1}
+              strokeOpacity={s.status === "not_started" ? 0.4 : 1} style={{ cursor: "pointer" }}
+              onClick={() => onPick(s.seatId)}>
+              <title>{`${s.name}: ${String(s.winnerParty).split("#")[0]}, ${LIVE_STATUS_STYLE[s.status]?.label.toLowerCase() || s.status}` +
+                `${s.winProb != null && s.status !== "not_started" ? ` (${Math.round(s.winProb * 100)}% certain)` : ""}`}</title>
+            </circle>
+          );
+        })}
+        {[labLine, coalLine].map((l, i) => (
+          <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="var(--text-1)" strokeWidth="1.5"
+            strokeDasharray="5 3" pointerEvents="none" />
+        ))}
+        <text x={cx} y={cy - 34} textAnchor="middle" fontSize="26" fontWeight="700" fill="var(--text-1)"
+          style={{ fontFamily: "var(--font-display)" }}>
+          <tspan fill={color("alp")}>{counts.alp || 0}</tspan>
+          <tspan fill="var(--text-3)" fontSize="18"> · </tspan>
+          <tspan fill={color("coalition")}>{counts.coalition || 0}</tspan>
+          {others > 0 && <><tspan fill="var(--text-3)" fontSize="18"> · </tspan><tspan fill="var(--text-2)">{others}</tspan></>}
+        </text>
+        <text x={cx} y={cy - 14} textAnchor="middle" fontSize="11" fill="var(--text-3)">
+          Labor · Coalition{others > 0 ? " · others" : ""}
+        </text>
+      </svg>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px", fontSize: 11, color: "var(--text-3)", marginTop: 6 }}>
+        <span>● Solid: projected or called</span><span style={{ opacity: 0.75 }}>● Faded: likely</span>
+        <span>○ Hollow: in doubt</span><span style={{ opacity: 0.45 }}>● Pale: not started (2022 result)</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Live: seats at a glance (status board / tile grid) ───────────────────────
+const LIVE_BOARD_COLUMNS = ["not_started", "in_doubt", "likely", "projected", "called"];
+// VIC_DISTRICT_REGION's swing groups: its "outer_metro" also holds Geelong, Ballarat and Bendigo.
+const LIVE_TILE_GROUPS = [["inner_metro", "Inner Melbourne"], ["outer_metro", "Suburbs and provincial cities"], ["regional", "Rural and regional"]];
+
+// Short tile labels, unique across all seats: initials or the first three letters, lengthened
+// only where two seats would otherwise share a label (Mornington MORN, Mordialloc MORD).
+function seatAbbrevs(names) {
+  const words = (n) => String(n).replace(/[^A-Za-z ]/g, " ").split(/\s+/).filter(Boolean);
+  const cand = (n, lvl) => {
+    const w = words(n);
+    if (!w.length) return "?";
+    if (w.length > 1) {
+      const rest = w.slice(1).map((x) => x[0]).join("");
+      return [w.map((x) => x[0]).join(""), w[0].slice(0, 2) + rest, w[0].slice(0, 3) + rest][lvl].toUpperCase();
+    }
+    return [w[0].slice(0, 3), w[0].slice(0, 4), w[0].slice(0, 2) + w[0].slice(-2)][lvl].toUpperCase();
+  };
+  const level = Object.fromEntries(names.map((n) => [n, 0]));
+  for (let round = 0; round < 3; round++) {
+    const by = {};
+    names.forEach((n) => { (by[cand(n, level[n])] ||= []).push(n); });
+    const clashes = Object.values(by).filter((g) => g.length > 1);
+    if (!clashes.length) break;
+    clashes.flat().forEach((n) => { level[n] = Math.min(2, level[n] + 1); });
+  }
+  const out = {}, used = {};
+  names.forEach((n) => {
+    let a = cand(n, level[n]);
+    if (used[a]) a = a.slice(0, 3) + (used[a] + 1);
+    used[cand(n, level[n])] = (used[cand(n, level[n])] || 0) + 1;
+    out[n] = a;
+  });
+  return out;
+}
+
+function LiveSeatsAtGlance({ seats, onPick, focusId, isMobile }) {
+  const [view, setView] = useState("board");
+  const color = (g) => (GROUP_CONFIG[g] || { color: "#64748B" }).color;
+  const abbrev = useMemo(() => seatAbbrevs(seats.map((s) => s.name)), [seats]);
+  const tab = (on) => ({ padding: "5px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", border: "none",
+    background: on ? "var(--text-1)" : "transparent", color: on ? "var(--panel-bg)" : "var(--text-2)" });
+  return (
+    <div style={{ ...STYLES.panel, marginBottom: 14 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginBottom: 10 }}>
+        <div style={{ ...STYLES.panelTitle, marginBottom: 0 }}>Seats at a glance</div>
+        <span style={{ flex: 1 }} />
+        <div role="group" aria-label="View" style={{ display: "inline-flex", border: "1px solid var(--border-2)", borderRadius: 6, overflow: "hidden" }}>
+          <button type="button" aria-pressed={view === "board"} style={tab(view === "board")} onClick={() => setView("board")}>Status board</button>
+          <button type="button" aria-pressed={view === "tiles"} style={tab(view === "tiles")} onClick={() => setView("tiles")}>Tile grid</button>
+        </div>
+      </div>
+
+      {view === "board" ? (
+        <div style={{ display: "grid", gap: 8, gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "repeat(5, minmax(0, 1fr))" }}>
+          {LIVE_BOARD_COLUMNS.map((k) => {
+            const col = seats.filter((s) => s.status === k).sort((a, b) => a.margin - b.margin);
+            const st = LIVE_STATUS_STYLE[k];
+            return (
+              <div key={k} style={{ background: "var(--subtle-bg)", borderRadius: 6, padding: 8, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 700,
+                  textTransform: "uppercase", letterSpacing: "0.06em", color: st.fg, marginBottom: 6 }}>
+                  <span>{st.label}</span><span>{col.length}</span>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, maxHeight: 320, overflowY: "auto" }}>
+                  {col.map((s) => (
+                    <button key={s.seatId} type="button" onClick={() => onPick(s.seatId)}
+                      title={`${s.name}: ${String(s.winnerParty).split("#")[0]} by ${s.margin.toFixed(1)}, ${s.countedPct.toFixed(0)}% counted`}
+                      style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, padding: "2px 6px",
+                        borderRadius: 5, cursor: "pointer", maxWidth: "100%", color: "var(--text-1)",
+                        background: "var(--panel-bg)", border: `1px solid ${s.seatId === focusId ? "var(--text-1)" : "var(--border-2)"}`,
+                        boxShadow: s.changed && s.status !== "not_started" ? "inset 0 0 0 1.5px #D97706" : "none" }}>
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: color(s.winnerGroup), flex: "none" }} />
+                      <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.name}</span>
+                    </button>
+                  ))}
+                  {!col.length && <span style={{ fontSize: 11, color: "var(--text-3)" }}>None</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div style={{ display: "grid", gap: 12 }}>
+          {LIVE_TILE_GROUPS.map(([key, label]) => {
+            const group = seats.filter((s) => _getVicRegion(s.name) === key).sort((a, b) => a.name.localeCompare(b.name));
+            if (!group.length) return null;
+            return (
+              <div key={key}>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em",
+                  color: "var(--text-3)", marginBottom: 6 }}>{label} · {group.length}</div>
+                <div style={{ display: "grid", gap: 4, gridTemplateColumns: "repeat(auto-fill, minmax(44px, 1fr))" }}>
+                  {group.map((s) => {
+                    const waiting = s.status === "not_started";
+                    const strength = waiting ? 0 : Math.round(35 + 65 * Math.max(0, ((s.winProb ?? 0.5) - 0.5) * 2));
+                    return (
+                      <button key={s.seatId} type="button" onClick={() => onPick(s.seatId)}
+                        title={`${s.name}: ${String(s.winnerParty).split("#")[0]}, ${LIVE_STATUS_STYLE[s.status]?.label.toLowerCase()}, ${s.countedPct.toFixed(0)}% counted`}
+                        style={{ aspectRatio: "1", maxWidth: "100%", borderRadius: 5, cursor: "pointer", position: "relative",
+                          display: "grid", placeItems: "center", fontSize: 11, fontWeight: 700, padding: 0,
+                          color: waiting ? "var(--text-3)" : "#fff",
+                          background: waiting ? "var(--subtle-bg)" : `color-mix(in srgb, ${color(s.winnerGroup)} ${strength}%, var(--subtle-bg))`,
+                          border: s.seatId === focusId ? "2px solid var(--text-1)"
+                            : s.status === "in_doubt" ? "2px dashed var(--text-1)" : "2px solid transparent" }}>
+                        {abbrev[s.name]}
+                        {(s.status === "projected" || s.status === "called") && (
+                          <span aria-hidden="true" style={{ position: "absolute", top: 1, right: 3, fontSize: 9 }}>
+                            {s.status === "called" ? "✓✓" : "✓"}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+          <div style={{ fontSize: 11, color: "var(--text-3)" }}>
+            Colour shows the leader; stronger colour means more certain. Dashed border: in doubt. ✓ projected, ✓✓ called. Grey: not started.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LivePage({
   meta, projected, confidence, status, error, lastFetched, refresh,
   isMobile, devSnapshots, snapshotUrl, onPickSnapshot, sourceLabel, polling,
   pollModel, liveSwing,
 }) {
-  const [sortKey, setSortKey] = useState("countedPct");
-  const [sortDir, setSortDir] = useState("desc");
-
   const hasData = projected && projected.length > 0 && confidence;
+  const [tableFilter, setTableFilter] = useState("all");
+  const [focusId, setFocusId] = useState(null);
 
   // Point-estimate projected seat counts (deterministic winner per seat).
   const projCounts = useMemo(() => {
@@ -5229,38 +5748,28 @@ function LivePage({
     return c;
   }, [projected]);
 
-  const sortedSeats = useMemo(() => {
-    const rows = [...(projected || [])];
-    const dir = sortDir === "asc" ? 1 : -1;
-    const val = (s) => {
-      switch (sortKey) {
-        case "name": return s.name;
-        case "countedPct": return s.countedPct;
-        case "margin": return s.margin;
-        case "swing": return s.swing2cp ?? -999;
-        case "winProb": return confidence?.seatWinProbs?.[s.seatId] ?? 0;
-        case "leader": return s.winnerGroup;
-        default: return s.countedPct;
-      }
-    };
-    rows.sort((a, b) => {
-      const va = val(a), vb = val(b);
-      if (typeof va === "string") return va.localeCompare(vb) * dir;
-      return (va - vb) * dir;
-    });
-    return rows;
-  }, [projected, confidence, sortKey, sortDir]);
+  // Running log of what changed between updates (lead changes, projections, calls).
+  const [eventLog, setEventLog] = useState([]);
+  const prevUpdate = useRef(null);
+  useEffect(() => {
+    if (!projected || !meta?.asAt) return;
+    const prev = prevUpdate.current;
+    if (prev && prev.asAt === meta.asAt) return;
+    if (prev) {
+      const ev = seatEvents(prev.seats, projected).map((e) => ({ ...e, at: meta.asAt }));
+      if (ev.length) setEventLog((l) => [...ev, ...l].slice(0, 40));
+    }
+    prevUpdate.current = { asAt: meta.asAt, seats: projected };
+  }, [projected, meta?.asAt]);
 
-  const toggleSort = (k) => {
-    if (sortKey === k) setSortDir(d => (d === "asc" ? "desc" : "asc"));
-    else { setSortKey(k); setSortDir(k === "name" ? "asc" : "desc"); }
-  };
-  const Th = ({ k, children, align = "left" }) => (
-    <th onClick={() => toggleSort(k)}
-      style={{ ...STYLES.tableHead, textAlign: align, cursor: "pointer", whiteSpace: "nowrap" }}>
-      {children}{sortKey === k ? (sortDir === "asc" ? " ▲" : " ▼") : ""}
-    </th>
-  );
+  // Clicking a seat anywhere shows it in the table.
+  const pickSeat = (id) => { setTableFilter("all"); setFocusId(id); };
+  useEffect(() => {
+    if (!focusId) return;
+    const el = typeof document !== "undefined" && document.getElementById(`live-seat-${focusId}`);
+    const smooth = typeof window !== "undefined" && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el?.scrollIntoView?.({ block: "center", behavior: smooth ? "smooth" : "auto" });
+  }, [focusId]);
 
   const majority = meta?.majority ?? LIVE_CONFIG.active.majority;
 
@@ -5423,6 +5932,17 @@ function LivePage({
         </div>
       </div>
 
+      <LiveChamber seats={projected} confidence={confidence} majority={majority}
+        onPick={pickSeat} focusId={focusId} />
+
+      <div style={{ display: "grid", gap: 14, marginBottom: 14,
+        gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "minmax(0, 3fr) minmax(0, 2fr)" }}>
+        <LiveRaceToCall seats={projected} onPick={pickSeat} focusId={focusId} isMobile={isMobile} />
+        <LiveWatchPanel seats={projected} log={eventLog} onPick={pickSeat} />
+      </div>
+
+      <LiveSeatsAtGlance seats={projected} onPick={pickSeat} focusId={focusId} isMobile={isMobile} />
+
       <LiveVsPollsPanel model={pollModel} projCounts={projCounts} confidence={confidence}
         liveSwing={liveSwing} majority={majority} totalSeats={meta?.totalSeats || totalShown} />
 
@@ -5450,93 +5970,8 @@ function LivePage({
         </div>
       </div>
 
-      <div style={{ ...STYLES.panel }}>
-        <div style={STYLES.panelTitle}>Seats ({projected.length})</div>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-            <thead>
-              <tr>
-                <Th k="name">Seat</Th>
-                <Th k="countedPct" align="right">Counted</Th>
-                <Th k="leader">Leader</Th>
-                <Th k="margin" align="right">Margin</Th>
-                <Th k="swing" align="right">Swing</Th>
-                <Th k="winProb" align="right">Win prob</Th>
-                {pollModel && <th style={{ ...STYLES.tableHead, textAlign: "left", whiteSpace: "nowrap" }}>Polls model</th>}
-                <th style={{ ...STYLES.tableHead, textAlign: "center" }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedSeats.map(s => {
-                const cfg = groupCfg(s.winnerGroup);
-                const basisNote = s.basis === "swing" ? "no count yet — 2022 plus swing so far"
-                  : s.status === "not_started" ? null
-                  : s.tcpState === "withheld" ? "2CP withheld by VEC"
-                  : s.basis === "fp" ? "est. from first preferences"
-                  : s.basis === "baseline" ? "no 2CP yet — holding 2022 result"
-                  : s.granularity === "booth" ? "booth-matched" : null;
-                const st = LIVE_STATUS_STYLE[s.status] || LIVE_STATUS_STYLE.in_doubt;
-                const wp = confidence.seatWinProbs?.[s.seatId];
-                const swing = s.swing2cp;
-                return (
-                  <tr key={s.seatId} style={{ borderTop: "1px solid var(--border-2)" }}>
-                    <td style={{ ...STYLES.tableCell }}>
-                      <div style={{ fontWeight: 600, color: "var(--text-1)" }}>{s.name}</div>
-                      {s.region && <div style={{ fontSize: 11, color: "var(--text-3)" }}>{s.region}</div>}
-                    </td>
-                    <td style={{ ...STYLES.tableCell, textAlign: "right", color: "var(--text-2)" }}>
-                      {s.countedPct.toFixed(0)}%
-                    </td>
-                    <td style={{ ...STYLES.tableCell }}>
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                        <span style={{ width: 9, height: 9, borderRadius: 2, background: cfg.color }} />
-                        <span style={{ fontWeight: 600 }}>{String(s.winnerParty).split("#")[0]}</span>
-                        {s.changed && <span style={{ fontSize: 10, color: "#B45309", fontWeight: 700 }}>GAIN</span>}
-                      </span>
-                      {basisNote && <div style={{ fontSize: 10, color: "var(--text-3)" }}>{basisNote}</div>}
-                    </td>
-                    <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                      {s.margin.toFixed(1)}
-                    </td>
-                    <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums",
-                      color: swing == null ? "var(--text-3)" : swing >= 0 ? "#DC2626" : "#1D4ED8" }}>
-                      {swing == null ? "—" : `${swing >= 0 ? "+" : ""}${swing.toFixed(1)}`}
-                    </td>
-                    <td style={{ ...STYLES.tableCell, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                      {wp == null ? "—" : `${Math.round(wp * 100)}%`}
-                    </td>
-                    {pollModel && (() => {
-                      const pm = pollModel.seats[s.seatId];
-                      if (!pm) return <td style={{ ...STYLES.tableCell, color: "var(--text-3)" }}>—</td>;
-                      // Only call a seat "different" once tonight's count, not 2022, drives it.
-                      const counted = s.basis === "tcp" || s.basis === "fp";
-                      const differs = counted && toCompareGroup(s.winnerGroup) !== pm.group;
-                      return (
-                        <td style={{ ...STYLES.tableCell, whiteSpace: "nowrap", color: "var(--text-2)" }}>
-                          {pm.party} {pm.margin.toFixed(1)}
-                          {differs && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: "#B45309" }}>DIFFERS</span>}
-                        </td>
-                      );
-                    })()}
-                    <td style={{ ...STYLES.tableCell, textAlign: "center" }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: st.fg, background: st.bg,
-                        borderRadius: 5, padding: "2px 8px", whiteSpace: "nowrap" }}>{st.label}</span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 10 }}>
-          Margin and swing are projected final two-candidate-preferred (pp). Swing is vs the{" "}
-          {meta?.baselineElectionId === "vic_2022" ? "2022" : "previous"} result, shown only where
-          tonight's final two are the same parties as last time. "Counted" is first-preference
-          votes as a share of expected turnout. Win probability follows the two-candidate count,
-          which lags first preferences on the night.
-          {meta?.attribution && <> Results data {meta.attribution}.</>}
-        </div>
-      </div>
+      <LiveSeatTable seats={projected} pollModel={pollModel} meta={meta} focusId={focusId}
+        filter={tableFilter} setFilter={setTableFilter} />
     </div>
   );
 }
@@ -6307,6 +6742,10 @@ export default function App() {
   const liveConfidence = useMemo(
     () => (liveProjected ? computeLiveConfidence(liveProjected, LIVE_CONFIG.active.cfg) : null),
     [liveProjected]);
+  // Seats with certainty, "callable at" and the Projected status added for the Live page.
+  const liveSeats = useMemo(
+    () => withCallStatus(liveProjected, liveConfidence, LIVE_CONFIG.active.cfg),
+    [liveProjected, liveConfidence]);
 
   const projCounts = useMemo(
     () => countByGroup(modelledSeats, (s) => s.modelled.winnerGroup),
@@ -7455,7 +7894,7 @@ export default function App() {
       {activeTab === "live" && (
         <LivePage
           meta={live.feed?.meta}
-          projected={liveProjected}
+          projected={liveSeats}
           confidence={liveConfidence}
           status={live.status}
           error={live.error}
@@ -12509,6 +12948,8 @@ aggregate = Σ_t w(t) · (tpp(t) − house_effect(pollster(t)))
 // (src/__tests__/baseline-alignment.test.jsx), which asserts that every model at
 // zero swing reproduces the actual election result. Not used by the UI.
 export {
+  chamberLayout,
+  seatAbbrevs,
   computeVicPollsModel,
   computeSeatDistribution,
   computeUncertainty,
