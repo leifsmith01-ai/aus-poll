@@ -473,15 +473,19 @@ def _session():
     return s
 
 
-def fetch(session, url: str, tries: int = 3) -> str | None:
+def fetch(session, url: str, tries: int = 3, missing_ok: bool = True) -> str | None:
+    """GET a page. `missing_ok` is for addresses that may genuinely not exist yet
+    (the results index before 6pm): a 404 returns None at once. For pages we were
+    linked to, a 404 is treated as transient and retried — the VEC site has been
+    seen intermittently failing pages for GitHub's servers that load fine otherwise."""
     for attempt in range(tries):
         try:
             r = session.get(url, timeout=30)
-            if r.status_code == 404:
+            if r.status_code == 404 and missing_ok:
                 return None
             r.raise_for_status()
             return r.text
-        except Exception as exc:                     # network blip / 5xx under load
+        except Exception as exc:                     # network blip / 404 / 5xx under load
             if attempt == tries - 1:
                 print(f"WARN fetch failed {url}: {exc}", file=sys.stderr)
                 return None
@@ -552,6 +556,30 @@ def discover(session, index_url: str) -> tuple[str, list[str]]:
     return index_url, []
 
 
+def find_subpages(session, url: str) -> dict:
+    page = fetch(session, url, missing_ok=False)
+    sub = subpage_links(page, url) if page else {}
+    if page and not sub.get("vc"):
+        print(f"WARN no booth-table link on {url}", file=sys.stderr)
+    return sub
+
+
+def grab(session, urls: dict, url: str) -> tuple[str | None, str | None]:
+    """Fetch one district's two booth pages -> (vc_html, tcp_html). vc_html is None
+    when the district could not be loaded (it then keeps its previous figures)."""
+    sub = urls.get(url) or {}
+    if not sub.get("vc"):
+        sub = urls[url] = find_subpages(session, url)
+        if not sub.get("vc"):
+            return None, None
+    vc = fetch(session, sub["vc"], missing_ok=False)
+    if vc and parse_results_table(vc) is None:
+        print(f"WARN no results table on {sub['vc']}", file=sys.stderr)
+        vc = None
+    tc = fetch(session, sub["tcp"], missing_ok=False) if vc and sub.get("tcp") else None
+    return vc, tc
+
+
 def collect(args) -> list[tuple[str, str, str | None]]:
     """-> [(district_url, vc_html, tcp_html)]"""
     if args.from_html:
@@ -576,29 +604,26 @@ def collect(args) -> list[tuple[str, str, str | None]]:
                              "published the results index yet? Pass --index with the right URL.")
         print(f"index {index_url}: {len(links)} districts", file=sys.stderr)
 
-        def find(u):
-            page = fetch(session, u)
-            return u, subpage_links(page, u) if page else {}
         with ThreadPoolExecutor(args.workers) as ex:
-            urls = dict(ex.map(find, links))
-    else:
-        # Districts whose booth tables were not linked yet when first discovered.
-        missing = [u for u, sub in urls.items() if not sub.get("vc")]
-        for u in missing:
-            got_page = fetch(session, u)
-            if got_page:
-                urls[u] = subpage_links(got_page, u)
+            urls = dict(ex.map(lambda u: (u, find_subpages(session, u)), links))
     if cache_path:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
-        cache_path.write_text(json.dumps(urls, indent=1))
 
-    def grab(item):
-        url, sub = item
-        vc = fetch(session, sub["vc"]) if sub.get("vc") else None
-        tc = fetch(session, sub["tcp"]) if sub.get("tcp") else None
-        return url, vc, tc
     with ThreadPoolExecutor(args.workers) as ex:
-        got = [g for g in ex.map(grab, urls.items()) if g[1]]
+        results = dict(ex.map(lambda item: (item[0], grab(session, urls, item[0])), list(urls.items())))
+    # Second sweep: anything that failed gets one slower, one-at-a-time retry.
+    failed = [u for u, r in results.items() if not r[0]]
+    if failed:
+        print(f"retrying {len(failed)} district(s) one at a time", file=sys.stderr)
+        for u in failed:
+            time.sleep(1.5)
+            results[u] = grab(session, urls, u)
+    if cache_path:
+        cache_path.write_text(json.dumps(urls, indent=1))
+    got = [(u, vc, tc) for u, (vc, tc) in results.items() if vc]
+    lost = sorted(u.rstrip("/").split("/")[-1] for u, (vc, _) in results.items() if not vc)
+    print(f"loaded {len(got)}/{len(urls)} districts" + (f"; failed: {lost}" if lost else ""),
+          file=sys.stderr)
 
     if args.save_html:
         d = Path(args.save_html)
@@ -636,7 +661,7 @@ def main() -> int:
     ap.add_argument("--from-html", help="replay pages saved with --save-html (no network)")
     ap.add_argument("--save-html", help="also save the fetched pages here")
     ap.add_argument("--cache", help="JSON file caching the discovered page URLs between runs")
-    ap.add_argument("--workers", type=int, default=4, help="parallel requests (keep small)")
+    ap.add_argument("--workers", type=int, default=3, help="parallel requests (keep small)")
     ap.add_argument("--rehearsal", action="store_true",
                     help="label the output as test data (e.g. replaying 2022 pages)")
     ap.add_argument("--reveal", type=float,
@@ -657,8 +682,12 @@ def main() -> int:
 
     now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
     pages = collect(args)
-    seats = [build_seat(vc, tc, url, now_iso=now_iso, reveal=args.reveal, seed=args.seed)
-             for url, vc, tc in pages]
+    seats = []
+    for url, vc, tc in pages:
+        seat = build_seat(vc, tc, url, now_iso=now_iso, reveal=args.reveal, seed=args.seed)
+        if seat is None:
+            print(f"WARN could not read the results table for {url}", file=sys.stderr)
+        seats.append(seat)
     seats = carry_forward(seats, args)
     feed = assemble(seats, now_iso=now_iso, rehearsal=args.rehearsal, source="vec-website")
 
