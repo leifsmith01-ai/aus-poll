@@ -509,23 +509,47 @@ def subpage_links(district_html: str, base: str) -> dict:
     return out
 
 
+# Pages that will link to the election's results once the VEC publishes them.
+LANDING_PAGES = [STATE_RESULTS, SITE + "/results", SITE + "/voting/{year}-state-election"]
+
+
+def results_index_candidates(page: str, base: str, year: str) -> list[str]:
+    """Links on a landing page that could be this election's results index: under
+    /results/, naming the year, and not a by-election or council page."""
+    out = []
+    for href in re.findall(r'href="([^"#?]+)"', page):
+        low = href.lower()
+        if (year in low and "/results/" in low and "state-election" in low
+                and "by-election" not in low and "council" not in low
+                and "/results-by-district/" not in low):
+            url = urljoin(base, href)
+            if url not in out:
+                out.append(url)
+    return out
+
+
 def discover(session, index_url: str) -> tuple[str, list[str]]:
     """Find the district pages. If the given index is missing or empty (e.g. the
-    2026 URL differs from the guess), look for the election on the state
-    results landing page."""
+    2026 address differs from the guess), look for the election's results index
+    on the VEC's results and election landing pages."""
     page = fetch(session, index_url)
     links = district_links(page, index_url) if page else []
-    if not links:
-        year = (re.search(r"(20\d\d)", index_url) or [None, "2026"])[1]
-        landing = fetch(session, STATE_RESULTS) or ""
-        for href in re.findall(r'href="([^"#?]+)"', landing):
-            if year in href and "state-election" in href.lower():
-                index_url = urljoin(STATE_RESULTS, href)
-                page = fetch(session, index_url)
-                links = district_links(page, index_url) if page else []
-                if links:
-                    break
-    return index_url, links
+    if links:
+        return index_url, links
+    year = (re.search(r"(20\d\d)", index_url) or [None, "2026"])[1]
+    tried = {index_url}
+    for landing_url in (u.format(year=year) for u in LANDING_PAGES):
+        landing = fetch(session, landing_url) or ""
+        for cand in results_index_candidates(landing, landing_url, year):
+            if cand in tried:
+                continue
+            tried.add(cand)
+            page = fetch(session, cand)
+            links = district_links(page, cand) if page else []
+            if links:
+                print(f"results index found at {cand}", file=sys.stderr)
+                return cand, links
+    return index_url, []
 
 
 def collect(args) -> list[tuple[str, str, str | None]]:

@@ -225,3 +225,36 @@ def test_unknown_district_is_dropped_not_fatal(monkeypatch, tmp_path, capsys):
     assert code == 0
     assert [s["seatId"] for s in json.loads(out.read_text())["seats"]] == ["bass"]
     assert "westernport is not in the 2022 baseline" in capsys.readouterr().err
+
+
+def test_finds_the_results_index_when_the_guessed_address_is_wrong(monkeypatch):
+    """Today the VEC's 2026 landing pages link only to voting information; on the
+    night a results index appears somewhere under /results/. Discovery must ignore
+    the former (no wasted requests) and find the latter wherever it is linked."""
+    index = page("index-2022.html").replace("2022-state-election-results", "2026-results-state-election")
+    pages = {
+        web.STATE_RESULTS: '<a href="/voting/2026-state-election/postal-voting">x</a>'
+                           '<a href="/results/state-election-results/state-by-elections-timeline/'
+                           'nepean-2026-by-election-results">x</a>',
+        web.SITE + "/results": '<a href="/results/state-election/2026-results-state-election">r</a>',
+        web.SITE + "/results/state-election/2026-results-state-election": index,
+    }
+    fetched = []
+
+    def fake_fetch(session, url, tries=3):
+        fetched.append(url)
+        return pages.get(url)
+    monkeypatch.setattr(web, "fetch", fake_fetch)
+    url, links = web.discover(None, web.DEFAULT_INDEX)
+    assert url.endswith("/2026-results-state-election")
+    assert len(links) == 87
+    assert not any("/voting/" in u and u != web.SITE + "/voting/2026-state-election" for u in fetched)
+    assert not any("by-election" in u for u in fetched)
+
+
+def test_discovery_before_results_exist_is_cheap_and_empty(monkeypatch):
+    calls = []
+    monkeypatch.setattr(web, "fetch", lambda s, u, tries=3: calls.append(u) or
+                        '<a href="/voting/2026-state-election/find-candidates">x</a>')
+    url, links = web.discover(None, web.DEFAULT_INDEX)
+    assert links == [] and len(calls) == 4             # the guess + three landing pages
