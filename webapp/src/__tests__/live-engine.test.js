@@ -268,3 +268,28 @@ describe("change log between updates", () => {
     expect(seatEvents(null, cur)).toEqual([]);
   });
 });
+
+describe("chamber layout", () => {
+  it("places every seat exactly once, ordered from left to right", async () => {
+    const { chamberLayout } = await import("../App.jsx");
+    for (const n of [88, 93, 151]) {
+      const pts = chamberLayout(n, n > 100 ? 8 : 6);
+      expect(pts).toHaveLength(n);
+      for (let i = 1; i < n; i++) expect(pts[i].a).toBeLessThanOrEqual(pts[i - 1].a + 1e-9);
+      expect(pts[0].a).toBeCloseTo(Math.PI, 6);
+      expect(pts[n - 1].a).toBeCloseTo(0, 6);
+      expect(new Set(pts.map((p) => `${p.r.toFixed(4)}:${p.a.toFixed(4)}`)).size).toBe(n);
+    }
+  });
+});
+
+describe("tile labels", () => {
+  it("gives every Victorian district a unique, short label", async () => {
+    const { seatAbbrevs } = await import("../App.jsx");
+    const names = Object.values(baseline.seats).map((s) => s.name);
+    const ab = seatAbbrevs(names);
+    expect(new Set(Object.values(ab)).size).toBe(names.length);
+    for (const a of Object.values(ab)) expect(a.length).toBeLessThanOrEqual(4);
+    expect(ab.Mornington).not.toBe(ab.Mordialloc);
+  });
+});
