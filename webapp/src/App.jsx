@@ -5315,7 +5315,10 @@ function LivePage({
             ? <>Could not load live results.<div style={{ fontSize: 12, marginTop: 8, color: "#B91C1C" }}>{error}</div></>
             : status === "loading"
             ? "Loading live results…"
-            : "Polls are not yet open — live results will appear here once counting begins."}
+            : <>Counting has not started yet.<div style={{ fontSize: 12, marginTop: 8 }}>
+                Polls close at 6pm on {LIVE_CONFIG.active.date}. Results will appear here automatically
+                as the Victorian Electoral Commission publishes them — no need to refresh.
+              </div></>}
         </div>
       </div>
     );
@@ -5531,6 +5534,7 @@ function LivePage({
           tonight's final two are the same parties as last time. "Counted" is first-preference
           votes as a share of expected turnout. Win probability follows the two-candidate count,
           which lags first preferences on the night.
+          {meta?.attribution && <> Results data {meta.attribution}.</>}
         </div>
       </div>
     </div>
@@ -6291,7 +6295,8 @@ export default function App() {
   // Fetches the normalized Electoral Commission feed, projects each seat's final
   // outcome via swing vs the prior-election baseline, and quantifies confidence.
   const [liveSnapshotUrl, setLiveSnapshotUrl] = useState(null);
-  const live = useLiveResults(LIVE_CONFIG.active?.sourceId, liveSnapshotUrl);
+  // No source id: the hook picks the sample or, from election night, the live proxy.
+  const live = useLiveResults(null, liveSnapshotUrl);
   const liveProjected = useMemo(
     () => (live.feed ? projectSeats(live.feed, live.baseline, LIVE_CONFIG.active.cfg) : null),
     [live.feed, live.baseline]);

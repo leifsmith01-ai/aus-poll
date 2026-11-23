@@ -25,14 +25,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14545,
-          "pct": 32.7
+          "votes": 14278,
+          "pct": 32.1
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17837,
-          "pct": 40.1
+          "votes": 18104,
+          "pct": 40.7
         },
         {
           "party": "GRN",
@@ -65,12 +65,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 22829,
-          "ALP": 18983
+          "LP": 23206,
+          "ALP": 18606
         },
         "pct": {
-          "LP": 54.6,
-          "ALP": 45.4
+          "LP": 55.5,
+          "ALP": 44.5
         },
         "countedPct": 94.0
       },
@@ -88,14 +88,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14823,
-          "pct": 39.2
+          "votes": 16411,
+          "pct": 43.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13953,
-          "pct": 36.9
+          "votes": 12365,
+          "pct": 32.7
         },
         {
           "party": "GRN",
@@ -128,12 +128,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 18590,
-          "LP": 16955
+          "ALP": 20545,
+          "LP": 15000
         },
         "pct": {
-          "ALP": 52.3,
-          "LP": 47.7
+          "ALP": 57.8,
+          "LP": 42.2
         },
         "countedPct": 94.0
       },
@@ -151,14 +151,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14359,
-          "pct": 37.4
+          "votes": 15281,
+          "pct": 39.8
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15012,
-          "pct": 39.1
+          "votes": 14091,
+          "pct": 36.7
         },
         {
           "party": "GRN",
@@ -191,12 +191,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17396,
-          "LP": 18695
+          "ALP": 18478,
+          "LP": 17612
         },
         "pct": {
-          "ALP": 48.2,
-          "LP": 51.8
+          "ALP": 51.2,
+          "LP": 48.8
         },
         "countedPct": 94.0
       },
@@ -214,14 +214,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16599,
-          "pct": 37.1
+          "votes": 16643,
+          "pct": 37.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 19193,
-          "pct": 42.9
+          "votes": 19149,
+          "pct": 42.8
         },
         {
           "party": "GRN",
@@ -254,12 +254,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20523,
-          "LP": 21532
+          "ALP": 20607,
+          "LP": 21448
         },
         "pct": {
-          "ALP": 48.8,
-          "LP": 51.2
+          "ALP": 49.0,
+          "LP": 51.0
         },
         "countedPct": 94.0
       },
@@ -277,14 +277,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16415,
-          "pct": 36.6
+          "votes": 17177,
+          "pct": 38.3
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18029,
-          "pct": 40.2
+          "votes": 17267,
+          "pct": 38.5
         },
         {
           "party": "GRN",
@@ -317,12 +317,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 21711,
-          "LP": 20447
+          "ALP": 22597,
+          "LP": 19561
         },
         "pct": {
-          "ALP": 51.5,
-          "LP": 48.5
+          "ALP": 53.6,
+          "LP": 46.4
         },
         "countedPct": 94.0
       },
@@ -340,14 +340,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14905,
-          "pct": 40.3
+          "votes": 16162,
+          "pct": 43.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 14757,
-          "pct": 39.9
+          "votes": 13536,
+          "pct": 36.6
         },
         {
           "party": "GRN",
@@ -380,12 +380,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 18043,
-          "LP": 16722
+          "ALP": 19503,
+          "LP": 15262
         },
         "pct": {
-          "ALP": 51.9,
-          "LP": 48.1
+          "ALP": 56.1,
+          "LP": 43.9
         },
         "countedPct": 94.0
       },
@@ -403,26 +403,26 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12535,
-          "pct": 28.3
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 19577,
-          "pct": 44.2
+          "votes": 21260,
+          "pct": 48.0
         },
         {
           "party": "GRN",
           "name": "",
-          "votes": 6777,
-          "pct": 15.3
+          "votes": 177,
+          "pct": 0.4
         },
         {
           "party": "IND",
           "name": "",
-          "votes": 3145,
-          "pct": 7.1
+          "votes": 20596,
+          "pct": 46.5
         },
         {
           "party": "ON",
@@ -440,15 +440,15 @@
       "tcp": {
         "pair": [
           "LP",
-          "ALP"
+          "IND"
         ],
         "votes": {
-          "LP": 25522,
-          "ALP": 16113
+          "LP": 21025,
+          "IND": 20609
         },
         "pct": {
-          "LP": 61.3,
-          "ALP": 38.7
+          "LP": 50.5,
+          "IND": 49.5
         },
         "countedPct": 94.0
       },
@@ -466,14 +466,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16487,
-          "pct": 39.5
+          "votes": 18198,
+          "pct": 43.6
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15109,
-          "pct": 36.2
+          "votes": 13398,
+          "pct": 32.1
         },
         {
           "party": "GRN",
@@ -506,12 +506,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20441,
-          "LP": 18793
+          "ALP": 22756,
+          "LP": 16478
         },
         "pct": {
-          "ALP": 52.1,
-          "LP": 47.9
+          "ALP": 58.0,
+          "LP": 42.0
         },
         "countedPct": 94.0
       },
@@ -529,14 +529,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14882,
-          "pct": 40.1
+          "votes": 16923,
+          "pct": 45.6
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 12841,
-          "pct": 34.6
+          "votes": 10800,
+          "pct": 29.1
         },
         {
           "party": "GRN",
@@ -569,12 +569,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 18978,
-          "LP": 15908
+          "ALP": 21629,
+          "LP": 13256
         },
         "pct": {
-          "ALP": 54.4,
-          "LP": 45.6
+          "ALP": 62.0,
+          "LP": 38.0
         },
         "countedPct": 94.0
       },
@@ -592,14 +592,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16060,
-          "pct": 40.2
+          "votes": 17338,
+          "pct": 43.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15980,
-          "pct": 40.0
+          "votes": 14702,
+          "pct": 36.8
         },
         {
           "party": "GRN",
@@ -632,12 +632,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19302,
-          "LP": 18251
+          "ALP": 21480,
+          "LP": 16073
         },
         "pct": {
-          "ALP": 51.4,
-          "LP": 48.6
+          "ALP": 57.2,
+          "LP": 42.8
         },
         "countedPct": 94.0
       },
@@ -655,14 +655,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 13051,
-          "pct": 33.6
+          "votes": 12352,
+          "pct": 31.8
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 16625,
-          "pct": 42.8
+          "votes": 17324,
+          "pct": 44.6
         },
         {
           "party": "GRN",
@@ -695,12 +695,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 19425,
-          "ALP": 17088
+          "LP": 21652,
+          "ALP": 14861
         },
         "pct": {
-          "LP": 53.2,
-          "ALP": 46.8
+          "LP": 59.3,
+          "ALP": 40.7
         },
         "countedPct": 94.0
       },
@@ -718,14 +718,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12808,
-          "pct": 34.9
+          "votes": 13725,
+          "pct": 37.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 12808,
-          "pct": 34.9
+          "votes": 11890,
+          "pct": 32.4
         },
         {
           "party": "GRN",
@@ -758,12 +758,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 16904,
-          "LP": 17594
+          "ALP": 19111,
+          "LP": 15386
         },
         "pct": {
-          "ALP": 49.0,
-          "LP": 51.0
+          "ALP": 55.4,
+          "LP": 44.6
         },
         "countedPct": 94.0
       },
@@ -781,14 +781,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12349,
-          "pct": 34.6
+          "votes": 11492,
+          "pct": 32.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15525,
-          "pct": 43.5
+          "votes": 16382,
+          "pct": 45.9
         },
         {
           "party": "GRN",
@@ -821,12 +821,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 18116,
-          "ALP": 15432
+          "LP": 19659,
+          "ALP": 13889
         },
         "pct": {
-          "LP": 54.0,
-          "ALP": 46.0
+          "LP": 58.6,
+          "ALP": 41.4
         },
         "countedPct": 94.0
       },
@@ -844,14 +844,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16744,
-          "pct": 41.0
+          "votes": 19154,
+          "pct": 46.9
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 14539,
-          "pct": 35.6
+          "votes": 12129,
+          "pct": 29.7
         },
         {
           "party": "GRN",
@@ -884,12 +884,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20846,
-          "LP": 17544
+          "ALP": 24185,
+          "LP": 14204
         },
         "pct": {
-          "ALP": 54.3,
-          "LP": 45.7
+          "ALP": 63.0,
+          "LP": 37.0
         },
         "countedPct": 94.0
       },
@@ -907,8 +907,8 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14503,
-          "pct": 41.7
+          "votes": 11860,
+          "pct": 34.1
         },
         {
           "party": "LP",
@@ -919,8 +919,8 @@
         {
           "party": "GRN",
           "name": "",
-          "votes": 18155,
-          "pct": 52.2
+          "votes": 20798,
+          "pct": 59.8
         },
         {
           "party": "IND",
@@ -947,12 +947,12 @@
           "ALP"
         ],
         "votes": {
-          "GRN": 18863,
-          "ALP": 13829
+          "GRN": 21283,
+          "ALP": 11410
         },
         "pct": {
-          "GRN": 57.7,
-          "ALP": 42.3
+          "GRN": 65.1,
+          "ALP": 34.9
         },
         "countedPct": 94.0
       },
@@ -970,14 +970,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12536,
-          "pct": 30.2
+          "votes": 11664,
+          "pct": 28.1
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 16936,
-          "pct": 40.8
+          "votes": 17766,
+          "pct": 42.8
         },
         {
           "party": "GRN",
@@ -1010,12 +1010,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 22085,
-          "ALP": 16934
+          "LP": 22865,
+          "ALP": 16154
         },
         "pct": {
-          "LP": 56.6,
-          "ALP": 43.4
+          "LP": 58.6,
+          "ALP": 41.4
         },
         "countedPct": 94.0
       },
@@ -1033,14 +1033,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16640,
-          "pct": 39.9
+          "votes": 18642,
+          "pct": 44.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15180,
-          "pct": 36.4
+          "votes": 13178,
+          "pct": 31.6
         },
         {
           "party": "GRN",
@@ -1073,12 +1073,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 21051,
-          "LP": 18150
+          "ALP": 24462,
+          "LP": 14740
         },
         "pct": {
-          "ALP": 53.7,
-          "LP": 46.3
+          "ALP": 62.4,
+          "LP": 37.6
         },
         "countedPct": 94.0
       },
@@ -1096,14 +1096,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 13980,
-          "pct": 40.0
+          "votes": 15308,
+          "pct": 43.8
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13351,
-          "pct": 38.2
+          "votes": 12022,
+          "pct": 34.4
         },
         {
           "party": "GRN",
@@ -1136,12 +1136,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17970,
-          "LP": 14882
+          "ALP": 16853,
+          "LP": 15999
         },
         "pct": {
-          "ALP": 54.7,
-          "LP": 45.3
+          "ALP": 51.3,
+          "LP": 48.7
         },
         "countedPct": 94.0
       },
@@ -1159,14 +1159,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12385,
-          "pct": 34.3
+          "votes": 12096,
+          "pct": 33.5
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15273,
-          "pct": 42.3
+          "votes": 15562,
+          "pct": 43.1
         },
         {
           "party": "GRN",
@@ -1199,12 +1199,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 20195,
-          "ALP": 13746
+          "LP": 18633,
+          "ALP": 15307
         },
         "pct": {
-          "LP": 59.5,
-          "ALP": 40.5
+          "LP": 54.9,
+          "ALP": 45.1
         },
         "countedPct": 94.0
       },
@@ -1222,14 +1222,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 13324,
-          "pct": 38.5
+          "votes": 14640,
+          "pct": 42.3
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 12667,
-          "pct": 36.6
+          "votes": 11352,
+          "pct": 32.8
         },
         {
           "party": "GRN",
@@ -1262,12 +1262,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17014,
-          "LP": 15518
+          "ALP": 17372,
+          "LP": 15160
         },
         "pct": {
-          "ALP": 52.3,
-          "LP": 47.7
+          "ALP": 53.4,
+          "LP": 46.6
         },
         "countedPct": 94.0
       },
@@ -1285,14 +1285,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14496,
-          "pct": 33.9
+          "votes": 15736,
+          "pct": 36.8
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 14667,
-          "pct": 34.3
+          "votes": 13427,
+          "pct": 31.4
         },
         {
           "party": "GRN",
@@ -1325,12 +1325,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19174,
-          "LP": 21023
+          "ALP": 22148,
+          "LP": 18048
         },
         "pct": {
-          "ALP": 47.7,
-          "LP": 52.3
+          "ALP": 55.1,
+          "LP": 44.9
         },
         "countedPct": 94.0
       },
@@ -1348,14 +1348,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14335,
-          "pct": 36.1
+          "votes": 14136,
+          "pct": 35.6
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17393,
-          "pct": 43.8
+          "votes": 17591,
+          "pct": 44.3
         },
         {
           "party": "GRN",
@@ -1388,12 +1388,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 20380,
-          "ALP": 16946
+          "LP": 20828,
+          "ALP": 16498
         },
         "pct": {
-          "LP": 54.6,
-          "ALP": 45.4
+          "LP": 55.8,
+          "ALP": 44.2
         },
         "countedPct": 94.0
       },
@@ -1411,14 +1411,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17009,
-          "pct": 42.7
+          "votes": 19717,
+          "pct": 49.5
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13583,
-          "pct": 34.1
+          "votes": 10914,
+          "pct": 27.4
         },
         {
           "party": "GRN",
@@ -1451,12 +1451,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20631,
-          "LP": 16812
+          "ALP": 24525,
+          "LP": 12918
         },
         "pct": {
-          "ALP": 55.1,
-          "LP": 44.9
+          "ALP": 65.5,
+          "LP": 34.5
         },
         "countedPct": 94.0
       },
@@ -1474,14 +1474,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 13950,
-          "pct": 30.9
+          "votes": 12821,
+          "pct": 28.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18871,
-          "pct": 41.8
+          "votes": 19999,
+          "pct": 44.3
         },
         {
           "party": "GRN",
@@ -1514,12 +1514,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 23892,
-          "ALP": 18545
+          "LP": 26013,
+          "ALP": 16423
         },
         "pct": {
-          "LP": 56.3,
-          "ALP": 43.7
+          "LP": 61.3,
+          "ALP": 38.7
         },
         "countedPct": 94.0
       },
@@ -1537,14 +1537,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12801,
-          "pct": 36.3
+          "votes": 13929,
+          "pct": 39.5
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 12378,
-          "pct": 35.1
+          "votes": 11249,
+          "pct": 31.9
         },
         {
           "party": "GRN",
@@ -1577,12 +1577,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 16640,
-          "LP": 16508
+          "ALP": 17569,
+          "LP": 15580
         },
         "pct": {
-          "ALP": 50.2,
-          "LP": 49.8
+          "ALP": 53.0,
+          "LP": 47.0
         },
         "countedPct": 94.0
       },
@@ -1600,14 +1600,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17582,
-          "pct": 41.2
+          "votes": 19630,
+          "pct": 46.0
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15704,
-          "pct": 36.8
+          "votes": 13656,
+          "pct": 32.0
         },
         {
           "party": "GRN",
@@ -1640,12 +1640,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20178,
-          "LP": 19937
+          "ALP": 24149,
+          "LP": 15966
         },
         "pct": {
-          "ALP": 50.3,
-          "LP": 49.7
+          "ALP": 60.2,
+          "LP": 39.8
         },
         "countedPct": 94.0
       },
@@ -1663,14 +1663,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16759,
-          "pct": 37.1
+          "votes": 17934,
+          "pct": 39.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17166,
-          "pct": 38.0
+          "votes": 15946,
+          "pct": 35.3
         },
         {
           "party": "GRN",
@@ -1703,12 +1703,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 21783,
-          "LP": 20679
+          "ALP": 21911,
+          "LP": 20552
         },
         "pct": {
-          "ALP": 51.3,
-          "LP": 48.7
+          "ALP": 51.6,
+          "LP": 48.4
         },
         "countedPct": 94.0
       },
@@ -1726,14 +1726,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12902,
-          "pct": 29.4
+          "votes": 11366,
+          "pct": 25.9
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18782,
-          "pct": 42.8
+          "votes": 20362,
+          "pct": 46.4
         },
         {
           "party": "GRN",
@@ -1766,12 +1766,12 @@
           "ALP"
         ],
         "votes": {
-          "NP": 24998,
-          "ALP": 16253
+          "NP": 25658,
+          "ALP": 15593
         },
         "pct": {
-          "NP": 60.6,
-          "ALP": 39.4
+          "NP": 62.2,
+          "ALP": 37.8
         },
         "countedPct": 94.0
       },
@@ -1789,14 +1789,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12820,
-          "pct": 31.9
+          "votes": 12017,
+          "pct": 29.9
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 16759,
-          "pct": 41.7
+          "votes": 17563,
+          "pct": 43.7
         },
         {
           "party": "GRN",
@@ -1829,12 +1829,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 20740,
-          "ALP": 17038
+          "LP": 21760,
+          "ALP": 16018
         },
         "pct": {
-          "LP": 54.9,
-          "ALP": 45.1
+          "LP": 57.6,
+          "ALP": 42.4
         },
         "countedPct": 94.0
       },
@@ -1852,26 +1852,26 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 20093,
-          "pct": 48.7
+          "votes": 20877,
+          "pct": 50.6
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13698,
-          "pct": 33.2
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "GRN",
           "name": "",
-          "votes": 4208,
-          "pct": 10.2
+          "votes": 18030,
+          "pct": 43.7
         },
         {
           "party": "IND",
           "name": "",
-          "votes": 866,
-          "pct": 2.1
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "ON",
@@ -1882,22 +1882,22 @@
         {
           "party": "OTH",
           "name": "",
-          "votes": 1692,
-          "pct": 4.1
+          "votes": 1650,
+          "pct": 4.0
         }
       ],
       "tcp": {
         "pair": [
           "ALP",
-          "LP"
+          "GRN"
         ],
         "votes": {
-          "ALP": 23503,
-          "LP": 15281
+          "ALP": 20943,
+          "GRN": 17840
         },
         "pct": {
-          "ALP": 60.6,
-          "LP": 39.4
+          "ALP": 54.0,
+          "GRN": 46.0
         },
         "countedPct": 94.0
       },
@@ -1915,14 +1915,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14010,
-          "pct": 35.5
+          "votes": 15273,
+          "pct": 38.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13694,
-          "pct": 34.7
+          "votes": 12471,
+          "pct": 31.6
         },
         {
           "party": "GRN",
@@ -1955,12 +1955,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17843,
-          "LP": 19253
+          "ALP": 20329,
+          "LP": 16767
         },
         "pct": {
-          "ALP": 48.1,
-          "LP": 51.9
+          "ALP": 54.8,
+          "LP": 45.2
         },
         "countedPct": 94.0
       },
@@ -1978,14 +1978,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15612,
-          "pct": 41.8
+          "votes": 17816,
+          "pct": 47.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13633,
-          "pct": 36.5
+          "votes": 11429,
+          "pct": 30.6
         },
         {
           "party": "GRN",
@@ -2018,12 +2018,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 18783,
-          "LP": 16326
+          "ALP": 21487,
+          "LP": 13622
         },
         "pct": {
-          "ALP": 53.5,
-          "LP": 46.5
+          "ALP": 61.2,
+          "LP": 38.8
         },
         "countedPct": 94.0
       },
@@ -2041,14 +2041,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 10338,
-          "pct": 25.2
+          "votes": 6564,
+          "pct": 16.0
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 19937,
-          "pct": 48.6
+          "votes": 23711,
+          "pct": 57.8
         },
         {
           "party": "GRN",
@@ -2081,12 +2081,12 @@
           "ALP"
         ],
         "votes": {
-          "NP": 25257,
-          "ALP": 13303
+          "NP": 30656,
+          "ALP": 7905
         },
         "pct": {
-          "NP": 65.5,
-          "ALP": 34.5
+          "NP": 79.5,
+          "ALP": 20.5
         },
         "countedPct": 94.0
       },
@@ -2104,14 +2104,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 11887,
-          "pct": 29.2
+          "votes": 9404,
+          "pct": 23.1
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18930,
-          "pct": 46.5
+          "votes": 21413,
+          "pct": 52.6
         },
         {
           "party": "GRN",
@@ -2144,12 +2144,12 @@
           "ALP"
         ],
         "votes": {
-          "NP": 23917,
-          "ALP": 14350
+          "NP": 26405,
+          "ALP": 11863
         },
         "pct": {
-          "NP": 62.5,
-          "ALP": 37.5
+          "NP": 69.0,
+          "ALP": 31.0
         },
         "countedPct": 94.0
       },
@@ -2167,14 +2167,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14355,
-          "pct": 36.2
+          "votes": 14831,
+          "pct": 37.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15822,
-          "pct": 39.9
+          "votes": 15346,
+          "pct": 38.7
         },
         {
           "party": "GRN",
@@ -2207,12 +2207,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17966,
-          "LP": 19308
+          "ALP": 18898,
+          "LP": 18376
         },
         "pct": {
-          "ALP": 48.2,
-          "LP": 51.8
+          "ALP": 50.7,
+          "LP": 49.3
         },
         "countedPct": 94.0
       },
@@ -2230,14 +2230,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15072,
-          "pct": 38.6
+          "votes": 16204,
+          "pct": 41.5
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15423,
-          "pct": 39.5
+          "votes": 14291,
+          "pct": 36.6
         },
         {
           "party": "GRN",
@@ -2270,12 +2270,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 18645,
-          "LP": 18058
+          "ALP": 20958,
+          "LP": 15746
         },
         "pct": {
-          "ALP": 50.8,
-          "LP": 49.2
+          "ALP": 57.1,
+          "LP": 42.9
         },
         "countedPct": 94.0
       },
@@ -2293,14 +2293,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15458,
-          "pct": 36.1
+          "votes": 15715,
+          "pct": 36.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17771,
-          "pct": 41.5
+          "votes": 17514,
+          "pct": 40.9
         },
         {
           "party": "GRN",
@@ -2333,12 +2333,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20408,
-          "LP": 19844
+          "ALP": 19281,
+          "LP": 20971
         },
         "pct": {
-          "ALP": 50.7,
-          "LP": 49.3
+          "ALP": 47.9,
+          "LP": 52.1
         },
         "countedPct": 94.0
       },
@@ -2356,14 +2356,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12181,
-          "pct": 33.3
+          "votes": 11925,
+          "pct": 32.6
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 14814,
-          "pct": 40.5
+          "votes": 15071,
+          "pct": 41.2
         },
         {
           "party": "GRN",
@@ -2396,12 +2396,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 18705,
-          "ALP": 15679
+          "LP": 19186,
+          "ALP": 15198
         },
         "pct": {
-          "LP": 54.4,
-          "ALP": 45.6
+          "LP": 55.8,
+          "ALP": 44.2
         },
         "countedPct": 94.0
       },
@@ -2419,14 +2419,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14642,
-          "pct": 40.9
+          "votes": 16396,
+          "pct": 45.8
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13210,
-          "pct": 36.9
+          "votes": 11420,
+          "pct": 31.9
         },
         {
           "party": "GRN",
@@ -2459,12 +2459,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17600,
-          "LP": 16052
+          "ALP": 19686,
+          "LP": 13966
         },
         "pct": {
-          "ALP": 52.3,
-          "LP": 47.7
+          "ALP": 58.5,
+          "LP": 41.5
         },
         "countedPct": 94.0
       },
@@ -2482,14 +2482,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16741,
-          "pct": 42.7
+          "votes": 19329,
+          "pct": 49.3
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 14114,
-          "pct": 36.0
+          "votes": 11566,
+          "pct": 29.5
         },
         {
           "party": "GRN",
@@ -2522,12 +2522,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19864,
-          "LP": 16990
+          "ALP": 23549,
+          "LP": 13304
         },
         "pct": {
-          "ALP": 53.9,
-          "LP": 46.1
+          "ALP": 63.9,
+          "LP": 36.1
         },
         "countedPct": 94.0
       },
@@ -2545,14 +2545,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15379,
-          "pct": 33.6
+          "votes": 14692,
+          "pct": 32.1
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 19361,
-          "pct": 42.3
+          "votes": 20047,
+          "pct": 43.8
         },
         {
           "party": "GRN",
@@ -2585,12 +2585,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 23491,
-          "ALP": 19533
+          "LP": 24222,
+          "ALP": 18801
         },
         "pct": {
-          "LP": 54.6,
-          "ALP": 45.4
+          "LP": 56.3,
+          "ALP": 43.7
         },
         "countedPct": 94.0
       },
@@ -2608,14 +2608,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15343,
-          "pct": 39.9
+          "votes": 17458,
+          "pct": 45.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13805,
-          "pct": 35.9
+          "votes": 11690,
+          "pct": 30.4
         },
         {
           "party": "GRN",
@@ -2648,12 +2648,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19808,
-          "LP": 16338
+          "ALP": 21977,
+          "LP": 14169
         },
         "pct": {
-          "ALP": 54.8,
-          "LP": 45.2
+          "ALP": 60.8,
+          "LP": 39.2
         },
         "countedPct": 94.0
       },
@@ -2671,14 +2671,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 13800,
-          "pct": 38.3
+          "votes": 15818,
+          "pct": 43.9
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 11891,
-          "pct": 33.0
+          "votes": 9873,
+          "pct": 27.4
         },
         {
           "party": "GRN",
@@ -2711,12 +2711,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 18425,
-          "LP": 15445
+          "ALP": 20932,
+          "LP": 12938
         },
         "pct": {
-          "ALP": 54.4,
-          "LP": 45.6
+          "ALP": 61.8,
+          "LP": 38.2
         },
         "countedPct": 94.0
       },
@@ -2734,14 +2734,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17320,
-          "pct": 45.2
+          "votes": 20232,
+          "pct": 52.8
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13871,
-          "pct": 36.2
+          "votes": 10959,
+          "pct": 28.6
         },
         {
           "party": "GRN",
@@ -2774,12 +2774,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19774,
-          "LP": 16245
+          "ALP": 23484,
+          "LP": 12535
         },
         "pct": {
-          "ALP": 54.9,
-          "LP": 45.1
+          "ALP": 65.2,
+          "LP": 34.8
         },
         "countedPct": 94.0
       },
@@ -2797,14 +2797,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 10237,
-          "pct": 28.2
+          "votes": 7115,
+          "pct": 19.6
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18514,
-          "pct": 51.0
+          "votes": 21635,
+          "pct": 59.6
         },
         {
           "party": "GRN",
@@ -2837,12 +2837,12 @@
           "ALP"
         ],
         "votes": {
-          "NP": 21839,
-          "ALP": 12284
+          "NP": 25490,
+          "ALP": 8633
         },
         "pct": {
-          "NP": 64.0,
-          "ALP": 36.0
+          "NP": 74.7,
+          "ALP": 25.3
         },
         "countedPct": 94.0
       },
@@ -2860,14 +2860,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 13647,
-          "pct": 39.1
+          "votes": 14973,
+          "pct": 42.9
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13158,
-          "pct": 37.7
+          "votes": 11832,
+          "pct": 33.9
         },
         {
           "party": "GRN",
@@ -2900,12 +2900,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 16962,
-          "LP": 15847
+          "ALP": 18668,
+          "LP": 14141
         },
         "pct": {
-          "ALP": 51.7,
-          "LP": 48.3
+          "ALP": 56.9,
+          "LP": 43.1
         },
         "countedPct": 94.0
       },
@@ -2923,14 +2923,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 13263,
-          "pct": 34.4
+          "votes": 12029,
+          "pct": 31.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18120,
-          "pct": 47.0
+          "votes": 19316,
+          "pct": 50.1
         },
         {
           "party": "GRN",
@@ -2963,12 +2963,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 20549,
-          "ALP": 15692
+          "LP": 22723,
+          "ALP": 13518
         },
         "pct": {
-          "LP": 56.7,
-          "ALP": 43.3
+          "LP": 62.7,
+          "ALP": 37.3
         },
         "countedPct": 94.0
       },
@@ -2986,8 +2986,8 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 18149,
-          "pct": 41.8
+          "votes": 16108,
+          "pct": 37.1
         },
         {
           "party": "LP",
@@ -2998,8 +2998,8 @@
         {
           "party": "GRN",
           "name": "",
-          "votes": 22187,
-          "pct": 51.1
+          "votes": 24228,
+          "pct": 55.8
         },
         {
           "party": "IND",
@@ -3026,12 +3026,12 @@
           "ALP"
         ],
         "votes": {
-          "GRN": 22774,
-          "ALP": 18040
+          "GRN": 24815,
+          "ALP": 15999
         },
         "pct": {
-          "GRN": 55.8,
-          "ALP": 44.2
+          "GRN": 60.8,
+          "ALP": 39.2
         },
         "countedPct": 94.0
       },
@@ -3049,14 +3049,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16065,
-          "pct": 37.7
+          "votes": 16832,
+          "pct": 39.5
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 16790,
-          "pct": 39.4
+          "votes": 16022,
+          "pct": 37.6
         },
         {
           "party": "GRN",
@@ -3089,12 +3089,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19027,
-          "LP": 21030
+          "ALP": 19547,
+          "LP": 20509
         },
         "pct": {
-          "ALP": 47.5,
-          "LP": 52.5
+          "ALP": 48.8,
+          "LP": 51.2
         },
         "countedPct": 94.0
       },
@@ -3112,26 +3112,26 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14352,
-          "pct": 33.2
+          "votes": 86,
+          "pct": 0.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 19756,
-          "pct": 45.7
+          "votes": 20966,
+          "pct": 48.5
         },
         {
           "party": "GRN",
           "name": "",
-          "votes": 4193,
-          "pct": 9.7
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "IND",
           "name": "",
-          "votes": 2594,
-          "pct": 6.0
+          "votes": 19885,
+          "pct": 46.0
         },
         {
           "party": "ON",
@@ -3149,15 +3149,15 @@
       "tcp": {
         "pair": [
           "NP",
-          "ALP"
+          "IND"
         ],
         "votes": {
-          "NP": 24422,
-          "ALP": 16213
+          "NP": 20887,
+          "IND": 19749
         },
         "pct": {
-          "NP": 60.1,
-          "ALP": 39.9
+          "NP": 51.4,
+          "IND": 48.6
         },
         "countedPct": 94.0
       },
@@ -3175,14 +3175,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15760,
-          "pct": 42.4
+          "votes": 17544,
+          "pct": 47.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 14533,
-          "pct": 39.1
+          "votes": 12786,
+          "pct": 34.4
         },
         {
           "party": "GRN",
@@ -3215,12 +3215,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17749,
-          "LP": 17190
+          "ALP": 20754,
+          "LP": 14185
         },
         "pct": {
-          "ALP": 50.8,
-          "LP": 49.2
+          "ALP": 59.4,
+          "LP": 40.6
         },
         "countedPct": 94.0
       },
@@ -3238,14 +3238,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14445,
-          "pct": 40.4
+          "votes": 15518,
+          "pct": 43.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 14481,
-          "pct": 40.5
+          "votes": 13372,
+          "pct": 37.4
         },
         {
           "party": "GRN",
@@ -3278,12 +3278,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17578,
-          "LP": 16032
+          "ALP": 18653,
+          "LP": 14956
         },
         "pct": {
-          "ALP": 52.3,
-          "LP": 47.7
+          "ALP": 55.5,
+          "LP": 44.5
         },
         "countedPct": 94.0
       },
@@ -3301,14 +3301,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16027,
-          "pct": 38.5
+          "votes": 17359,
+          "pct": 41.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 16152,
-          "pct": 38.8
+          "votes": 14820,
+          "pct": 35.6
         },
         {
           "party": "GRN",
@@ -3341,12 +3341,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20309,
-          "LP": 18822
+          "ALP": 21953,
+          "LP": 17179
         },
         "pct": {
-          "ALP": 51.9,
-          "LP": 48.1
+          "ALP": 56.1,
+          "LP": 43.9
         },
         "countedPct": 94.0
       },
@@ -3364,32 +3364,32 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12616,
-          "pct": 33.1
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17838,
-          "pct": 46.8
+          "votes": 18524,
+          "pct": 48.6
         },
         {
           "party": "GRN",
           "name": "",
-          "votes": 4574,
-          "pct": 12.0
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "IND",
           "name": "",
-          "votes": 1410,
-          "pct": 3.7
+          "votes": 17876,
+          "pct": 46.9
         },
         {
           "party": "ON",
           "name": "",
-          "votes": 648,
-          "pct": 1.7
+          "votes": 610,
+          "pct": 1.6
         },
         {
           "party": "OTH",
@@ -3401,15 +3401,15 @@
       "tcp": {
         "pair": [
           "LP",
-          "ALP"
+          "IND"
         ],
         "votes": {
-          "LP": 20136,
-          "ALP": 15693
+          "LP": 18094,
+          "IND": 17735
         },
         "pct": {
-          "LP": 56.2,
-          "ALP": 43.8
+          "LP": 50.5,
+          "IND": 49.5
         },
         "countedPct": 94.0
       },
@@ -3427,14 +3427,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14340,
-          "pct": 36.5
+          "votes": 13633,
+          "pct": 34.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17993,
-          "pct": 45.8
+          "votes": 18701,
+          "pct": 47.6
         },
         {
           "party": "GRN",
@@ -3467,12 +3467,12 @@
           "ALP"
         ],
         "votes": {
-          "NP": 20053,
-          "ALP": 16877
+          "NP": 21382,
+          "ALP": 15547
         },
         "pct": {
-          "NP": 54.3,
-          "ALP": 45.7
+          "NP": 57.9,
+          "ALP": 42.1
         },
         "countedPct": 94.0
       },
@@ -3490,14 +3490,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15996,
-          "pct": 40.8
+          "votes": 17760,
+          "pct": 45.3
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15055,
-          "pct": 38.4
+          "votes": 13291,
+          "pct": 33.9
         },
         {
           "party": "GRN",
@@ -3530,12 +3530,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 18390,
-          "LP": 18464
+          "ALP": 20970,
+          "LP": 15884
         },
         "pct": {
-          "ALP": 49.9,
-          "LP": 50.1
+          "ALP": 56.9,
+          "LP": 43.1
         },
         "countedPct": 94.0
       },
@@ -3553,14 +3553,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 9665,
-          "pct": 26.7
+          "votes": 6407,
+          "pct": 17.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17955,
-          "pct": 49.6
+          "votes": 21213,
+          "pct": 58.6
         },
         {
           "party": "GRN",
@@ -3593,12 +3593,12 @@
           "ALP"
         ],
         "votes": {
-          "NP": 21947,
-          "ALP": 12080
+          "NP": 26405,
+          "ALP": 7622
         },
         "pct": {
-          "NP": 64.5,
-          "ALP": 35.5
+          "NP": 77.6,
+          "ALP": 22.4
         },
         "countedPct": 94.0
       },
@@ -3616,14 +3616,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17658,
-          "pct": 39.2
+          "votes": 19099,
+          "pct": 42.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17297,
-          "pct": 38.4
+          "votes": 15856,
+          "pct": 35.2
         },
         {
           "party": "GRN",
@@ -3656,12 +3656,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 21637,
-          "LP": 20705
+          "ALP": 24601,
+          "LP": 17741
         },
         "pct": {
-          "ALP": 51.1,
-          "LP": 48.9
+          "ALP": 58.1,
+          "LP": 41.9
         },
         "countedPct": 94.0
       },
@@ -3679,14 +3679,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 12881,
-          "pct": 37.7
+          "votes": 13941,
+          "pct": 40.8
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 12779,
-          "pct": 37.4
+          "votes": 11720,
+          "pct": 34.3
         },
         {
           "party": "GRN",
@@ -3719,12 +3719,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 16155,
-          "LP": 15963
+          "ALP": 17344,
+          "LP": 14774
         },
         "pct": {
-          "ALP": 50.3,
-          "LP": 49.7
+          "ALP": 54.0,
+          "LP": 46.0
         },
         "countedPct": 94.0
       },
@@ -3742,14 +3742,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 11410,
-          "pct": 32.5
+          "votes": 10603,
+          "pct": 30.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15448,
-          "pct": 44.0
+          "votes": 16255,
+          "pct": 46.3
         },
         {
           "party": "GRN",
@@ -3782,12 +3782,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 19009,
-          "ALP": 13993
+          "LP": 20198,
+          "ALP": 12805
         },
         "pct": {
-          "LP": 57.6,
-          "ALP": 42.4
+          "LP": 61.2,
+          "ALP": 38.8
         },
         "countedPct": 94.0
       },
@@ -3805,14 +3805,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17609,
-          "pct": 39.0
+          "votes": 18783,
+          "pct": 41.6
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17970,
-          "pct": 39.8
+          "votes": 16796,
+          "pct": 37.2
         },
         {
           "party": "GRN",
@@ -3845,12 +3845,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 22367,
-          "LP": 20075
+          "ALP": 22706,
+          "LP": 19736
         },
         "pct": {
-          "ALP": 52.7,
-          "LP": 47.3
+          "ALP": 53.5,
+          "LP": 46.5
         },
         "countedPct": 94.0
       },
@@ -3868,26 +3868,26 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17037,
-          "pct": 37.5
+          "votes": 21444,
+          "pct": 47.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18037,
-          "pct": 39.7
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "GRN",
           "name": "",
-          "votes": 5179,
-          "pct": 11.4
+          "votes": 21035,
+          "pct": 46.3
         },
         {
           "party": "IND",
           "name": "",
-          "votes": 2181,
-          "pct": 4.8
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "ON",
@@ -3905,15 +3905,15 @@
       "tcp": {
         "pair": [
           "ALP",
-          "LP"
+          "GRN"
         ],
         "votes": {
-          "ALP": 20584,
-          "LP": 22122
+          "ALP": 22250,
+          "GRN": 20456
         },
         "pct": {
-          "ALP": 48.2,
-          "LP": 51.8
+          "ALP": 52.1,
+          "GRN": 47.9
         },
         "countedPct": 94.0
       },
@@ -3931,14 +3931,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14582,
-          "pct": 40.6
+          "votes": 16486,
+          "pct": 45.9
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13217,
-          "pct": 36.8
+          "votes": 11314,
+          "pct": 31.5
         },
         {
           "party": "GRN",
@@ -3971,12 +3971,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17556,
-          "LP": 16206
+          "ALP": 20426,
+          "LP": 13336
         },
         "pct": {
-          "ALP": 52.0,
-          "LP": 48.0
+          "ALP": 60.5,
+          "LP": 39.5
         },
         "countedPct": 94.0
       },
@@ -3994,14 +3994,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 11867,
-          "pct": 26.5
+          "votes": 9046,
+          "pct": 20.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 19794,
-          "pct": 44.2
+          "votes": 22571,
+          "pct": 50.4
         },
         {
           "party": "GRN",
@@ -4034,12 +4034,12 @@
           "ALP"
         ],
         "votes": {
-          "NP": 26142,
-          "ALP": 15954
+          "NP": 29551,
+          "ALP": 12545
         },
         "pct": {
-          "NP": 62.1,
-          "ALP": 37.9
+          "NP": 70.2,
+          "ALP": 29.8
         },
         "countedPct": 94.0
       },
@@ -4057,14 +4057,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15877,
-          "pct": 36.3
+          "votes": 15920,
+          "pct": 36.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18588,
-          "pct": 42.5
+          "votes": 18544,
+          "pct": 42.4
         },
         {
           "party": "GRN",
@@ -4097,12 +4097,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19446,
-          "LP": 21666
+          "ALP": 19816,
+          "LP": 21296
         },
         "pct": {
-          "ALP": 47.3,
-          "LP": 52.7
+          "ALP": 48.2,
+          "LP": 51.8
         },
         "countedPct": 94.0
       },
@@ -4120,26 +4120,26 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 18418,
-          "pct": 46.9
+          "votes": 19360,
+          "pct": 49.3
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13273,
-          "pct": 33.8
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "GRN",
           "name": "",
-          "votes": 3848,
-          "pct": 9.8
+          "votes": 18064,
+          "pct": 46.0
         },
         {
           "party": "IND",
           "name": "",
-          "votes": 1885,
-          "pct": 4.8
+          "votes": 39,
+          "pct": 0.1
         },
         {
           "party": "ON",
@@ -4157,15 +4157,15 @@
       "tcp": {
         "pair": [
           "ALP",
-          "LP"
+          "GRN"
         ],
         "votes": {
-          "ALP": 21447,
-          "LP": 15467
+          "ALP": 20007,
+          "GRN": 16907
         },
         "pct": {
-          "ALP": 58.1,
-          "LP": 41.9
+          "ALP": 54.2,
+          "GRN": 45.8
         },
         "countedPct": 94.0
       },
@@ -4183,14 +4183,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15313,
-          "pct": 39.8
+          "votes": 16621,
+          "pct": 43.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15120,
-          "pct": 39.3
+          "votes": 13812,
+          "pct": 35.9
         },
         {
           "party": "GRN",
@@ -4223,12 +4223,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 18734,
-          "LP": 17432
+          "ALP": 18951,
+          "LP": 17215
         },
         "pct": {
-          "ALP": 51.8,
-          "LP": 48.2
+          "ALP": 52.4,
+          "LP": 47.6
         },
         "countedPct": 94.0
       },
@@ -4246,14 +4246,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14888,
-          "pct": 35.3
+          "votes": 14593,
+          "pct": 34.6
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18094,
-          "pct": 42.9
+          "votes": 18389,
+          "pct": 43.6
         },
         {
           "party": "GRN",
@@ -4286,12 +4286,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 21052,
-          "ALP": 18594
+          "LP": 21092,
+          "ALP": 18555
         },
         "pct": {
-          "LP": 53.1,
-          "ALP": 46.9
+          "LP": 53.2,
+          "ALP": 46.8
         },
         "countedPct": 94.0
       },
@@ -4315,14 +4315,14 @@
         {
           "party": "LP",
           "name": "",
-          "votes": 16492,
-          "pct": 46.0
+          "votes": 12907,
+          "pct": 36.0
         },
         {
           "party": "GRN",
           "name": "",
-          "votes": 16850,
-          "pct": 47.0
+          "votes": 20436,
+          "pct": 57.0
         },
         {
           "party": "IND",
@@ -4349,12 +4349,12 @@
           "LP"
         ],
         "votes": {
-          "GRN": 17963,
-          "LP": 15738
+          "GRN": 21299,
+          "LP": 12402
         },
         "pct": {
-          "GRN": 53.3,
-          "LP": 46.7
+          "GRN": 63.2,
+          "LP": 36.8
         },
         "countedPct": 94.0
       },
@@ -4372,32 +4372,32 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15924,
-          "pct": 40.3
+          "votes": 18730,
+          "pct": 47.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 12605,
-          "pct": 31.9
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "GRN",
           "name": "",
-          "votes": 5809,
-          "pct": 14.7
+          "votes": 17228,
+          "pct": 43.6
         },
         {
           "party": "IND",
           "name": "",
-          "votes": 1541,
-          "pct": 3.9
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "ON",
           "name": "",
-          "votes": 1581,
-          "pct": 4.0
+          "votes": 1541,
+          "pct": 3.9
         },
         {
           "party": "OTH",
@@ -4409,15 +4409,15 @@
       "tcp": {
         "pair": [
           "ALP",
-          "LP"
+          "GRN"
         ],
         "votes": {
-          "ALP": 20020,
-          "LP": 17123
+          "ALP": 19203,
+          "GRN": 17940
         },
         "pct": {
-          "ALP": 53.9,
-          "LP": 46.1
+          "ALP": 51.7,
+          "GRN": 48.3
         },
         "countedPct": 94.0
       },
@@ -4435,8 +4435,8 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15987,
-          "pct": 44.8
+          "votes": 14060,
+          "pct": 39.4
         },
         {
           "party": "LP",
@@ -4447,8 +4447,8 @@
         {
           "party": "GRN",
           "name": "",
-          "votes": 17164,
-          "pct": 48.1
+          "votes": 19091,
+          "pct": 53.5
         },
         {
           "party": "IND",
@@ -4475,12 +4475,12 @@
           "ALP"
         ],
         "votes": {
-          "GRN": 18281,
-          "ALP": 15262
+          "GRN": 20059,
+          "ALP": 13485
         },
         "pct": {
-          "GRN": 54.5,
-          "ALP": 45.5
+          "GRN": 59.8,
+          "ALP": 40.2
         },
         "countedPct": 94.0
       },
@@ -4498,14 +4498,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16633,
-          "pct": 39.1
+          "votes": 17866,
+          "pct": 42.0
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 16803,
-          "pct": 39.5
+          "votes": 15527,
+          "pct": 36.5
         },
         {
           "party": "GRN",
@@ -4538,12 +4538,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19953,
-          "LP": 20033
+          "ALP": 22592,
+          "LP": 17394
         },
         "pct": {
-          "ALP": 49.9,
-          "LP": 50.1
+          "ALP": 56.5,
+          "LP": 43.5
         },
         "countedPct": 94.0
       },
@@ -4561,14 +4561,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16301,
-          "pct": 35.8
+          "votes": 16848,
+          "pct": 37.0
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18123,
-          "pct": 39.8
+          "votes": 17576,
+          "pct": 38.6
         },
         {
           "party": "GRN",
@@ -4601,12 +4601,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19346,
-          "LP": 23455
+          "ALP": 21529,
+          "LP": 21273
         },
         "pct": {
-          "ALP": 45.2,
-          "LP": 54.8
+          "ALP": 50.3,
+          "LP": 49.7
         },
         "countedPct": 94.0
       },
@@ -4624,14 +4624,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 13010,
-          "pct": 35.5
+          "votes": 12460,
+          "pct": 34.0
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 16382,
-          "pct": 44.7
+          "votes": 16931,
+          "pct": 46.2
         },
         {
           "party": "GRN",
@@ -4664,12 +4664,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 18534,
-          "ALP": 15915
+          "LP": 19533,
+          "ALP": 14916
         },
         "pct": {
-          "LP": 53.8,
-          "ALP": 46.2
+          "LP": 56.7,
+          "ALP": 43.3
         },
         "countedPct": 94.0
       },
@@ -4687,14 +4687,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 11880,
-          "pct": 32.2
+          "votes": 11216,
+          "pct": 30.4
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15717,
-          "pct": 42.6
+          "votes": 16381,
+          "pct": 44.4
         },
         {
           "party": "GRN",
@@ -4727,12 +4727,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 18589,
-          "ALP": 16092
+          "LP": 19456,
+          "ALP": 15225
         },
         "pct": {
-          "LP": 53.6,
-          "ALP": 46.4
+          "LP": 56.1,
+          "ALP": 43.9
         },
         "countedPct": 94.0
       },
@@ -4750,26 +4750,26 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14976,
-          "pct": 36.4
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 19584,
-          "pct": 47.6
+          "votes": 22217,
+          "pct": 54.0
         },
         {
           "party": "GRN",
           "name": "",
-          "votes": 3250,
-          "pct": 7.9
+          "votes": 0,
+          "pct": 0.0
         },
         {
           "party": "IND",
           "name": "",
-          "votes": 782,
-          "pct": 1.9
+          "votes": 16375,
+          "pct": 39.8
         },
         {
           "party": "ON",
@@ -4787,15 +4787,15 @@
       "tcp": {
         "pair": [
           "NP",
-          "ALP"
+          "IND"
         ],
         "votes": {
-          "NP": 21310,
-          "ALP": 17365
+          "NP": 22509,
+          "IND": 16166
         },
         "pct": {
-          "NP": 55.1,
-          "ALP": 44.9
+          "NP": 58.2,
+          "IND": 41.8
         },
         "countedPct": 94.0
       },
@@ -4813,14 +4813,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17722,
-          "pct": 39.4
+          "votes": 19431,
+          "pct": 43.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17182,
-          "pct": 38.2
+          "votes": 15518,
+          "pct": 34.5
         },
         {
           "party": "GRN",
@@ -4853,12 +4853,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 21943,
-          "LP": 20337
+          "ALP": 24776,
+          "LP": 17504
         },
         "pct": {
-          "ALP": 51.9,
-          "LP": 48.1
+          "ALP": 58.6,
+          "LP": 41.4
         },
         "countedPct": 94.0
       },
@@ -4876,14 +4876,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15543,
-          "pct": 34.6
+          "votes": 14060,
+          "pct": 31.3
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 20933,
-          "pct": 46.6
+          "votes": 22416,
+          "pct": 49.9
         },
         {
           "party": "GRN",
@@ -4916,12 +4916,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 23266,
-          "ALP": 18959
+          "LP": 24449,
+          "ALP": 17777
         },
         "pct": {
-          "LP": 55.1,
-          "ALP": 44.9
+          "LP": 57.9,
+          "ALP": 42.1
         },
         "countedPct": 94.0
       },
@@ -4939,14 +4939,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14102,
-          "pct": 39.0
+          "votes": 15439,
+          "pct": 42.7
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13849,
-          "pct": 38.3
+          "votes": 12511,
+          "pct": 34.6
         },
         {
           "party": "GRN",
@@ -4979,12 +4979,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17946,
-          "LP": 16043
+          "ALP": 18796,
+          "LP": 15193
         },
         "pct": {
-          "ALP": 52.8,
-          "LP": 47.2
+          "ALP": 55.3,
+          "LP": 44.7
         },
         "countedPct": 94.0
       },
@@ -5002,14 +5002,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17038,
-          "pct": 38.4
+          "votes": 18147,
+          "pct": 40.9
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 17482,
-          "pct": 39.4
+          "votes": 16373,
+          "pct": 36.9
         },
         {
           "party": "GRN",
@@ -5042,12 +5042,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20812,
-          "LP": 20896
+          "ALP": 22314,
+          "LP": 19394
         },
         "pct": {
-          "ALP": 49.9,
-          "LP": 50.1
+          "ALP": 53.5,
+          "LP": 46.5
         },
         "countedPct": 94.0
       },
@@ -5065,14 +5065,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 15888,
-          "pct": 39.8
+          "votes": 17285,
+          "pct": 43.3
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15489,
-          "pct": 38.8
+          "votes": 14091,
+          "pct": 35.3
         },
         {
           "party": "GRN",
@@ -5105,12 +5105,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 19963,
-          "LP": 17561
+          "ALP": 20263,
+          "LP": 17261
         },
         "pct": {
-          "ALP": 53.2,
-          "LP": 46.8
+          "ALP": 54.0,
+          "LP": 46.0
         },
         "countedPct": 94.0
       },
@@ -5128,14 +5128,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16614,
-          "pct": 37.6
+          "votes": 18514,
+          "pct": 41.9
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15067,
-          "pct": 34.1
+          "votes": 13167,
+          "pct": 29.8
         },
         {
           "party": "GRN",
@@ -5168,12 +5168,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 23467,
-          "LP": 18067
+          "ALP": 24463,
+          "LP": 17070
         },
         "pct": {
-          "ALP": 56.5,
-          "LP": 43.5
+          "ALP": 58.9,
+          "LP": 41.1
         },
         "countedPct": 94.0
       },
@@ -5191,14 +5191,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17025,
-          "pct": 41.5
+          "votes": 19404,
+          "pct": 47.3
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 14153,
-          "pct": 34.5
+          "votes": 11733,
+          "pct": 28.6
         },
         {
           "party": "GRN",
@@ -5231,12 +5231,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20746,
-          "LP": 17815
+          "ALP": 23985,
+          "LP": 14576
         },
         "pct": {
-          "ALP": 53.8,
-          "LP": 46.2
+          "ALP": 62.2,
+          "LP": 37.8
         },
         "countedPct": 94.0
       },
@@ -5254,14 +5254,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14854,
-          "pct": 32.8
+          "votes": 14129,
+          "pct": 31.2
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 19201,
-          "pct": 42.4
+          "votes": 19926,
+          "pct": 44.0
         },
         {
           "party": "GRN",
@@ -5294,12 +5294,12 @@
           "ALP"
         ],
         "votes": {
-          "LP": 23413,
-          "ALP": 19156
+          "LP": 24264,
+          "ALP": 18305
         },
         "pct": {
-          "LP": 55.0,
-          "ALP": 45.0
+          "LP": 57.0,
+          "ALP": 43.0
         },
         "countedPct": 94.0
       },
@@ -5317,14 +5317,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16878,
-          "pct": 40.0
+          "votes": 18523,
+          "pct": 43.9
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 15105,
-          "pct": 35.8
+          "votes": 13460,
+          "pct": 31.9
         },
         {
           "party": "GRN",
@@ -5357,12 +5357,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20624,
-          "LP": 19038
+          "ALP": 23520,
+          "LP": 16143
         },
         "pct": {
-          "ALP": 52.0,
-          "LP": 48.0
+          "ALP": 59.3,
+          "LP": 40.7
         },
         "countedPct": 94.0
       },
@@ -5380,14 +5380,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 14171,
-          "pct": 39.3
+          "votes": 15721,
+          "pct": 43.6
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 13450,
-          "pct": 37.3
+          "votes": 11899,
+          "pct": 33.0
         },
         {
           "party": "GRN",
@@ -5420,12 +5420,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 17557,
-          "LP": 16337
+          "ALP": 19930,
+          "LP": 13965
         },
         "pct": {
-          "ALP": 51.8,
-          "LP": 48.2
+          "ALP": 58.8,
+          "LP": 41.2
         },
         "countedPct": 94.0
       },
@@ -5443,14 +5443,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 16442,
-          "pct": 40.6
+          "votes": 18548,
+          "pct": 45.8
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 14538,
-          "pct": 35.9
+          "votes": 12433,
+          "pct": 30.7
         },
         {
           "party": "GRN",
@@ -5483,12 +5483,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20214,
-          "LP": 17854
+          "ALP": 24249,
+          "LP": 13818
         },
         "pct": {
-          "ALP": 53.1,
-          "LP": 46.9
+          "ALP": 63.7,
+          "LP": 36.3
         },
         "countedPct": 94.0
       },
@@ -5506,14 +5506,14 @@
         {
           "party": "ALP",
           "name": "",
-          "votes": 17540,
-          "pct": 39.2
+          "votes": 18256,
+          "pct": 40.8
         },
         {
           "party": "LP",
           "name": "",
-          "votes": 18570,
-          "pct": 41.5
+          "votes": 17854,
+          "pct": 39.9
         },
         {
           "party": "GRN",
@@ -5546,12 +5546,12 @@
           "LP"
         ],
         "votes": {
-          "ALP": 20820,
-          "LP": 21241
+          "ALP": 21577,
+          "LP": 20484
         },
         "pct": {
-          "ALP": 49.5,
-          "LP": 50.5
+          "ALP": 51.3,
+          "LP": 48.7
         },
         "countedPct": 94.0
       },

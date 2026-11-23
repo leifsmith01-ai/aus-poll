@@ -43,6 +43,13 @@ const DECLARED_SIGMA = 1e-6;
 const sigAlpCoal = (s) => (s.declared ? DECLARED_SIGMA : seatSigma(s.countedFraction));
 const sigOther = (s) => (s.declared ? DECLARED_SIGMA : nonAlpCoalSigma(s.countedFraction));
 
+// P(Labor wins) for a Labor-v-Coalition seat. A declared seat follows its declared winner,
+// which can differ from the sign of a near-50 indicative 2CP.
+function alpProb(s, delta, sig) {
+  if (s.declared) return s.winnerGroup === "alp" ? 1 : 0;
+  return clamp01(normCDF((s.projAlp2pp - 50 + delta) / sig));
+}
+
 // Per-seat winner-margin sigma, driven by how much of THIS seat is counted.
 function seatSigma(f) {
   const r = Math.max(0, 1 - f);
@@ -80,13 +87,13 @@ export function computeLiveConfidence(projected, cfg) {
   const alpWinProbs = {};  // P(ALP wins the seat)
   for (const s of alpCoal) {
     const sig = sigAlpCoal(s);
-    const pAlp = clamp01(normCDF((s.projAlp2pp - 50) / sig));
+    const pAlp = alpProb(s, 0, sig);
     alpWinProbs[s.seatId] = round3(pAlp);
     seatWinProbs[s.seatId] = round3(s.winnerGroup === "alp" ? pAlp : 1 - pAlp);
   }
   for (const s of others) {
     const sig = sigOther(s);
-    const pHold = clamp01(normCDF((s.leaderPct - 50) / sig));
+    const pHold = s.declared ? 1 : clamp01(normCDF((s.leaderPct - 50) / sig));
     seatWinProbs[s.seatId] = round3(pHold);
     // ALP win prob for an "other" seat: pHold if ALP leads, (1-pHold) if ALP is runner-up.
     const runnerUp = s.pair[0] === s.winnerParty ? s.pair[1] : s.pair[0];
@@ -132,7 +139,7 @@ export function computeLiveConfidence(projected, cfg) {
     for (const s of alpCoal) {
       const sig = sigAlpCoal(s);
       // A declared seat is settled — the statewide "what if" shift does not move it.
-      const pAlp = clamp01(normCDF((s.projAlp2pp - 50 + (s.declared ? 0 : delta)) / sig));
+      const pAlp = alpProb(s, delta, sig);
       alpCount += pAlp;
       coalCount += 1 - pAlp;
     }
@@ -172,7 +179,7 @@ function expectedFromAlpCoal(alpCoal, which) {
   let n = 0;
   for (const s of alpCoal) {
     const sig = sigAlpCoal(s);
-    const pAlp = clamp01(normCDF((s.projAlp2pp - 50) / sig));
+    const pAlp = alpProb(s, 0, sig);
     n += which === "alp" ? pAlp : 1 - pAlp;
   }
   return n;

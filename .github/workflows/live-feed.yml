@@ -1,61 +1,96 @@
 name: Live Feed Proxy
 
-# Election-night CORS proxy for the Live Results tab (webapp/src/live/).
+# Election-night proxy for the Live Results tab (webapp/src/live/).
 #
-# The browser cannot fetch the VEC results endpoint directly if it lacks CORS
-# headers, so this workflow polls it server-side, normalizes the payload into
-# the live contract (scripts/fetch_live_vec.py — all VEC-shape knowledge lives
-# there), and force-pushes the snapshot as the single-commit `live-feed`
-# branch. raw.githubusercontent.com serves that file with `CORS: *`, and the
-# dashboard's `vec_proxy_2026` source polls it .
+# Polls the VEC server-side, turns the results into the live contract, and
+# force-pushes the snapshot as the single-commit `live-feed` branch.
+# raw.githubusercontent.com serves that file with `CORS: *`, and the
+# dashboard's `vec_proxy_2026` source polls it.
 #
-# REHEARSAL (works today): leave feed_url BLANK. The job steps through the
-# VEC's published SE2026 sample snapshots (tests/fixtures/vec_sample — real
-# feed format, fictitious data, 23 steps) through the full
-# reader -> branch -> dashboard path. The page labels it "TEST DATA".
+# MODES
+#   website        (default, election night) — scrapes the public VEC results
+#                  website with scripts/fetch_live_vec_web.py. The site is
+#                  CC BY 4.0 ("© Victorian Electoral Commission"), so a derived
+#                  public snapshot is fine with attribution. Leave results_url
+#                  at its default unless the VEC uses a different address; if
+#                  that page is missing the script searches the state results
+#                  landing page for the 2026 election.
+#   rehearsal-2022 — fetches the real 2022 results website ONCE, then replays it
+#                  as a night in progress (5% -> 100% of booths, early votes
+#                  part-way, postals last). Labelled "TEST DATA" on the page.
+#   rehearsal-feed — replays the VEC's sample data-feed files
+#                  (tests/fixtures/vec_sample) through scripts/fetch_live_vec.py.
+#   feed-url       — a directly downloadable VEC data-feed ZIP/XML (feed_url).
 #
-# ON THE NIGHT — NOT YET WIRED. The real feed is ZIP files on a SharePoint
-# site behind a shared access token (VEC user guide, Sept 2026), not a plain
-# URL. Still to do once access is granted:
-#   1. add the download step (token from a repository SECRET, never an input —
-#      inputs are printed in this public repo's logs), saving ZIPs to a folder
-#      and calling `fetch_live_vec.py --dir <folder>`;
-#   2. confirm with the VEC that publishing a derived snapshot on a public
-#      branch is allowed (terms of use cl. 1.2 bars releasing the feed "in
-#      either its original or any modified form").
-# feed_url only works for a directly downloadable ZIP/XML.
+# AUTOMATIC ON THE NIGHT — nothing to start by hand. The schedule below (UTC;
+# Melbourne is UTC+11 in late November) runs website mode:
+#   Sat 28 Nov 17:41 AEDT  — long run, a pass every 5 min (~5h40m)
+#   Sat 28 Nov 23:23 AEDT  — second long run (queues if the first is late)
+#   29-30 Nov              — one pass every 2 hours (postal / declaration counting)
+#   1-12 Dec               — one pass every 3 hours (rechecks, declarations)
+# Cron has no year, so the job skips itself outside ELECTION_WINDOW below.
+# Delete the schedule block after the election. A manual dispatch still works
+# any time and cancels a running scheduled job.
 #
-# Lag: the VEC publishes every 5 minutes, and raw.githubusercontent.com caches
-# for up to 5 more (it ignores cache-busting query strings — tested).
+# Load on the VEC: one pass is ~2 pages per district (~176 requests) with 4
+# parallel requests; at the default 5-minute interval that is under one request
+# a second. Do not lower the interval below a few minutes — the VEC only
+# updates every 5 minutes anyway.
+#
+# Lag: VEC updates every 5 min, a pass takes ~1-2 min, and
+# raw.githubusercontent.com caches for up to 5 min more (it ignores
+# cache-busting query strings — tested).
 #
 # This never touches main; the live-feed branch is disposable afterwards.
 
 on:
+  schedule:
+    - cron: "41 6 28 11 *"        # 17:41 AEDT election night — long run
+    - cron: "23 12 28 11 *"       # 23:23 AEDT — second long run
+    - cron: "17 */2 29,30 11 *"   # every 2h, Sun-Mon after the election
+    - cron: "17 */3 1-12 12 *"    # every 3h for the following fortnight
   workflow_dispatch:
     inputs:
+      mode:
+        description: "Source"
+        type: choice
+        options: [website, rehearsal-2022, rehearsal-feed, feed-url]
+        default: website
+      results_url:
+        description: "VEC results index (website mode)"
+        required: false
+        default: "https://www.vec.vic.gov.au/results/state-election-results/2026-state-election-results"
       feed_url:
-        description: "Direct ZIP/XML URL (leave blank for the VEC-sample rehearsal)"
+        description: "Data-feed ZIP/XML URL (feed-url mode only)"
         required: false
         default: ""
       interval_seconds:
-        description: "Seconds between fetches"
-        required: false
-        default: "90"
-      duration_minutes:
-        description: "How long to keep polling (max ~350; job limit is 6h)"
+        description: "Seconds between passes (keep >= 180)"
         required: false
         default: "300"
+      duration_minutes:
+        description: "How long to keep polling (max ~350; job limit is 6h; 0 = one pass)"
+        required: false
+        default: "330"
+
+env:
+  # Scheduled runs only act inside this window (dates in UTC).
+  ELECTION_WINDOW_START: "2026-11-28"
+  ELECTION_WINDOW_END: "2026-12-13"
 
 permissions:
   contents: write
 
 concurrency:
   group: live-feed-proxy
-  cancel-in-progress: true    # a re-dispatch supersedes the running proxy
+  # A manual dispatch supersedes whatever is running; scheduled runs queue
+  # behind each other so the second night run picks up when the first ends.
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
 
 jobs:
   proxy:
     runs-on: ubuntu-latest
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v5
 
@@ -66,55 +101,26 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Poll, normalize, publish
-        env:
-          FEED_URL: ${{ inputs.feed_url }}
-          INTERVAL: ${{ inputs.interval_seconds }}
-          DURATION_MIN: ${{ inputs.duration_minutes }}
-          TOKEN: ${{ github.token }}
+      - name: Skip scheduled runs outside the election window
+        id: window
         run: |
-          set -u
-          deadline=$(( $(date +%s) + DURATION_MIN * 60 ))
-          step=0
-          failures=0
-          while [ "$(date +%s)" -lt "$deadline" ]; do
-            if [ -n "$FEED_URL" ]; then
-              src_args=(--url "$FEED_URL")
-            else
-              src_args=(--replay "$step" --replay-dir tests/fixtures/vec_sample --allow-partial)
-            fi
-            if python scripts/fetch_live_vec.py "${src_args[@]}" \
-                 --out publish/live/vec-latest.json; then
-              failures=0
-              # `set -e` semantics inside the subshell so a failed push is not
-              # silently reported as published; the snapshot self-heals on the
-              # next interval, but the log must show it was lost.
-              if (
-                set -e
-                cd publish
-                rm -rf .git
-                git init -q -b live-feed
-                git -c user.name="github-actions[bot]" \
-                    -c user.email="github-actions[bot]@users.noreply.github.com" \
-                    add -A
-                git -c user.name="github-actions[bot]" \
-                    -c user.email="github-actions[bot]@users.noreply.github.com" \
-                    commit -qm "live snapshot $(date -u +%FT%TZ)"
-                git push -qf \
-                  "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-                  live-feed
-              ); then
-                echo "$(date -u +%T) published step $step"
-              else
-                echo "::warning::push of snapshot $step failed — retrying on the next interval"
-              fi
-            else
-              # Keep the previous good snapshot on the branch; back off a little.
-              failures=$((failures + 1))
-              echo "::warning::fetch/normalize failed (streak $failures) — keeping last good snapshot"
-              sleep $(( INTERVAL < 60 ? INTERVAL : 60 ))
-            fi
-            step=$((step + 1))
-            sleep "$INTERVAL"
-          done
-          echo "duration elapsed — re-dispatch to continue"
+          today=$(date -u +%F)
+          if [ "${{ github.event_name }}" = schedule ] && \
+             { [[ "$today" < "$ELECTION_WINDOW_START" ]] || [[ "$today" > "$ELECTION_WINDOW_END" ]]; }; then
+            echo "Outside the election window ($ELECTION_WINDOW_START to $ELECTION_WINDOW_END) — nothing to do."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Poll, normalize, publish
+        if: steps.window.outputs.run == 'true'
+        env:
+          MODE: ${{ inputs.mode || 'website' }}
+          RESULTS_URL: ${{ inputs.results_url || 'https://www.vec.vic.gov.au/results/state-election-results/2026-state-election-results' }}
+          FEED_URL: ${{ inputs.feed_url }}
+          INTERVAL: ${{ inputs.interval_seconds || '300' }}
+          # The two election-night schedules poll for ~5h40m; the later ones do one pass.
+          DURATION_MIN: ${{ inputs.duration_minutes || ((github.event.schedule == '41 6 28 11 *' || github.event.schedule == '23 12 28 11 *') && '340' || '0') }}
+          TOKEN: ${{ github.token }}
+        run: bash scripts/live_feed_loop.sh

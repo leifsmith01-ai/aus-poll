@@ -163,3 +163,46 @@ describe("polls benchmark for the Live tab", () => {
     expect(pm.alp + pm.coalition + pm.hung).toBeGreaterThanOrEqual(99);
   });
 });
+
+// ── Automatic election-night switch-over ─────────────────────────────────────
+import { vi } from "vitest";
+import { defaultSourceId, resolveSource, msUntilLive } from "../live/sources.js";
+import { fetchOnce } from "../live/fetchLoop.js";
+import { LIVE_CONFIG } from "../live/config.js";
+
+describe("election-night switch-over", () => {
+  const from = Date.parse(LIVE_CONFIG.active.liveFrom);
+
+  it("is set for 5:30pm Melbourne time on polling day", () => {
+    // 28 Nov 2026 06:30 UTC = 17:30 AEDT (UTC+11)
+    expect(new Date(from).toISOString()).toBe("2026-11-28T06:30:00.000Z");
+  });
+
+  it("uses the sample before the switch and the live proxy from then on", () => {
+    expect(defaultSourceId(from - 1)).toBe("sample_vic_2026");
+    expect(defaultSourceId(from)).toBe("vec_proxy_2026");
+    const live = resolveSource(null, null, from + 60_000);
+    expect(live.id).toBe("vec_proxy_2026");
+    expect(live.auto).toBe(true);
+    expect(live.pollMs).toBeGreaterThan(0);
+    expect(msUntilLive(from - 5000)).toBe(5000);
+    expect(msUntilLive(from + 1)).toBeNull();
+  });
+
+  it("does not treat an explicitly chosen source as automatic", () => {
+    expect(resolveSource("vec_proxy_2026", null, from - 1).auto).toBe(false);
+    expect(resolveSource(null, null, from - 1).auto).toBe(false);   // the sample
+  });
+
+  it("reports 'waiting' while the proxy has nothing, or only its waiting marker", async () => {
+    const source = resolveSource(null, null, from + 1);
+    const mock = (body, status = 200) => vi.fn(async () => ({
+      ok: status < 400, status, json: async () => body }));
+    globalThis.fetch = mock(null, 404);
+    expect((await fetchOnce(source)).waiting).toBe(true);
+    globalThis.fetch = mock({ contractVersion: 1, waiting: true, meta: {}, seats: [] });
+    expect((await fetchOnce(source)).waiting).toBe(true);
+    globalThis.fetch = mock(null, 500);
+    await expect(fetchOnce(source)).rejects.toThrow("HTTP 500");
+  });
+});

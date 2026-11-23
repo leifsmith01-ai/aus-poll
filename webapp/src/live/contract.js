@@ -101,6 +101,7 @@ export function validateFeed(json) {
       lastUpdated: s.lastUpdated || meta.asAt || null,
       fp: normalizeFp(s.fp),
       tcp: s.tcp || null,
+      elected: s.elected || null,     // party code of the member the EC has declared elected
       matched: s.matched && s.matched.formal > 0 ? s.matched : null,   // booth-matched FP sums
       tcpState: s.tcpState || (s.tcp ? "published" : "none"),   // published | withheld | none
       boothsReturned: s.boothsReturned ?? null,
@@ -122,6 +123,7 @@ export function validateFeed(json) {
       boothLevel: !!meta.boothLevel,
       source: meta.source || "unknown",
       eventName: meta.eventName || null,
+      attribution: meta.attribution || null,   // licence credit the page must show
       test: !!meta.test || meta.source === "sample",   // fictitious data — UI must say so
       phase: meta.phase || null,
       baselineElectionId: meta.baselineElectionId || null,

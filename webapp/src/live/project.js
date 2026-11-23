@@ -216,7 +216,10 @@ function projectSeat(seat, base, meta, cfg) {
     projRef = clampPct(liveRef);
   }
 
-  const winnerParty = projRef >= 50 ? refParty : otherParty;
+  // Once the commission declares a member, that is the result — even where the indicative
+  // 2CP count disagrees (a near-tie, or a seat decided by the full preference distribution).
+  const declaredWinner = seat.status === "ec_called" && seat.elected ? seat.elected : null;
+  const winnerParty = declaredWinner ?? (projRef >= 50 ? refParty : otherParty);
   const winnerGroup = cfg.groupOf(winnerParty);
   const leaderPct = Math.max(projRef, 100 - projRef);
   const margin2cp = Math.abs(2 * projRef - 100);          // pp gap between the two contesters
