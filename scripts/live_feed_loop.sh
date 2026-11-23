@@ -24,7 +24,20 @@ DRY_RUN=${DRY_RUN:-0}
 out=publish/live/vec-latest.json
 mkdir -p work publish/live
 
+# The live-feed branch holds only the results file, but the Vercel project is
+# connected to this repo and would try (and fail) to build every snapshot,
+# emailing a failure each time. Vercel reads `git.deploymentEnabled` from the
+# commit being built, and the project's Root Directory is `webapp`, so each
+# snapshot carries a vercel.json in both places switching deployments off.
+write_vercel_optout() {
+  mkdir -p publish/webapp
+  for f in publish/vercel.json publish/webapp/vercel.json; do
+    printf '{\n  "git": { "deploymentEnabled": false }\n}\n' > "$f"
+  done
+}
+
 publish() {
+  write_vercel_optout
   if [ "$DRY_RUN" = 1 ]; then echo "(dry run) would publish $1"; return 0; fi
   # `set -e` inside the subshell so a failed push is not reported as published.
   (
