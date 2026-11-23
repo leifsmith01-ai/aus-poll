@@ -224,3 +224,40 @@ function tailProb(cdf, threshold) {
 function roundParty(p) { for (const k in p) p[k] = Math.round(p[k] * 10) / 10; }
 function clamp01(x) { return Math.min(1, Math.max(0, x)); }
 function round3(x) { return Math.round(x * 1000) / 1000; }
+
+// ── Projected status and "callable at" ───────────────────────────────────────
+// The formal "called" rule (≥85% of the seat counted and an 8-point margin, or the VEC's
+// declaration) leaves nearly every seat at "likely" for most of the night. "Projected" is
+// our own call: the seat's projected winner is at least PROJECT_P likely to hold it.
+export const PROJECT_P = 0.99;
+const Z_PROJECT = 2.326;   // normal quantile for 0.99
+
+// Share of the seat (0–100) that would need to be counted for its current lead to reach
+// PROJECT_P, if the lead holds. null when the seat is settled, has no live count behind
+// it, or the lead is too small ever to get there.
+export function estimateCallAt(s, cfg) {
+  if (!s || s.declared || s.status === "called") return null;
+  if (s.basis === "baseline" || s.basis === "swing" || s.status === "not_started") return null;
+  const isAlpCoal = s.projAlp2pp != null && s.pair?.includes("ALP")
+    && s.pair.some((p) => cfg.groupOf(p) === "coalition");
+  const sig = isAlpCoal ? seatSigma : nonAlpCoalSigma;
+  const lead = (s.margin ?? 0) / 2;              // points above 50 for the leader
+  for (let f = Math.max(0.01, s.countedFraction || 0); f <= 1.0001; f += 0.01) {
+    if (lead >= Z_PROJECT * sig(Math.min(1, f))) return Math.round(Math.min(1, f) * 100);
+  }
+  return null;
+}
+
+// Adds winProb, callAt and the "projected" status to each projected seat.
+export function withCallStatus(projected, confidence, cfg) {
+  if (!projected || !confidence) return projected;
+  const minF = cfg.minCountedForLikely ?? 0.1;
+  return projected.map((s) => {
+    const winProb = confidence.seatWinProbs?.[s.seatId] ?? null;
+    const callAt = estimateCallAt(s, cfg);
+    const open = s.status === "likely" || s.status === "in_doubt";
+    const status = open && winProb != null && winProb >= PROJECT_P && s.countedFraction >= minF
+      && s.basis !== "baseline" && s.basis !== "swing" ? "projected" : s.status;
+    return { ...s, winProb, callAt, status };
+  });
+}
