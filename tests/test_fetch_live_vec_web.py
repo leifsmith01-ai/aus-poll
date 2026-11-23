@@ -258,3 +258,36 @@ def test_discovery_before_results_exist_is_cheap_and_empty(monkeypatch):
                         '<a href="/voting/2026-state-election/find-candidates">x</a>')
     url, links = web.discover(None, web.DEFAULT_INDEX)
     assert links == [] and len(calls) == 4             # the guess + three landing pages
+
+
+def test_intermittent_page_failures_are_retried_not_dropped(monkeypatch, tmp_path, capsys):
+    """GitHub's servers saw ~1 in 8 district pages fail intermittently (silently, as
+    404s) in the first rehearsal. Every district must still load, and failures must
+    show up in the log."""
+    import json
+    from types import SimpleNamespace
+    district = page("nepean-2026.district.html")
+    vc, tcp = page("nepean-2026.vc.html"), page("nepean-2026.2cp.html")
+    sub = web.subpage_links(district, SITE)
+    seen = {}
+
+    class FlakySession:
+        def get(self, url, timeout=30):
+            seen[url] = seen.get(url, 0) + 1
+            # The first two requests for every booth page fail; districts load.
+            if url in (sub["vc"], sub["tcp"]) and seen[url] <= 2:
+                return SimpleNamespace(status_code=404, text="",
+                                       raise_for_status=lambda: (_ for _ in ()).throw(RuntimeError("404")))
+            body = vc if url == sub["vc"] else tcp if url == sub["tcp"] else district
+            return SimpleNamespace(status_code=200, text=body, raise_for_status=lambda: None)
+
+    monkeypatch.setattr(web, "_session", lambda: FlakySession())
+    monkeypatch.setattr(web.time, "sleep", lambda s: None)
+    cache = tmp_path / "urls.json"
+    cache.write_text(json.dumps({SITE + "/nepean-district-results": {}}))   # links not yet known
+    args = SimpleNamespace(from_html=None, cache=str(cache), index="unused", workers=3, save_html=None)
+    got = web.collect(args)
+    assert len(got) == 1 and "HERCUS, Darren" in got[0][1]
+    err = capsys.readouterr().err
+    assert "loaded 1/1 districts" in err
+    assert json.loads(cache.read_text())[SITE + "/nepean-district-results"]["vc"] == sub["vc"]
