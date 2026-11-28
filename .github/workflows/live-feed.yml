@@ -59,7 +59,7 @@ on:
       results_url:
         description: "VEC results index (website mode)"
         required: false
-        default: "https://www.vec.vic.gov.au/results/state-election-results/2026-state-election-results"
+        default: "https://www.vec.vic.gov.au/results/2026-results/district-election-page"
       feed_url:
         description: "Data-feed ZIP/XML URL (feed-url mode only)"
         required: false
@@ -117,7 +117,7 @@ jobs:
         if: steps.window.outputs.run == 'true'
         env:
           MODE: ${{ inputs.mode || 'website' }}
-          RESULTS_URL: ${{ inputs.results_url || 'https://www.vec.vic.gov.au/results/state-election-results/2026-state-election-results' }}
+          RESULTS_URL: ${{ inputs.results_url || 'https://www.vec.vic.gov.au/results/2026-results/district-election-page' }}
           FEED_URL: ${{ inputs.feed_url }}
           INTERVAL: ${{ inputs.interval_seconds || '300' }}
           # The two election-night schedules poll for ~5h40m; the later ones do one pass.

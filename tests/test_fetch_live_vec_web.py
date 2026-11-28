@@ -291,3 +291,33 @@ def test_intermittent_page_failures_are_retried_not_dropped(monkeypatch, tmp_pat
     err = capsys.readouterr().err
     assert "loaded 1/1 districts" in err
     assert json.loads(cache.read_text())[SITE + "/nepean-district-results"]["vc"] == sub["vc"]
+
+
+def test_finds_the_2026_style_results_address(monkeypatch):
+    """On election night the VEC published at /results/2026-results/district-election-page,
+    not the 2022 pattern. Discovery must follow that link from the landing pages and skip
+    the Upper House (region) page."""
+    index = page("index-2022.html").replace("/results/state-election-results/2022-state-election-results",
+                                            "/results/2026-results/district-election-page")
+    pages = {
+        web.STATE_RESULTS: '<a href="/results/2026-results/region-election-page">u</a>'
+                           '<a href="/results/2026-results/district-election-page">l</a>',
+        web.SITE + "/results/2026-results/district-election-page": index,
+    }
+    monkeypatch.setattr(web, "fetch", lambda s, u, tries=3, missing_ok=True: pages.get(u))
+    url, links = web.discover(None, web.STATE_RESULTS + "/2026-state-election-results")
+    assert url.endswith("/2026-results/district-election-page")
+    assert len(links) == 87
+
+
+def test_successful_candidate_label_marks_a_declared_seat():
+    """2026 pages label the winner "Successful candidate", with placeholder text until
+    the seat is declared."""
+    waiting = ('<div id="main"><h1>Bass District results</h1><p>Successful candidate</p>'
+               "<p>The successful candidate's name will display here when we know the result for Bass District.</p>"
+               "<p>Total enrolled voters:</p><p>57,998</p></div>")
+    assert web.parse_summary(waiting)["elected"] is None
+    assert web.parse_summary(waiting)["enrolment"] == 57998
+    declared = waiting.replace("<p>The successful candidate's name will display here when we know the result for Bass District.</p>",
+                               "<p>HALSTEAD, Rochelle</p>")
+    assert web.parse_summary(declared)["elected"] == "HALSTEAD, Rochelle"
