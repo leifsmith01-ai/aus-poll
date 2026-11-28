@@ -1,0 +1,9114 @@
+{
+ "contractVersion": 1,
+ "meta": {
+  "jurisdiction": "vic",
+  "electionId": "vic_2026",
+  "chamber": "Legislative Assembly",
+  "asAt": "2026-11-28T12:08:57+00:00",
+  "totalSeats": 88,
+  "majority": 45,
+  "boothLevel": true,
+  "source": "vec-website",
+  "eventName": "2026 Victorian State Election",
+  "test": false,
+  "attribution": "© Victorian Electoral Commission, CC BY 4.0",
+  "baselineElectionId": "vic_2022",
+  "countedPct": 41.9
+ },
+ "seats": [
+  {
+   "seatId": "albert_park",
+   "name": "Albert Park",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 34.0,
+   "expectedTotal": 44983,
+   "enrolment": 51117,
+   "votesCounted": 15293,
+   "boothsReturned": 23,
+   "boothsExpected": 28,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "DRAGWIDGE, Georgie",
+     "candidateId": "DRAGWIDGE, Georgie",
+     "votes": 915,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "SEMMENS, Sonya",
+     "candidateId": "SEMMENS, Sonya",
+     "votes": 3330,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "COOK, Andrew",
+     "candidateId": "COOK, Andrew",
+     "votes": 5460,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "TAYLOR, Nina",
+     "candidateId": "TAYLOR, Nina",
+     "votes": 2664,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "KING, Adrian William",
+     "candidateId": "KING, Adrian William",
+     "votes": 286,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "LINDRUM, Tam",
+     "candidateId": "LINDRUM, Tam",
+     "votes": 1371,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "BOLGER, Colleen",
+     "candidateId": "BOLGER, Colleen",
+     "votes": 638,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 12816,
+    "now": {
+     "ind": 1070,
+     "greens": 2838,
+     "coalition": 4888,
+     "alp": 2327,
+     "one_nation": 1164,
+     "other": 529
+    },
+    "then": {
+     "alp": 4679.6,
+     "coalition": 3809.8,
+     "greens": 2641.2,
+     "ind": 835.5,
+     "other": 849.9
+    },
+    "base": {
+     "alp": 36.49,
+     "coalition": 29.74,
+     "greens": 20.92,
+     "ind": 5.88,
+     "other": 6.97
+    },
+    "coverage": 44.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "ashwood",
+   "name": "Ashwood",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 42.03,
+   "expectedTotal": 46755,
+   "enrolment": 53131,
+   "votesCounted": 19653,
+   "boothsReturned": 26,
+   "boothsExpected": 30,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "FFV",
+     "name": "UWIMANA, Enid",
+     "candidateId": "UWIMANA, Enid",
+     "votes": 346,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "RANDALL, Tim",
+     "candidateId": "RANDALL, Tim",
+     "votes": 3358,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "FREGON, Matt",
+     "candidateId": "FREGON, Matt",
+     "votes": 3436,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "VAN DER EYNDEN, Jacob",
+     "candidateId": "VAN DER EYNDEN, Jacob",
+     "votes": 493,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "ZOGRAPHOS, Theo",
+     "candidateId": "ZOGRAPHOS, Theo",
+     "votes": 8744,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "JOSHI, Hitendra K.",
+     "candidateId": "JOSHI, Hitendra K.",
+     "votes": 938,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "MITCHELL, Steven",
+     "candidateId": "MITCHELL, Steven",
+     "votes": 1599,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 17,
+    "formal": 17883,
+    "now": {
+     "other": 774,
+     "greens": 3134,
+     "alp": 3266,
+     "coalition": 8328,
+     "ind": 892,
+     "one_nation": 1489
+    },
+    "then": {
+     "alp": 7164.4,
+     "coalition": 6786.4,
+     "greens": 2524.0,
+     "ind": 521.3,
+     "other": 886.8
+    },
+    "base": {
+     "alp": 40.65,
+     "coalition": 36.89,
+     "greens": 14.68,
+     "ind": 2.64,
+     "other": 5.14
+    },
+    "coverage": 43.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "bass",
+   "name": "Bass",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 32.03,
+   "expectedTotal": 51038,
+   "enrolment": 57998,
+   "votesCounted": 16348,
+   "boothsReturned": 30,
+   "boothsExpected": 33,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "JOBE, Chris",
+     "candidateId": "JOBE, Chris",
+     "votes": 559,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "THORN, Sophie",
+     "candidateId": "THORN, Sophie",
+     "votes": 2158,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "SCHELLEKENS, Nikole",
+     "candidateId": "SCHELLEKENS, Nikole",
+     "votes": 5851,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "HALSTEAD, Rochelle",
+     "candidateId": "HALSTEAD, Rochelle",
+     "votes": 4986,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "CAUNEAC, Ben",
+     "candidateId": "CAUNEAC, Ben",
+     "votes": 320,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "BUCKINGHAM, Chris",
+     "candidateId": "BUCKINGHAM, Chris",
+     "votes": 1932,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 21,
+    "formal": 13776,
+    "now": {
+     "other": 716,
+     "greens": 1762,
+     "one_nation": 5171,
+     "coalition": 4468,
+     "alp": 1659
+    },
+    "then": {
+     "alp": 4275.8,
+     "coalition": 6031.4,
+     "greens": 1050.6,
+     "ind": 597.2,
+     "other": 1821.0
+    },
+    "base": {
+     "alp": 32.53,
+     "coalition": 43.44,
+     "greens": 8.11,
+     "ind": 4.48,
+     "other": 11.44
+    },
+    "coverage": 35.4
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "bayswater",
+   "name": "Bayswater",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 13.34,
+   "expectedTotal": 45330,
+   "enrolment": 51511,
+   "votesCounted": 6046,
+   "boothsReturned": 23,
+   "boothsExpected": 27,
+   "lastUpdated": "2026-11-28T08:48:34+00:00",
+   "fp": [
+    {
+     "party": "ON",
+     "name": "BLEAKNEY, Kayte",
+     "candidateId": "BLEAKNEY, Kayte",
+     "votes": 1115,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "KENNEDY, Jess",
+     "candidateId": "KENNEDY, Jess",
+     "votes": 926,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "BUXTON, Julie",
+     "candidateId": "BUXTON, Julie",
+     "votes": 1075,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "KITCHEN, David",
+     "candidateId": "KITCHEN, David",
+     "votes": 2028,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "CLARKE, Mathew",
+     "candidateId": "CLARKE, Mathew",
+     "votes": 93,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "HUBBARD, Naomi",
+     "candidateId": "HUBBARD, Naomi",
+     "votes": 43,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "FERGUSON, Alec",
+     "candidateId": "FERGUSON, Alec",
+     "votes": 208,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "COOMBES, Gary",
+     "candidateId": "COOMBES, Gary",
+     "votes": 177,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 7,
+    "formal": 4851,
+    "now": {
+     "one_nation": 912,
+     "greens": 809,
+     "alp": 919,
+     "coalition": 1777,
+     "ind": 80,
+     "other": 354
+    },
+    "then": {
+     "alp": 2127.1,
+     "coalition": 1623.1,
+     "greens": 366.7,
+     "ind": 93.5,
+     "other": 640.5
+    },
+    "base": {
+     "alp": 41.3,
+     "coalition": 35.59,
+     "greens": 7.38,
+     "ind": 2.1,
+     "other": 13.63
+    },
+    "coverage": 12.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "bellarine",
+   "name": "Bellarine",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 34.05,
+   "expectedTotal": 52645,
+   "enrolment": 59824,
+   "votesCounted": 17928,
+   "boothsReturned": 20,
+   "boothsExpected": 25,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LP",
+     "name": "WHITEHEAD, Callum",
+     "candidateId": "WHITEHEAD, Callum",
+     "votes": 5697,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "MARCHANT, Alison",
+     "candidateId": "MARCHANT, Alison",
+     "votes": 3805,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "MCRAE, Ross",
+     "candidateId": "MCRAE, Ross",
+     "votes": 3241,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "KEOGH, Ronan",
+     "candidateId": "KEOGH, Ronan",
+     "votes": 249,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "LOCKHART, Kate",
+     "candidateId": "LOCKHART, Kate",
+     "votes": 470,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "MANUELL, Guy",
+     "candidateId": "MANUELL, Guy",
+     "votes": 221,
+     "pct": null
+    },
+    {
+     "party": "VS#2",
+     "name": "WILLIAMS, Dom",
+     "candidateId": "WILLIAMS, Dom",
+     "votes": 79,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "POPE, Mitch",
+     "candidateId": "POPE, Mitch",
+     "votes": 3257,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 15056,
+    "now": {
+     "coalition": 5150,
+     "alp": 3376,
+     "one_nation": 2784,
+     "other": 471,
+     "ind": 400,
+     "greens": 2875
+    },
+    "then": {
+     "alp": 6261.9,
+     "coalition": 4693.0,
+     "greens": 2053.6,
+     "ind": 763.2,
+     "other": 1284.3
+    },
+    "base": {
+     "alp": 42.58,
+     "coalition": 33.09,
+     "greens": 11.78,
+     "ind": 4.59,
+     "other": 7.96
+    },
+    "coverage": 37.4
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "benambra",
+   "name": "Benambra",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 39.48,
+   "expectedTotal": 45736,
+   "enrolment": 51973,
+   "votesCounted": 18056,
+   "boothsReturned": 29,
+   "boothsExpected": 32,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "AJP",
+     "name": "FUERY, Mike",
+     "candidateId": "FUERY, Mike",
+     "votes": 361,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "PARTON, Graham",
+     "candidateId": "PARTON, Graham",
+     "votes": 842,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "YOUNG, Oliver",
+     "candidateId": "YOUNG, Oliver",
+     "votes": 683,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "VANGALEN, Alex",
+     "candidateId": "VANGALEN, Alex",
+     "votes": 186,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "McKEEMAN, Lachie",
+     "candidateId": "McKEEMAN, Lachie",
+     "votes": 5603,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "MARTIN, Steve",
+     "candidateId": "MARTIN, Steve",
+     "votes": 4237,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "SHEPPARD, Kellie",
+     "candidateId": "SHEPPARD, Kellie",
+     "votes": 4630,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "PEPPER, Evette",
+     "candidateId": "PEPPER, Evette",
+     "votes": 240,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "QUILTY, Tim",
+     "candidateId": "QUILTY, Tim",
+     "votes": 152,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 25,
+    "formal": 16041,
+    "now": {
+     "other": 859,
+     "greens": 784,
+     "alp": 637,
+     "ind": 5349,
+     "coalition": 4040,
+     "one_nation": 4372
+    },
+    "then": {
+     "alp": 2021.0,
+     "coalition": 6806.9,
+     "greens": 674.2,
+     "ind": 5094.6,
+     "other": 1444.3
+    },
+    "base": {
+     "alp": 13.19,
+     "coalition": 43.02,
+     "greens": 3.83,
+     "ind": 31.48,
+     "other": 8.48
+    },
+    "coverage": 41.5
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "bendigo_east",
+   "name": "Bendigo East",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 17.81,
+   "expectedTotal": 49414,
+   "enrolment": 56152,
+   "votesCounted": 8802,
+   "boothsReturned": 33,
+   "boothsExpected": 37,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "FFV",
+     "name": "JOHN, Des",
+     "candidateId": "JOHN, Des",
+     "votes": 261,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "DUNN, Bonnie",
+     "candidateId": "DUNN, Bonnie",
+     "votes": 208,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "NORSEN, Denali",
+     "candidateId": "NORSEN, Denali",
+     "votes": 178,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "HAWKEN, Cheryl",
+     "candidateId": "HAWKEN, Cheryl",
+     "votes": 1924,
+     "pct": null
+    },
+    {
+     "party": "NP",
+     "name": "LETHLEAN, Andrew",
+     "candidateId": "LETHLEAN, Andrew",
+     "votes": 3099,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "WRIGHT, Liz",
+     "candidateId": "WRIGHT, Liz",
+     "votes": 148,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "HOSKINS, Kristie",
+     "candidateId": "HOSKINS, Kristie",
+     "votes": 33,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "RICKWOOD, Tim",
+     "candidateId": "RICKWOOD, Tim",
+     "votes": 1364,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "TOLHURST, Michael",
+     "candidateId": "TOLHURST, Michael",
+     "votes": 1067,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 7604,
+    "now": {
+     "other": 567,
+     "one_nation": 1726,
+     "coalition": 2920,
+     "ind": 161,
+     "alp": 1264,
+     "greens": 966
+    },
+    "then": {
+     "alp": 3464.7,
+     "coalition": 2063.0,
+     "greens": 727.6,
+     "ind": 321.5,
+     "one_nation": 484.4,
+     "other": 542.9
+    },
+    "base": {
+     "alp": 48.32,
+     "coalition": 27.39,
+     "greens": 8.59,
+     "ind": 3.53,
+     "one_nation": 5.68,
+     "other": 6.5
+    },
+    "coverage": 17.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "bendigo_west",
+   "name": "Bendigo West",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 27.34,
+   "expectedTotal": 43767,
+   "enrolment": 49735,
+   "votesCounted": 11966,
+   "boothsReturned": 27,
+   "boothsExpected": 32,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "SHALEVSKI, Tayne",
+     "candidateId": "SHALEVSKI, Tayne",
+     "votes": 641,
+     "pct": null
+    },
+    {
+     "party": "NP",
+     "name": "HUTCHINGS, David",
+     "candidateId": "HUTCHINGS, David",
+     "votes": 3026,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "TRANTER, Debra",
+     "candidateId": "TRANTER, Debra",
+     "votes": 515,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "BALDWIN, Brenton",
+     "candidateId": "BALDWIN, Brenton",
+     "votes": 2268,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "SHAW, Liza",
+     "candidateId": "SHAW, Liza",
+     "votes": 1985,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "HARISOPOULOS, Christos",
+     "candidateId": "HARISOPOULOS, Christos",
+     "votes": 258,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "MORGAN, Ellen",
+     "candidateId": "MORGAN, Ellen",
+     "votes": 2754,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 17,
+    "formal": 11120,
+    "now": {
+     "other": 1361,
+     "coalition": 2959,
+     "alp": 2210,
+     "greens": 1946,
+     "one_nation": 2644
+    },
+    "then": {
+     "alp": 5051.5,
+     "coalition": 2673.9,
+     "greens": 1382.1,
+     "ind": 424.0,
+     "other": 1588.5
+    },
+    "base": {
+     "alp": 46.4,
+     "coalition": 24.98,
+     "greens": 11.5,
+     "ind": 3.33,
+     "other": 13.79
+    },
+    "coverage": 25.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "bentleigh",
+   "name": "Bentleigh",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 43.37,
+   "expectedTotal": 48361,
+   "enrolment": 54956,
+   "votesCounted": 20973,
+   "boothsReturned": 25,
+   "boothsExpected": 30,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LP",
+     "name": "PUTT, Tynan",
+     "candidateId": "PUTT, Tynan",
+     "votes": 9005,
+     "pct": null
+    },
+    {
+     "party": "CP",
+     "name": "VAINORAS, Tony",
+     "candidateId": "VAINORAS, Tony",
+     "votes": 175,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "LONSING, Herbert",
+     "candidateId": "LONSING, Herbert",
+     "votes": 2690,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "PROCTOR, Claire",
+     "candidateId": "PROCTOR, Claire",
+     "votes": 2831,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "STAIKOS, Nick",
+     "candidateId": "STAIKOS, Nick",
+     "votes": 5112,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "KRUGER, Liam",
+     "candidateId": "KRUGER, Liam",
+     "votes": 603,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 19052,
+    "now": {
+     "coalition": 8478,
+     "other": 726,
+     "one_nation": 2470,
+     "greens": 2589,
+     "alp": 4789
+    },
+    "then": {
+     "alp": 8936.6,
+     "coalition": 6595.6,
+     "greens": 2181.1,
+     "ind": 351.2,
+     "other": 987.5
+    },
+    "base": {
+     "alp": 45.78,
+     "coalition": 36.32,
+     "greens": 10.74,
+     "ind": 1.76,
+     "other": 5.39
+    },
+    "coverage": 49.2
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "berwick",
+   "name": "Berwick",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 35.81,
+   "expectedTotal": 58969,
+   "enrolment": 67010,
+   "votesCounted": 21117,
+   "boothsReturned": 24,
+   "boothsExpected": 28,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "KHAN, Rana",
+     "candidateId": "KHAN, Rana",
+     "votes": 3076,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "DE SILVA, Roshan",
+     "candidateId": "DE SILVA, Roshan",
+     "votes": 2735,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "DE PAOLIS, Vincenzo",
+     "candidateId": "DE PAOLIS, Vincenzo",
+     "votes": 384,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "PIASTRINO, Michael",
+     "candidateId": "PIASTRINO, Michael",
+     "votes": 3850,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "BATTIN, Brad",
+     "candidateId": "BATTIN, Brad",
+     "votes": 9232,
+     "pct": null
+    },
+    {
+     "party": "CP",
+     "name": "DOWLING, Scott",
+     "candidateId": "DOWLING, Scott",
+     "votes": 92,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "JOHN, David",
+     "candidateId": "JOHN, David",
+     "votes": 110,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "AMARASIRI GUNAWARDANA, Nalinda",
+     "candidateId": "AMARASIRI GUNAWARDANA, Nalinda",
+     "votes": 288,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "KING, Ethelyn",
+     "candidateId": "KING, Ethelyn",
+     "votes": 174,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 17411,
+    "now": {
+     "alp": 2606,
+     "greens": 2286,
+     "other": 796,
+     "one_nation": 3468,
+     "coalition": 8157,
+     "ind": 98
+    },
+    "then": {
+     "alp": 6331.2,
+     "coalition": 7605.2,
+     "greens": 1744.4,
+     "other": 1730.3
+    },
+    "base": {
+     "alp": 35.35,
+     "coalition": 45.65,
+     "greens": 9.71,
+     "other": 9.29
+    },
+    "coverage": 39.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "box_hill",
+   "name": "Box Hill",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 34.7,
+   "expectedTotal": 46427,
+   "enrolment": 52758,
+   "votesCounted": 16112,
+   "boothsReturned": 26,
+   "boothsExpected": 31,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "GRN",
+     "name": "QIN, Aaron",
+     "candidateId": "QIN, Aaron",
+     "votes": 2614,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "CHEUNG, Heena",
+     "candidateId": "CHEUNG, Heena",
+     "votes": 757,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BAKER, Jamie",
+     "candidateId": "BAKER, Jamie",
+     "votes": 1220,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "HOUGUET, Sally",
+     "candidateId": "HOUGUET, Sally",
+     "votes": 6688,
+     "pct": null
+    },
+    {
+     "party": "E",
+     "name": "McGRATH, Sue",
+     "candidateId": "McGRATH, Sue",
+     "votes": 112,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "HAMER, Paul",
+     "candidateId": "HAMER, Paul",
+     "votes": 3384,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "AFAJ, Saravina",
+     "candidateId": "AFAJ, Saravina",
+     "votes": 451,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "FAGG, Peter",
+     "candidateId": "FAGG, Peter",
+     "votes": 279,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 18,
+    "formal": 14554,
+    "now": {
+     "greens": 2420,
+     "ind": 702,
+     "one_nation": 1145,
+     "coalition": 6282,
+     "other": 799,
+     "alp": 3206
+    },
+    "then": {
+     "alp": 5955.4,
+     "coalition": 5226.0,
+     "greens": 2060.9,
+     "ind": 275.2,
+     "other": 1036.5
+    },
+    "base": {
+     "alp": 41.34,
+     "coalition": 35.14,
+     "greens": 14.11,
+     "ind": 2.05,
+     "other": 7.36
+    },
+    "coverage": 40.2
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "brighton",
+   "name": "Brighton",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 22.65,
+   "expectedTotal": 44836,
+   "enrolment": 50950,
+   "votesCounted": 10155,
+   "boothsReturned": 20,
+   "boothsExpected": 25,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ON",
+     "name": "FAGAN, Alexander",
+     "candidateId": "FAGAN, Alexander",
+     "votes": 768,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "CASLEY, John",
+     "candidateId": "CASLEY, John",
+     "votes": 58,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "HAIN, Anthony",
+     "candidateId": "HAIN, Anthony",
+     "votes": 78,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "MULLAHY, Bridget",
+     "candidateId": "MULLAHY, Bridget",
+     "votes": 1240,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "SMITH, Jessica",
+     "candidateId": "SMITH, Jessica",
+     "votes": 284,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "NEWBURY, James",
+     "candidateId": "NEWBURY, James",
+     "votes": 5426,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "VINCENT, Barry",
+     "candidateId": "VINCENT, Barry",
+     "votes": 75,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "BAIN, Ebony",
+     "candidateId": "BAIN, Ebony",
+     "votes": 1835,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 11,
+    "formal": 7860,
+    "now": {
+     "one_nation": 626,
+     "ind": 53,
+     "other": 302,
+     "alp": 947,
+     "coalition": 4712,
+     "greens": 1220
+    },
+    "then": {
+     "alp": 1833.0,
+     "coalition": 3774.8,
+     "greens": 915.1,
+     "ind": 1095.9,
+     "other": 241.2
+    },
+    "base": {
+     "alp": 24.6,
+     "coalition": 45.71,
+     "greens": 13.76,
+     "ind": 12.52,
+     "other": 3.41
+    },
+    "coverage": 21.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "broadmeadows",
+   "name": "Broadmeadows",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 30.88,
+   "expectedTotal": 45386,
+   "enrolment": 51575,
+   "votesCounted": 14014,
+   "boothsReturned": 22,
+   "boothsExpected": 25,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "YOLBULAN, Mutullah Can",
+     "candidateId": "YOLBULAN, Mutullah Can",
+     "votes": 1106,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "EL YOUSSEF, Mohamad",
+     "candidateId": "EL YOUSSEF, Mohamad",
+     "votes": 242,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "DUZOVA, Baris",
+     "candidateId": "DUZOVA, Baris",
+     "votes": 2128,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "NASIM, Maryam",
+     "candidateId": "NASIM, Maryam",
+     "votes": 2273,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "ELMUSTAPHA, Mohamad",
+     "candidateId": "ELMUSTAPHA, Mohamad",
+     "votes": 356,
+     "pct": null
+    },
+    {
+     "party": "WK",
+     "name": "MATTHEWS",
+     "candidateId": "MATTHEWS",
+     "votes": 3107,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "WILSON, Russell",
+     "candidateId": "WILSON, Russell",
+     "votes": 236,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "KEIRS, Ethan",
+     "candidateId": "KEIRS, Ethan",
+     "votes": 2143,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "UNICOMB, Rachel",
+     "candidateId": "UNICOMB, Rachel",
+     "votes": 224,
+     "pct": null
+    },
+    {
+     "party": "VS#2",
+     "name": "BOLTON, Sue",
+     "candidateId": "BOLTON, Sue",
+     "votes": 609,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 11047,
+    "now": {
+     "other": 4709,
+     "ind": 534,
+     "coalition": 1897,
+     "greens": 1963,
+     "one_nation": 1944
+    },
+    "then": {
+     "alp": 5016.1,
+     "coalition": 2442.4,
+     "greens": 869.8,
+     "ind": 712.1,
+     "other": 2006.6
+    },
+    "base": {
+     "alp": 45.59,
+     "coalition": 23.24,
+     "greens": 8.26,
+     "ind": 4.91,
+     "other": 18.0
+    },
+    "coverage": 37.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "brunswick",
+   "name": "Brunswick",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 34.5,
+   "expectedTotal": 49451,
+   "enrolment": 56194,
+   "votesCounted": 17060,
+   "boothsReturned": 25,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "FARMER, Naomi",
+     "candidateId": "FARMER, Naomi",
+     "votes": 3207,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "MARGELIS, John",
+     "candidateId": "MARGELIS, John",
+     "votes": 1742,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "PULFORD, Adam",
+     "candidateId": "PULFORD, Adam",
+     "votes": 7548,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "HELMAN, Adam",
+     "candidateId": "HELMAN, Adam",
+     "votes": 680,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "ROSE, India",
+     "candidateId": "ROSE, India",
+     "votes": 290,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "STEGER, Gabe",
+     "candidateId": "STEGER, Gabe",
+     "votes": 2494,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "AMANATIDIS, Jack",
+     "candidateId": "AMANATIDIS, Jack",
+     "votes": 79,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "YUAN, Melissa",
+     "candidateId": "YUAN, Melissa",
+     "votes": 283,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 13691,
+    "now": {
+     "other": 2920,
+     "coalition": 1502,
+     "greens": 6314,
+     "one_nation": 581,
+     "alp": 2078,
+     "ind": 296
+    },
+    "then": {
+     "alp": 3721.1,
+     "coalition": 1189.5,
+     "greens": 6267.2,
+     "ind": 187.1,
+     "other": 2325.9
+    },
+    "base": {
+     "alp": 28.74,
+     "coalition": 10.85,
+     "greens": 43.51,
+     "ind": 1.6,
+     "other": 15.3
+    },
+    "coverage": 36.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "bulleen",
+   "name": "Bulleen",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 44.98,
+   "expectedTotal": 45085,
+   "enrolment": 51233,
+   "votesCounted": 20280,
+   "boothsReturned": 24,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "RUBLEE, Greg",
+     "candidateId": "RUBLEE, Greg",
+     "votes": 411,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "LIGHTBODY, Tomas",
+     "candidateId": "LIGHTBODY, Tomas",
+     "votes": 2373,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "HARVEY, Bradley",
+     "candidateId": "HARVEY, Bradley",
+     "votes": 293,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "GUY, Matthew",
+     "candidateId": "GUY, Matthew",
+     "votes": 10134,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "PALIOURAS, Amanda",
+     "candidateId": "PALIOURAS, Amanda",
+     "votes": 172,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "TAFIDIS, Dimitrios",
+     "candidateId": "TAFIDIS, Dimitrios",
+     "votes": 449,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "DALE, Tim",
+     "candidateId": "DALE, Tim",
+     "votes": 3012,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "ATHARI, Mahdi",
+     "candidateId": "ATHARI, Mahdi",
+     "votes": 2254,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 16,
+    "formal": 17826,
+    "now": {
+     "ind": 538,
+     "greens": 2178,
+     "other": 694,
+     "coalition": 9507,
+     "alp": 2836,
+     "one_nation": 2073
+    },
+    "then": {
+     "alp": 5864.1,
+     "coalition": 8516.7,
+     "greens": 1891.4,
+     "ind": 265.0,
+     "other": 1288.8
+    },
+    "base": {
+     "alp": 32.63,
+     "coalition": 48.13,
+     "greens": 10.63,
+     "ind": 1.49,
+     "other": 7.12
+    },
+    "coverage": 47.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "bundoora",
+   "name": "Bundoora",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 41.33,
+   "expectedTotal": 43098,
+   "enrolment": 48975,
+   "votesCounted": 17812,
+   "boothsReturned": 23,
+   "boothsExpected": 28,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "WM",
+     "name": "MURPHY",
+     "candidateId": "MURPHY",
+     "votes": 444,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "LAITALA, Nina",
+     "candidateId": "LAITALA, Nina",
+     "votes": 2797,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "PARR, Chris",
+     "candidateId": "PARR, Chris",
+     "votes": 4963,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "WHALLEY, Bruce",
+     "candidateId": "WHALLEY, Bruce",
+     "votes": 3180,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "RANCIE, Rae",
+     "candidateId": "RANCIE, Rae",
+     "votes": 296,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "NICOLOSI, Chloe",
+     "candidateId": "NICOLOSI, Chloe",
+     "votes": 262,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "BROOKS, Colin",
+     "candidateId": "BROOKS, Colin",
+     "votes": 4176,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "SANYAL, Sagar",
+     "candidateId": "SANYAL, Sagar",
+     "votes": 678,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 15179,
+    "now": {
+     "other": 1516,
+     "greens": 2471,
+     "coalition": 4526,
+     "one_nation": 2841,
+     "alp": 3825
+    },
+    "then": {
+     "alp": 7278.7,
+     "coalition": 4053.1,
+     "greens": 2114.1,
+     "ind": 156.7,
+     "other": 1576.4
+    },
+    "base": {
+     "alp": 47.77,
+     "coalition": 27.68,
+     "greens": 13.2,
+     "ind": 1.02,
+     "other": 10.32
+    },
+    "coverage": 41.5
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "carrum",
+   "name": "Carrum",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 33.96,
+   "expectedTotal": 47991,
+   "enrolment": 54535,
+   "votesCounted": 16297,
+   "boothsReturned": 22,
+   "boothsExpected": 27,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ON",
+     "name": "MATHEWS, Joshua",
+     "candidateId": "MATHEWS, Joshua",
+     "votes": 3786,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "ABABNEH, Reema",
+     "candidateId": "ABABNEH, Reema",
+     "votes": 435,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "MOORE, Carolyn",
+     "candidateId": "MOORE, Carolyn",
+     "votes": 311,
+     "pct": null
+    },
+    {
+     "party": "LCV",
+     "name": "MACKENZIE, Harley",
+     "candidateId": "MACKENZIE, Harley",
+     "votes": 501,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "SMITH, Trevor",
+     "candidateId": "SMITH, Trevor",
+     "votes": 152,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "KILKENNY, Sonya",
+     "candidateId": "KILKENNY, Sonya",
+     "votes": 3287,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "PEGRUM, Zoe",
+     "candidateId": "PEGRUM, Zoe",
+     "votes": 2099,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "SHELLEY, Jeff",
+     "candidateId": "SHELLEY, Jeff",
+     "votes": 4827,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 14604,
+    "now": {
+     "one_nation": 3598,
+     "other": 1310,
+     "alp": 3116,
+     "greens": 1970,
+     "coalition": 4610
+    },
+    "then": {
+     "alp": 7199.4,
+     "coalition": 4166.8,
+     "greens": 1255.0,
+     "ind": 338.9,
+     "other": 1643.9
+    },
+    "base": {
+     "alp": 49.85,
+     "coalition": 30.29,
+     "greens": 7.6,
+     "ind": 2.29,
+     "other": 9.96
+    },
+    "coverage": 35.4
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "caulfield",
+   "name": "Caulfield",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 37.68,
+   "expectedTotal": 44957,
+   "enrolment": 51087,
+   "votesCounted": 16941,
+   "boothsReturned": 23,
+   "boothsExpected": 28,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "GRN",
+     "name": "DOLEJŠÍ, Angel",
+     "candidateId": "DOLEJŠÍ, Angel",
+     "votes": 3531,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "SHROOT, Yaakov Ziv",
+     "candidateId": "SHROOT, Yaakov Ziv",
+     "votes": 213,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "ABABNEH, Malak",
+     "candidateId": "ABABNEH, Malak",
+     "votes": 756,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "STAFRACE, Mikaela",
+     "candidateId": "STAFRACE, Mikaela",
+     "votes": 2499,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "GILBERT, Geneviève",
+     "candidateId": "GILBERT, Geneviève",
+     "votes": 113,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "SOUTHWICK, David",
+     "candidateId": "SOUTHWICK, David",
+     "votes": 8023,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "ABELMAN, Michael",
+     "candidateId": "ABELMAN, Michael",
+     "votes": 1211,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 14776,
+    "now": {
+     "greens": 3112,
+     "ind": 200,
+     "other": 781,
+     "alp": 2236,
+     "coalition": 7338,
+     "one_nation": 1109
+    },
+    "then": {
+     "alp": 4196.5,
+     "coalition": 6387.4,
+     "greens": 2331.9,
+     "ind": 1050.9,
+     "other": 809.3
+    },
+    "base": {
+     "alp": 27.84,
+     "coalition": 44.41,
+     "greens": 15.81,
+     "ind": 6.48,
+     "other": 5.46
+    },
+    "coverage": 38.8
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "clarinda",
+   "name": "Clarinda",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 31.85,
+   "expectedTotal": 43629,
+   "enrolment": 49578,
+   "votesCounted": 13897,
+   "boothsReturned": 28,
+   "boothsExpected": 34,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LDP",
+     "name": "ROCHE, Liam",
+     "candidateId": "ROCHE, Liam",
+     "votes": 233,
+     "pct": null
+    },
+    {
+     "party": "EC",
+     "name": "BOYD",
+     "candidateId": "BOYD",
+     "votes": 1586,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "TAK, Meng Heang",
+     "candidateId": "TAK, Meng Heang",
+     "votes": 3906,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "MESSAGE, Kit",
+     "candidateId": "MESSAGE, Kit",
+     "votes": 352,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "WHITE, Caroline",
+     "candidateId": "WHITE, Caroline",
+     "votes": 892,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BAIN, Gavin",
+     "candidateId": "BAIN, Gavin",
+     "votes": 1941,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "PAGANIS, John",
+     "candidateId": "PAGANIS, John",
+     "votes": 4186,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 18,
+    "formal": 11736,
+    "now": {
+     "other": 1939,
+     "alp": 3618,
+     "ind": 704,
+     "one_nation": 1698,
+     "coalition": 3777
+    },
+    "then": {
+     "alp": 5470.8,
+     "coalition": 3169.0,
+     "greens": 985.3,
+     "ind": 1274.9,
+     "other": 836.0
+    },
+    "base": {
+     "alp": 45.56,
+     "coalition": 28.42,
+     "greens": 7.91,
+     "ind": 10.66,
+     "other": 7.45
+    },
+    "coverage": 39.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "cranbourne",
+   "name": "Cranbourne",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 28.29,
+   "expectedTotal": 51710,
+   "enrolment": 58761,
+   "votesCounted": 14628,
+   "boothsReturned": 22,
+   "boothsExpected": 25,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LCV",
+     "name": "URQUIOLA, Liam",
+     "candidateId": "URQUIOLA, Liam",
+     "votes": 596,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "BAIRD, Craig",
+     "candidateId": "BAIRD, Craig",
+     "votes": 142,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "MERCER, Annalise",
+     "candidateId": "MERCER, Annalise",
+     "votes": 1820,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "TRIPODI, Gino",
+     "candidateId": "TRIPODI, Gino",
+     "votes": 3761,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "RICHARDS, Pauline",
+     "candidateId": "RICHARDS, Pauline",
+     "votes": 3192,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "YUNIS, Reem",
+     "candidateId": "YUNIS, Reem",
+     "votes": 321,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "HIRST, Andrew",
+     "candidateId": "HIRST, Andrew",
+     "votes": 3401,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "FOREMAN, Shane",
+     "candidateId": "FOREMAN, Shane",
+     "votes": 359,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 11954,
+    "now": {
+     "other": 1242,
+     "greens": 1578,
+     "coalition": 3319,
+     "alp": 2794,
+     "one_nation": 3021
+    },
+    "then": {
+     "alp": 5775.4,
+     "coalition": 3060.3,
+     "greens": 735.6,
+     "ind": 62.7,
+     "other": 2320.1
+    },
+    "base": {
+     "alp": 46.12,
+     "coalition": 27.49,
+     "greens": 5.58,
+     "ind": 0.61,
+     "other": 20.19
+    },
+    "coverage": 30.2
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "croydon",
+   "name": "Croydon",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 71.18,
+   "expectedTotal": 48939,
+   "enrolment": 55612,
+   "votesCounted": 34834,
+   "boothsReturned": 26,
+   "boothsExpected": 31,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "FARR, Richard",
+     "candidateId": "FARR, Richard",
+     "votes": 5300,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "VANDERWOLF, David",
+     "candidateId": "VANDERWOLF, David",
+     "votes": 1484,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "SCHWAB, Nathan",
+     "candidateId": "SCHWAB, Nathan",
+     "votes": 286,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "THOMAS, Nofoao",
+     "candidateId": "THOMAS, Nofoao",
+     "votes": 756,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "WOOLDRIDGE, Toby",
+     "candidateId": "WOOLDRIDGE, Toby",
+     "votes": 13249,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "GRIMSHAW, Beth",
+     "candidateId": "GRIMSHAW, Beth",
+     "votes": 1004,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BRINDLEY, Glenn",
+     "candidateId": "BRINDLEY, Glenn",
+     "votes": 5964,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "FERNANDO, Lini",
+     "candidateId": "FERNANDO, Lini",
+     "votes": 5086,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 19,
+    "formal": 31259,
+    "now": {
+     "alp": 4991,
+     "ind": 1398,
+     "other": 1871,
+     "coalition": 12682,
+     "one_nation": 5613,
+     "greens": 4704
+    },
+    "then": {
+     "alp": 10718.9,
+     "coalition": 13523.2,
+     "greens": 3361.2,
+     "other": 3655.6
+    },
+    "base": {
+     "alp": 34.08,
+     "coalition": 42.97,
+     "greens": 10.83,
+     "other": 12.12
+    },
+    "coverage": 71.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "dandenong",
+   "name": "Dandenong",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 31.61,
+   "expectedTotal": 47741,
+   "enrolment": 54251,
+   "votesCounted": 15092,
+   "boothsReturned": 26,
+   "boothsExpected": 32,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LP",
+     "name": "BILLINGS, William",
+     "candidateId": "BILLINGS, William",
+     "votes": 3569,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "McMAHON, Jack",
+     "candidateId": "McMAHON, Jack",
+     "votes": 413,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "KHAN, Arshad Ali",
+     "candidateId": "KHAN, Arshad Ali",
+     "votes": 218,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "HARVEY, Jacqueline",
+     "candidateId": "HARVEY, Jacqueline",
+     "votes": 394,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "WILLIAMS, Gabrielle",
+     "candidateId": "WILLIAMS, Gabrielle",
+     "votes": 4544,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "FORTE, Jordan",
+     "candidateId": "FORTE, Jordan",
+     "votes": 132,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "D'ARCY, Catherine",
+     "candidateId": "D'ARCY, Catherine",
+     "votes": 1952,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "WRIGHT, Glenda",
+     "candidateId": "WRIGHT, Glenda",
+     "votes": 2338,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 12681,
+    "now": {
+     "coalition": 3360,
+     "other": 868,
+     "ind": 198,
+     "alp": 4291,
+     "greens": 1790,
+     "one_nation": 2174
+    },
+    "then": {
+     "alp": 7092.8,
+     "coalition": 2572.7,
+     "greens": 1126.0,
+     "other": 1889.5
+    },
+    "base": {
+     "alp": 55.15,
+     "coalition": 21.02,
+     "greens": 8.16,
+     "other": 15.67
+    },
+    "coverage": 35.6
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "eildon",
+   "name": "Eildon",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 47.06,
+   "expectedTotal": 45506,
+   "enrolment": 51711,
+   "votesCounted": 21416,
+   "boothsReturned": 44,
+   "boothsExpected": 48,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "WARD, Tom",
+     "candidateId": "WARD, Tom",
+     "votes": 1272,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "MCLEISH, Cindy",
+     "candidateId": "MCLEISH, Cindy",
+     "votes": 6746,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BARBER, Tim",
+     "candidateId": "BARBER, Tim",
+     "votes": 6468,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "MOSELY, Joshua",
+     "candidateId": "MOSELY, Joshua",
+     "votes": 276,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "GULPILIL, Talia",
+     "candidateId": "GULPILIL, Talia",
+     "votes": 2577,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "LITTLE, Dylan",
+     "candidateId": "LITTLE, Dylan",
+     "votes": 363,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "GIBSON, Kevin",
+     "candidateId": "GIBSON, Kevin",
+     "votes": 1950,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "BOND, Chloe",
+     "candidateId": "BOND, Chloe",
+     "votes": 637,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 39,
+    "formal": 19734,
+    "now": {
+     "ind": 1208,
+     "coalition": 6566,
+     "one_nation": 6273,
+     "other": 1255,
+     "greens": 2517,
+     "alp": 1915
+    },
+    "then": {
+     "alp": 5705.0,
+     "coalition": 9312.8,
+     "greens": 2158.2,
+     "ind": 472.8,
+     "other": 2085.2
+    },
+    "base": {
+     "alp": 28.98,
+     "coalition": 47.46,
+     "greens": 11.15,
+     "ind": 2.45,
+     "other": 9.95
+    },
+    "coverage": 48.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "eltham",
+   "name": "Eltham",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 45.66,
+   "expectedTotal": 44499,
+   "enrolment": 50567,
+   "votesCounted": 20318,
+   "boothsReturned": 23,
+   "boothsExpected": 28,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "RICHES, Maeve",
+     "candidateId": "RICHES, Maeve",
+     "votes": 792,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "BYRNES, Paul",
+     "candidateId": "BYRNES, Paul",
+     "votes": 7609,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "BROOKSBY, Louise",
+     "candidateId": "BROOKSBY, Louise",
+     "votes": 355,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "MARASEA, Steven",
+     "candidateId": "MARASEA, Steven",
+     "votes": 119,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "WARD, Vicki",
+     "candidateId": "WARD, Vicki",
+     "votes": 4262,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "WEATHERLEY, Jessie",
+     "candidateId": "WEATHERLEY, Jessie",
+     "votes": 3144,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "BUSBRIDGE, Rachel",
+     "candidateId": "BUSBRIDGE, Rachel",
+     "votes": 3381,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 18995,
+    "now": {
+     "other": 1215,
+     "coalition": 7379,
+     "alp": 4127,
+     "one_nation": 3055,
+     "greens": 3219
+    },
+    "then": {
+     "alp": 8608.4,
+     "coalition": 6639.3,
+     "greens": 2505.9,
+     "other": 1241.4
+    },
+    "base": {
+     "alp": 44.51,
+     "coalition": 35.61,
+     "greens": 13.43,
+     "other": 6.46
+    },
+    "coverage": 45.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "essendon",
+   "name": "Essendon",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 35.91,
+   "expectedTotal": 47282,
+   "enrolment": 53729,
+   "votesCounted": 16981,
+   "boothsReturned": 20,
+   "boothsExpected": 24,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ON",
+     "name": "BARNES, John",
+     "candidateId": "BARNES, John",
+     "votes": 1695,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "ADAMS, Ava",
+     "candidateId": "ADAMS, Ava",
+     "votes": 938,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "LE DEUX, Tommy",
+     "candidateId": "LE DEUX, Tommy",
+     "votes": 4553,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "MOHAMUD, Anab",
+     "candidateId": "MOHAMUD, Anab",
+     "votes": 75,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "THEODOSIS, Kat",
+     "candidateId": "THEODOSIS, Kat",
+     "votes": 3208,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "WILLIAMS, James",
+     "candidateId": "WILLIAMS, James",
+     "votes": 2786,
+     "pct": null
+    },
+    {
+     "party": "IND#3",
+     "name": "YILDIZ, Oscar",
+     "candidateId": "YILDIZ, Oscar",
+     "votes": 1522,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "KEDEM, Michal",
+     "candidateId": "KEDEM, Michal",
+     "votes": 1347,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 15361,
+    "now": {
+     "one_nation": 1621,
+     "ind": 2431,
+     "coalition": 4427,
+     "alp": 3079,
+     "greens": 2568,
+     "other": 1235
+    },
+    "then": {
+     "alp": 6409.5,
+     "coalition": 4361.8,
+     "greens": 2408.8,
+     "other": 2181.0
+    },
+    "base": {
+     "alp": 41.3,
+     "coalition": 29.24,
+     "greens": 15.13,
+     "other": 14.32
+    },
+    "coverage": 36.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "eureka",
+   "name": "Eureka",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 74.86,
+   "expectedTotal": 51143,
+   "enrolment": 58117,
+   "votesCounted": 38287,
+   "boothsReturned": 33,
+   "boothsExpected": 38,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "ZIVKOVIC, Belinda",
+     "candidateId": "ZIVKOVIC, Belinda",
+     "votes": 886,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "McCOLL, Sam",
+     "candidateId": "McCOLL, Sam",
+     "votes": 5197,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "SETTLE, Michaela",
+     "candidateId": "SETTLE, Michaela",
+     "votes": 5965,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "RAVEN, Andy",
+     "candidateId": "RAVEN, Andy",
+     "votes": 839,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "HARKNESS, Ian Maxwell",
+     "candidateId": "HARKNESS, Ian Maxwell",
+     "votes": 675,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "MORRISON, Wendy",
+     "candidateId": "MORRISON, Wendy",
+     "votes": 593,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BALLINGER, Paul",
+     "candidateId": "BALLINGER, Paul",
+     "votes": 10939,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "MUIR, Emma",
+     "candidateId": "MUIR, Emma",
+     "votes": 10034,
+     "pct": null
+    },
+    {
+     "party": "TS",
+     "name": "VENDITTI",
+     "candidateId": "VENDITTI",
+     "votes": 857,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 27,
+    "formal": 35379,
+    "now": {
+     "ind": 869,
+     "greens": 5026,
+     "alp": 5851,
+     "other": 2901,
+     "one_nation": 10808,
+     "coalition": 9924
+    },
+    "then": {
+     "alp": 14463.6,
+     "coalition": 11262.1,
+     "greens": 3774.4,
+     "ind": 1542.7,
+     "other": 4336.3
+    },
+    "base": {
+     "alp": 40.91,
+     "coalition": 31.69,
+     "greens": 10.77,
+     "ind": 4.36,
+     "other": 12.26
+    },
+    "coverage": 78.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "euroa",
+   "name": "Euroa",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 28.82,
+   "expectedTotal": 46769,
+   "enrolment": 53147,
+   "votesCounted": 13480,
+   "boothsReturned": 38,
+   "boothsExpected": 42,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "NP",
+     "name": "CLEELAND, Annabelle",
+     "candidateId": "CLEELAND, Annabelle",
+     "votes": 5068,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "TAOUK, Moussa",
+     "candidateId": "TAOUK, Moussa",
+     "votes": 248,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "REGAN, Alysia",
+     "candidateId": "REGAN, Alysia",
+     "votes": 1061,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "KELLY, Karina",
+     "candidateId": "KELLY, Karina",
+     "votes": 315,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "KELLY, Julian",
+     "candidateId": "KELLY, Julian",
+     "votes": 1169,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "CAMPBELL, Steve",
+     "candidateId": "CAMPBELL, Steve",
+     "votes": 4676,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "LYLE, Zoe",
+     "candidateId": "LYLE, Zoe",
+     "votes": 282,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 26,
+    "formal": 11533,
+    "now": {
+     "coalition": 4618,
+     "other": 758,
+     "greens": 950,
+     "alp": 1066,
+     "one_nation": 4141
+    },
+    "then": {
+     "alp": 3428.9,
+     "coalition": 5991.7,
+     "greens": 640.1,
+     "other": 1472.3
+    },
+    "base": {
+     "alp": 30.44,
+     "coalition": 53.77,
+     "greens": 5.3,
+     "other": 10.49
+    },
+    "coverage": 28.8
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "evelyn",
+   "name": "Evelyn",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 38.13,
+   "expectedTotal": 46783,
+   "enrolment": 53163,
+   "votesCounted": 17840,
+   "boothsReturned": 26,
+   "boothsExpected": 32,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "SHERLOCK, Analise",
+     "candidateId": "SHERLOCK, Analise",
+     "votes": 2224,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "O'BRIEN, Michelle",
+     "candidateId": "O'BRIEN, Michelle",
+     "votes": 515,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "HENLEY, Andrew",
+     "candidateId": "HENLEY, Andrew",
+     "votes": 2372,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "VALLENCE, Bridget",
+     "candidateId": "VALLENCE, Bridget",
+     "votes": 6793,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "HEALD, Jan",
+     "candidateId": "HEALD, Jan",
+     "votes": 325,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "KILLEY, Daniel",
+     "candidateId": "KILLEY, Daniel",
+     "votes": 4264,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "SCANLON, James",
+     "candidateId": "SCANLON, James",
+     "votes": 567,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 16,
+    "formal": 15375,
+    "now": {
+     "alp": 2008,
+     "other": 1251,
+     "greens": 2065,
+     "coalition": 6208,
+     "one_nation": 3843
+    },
+    "then": {
+     "alp": 5019.0,
+     "coalition": 7035.2,
+     "greens": 1533.0,
+     "ind": 292.6,
+     "other": 1495.1
+    },
+    "base": {
+     "alp": 32.73,
+     "coalition": 46.59,
+     "greens": 9.27,
+     "ind": 1.89,
+     "other": 9.52
+    },
+    "coverage": 40.4
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "footscray",
+   "name": "Footscray",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 72.6,
+   "expectedTotal": 45725,
+   "enrolment": 51960,
+   "votesCounted": 33198,
+   "boothsReturned": 21,
+   "boothsExpected": 26,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "DINH, Hai",
+     "candidateId": "DINH, Hai",
+     "votes": 501,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "PEREYRA, Elena",
+     "candidateId": "PEREYRA, Elena",
+     "votes": 7512,
+     "pct": null
+    },
+    {
+     "party": "TWP",
+     "name": "NGUYEN, Minh Quan",
+     "candidateId": "NGUYEN, Minh Quan",
+     "votes": 412,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "FELATE, Andualem",
+     "candidateId": "FELATE, Andualem",
+     "votes": 72,
+     "pct": null
+    },
+    {
+     "party": "IVAF",
+     "name": "HESS, Kristina",
+     "candidateId": "HESS, Kristina",
+     "votes": 107,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "LOPEZ, Alexander",
+     "candidateId": "LOPEZ, Alexander",
+     "votes": 2515,
+     "pct": null
+    },
+    {
+     "party": "FP",
+     "name": "LEWIS, Daniel",
+     "candidateId": "LEWIS, Daniel",
+     "votes": 84,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "IBRAHIM, Marcus",
+     "candidateId": "IBRAHIM, Marcus",
+     "votes": 51,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "FLORES, Ana",
+     "candidateId": "FLORES, Ana",
+     "votes": 218,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "HALL, Katie",
+     "candidateId": "HALL, Katie",
+     "votes": 6653,
+     "pct": null
+    },
+    {
+     "party": "IND#3",
+     "name": "MARSH, Jess",
+     "candidateId": "MARSH, Jess",
+     "votes": 1798,
+     "pct": null
+    },
+    {
+     "party": "CAN",
+     "name": "CALDER, Daryle",
+     "candidateId": "CALDER, Daryle",
+     "votes": 49,
+     "pct": null
+    },
+    {
+     "party": "IND#4",
+     "name": "CUMMING, Catherine",
+     "candidateId": "CUMMING, Catherine",
+     "votes": 259,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "CHANG, Tim",
+     "candidateId": "CHANG, Tim",
+     "votes": 5550,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "DUFF, Jasmine",
+     "candidateId": "DUFF, Jasmine",
+     "votes": 4583,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 29424,
+    "now": {
+     "ind": 2531,
+     "greens": 7239,
+     "other": 5327,
+     "one_nation": 2435,
+     "alp": 6444,
+     "coalition": 5448
+    },
+    "then": {
+     "alp": 12780.2,
+     "coalition": 5264.0,
+     "greens": 6510.9,
+     "other": 4868.8
+    },
+    "base": {
+     "alp": 43.01,
+     "coalition": 17.92,
+     "greens": 22.45,
+     "other": 16.62
+    },
+    "coverage": 75.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "frankston",
+   "name": "Frankston",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 38.04,
+   "expectedTotal": 45089,
+   "enrolment": 51237,
+   "votesCounted": 17152,
+   "boothsReturned": 22,
+   "boothsExpected": 26,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LCV",
+     "name": "KNIPE, Jeff",
+     "candidateId": "KNIPE, Jeff",
+     "votes": 740,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "KELSALL, Henry",
+     "candidateId": "KELSALL, Henry",
+     "votes": 128,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "BARRY, Nicola",
+     "candidateId": "BARRY, Nicola",
+     "votes": 60,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "NICHOLES, Peter",
+     "candidateId": "NICHOLES, Peter",
+     "votes": 243,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "EDBROOKE, Paul",
+     "candidateId": "EDBROOKE, Paul",
+     "votes": 3120,
+     "pct": null
+    },
+    {
+     "party": "IND#3",
+     "name": "ABRAHAM, Chrysten",
+     "candidateId": "ABRAHAM, Chrysten",
+     "votes": 294,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "AMBRY, Bree",
+     "candidateId": "AMBRY, Bree",
+     "votes": 4591,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "STAFFORD, Paul",
+     "candidateId": "STAFFORD, Paul",
+     "votes": 3396,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "HARMAN, Julie",
+     "candidateId": "HARMAN, Julie",
+     "votes": 288,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "GOULAS, Katie",
+     "candidateId": "GOULAS, Katie",
+     "votes": 2646,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "CHEESEMAN, Andrew",
+     "candidateId": "CHEESEMAN, Andrew",
+     "votes": 527,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 15502,
+    "now": {
+     "other": 1726,
+     "ind": 463,
+     "alp": 3026,
+     "coalition": 4461,
+     "one_nation": 3286,
+     "greens": 2540
+    },
+    "then": {
+     "alp": 6420.9,
+     "coalition": 4271.2,
+     "greens": 2104.9,
+     "ind": 640.3,
+     "other": 2064.7
+    },
+    "base": {
+     "alp": 41.49,
+     "coalition": 29.47,
+     "greens": 12.65,
+     "ind": 3.05,
+     "other": 13.35
+    },
+    "coverage": 38.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "geelong",
+   "name": "Geelong",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 42.23,
+   "expectedTotal": 47435,
+   "enrolment": 53903,
+   "votesCounted": 20031,
+   "boothsReturned": 29,
+   "boothsExpected": 35,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "GRN",
+     "name": "FLYNN, Emilie",
+     "candidateId": "FLYNN, Emilie",
+     "votes": 4330,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "POBJOY, Andy",
+     "candidateId": "POBJOY, Andy",
+     "votes": 6117,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "BENGTSSON, Maria",
+     "candidateId": "BENGTSSON, Maria",
+     "votes": 327,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "MACPHERSON, Pippa",
+     "candidateId": "MACPHERSON, Pippa",
+     "votes": 321,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "DE LORENZO, John",
+     "candidateId": "DE LORENZO, John",
+     "votes": 3369,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "GRULL, Brenden",
+     "candidateId": "GRULL, Brenden",
+     "votes": 193,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "COUZENS, Christine",
+     "candidateId": "COUZENS, Christine",
+     "votes": 3950,
+     "pct": null
+    },
+    {
+     "party": "VS#2",
+     "name": "VANDERPOL, Bree",
+     "candidateId": "VANDERPOL, Bree",
+     "votes": 473,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 17,
+    "formal": 17387,
+    "now": {
+     "greens": 3851,
+     "coalition": 5740,
+     "other": 1160,
+     "one_nation": 3016,
+     "alp": 3620
+    },
+    "then": {
+     "alp": 8076.3,
+     "coalition": 4657.0,
+     "greens": 2692.5,
+     "ind": 585.8,
+     "other": 1375.3
+    },
+    "base": {
+     "alp": 46.43,
+     "coalition": 27.18,
+     "greens": 15.27,
+     "ind": 3.27,
+     "other": 7.85
+    },
+    "coverage": 42.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "gippsland_east",
+   "name": "Gippsland East",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 46.52,
+   "expectedTotal": 45485,
+   "enrolment": 51687,
+   "votesCounted": 21159,
+   "boothsReturned": 40,
+   "boothsExpected": 44,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "ESPESETH, Amy",
+     "candidateId": "ESPESETH, Amy",
+     "votes": 576,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "STEPHENS, Sonny",
+     "candidateId": "STEPHENS, Sonny",
+     "votes": 1560,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "MUNRO, Ash",
+     "candidateId": "MUNRO, Ash",
+     "votes": 1972,
+     "pct": null
+    },
+    {
+     "party": "NP",
+     "name": "RENDELL, Gemma",
+     "candidateId": "RENDELL, Gemma",
+     "votes": 7115,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "WATERS, Alison",
+     "candidateId": "WATERS, Alison",
+     "votes": 270,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "GOODMAN, Steve",
+     "candidateId": "GOODMAN, Steve",
+     "votes": 8020,
+     "pct": null
+    },
+    {
+     "party": "SFF",
+     "name": "MUIR, Ricky",
+     "candidateId": "MUIR, Ricky",
+     "votes": 587,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 37,
+    "formal": 20100,
+    "now": {
+     "other": 1433,
+     "alp": 1560,
+     "greens": 1972,
+     "coalition": 7115,
+     "one_nation": 8020
+    },
+    "then": {
+     "alp": 3389.5,
+     "coalition": 12562.7,
+     "greens": 1334.0,
+     "other": 2813.8
+    },
+    "base": {
+     "alp": 17.01,
+     "coalition": 63.37,
+     "greens": 6.38,
+     "other": 13.24
+    },
+    "coverage": 51.5
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "gippsland_south",
+   "name": "Gippsland South",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 47.61,
+   "expectedTotal": 44839,
+   "enrolment": 50953,
+   "votesCounted": 21346,
+   "boothsReturned": 46,
+   "boothsExpected": 49,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "MA",
+     "name": "BARRY",
+     "candidateId": "BARRY",
+     "votes": 2143,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "McAULIFFE, Jessica",
+     "candidateId": "McAULIFFE, Jessica",
+     "votes": 431,
+     "pct": null
+    },
+    {
+     "party": "NP",
+     "name": "O'BRIEN, Danny",
+     "candidateId": "O'BRIEN, Danny",
+     "votes": 7538,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "SCHUHMANN, Phillip",
+     "candidateId": "SCHUHMANN, Phillip",
+     "votes": 218,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "EVANS, Zave",
+     "candidateId": "EVANS, Zave",
+     "votes": 2195,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "McGENNISKEN, Lachie",
+     "candidateId": "McGENNISKEN, Lachie",
+     "votes": 339,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "WILKIE, Bianca",
+     "candidateId": "WILKIE, Bianca",
+     "votes": 7265,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 39,
+    "formal": 18168,
+    "now": {
+     "other": 2669,
+     "coalition": 6842,
+     "ind": 191,
+     "greens": 2034,
+     "one_nation": 6432
+    },
+    "then": {
+     "alp": 4335.3,
+     "coalition": 9297.0,
+     "greens": 1695.2,
+     "ind": 1112.3,
+     "other": 1728.2
+    },
+    "base": {
+     "alp": 23.41,
+     "coalition": 53.29,
+     "greens": 8.35,
+     "ind": 5.69,
+     "other": 9.26
+    },
+    "coverage": 43.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "glen_waverley",
+   "name": "Glen Waverley",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 31.7,
+   "expectedTotal": 44722,
+   "enrolment": 50821,
+   "votesCounted": 14175,
+   "boothsReturned": 26,
+   "boothsExpected": 31,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LP",
+     "name": "SUN, Jacky",
+     "candidateId": "SUN, Jacky",
+     "votes": 6328,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "WHITE, Toyo",
+     "candidateId": "WHITE, Toyo",
+     "votes": 1793,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "NADARAJAH, Segar",
+     "candidateId": "NADARAJAH, Segar",
+     "votes": 150,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "COX, Brad",
+     "candidateId": "COX, Brad",
+     "votes": 1404,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "DOBIE, Anna",
+     "candidateId": "DOBIE, Anna",
+     "votes": 274,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "SIOW, Nicholas",
+     "candidateId": "SIOW, Nicholas",
+     "votes": 355,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "MULLAHY, John",
+     "candidateId": "MULLAHY, John",
+     "votes": 3338,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 17,
+    "formal": 12511,
+    "now": {
+     "coalition": 5812,
+     "greens": 1627,
+     "other": 713,
+     "one_nation": 1294,
+     "alp": 3065
+    },
+    "then": {
+     "alp": 5182.3,
+     "coalition": 4907.3,
+     "greens": 1227.4,
+     "other": 1194.0
+    },
+    "base": {
+     "alp": 40.64,
+     "coalition": 40.16,
+     "greens": 9.56,
+     "other": 9.63
+    },
+    "coverage": 34.6
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "greenvale",
+   "name": "Greenvale",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 25.37,
+   "expectedTotal": 48876,
+   "enrolment": 55541,
+   "votesCounted": 12401,
+   "boothsReturned": 20,
+   "boothsExpected": 24,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "SAID, Hassan",
+     "candidateId": "SAID, Hassan",
+     "votes": 831,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "SMELOV, Kirill",
+     "candidateId": "SMELOV, Kirill",
+     "votes": 624,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "MCGINNESS, Declan",
+     "candidateId": "MCGINNESS, Declan",
+     "votes": 1314,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "MOORE, Chris",
+     "candidateId": "MOORE, Chris",
+     "votes": 2324,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "ZOUGHAIB, Yehya",
+     "candidateId": "ZOUGHAIB, Yehya",
+     "votes": 217,
+     "pct": null
+    },
+    {
+     "party": "CP",
+     "name": "YOHANNA, Mazen",
+     "candidateId": "YOHANNA, Mazen",
+     "votes": 208,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "TITHERIDGE, Michael",
+     "candidateId": "TITHERIDGE, Michael",
+     "votes": 213,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "FURINA, Rosanna",
+     "candidateId": "FURINA, Rosanna",
+     "votes": 112,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "OVEREND, Jim",
+     "candidateId": "OVEREND, Jim",
+     "votes": 2398,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "WALTERS, Iwan",
+     "candidateId": "WALTERS, Iwan",
+     "votes": 2959,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 11,
+    "formal": 10253,
+    "now": {
+     "ind": 964,
+     "other": 1065,
+     "greens": 1204,
+     "one_nation": 2055,
+     "coalition": 2202,
+     "alp": 2763
+    },
+    "then": {
+     "alp": 4138.6,
+     "coalition": 2384.0,
+     "greens": 615.3,
+     "ind": 882.2,
+     "other": 2232.9
+    },
+    "base": {
+     "alp": 41.33,
+     "coalition": 25.34,
+     "greens": 5.82,
+     "ind": 6.44,
+     "other": 21.07
+    },
+    "coverage": 27.9
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "hastings",
+   "name": "Hastings",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 35.81,
+   "expectedTotal": 44747,
+   "enrolment": 50849,
+   "votesCounted": 16023,
+   "boothsReturned": 21,
+   "boothsExpected": 25,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "AJP",
+     "name": "COULSON, Chloe",
+     "candidateId": "COULSON, Chloe",
+     "votes": 532,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "DENMAN, Michael",
+     "candidateId": "DENMAN, Michael",
+     "votes": 359,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "WILLOUGHBY, Isaac",
+     "candidateId": "WILLOUGHBY, Isaac",
+     "votes": 1902,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "MERCURIO, Paul",
+     "candidateId": "MERCURIO, Paul",
+     "votes": 2765,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "SCHIEFLER, Frank",
+     "candidateId": "SCHIEFLER, Frank",
+     "votes": 5001,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "SMART, Jason",
+     "candidateId": "SMART, Jason",
+     "votes": 149,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "ANGELICO, Peter",
+     "candidateId": "ANGELICO, Peter",
+     "votes": 4536,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 14192,
+    "now": {
+     "other": 828,
+     "greens": 1732,
+     "alp": 2568,
+     "coalition": 4727,
+     "ind": 141,
+     "one_nation": 4196
+    },
+    "then": {
+     "alp": 5297.4,
+     "coalition": 5360.3,
+     "greens": 1490.2,
+     "ind": 190.9,
+     "other": 1853.2
+    },
+    "base": {
+     "alp": 37.07,
+     "coalition": 39.66,
+     "greens": 9.93,
+     "ind": 1.29,
+     "other": 12.05
+    },
+    "coverage": 36.6
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "hawthorn",
+   "name": "Hawthorn",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 53.8,
+   "expectedTotal": 45690,
+   "enrolment": 51920,
+   "votesCounted": 24579,
+   "boothsReturned": 25,
+   "boothsExpected": 28,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "CROSBY, Clive",
+     "candidateId": "CROSBY, Clive",
+     "votes": 1757,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "ROCHA, Kylie",
+     "candidateId": "ROCHA, Kylie",
+     "votes": 2318,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "IBUKI, Shima",
+     "candidateId": "IBUKI, Shima",
+     "votes": 6216,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "PRIBILOVICS, Paul",
+     "candidateId": "PRIBILOVICS, Paul",
+     "votes": 1287,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "NICOLL, Adam",
+     "candidateId": "NICOLL, Adam",
+     "votes": 170,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "McENEARNEY, Tess",
+     "candidateId": "McENEARNEY, Tess",
+     "votes": 672,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "PESUTTO, John",
+     "candidateId": "PESUTTO, John",
+     "votes": 11515,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 17,
+    "formal": 22770,
+    "now": {
+     "alp": 1672,
+     "greens": 2180,
+     "ind": 5896,
+     "one_nation": 1213,
+     "other": 774,
+     "coalition": 11035
+    },
+    "then": {
+     "alp": 5143.9,
+     "coalition": 9381.8,
+     "greens": 2453.4,
+     "ind": 4782.8,
+     "other": 1008.0
+    },
+    "base": {
+     "alp": 22.04,
+     "coalition": 42.34,
+     "greens": 11.12,
+     "ind": 19.96,
+     "other": 4.55
+    },
+    "coverage": 48.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "ivanhoe",
+   "name": "Ivanhoe",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 39.02,
+   "expectedTotal": 44216,
+   "enrolment": 50245,
+   "votesCounted": 17255,
+   "boothsReturned": 21,
+   "boothsExpected": 24,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "KENNEDY, Michelle",
+     "candidateId": "KENNEDY, Michelle",
+     "votes": 1033,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "MILNE, Ben",
+     "candidateId": "MILNE, Ben",
+     "votes": 1017,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "CARBINES, Anthony",
+     "candidateId": "CARBINES, Anthony",
+     "votes": 3616,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "LOPEZ RIOS, Oscar",
+     "candidateId": "LOPEZ RIOS, Oscar",
+     "votes": 5312,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "HUTCHINSON, Wayne",
+     "candidateId": "HUTCHINSON, Wayne",
+     "votes": 1567,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "CASONATO, Ren",
+     "candidateId": "CASONATO, Ren",
+     "votes": 184,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "CRAWLEY, Nina",
+     "candidateId": "CRAWLEY, Nina",
+     "votes": 3483,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "BERGMAN, Dora",
+     "candidateId": "BERGMAN, Dora",
+     "votes": 82,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 17,
+    "formal": 16260,
+    "now": {
+     "ind": 1113,
+     "other": 1200,
+     "alp": 3605,
+     "coalition": 5306,
+     "one_nation": 1560,
+     "greens": 3476
+    },
+    "then": {
+     "alp": 7021.1,
+     "coalition": 4684.2,
+     "greens": 3368.6,
+     "ind": 330.9,
+     "other": 855.3
+    },
+    "base": {
+     "alp": 42.68,
+     "coalition": 30.97,
+     "greens": 19.22,
+     "ind": 1.83,
+     "other": 5.31
+    },
+    "coverage": 42.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "kalkallo",
+   "name": "Kalkallo",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 25.24,
+   "expectedTotal": 61918,
+   "enrolment": 70361,
+   "votesCounted": 15627,
+   "boothsReturned": 23,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "SPENCE, Ros",
+     "candidateId": "SPENCE, Ros",
+     "votes": 3013,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "DADISHO, Eddie",
+     "candidateId": "DADISHO, Eddie",
+     "votes": 3984,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "DOBSON, Jeanette",
+     "candidateId": "DOBSON, Jeanette",
+     "votes": 425,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "LYNCH, Matthew",
+     "candidateId": "LYNCH, Matthew",
+     "votes": 232,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "STEANS, Troy",
+     "candidateId": "STEANS, Troy",
+     "votes": 4144,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "TIWARI, Payal",
+     "candidateId": "TIWARI, Payal",
+     "votes": 1563,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "ISLAM, Rebeca",
+     "candidateId": "ISLAM, Rebeca",
+     "votes": 377,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "MILLETT, Courtney",
+     "candidateId": "MILLETT, Courtney",
+     "votes": 632,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 10,
+    "formal": 12027,
+    "now": {
+     "alp": 2483,
+     "coalition": 3287,
+     "other": 1076,
+     "one_nation": 3587,
+     "greens": 1301,
+     "ind": 293
+    },
+    "then": {
+     "alp": 6555.0,
+     "coalition": 2665.9,
+     "greens": 661.6,
+     "ind": 248.5,
+     "other": 1896.1
+    },
+    "base": {
+     "alp": 54.01,
+     "coalition": 22.8,
+     "greens": 5.26,
+     "ind": 2.28,
+     "other": 15.65
+    },
+    "coverage": 34.4
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "kew",
+   "name": "Kew",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 71.07,
+   "expectedTotal": 44981,
+   "enrolment": 51115,
+   "votesCounted": 31968,
+   "boothsReturned": 24,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "LIANG, Man",
+     "candidateId": "LIANG, Man",
+     "votes": 144,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "TORNEY, Sophie",
+     "candidateId": "TORNEY, Sophie",
+     "votes": 7370,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "CARTER, Jackie",
+     "candidateId": "CARTER, Jackie",
+     "votes": 2118,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "SUN, David",
+     "candidateId": "SUN, David",
+     "votes": 1775,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "LAIRD, David",
+     "candidateId": "LAIRD, David",
+     "votes": 1693,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "LINCOLNE, Samantha",
+     "candidateId": "LINCOLNE, Samantha",
+     "votes": 636,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "WILSON, Jess",
+     "candidateId": "WILSON, Jess",
+     "votes": 16517,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "SEELEY, Ann",
+     "candidateId": "SEELEY, Ann",
+     "votes": 204,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "HALES, Juliet",
+     "candidateId": "HALES, Juliet",
+     "votes": 188,
+     "pct": null
+    },
+    {
+     "party": "IND#3",
+     "name": "DAVIS, Finlay",
+     "candidateId": "DAVIS, Finlay",
+     "votes": 48,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 18,
+    "formal": 30131,
+    "now": {
+     "ind": 7416,
+     "greens": 2053,
+     "alp": 1736,
+     "one_nation": 1667,
+     "other": 986,
+     "coalition": 16273
+    },
+    "then": {
+     "alp": 6775.1,
+     "coalition": 13389.1,
+     "greens": 2382.9,
+     "ind": 6751.7,
+     "other": 832.2
+    },
+    "base": {
+     "alp": 22.63,
+     "coalition": 44.32,
+     "greens": 8.28,
+     "ind": 21.85,
+     "other": 2.91
+    },
+    "coverage": 71.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "kororoit",
+   "name": "Kororoit",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 22.07,
+   "expectedTotal": 54398,
+   "enrolment": 61816,
+   "votesCounted": 12004,
+   "boothsReturned": 21,
+   "boothsExpected": 27,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "TWP",
+     "name": "SOUTHERN, Donna",
+     "candidateId": "SOUTHERN, Donna",
+     "votes": 258,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "PATTERSON, Nick",
+     "candidateId": "PATTERSON, Nick",
+     "votes": 429,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "MCDONALD, Joyce",
+     "candidateId": "MCDONALD, Joyce",
+     "votes": 1195,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "PIDI, Divya",
+     "candidateId": "PIDI, Divya",
+     "votes": 81,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "HASSAN, Rayan",
+     "candidateId": "HASSAN, Rayan",
+     "votes": 668,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "CHAKOMA, Jack",
+     "candidateId": "CHAKOMA, Jack",
+     "votes": 2692,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "GRIGOROVITCH, Luba",
+     "candidateId": "GRIGOROVITCH, Luba",
+     "votes": 3051,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "MELNIKOV, Seva",
+     "candidateId": "MELNIKOV, Seva",
+     "votes": 2357,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "KANDPAL, Vasundhara",
+     "candidateId": "KANDPAL, Vasundhara",
+     "votes": 254,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 10,
+    "formal": 8717,
+    "now": {
+     "other": 1266,
+     "greens": 927,
+     "coalition": 2077,
+     "alp": 2410,
+     "one_nation": 2037
+    },
+    "then": {
+     "alp": 3856.1,
+     "coalition": 2169.5,
+     "greens": 601.7,
+     "ind": 242.2,
+     "other": 1847.5
+    },
+    "base": {
+     "alp": 43.08,
+     "coalition": 24.17,
+     "greens": 6.52,
+     "ind": 2.65,
+     "other": 23.58
+    },
+    "coverage": 26.4
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "lara",
+   "name": "Lara",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 70.82,
+   "expectedTotal": 45460,
+   "enrolment": 51659,
+   "votesCounted": 32196,
+   "boothsReturned": 25,
+   "boothsExpected": 30,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "HATHWAY, Sarah",
+     "candidateId": "HATHWAY, Sarah",
+     "votes": 933,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "LONG, Samantha",
+     "candidateId": "LONG, Samantha",
+     "votes": 612,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "UWIZEYIMANA, Tina",
+     "candidateId": "UWIZEYIMANA, Tina",
+     "votes": 643,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "SLATER, Theresa",
+     "candidateId": "SLATER, Theresa",
+     "votes": 3426,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "SPYROS, Steven",
+     "candidateId": "SPYROS, Steven",
+     "votes": 9823,
+     "pct": null
+    },
+    {
+     "party": "VS#2",
+     "name": "RANDALL, Oliver",
+     "candidateId": "RANDALL, Oliver",
+     "votes": 454,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "GEORGE, Ella",
+     "candidateId": "GEORGE, Ella",
+     "votes": 8349,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "BEDDOE, Tim",
+     "candidateId": "BEDDOE, Tim",
+     "votes": 5802,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 28665,
+    "now": {
+     "other": 2493,
+     "greens": 3228,
+     "one_nation": 9394,
+     "alp": 7994,
+     "coalition": 5556
+    },
+    "then": {
+     "alp": 14490.2,
+     "coalition": 6256.0,
+     "greens": 3069.6,
+     "ind": 740.5,
+     "other": 4108.6
+    },
+    "base": {
+     "alp": 49.9,
+     "coalition": 21.38,
+     "greens": 11.34,
+     "ind": 2.66,
+     "other": 14.72
+    },
+    "coverage": 79.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "laverton",
+   "name": "Laverton",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 25.59,
+   "expectedTotal": 49320,
+   "enrolment": 56046,
+   "votesCounted": 12623,
+   "boothsReturned": 21,
+   "boothsExpected": 27,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "GRN",
+     "name": "NGUYEN, Lucy",
+     "candidateId": "NGUYEN, Lucy",
+     "votes": 2275,
+     "pct": null
+    },
+    {
+     "party": "TWP",
+     "name": "MENDELSOHN, Emma",
+     "candidateId": "MENDELSOHN, Emma",
+     "votes": 212,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "PAREDES, Rufo",
+     "candidateId": "PAREDES, Rufo",
+     "votes": 1865,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "GARCIA, Jo",
+     "candidateId": "GARCIA, Jo",
+     "votes": 286,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "CONNOLLY, Sarah",
+     "candidateId": "CONNOLLY, Sarah",
+     "votes": 3259,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "MANSOURI JAJAEE, Shohre",
+     "candidateId": "MANSOURI JAJAEE, Shohre",
+     "votes": 159,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "CHITTEDI, Suchithra",
+     "candidateId": "CHITTEDI, Suchithra",
+     "votes": 60,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "NOUNE, Ghada",
+     "candidateId": "NOUNE, Ghada",
+     "votes": 2633,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "RUDD, Van Thanh",
+     "candidateId": "RUDD, Van Thanh",
+     "votes": 896,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 11,
+    "formal": 9822,
+    "now": {
+     "greens": 1891,
+     "other": 1380,
+     "one_nation": 1631,
+     "alp": 2764,
+     "coalition": 2156
+    },
+    "then": {
+     "alp": 4507.0,
+     "coalition": 2136.4,
+     "greens": 1072.3,
+     "ind": 86.3,
+     "other": 2020.1
+    },
+    "base": {
+     "alp": 45.72,
+     "coalition": 22.18,
+     "greens": 9.44,
+     "ind": 0.98,
+     "other": 21.69
+    },
+    "coverage": 31.5
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "lowan",
+   "name": "Lowan",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 46.19,
+   "expectedTotal": 44911,
+   "enrolment": 51035,
+   "votesCounted": 20743,
+   "boothsReturned": 56,
+   "boothsExpected": 60,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "BUTLER, Kieran",
+     "candidateId": "BUTLER, Kieran",
+     "votes": 401,
+     "pct": null
+    },
+    {
+     "party": "AD",
+     "name": "HYSLOP, Karen",
+     "candidateId": "HYSLOP, Karen",
+     "votes": 407,
+     "pct": null
+    },
+    {
+     "party": "NP",
+     "name": "KEALY, Emma",
+     "candidateId": "KEALY, Emma",
+     "votes": 7785,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "PAVLOVICH, Sue",
+     "candidateId": "PAVLOVICH, Sue",
+     "votes": 1600,
+     "pct": null
+    },
+    {
+     "party": "A",
+     "name": "ELMES, Lee",
+     "candidateId": "ELMES, Lee",
+     "votes": 427,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "PARTRIDGE, Andrew",
+     "candidateId": "PARTRIDGE, Andrew",
+     "votes": 6708,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "DOWNEY, Jos",
+     "candidateId": "DOWNEY, Jos",
+     "votes": 243,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "MORAN, Jeff",
+     "candidateId": "MORAN, Jeff",
+     "votes": 1720,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 50,
+    "formal": 17470,
+    "now": {
+     "other": 977,
+     "coalition": 7090,
+     "alp": 1451,
+     "one_nation": 6089,
+     "greens": 1517,
+     "ind": 346
+    },
+    "then": {
+     "alp": 3565.0,
+     "coalition": 10187.7,
+     "greens": 1056.2,
+     "ind": 915.1,
+     "other": 1745.9
+    },
+    "base": {
+     "alp": 19.77,
+     "coalition": 58.98,
+     "greens": 5.94,
+     "ind": 5.37,
+     "other": 9.94
+    },
+    "coverage": 46.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "macedon",
+   "name": "Macedon",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 38.18,
+   "expectedTotal": 45272,
+   "enrolment": 51446,
+   "votesCounted": 17285,
+   "boothsReturned": 30,
+   "boothsExpected": 33,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "BONANNO, Dom",
+     "candidateId": "BONANNO, Dom",
+     "votes": 398,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "DEATH, Annette",
+     "candidateId": "DEATH, Annette",
+     "votes": 2676,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "WILSON, Catherine",
+     "candidateId": "WILSON, Catherine",
+     "votes": 556,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "MCRAE MCLEOD, Marley",
+     "candidateId": "MCRAE MCLEOD, Marley",
+     "votes": 2712,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "SETON, Michael",
+     "candidateId": "SETON, Michael",
+     "votes": 467,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "MAYNE, Bernadette",
+     "candidateId": "MAYNE, Bernadette",
+     "votes": 187,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "KORINFSKY, Natalie",
+     "candidateId": "KORINFSKY, Natalie",
+     "votes": 894,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "KENDALL, Kate",
+     "candidateId": "KENDALL, Kate",
+     "votes": 4909,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "PAROLIN, Damien",
+     "candidateId": "PAROLIN, Damien",
+     "votes": 3613,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 23,
+    "formal": 15945,
+    "now": {
+     "ind": 849,
+     "alp": 2599,
+     "other": 1573,
+     "greens": 2613,
+     "coalition": 4788,
+     "one_nation": 3523
+    },
+    "then": {
+     "alp": 6664.5,
+     "coalition": 4447.4,
+     "greens": 2168.7,
+     "ind": 814.8,
+     "one_nation": 586.6,
+     "other": 1263.0
+    },
+    "base": {
+     "alp": 41.41,
+     "coalition": 29.94,
+     "greens": 12.59,
+     "ind": 5.41,
+     "one_nation": 3.64,
+     "other": 7.02
+    },
+    "coverage": 41.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "malvern",
+   "name": "Malvern",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 40.63,
+   "expectedTotal": 43171,
+   "enrolment": 49058,
+   "votesCounted": 17540,
+   "boothsReturned": 21,
+   "boothsExpected": 24,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LDP",
+     "name": "SEGAL, David",
+     "candidateId": "SEGAL, David",
+     "votes": 153,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "MARTIN, Peter",
+     "candidateId": "MARTIN, Peter",
+     "votes": 1745,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BODE, Edward",
+     "candidateId": "BODE, Edward",
+     "votes": 1135,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "LEONARD, Gavin",
+     "candidateId": "LEONARD, Gavin",
+     "votes": 495,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "KATSIKIS, Georgia",
+     "candidateId": "KATSIKIS, Georgia",
+     "votes": 2883,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "ZIGOURAS, Christina",
+     "candidateId": "ZIGOURAS, Christina",
+     "votes": 1179,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "HAMER, Amelia",
+     "candidateId": "HAMER, Amelia",
+     "votes": 9442,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 16687,
+    "now": {
+     "other": 632,
+     "alp": 1706,
+     "one_nation": 1116,
+     "greens": 2784,
+     "ind": 1153,
+     "coalition": 9296
+    },
+    "then": {
+     "alp": 4543.0,
+     "coalition": 8541.8,
+     "greens": 2653.0,
+     "ind": 262.4,
+     "other": 686.7
+    },
+    "base": {
+     "alp": 26.18,
+     "coalition": 52.55,
+     "greens": 15.65,
+     "ind": 1.58,
+     "other": 4.04
+    },
+    "coverage": 43.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "melbourne",
+   "name": "Melbourne",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 51.11,
+   "expectedTotal": 50456,
+   "enrolment": 57336,
+   "votesCounted": 25790,
+   "boothsReturned": 20,
+   "boothsExpected": 27,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "TUCKFIELD, Rowan",
+     "candidateId": "TUCKFIELD, Rowan",
+     "votes": 280,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "SANDELL, Ellen",
+     "candidateId": "SANDELL, Ellen",
+     "votes": 9563,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "MCCATHIE, Rob",
+     "candidateId": "MCCATHIE, Rob",
+     "votes": 188,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "GRIFFITHS, Davydd",
+     "candidateId": "GRIFFITHS, Davydd",
+     "votes": 4240,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "YUSUF, Mohamed",
+     "candidateId": "YUSUF, Mohamed",
+     "votes": 326,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "JONES, Naomi",
+     "candidateId": "JONES, Naomi",
+     "votes": 417,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "CAMILLO, Rafael",
+     "candidateId": "CAMILLO, Rafael",
+     "votes": 4973,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "VAN DEN LAMB, Jordan",
+     "candidateId": "VAN DEN LAMB, Jordan",
+     "votes": 3139,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "COURTIS, Phillip",
+     "candidateId": "COURTIS, Phillip",
+     "votes": 1600,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 8,
+    "formal": 22068,
+    "now": {
+     "ind": 523,
+     "greens": 8484,
+     "other": 3296,
+     "alp": 3848,
+     "coalition": 4474,
+     "one_nation": 1443
+    },
+    "then": {
+     "alp": 6922.0,
+     "coalition": 4003.4,
+     "greens": 8065.0,
+     "ind": 239.5,
+     "other": 2838.1
+    },
+    "base": {
+     "alp": 30.6,
+     "coalition": 17.73,
+     "greens": 37.24,
+     "ind": 0.99,
+     "other": 13.44
+    },
+    "coverage": 55.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "melton",
+   "name": "Melton",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 49.16,
+   "expectedTotal": 52985,
+   "enrolment": 60210,
+   "votesCounted": 26049,
+   "boothsReturned": 19,
+   "boothsExpected": 22,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "TWP",
+     "name": "LEGRO, Hayden",
+     "candidateId": "LEGRO, Hayden",
+     "votes": 817,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "KELLY, Daire",
+     "candidateId": "KELLY, Daire",
+     "votes": 534,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "FARUQ, M.D. Omor",
+     "candidateId": "FARUQ, M.D. Omor",
+     "votes": 232,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "LEVCHENKOVA, Veronika",
+     "candidateId": "LEVCHENKOVA, Veronika",
+     "votes": 2643,
+     "pct": null
+    },
+    {
+     "party": "JF",
+     "name": "ADIN",
+     "candidateId": "ADIN",
+     "votes": 274,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "BINGHAM, Jarrod",
+     "candidateId": "BINGHAM, Jarrod",
+     "votes": 6312,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "WEST, Marlene",
+     "candidateId": "WEST, Marlene",
+     "votes": 496,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "BORG, Broden",
+     "candidateId": "BORG, Broden",
+     "votes": 4856,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "PERERA, Jason Spencer",
+     "candidateId": "PERERA, Jason Spencer",
+     "votes": 83,
+     "pct": null
+    },
+    {
+     "party": "IND#3",
+     "name": "FRASER, Jason",
+     "candidateId": "FRASER, Jason",
+     "votes": 265,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "KATSELIS, Matthew",
+     "candidateId": "KATSELIS, Matthew",
+     "votes": 7054,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 11,
+    "formal": 21464,
+    "now": {
+     "other": 1957,
+     "ind": 508,
+     "greens": 2307,
+     "coalition": 5747,
+     "alp": 4379,
+     "one_nation": 6566
+    },
+    "then": {
+     "alp": 8095.8,
+     "coalition": 5277.3,
+     "greens": 942.2,
+     "ind": 3363.5,
+     "other": 3785.2
+    },
+    "base": {
+     "alp": 37.49,
+     "coalition": 24.39,
+     "greens": 4.55,
+     "ind": 15.23,
+     "other": 18.33
+    },
+    "coverage": 58.4
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "mildura",
+   "name": "Mildura",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 57.61,
+   "expectedTotal": 42730,
+   "enrolment": 48557,
+   "votesCounted": 24617,
+   "boothsReturned": 39,
+   "boothsExpected": 42,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "FFV",
+     "name": "NTAHOMVUKIYE, Joselyne",
+     "candidateId": "NTAHOMVUKIYE, Joselyne",
+     "votes": 499,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "COOPER, Guy",
+     "candidateId": "COOPER, Guy",
+     "votes": 8831,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "NAYEF, Renee",
+     "candidateId": "NAYEF, Renee",
+     "votes": 253,
+     "pct": null
+    },
+    {
+     "party": "NP",
+     "name": "BENHAM, Jade",
+     "candidateId": "BENHAM, Jade",
+     "votes": 10085,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "FRIES, Vanessa",
+     "candidateId": "FRIES, Vanessa",
+     "votes": 281,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "ZIGOURAS, Stella",
+     "candidateId": "ZIGOURAS, Stella",
+     "votes": 1414,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "CLEMENTS, Katie",
+     "candidateId": "CLEMENTS, Katie",
+     "votes": 1886,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 36,
+    "formal": 23249,
+    "now": {
+     "one_nation": 8831,
+     "coalition": 10085,
+     "other": 1033,
+     "alp": 1414,
+     "greens": 1886
+    },
+    "then": {
+     "alp": 1475.4,
+     "coalition": 10567.2,
+     "greens": 555.4,
+     "ind": 9432.2,
+     "other": 1218.8
+    },
+    "base": {
+     "alp": 6.52,
+     "coalition": 45.02,
+     "greens": 2.35,
+     "ind": 41.13,
+     "other": 4.98
+    },
+    "coverage": 63.9
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "mill_park",
+   "name": "Mill Park",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 61.18,
+   "expectedTotal": 42501,
+   "enrolment": 48297,
+   "votesCounted": 26001,
+   "boothsReturned": 19,
+   "boothsExpected": 23,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "NEALY, Elizabeth",
+     "candidateId": "NEALY, Elizabeth",
+     "votes": 5683,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "DRYSDALE, Joel",
+     "candidateId": "DRYSDALE, Joel",
+     "votes": 7052,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "VAN DER END, Kath",
+     "candidateId": "VAN DER END, Kath",
+     "votes": 590,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "ZACHARIAS, Binoy",
+     "candidateId": "ZACHARIAS, Binoy",
+     "votes": 2644,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "McLINDON, Aidan",
+     "candidateId": "McLINDON, Aidan",
+     "votes": 168,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "LAMBOURN, Jesse",
+     "candidateId": "LAMBOURN, Jesse",
+     "votes": 1017,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "TSOUTSOULIS, Arthur",
+     "candidateId": "TSOUTSOULIS, Arthur",
+     "votes": 6379,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "LEVENS, Eve",
+     "candidateId": "LEVENS, Eve",
+     "votes": 419,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 12,
+    "formal": 23189,
+    "now": {
+     "alp": 5533,
+     "coalition": 6864,
+     "other": 1953,
+     "greens": 2523,
+     "ind": 161,
+     "one_nation": 6155
+    },
+    "then": {
+     "alp": 11598.0,
+     "coalition": 6024.2,
+     "greens": 1639.5,
+     "other": 3927.2
+    },
+    "base": {
+     "alp": 49.85,
+     "coalition": 25.95,
+     "greens": 7.28,
+     "other": 16.92
+    },
+    "coverage": 65.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "monbulk",
+   "name": "Monbulk",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 45.22,
+   "expectedTotal": 44003,
+   "enrolment": 50003,
+   "votesCounted": 19896,
+   "boothsReturned": 28,
+   "boothsExpected": 32,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LP",
+     "name": "FITZMAURICE, Clare",
+     "candidateId": "FITZMAURICE, Clare",
+     "votes": 5331,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "MANNERS, Craig",
+     "candidateId": "MANNERS, Craig",
+     "votes": 370,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "DE MARTINO, Daniela",
+     "candidateId": "DE MARTINO, Daniela",
+     "votes": 4066,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "DOWELL, Adrian",
+     "candidateId": "DOWELL, Adrian",
+     "votes": 4077,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "BLAIR, Merran",
+     "candidateId": "BLAIR, Merran",
+     "votes": 3932,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "WORMALD, Alyssa",
+     "candidateId": "WORMALD, Alyssa",
+     "votes": 515,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "BRIGGS, Noah",
+     "candidateId": "BRIGGS, Noah",
+     "votes": 860,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 20,
+    "formal": 18493,
+    "now": {
+     "coalition": 5194,
+     "other": 1667,
+     "alp": 3945,
+     "one_nation": 3950,
+     "greens": 3737
+    },
+    "then": {
+     "alp": 6599.8,
+     "coalition": 5199.0,
+     "greens": 2884.0,
+     "ind": 2109.8,
+     "other": 1700.4
+    },
+    "base": {
+     "alp": 36.02,
+     "coalition": 29.51,
+     "greens": 14.95,
+     "ind": 10.31,
+     "other": 9.21
+    },
+    "coverage": 45.2
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "mordialloc",
+   "name": "Mordialloc",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 35.98,
+   "expectedTotal": 47610,
+   "enrolment": 54102,
+   "votesCounted": 17128,
+   "boothsReturned": 22,
+   "boothsExpected": 27,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LP",
+     "name": "O'HALLORAN, Paul",
+     "candidateId": "O'HALLORAN, Paul",
+     "votes": 6602,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "HOSSAIN, Mahee",
+     "candidateId": "HOSSAIN, Mahee",
+     "votes": 588,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "POTUCEK, Lily",
+     "candidateId": "POTUCEK, Lily",
+     "votes": 221,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "VERSTEEGEN, Rachel",
+     "candidateId": "VERSTEEGEN, Rachel",
+     "votes": 132,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "TICEHURST, Nadia",
+     "candidateId": "TICEHURST, Nadia",
+     "votes": 2217,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "BRESKIN, Alex",
+     "candidateId": "BRESKIN, Alex",
+     "votes": 2598,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "RICHARDSON, Tim",
+     "candidateId": "RICHARDSON, Tim",
+     "votes": 3597,
+     "pct": null
+    },
+    {
+     "party": "LCV",
+     "name": "THOMPSON, Renee",
+     "candidateId": "THOMPSON, Renee",
+     "votes": 389,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 15998,
+    "now": {
+     "coalition": 6463,
+     "other": 1293,
+     "one_nation": 2170,
+     "greens": 2542,
+     "alp": 3530
+    },
+    "then": {
+     "alp": 6986.9,
+     "coalition": 4752.6,
+     "greens": 1815.3,
+     "ind": 1323.5,
+     "other": 1119.7
+    },
+    "base": {
+     "alp": 43.81,
+     "coalition": 31.64,
+     "greens": 10.17,
+     "ind": 7.72,
+     "other": 6.67
+    },
+    "coverage": 40.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "mornington",
+   "name": "Mornington",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 88.04,
+   "expectedTotal": 44133,
+   "enrolment": 50151,
+   "votesCounted": 38855,
+   "boothsReturned": 18,
+   "boothsExpected": 21,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "BROWNLIE, Gene",
+     "candidateId": "BROWNLIE, Gene",
+     "votes": 590,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "MACDONALD, Kerry",
+     "candidateId": "MACDONALD, Kerry",
+     "votes": 3844,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "CREWTHER, Chris",
+     "candidateId": "CREWTHER, Chris",
+     "votes": 19334,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BEARDS, Ashli",
+     "candidateId": "BEARDS, Ashli",
+     "votes": 5883,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "TITCHER, Kai",
+     "candidateId": "TITCHER, Kai",
+     "votes": 3527,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "GOFFIN, Melissa",
+     "candidateId": "GOFFIN, Melissa",
+     "votes": 2811,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "MAHER, Adrian",
+     "candidateId": "MAHER, Adrian",
+     "votes": 911,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 36414,
+    "now": {
+     "alp": 3803,
+     "coalition": 19113,
+     "one_nation": 5800,
+     "greens": 3447,
+     "ind": 3670,
+     "other": 581
+    },
+    "then": {
+     "alp": 8079.3,
+     "coalition": 15458.8,
+     "greens": 2202.1,
+     "ind": 8828.4,
+     "other": 1845.3
+    },
+    "base": {
+     "alp": 21.93,
+     "coalition": 42.62,
+     "greens": 6.33,
+     "ind": 23.99,
+     "other": 5.13
+    },
+    "coverage": 85.6
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "morwell",
+   "name": "Morwell",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 57.43,
+   "expectedTotal": 48689,
+   "enrolment": 55328,
+   "votesCounted": 27961,
+   "boothsReturned": 25,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "FFV",
+     "name": "CLARKE, Brendan",
+     "candidateId": "CLARKE, Brendan",
+     "votes": 911,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "LUND, Tracie",
+     "candidateId": "LUND, Tracie",
+     "votes": 3317,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "HINE, Rochelle",
+     "candidateId": "HINE, Rochelle",
+     "votes": 2579,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "McPHEE, Ross",
+     "candidateId": "McPHEE, Ross",
+     "votes": 188,
+     "pct": null
+    },
+    {
+     "party": "NP",
+     "name": "CAMERON, Martin",
+     "candidateId": "CAMERON, Martin",
+     "votes": 8343,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "ACREMAN, Natalie",
+     "candidateId": "ACREMAN, Natalie",
+     "votes": 591,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "MURPHY, Casey",
+     "candidateId": "MURPHY, Casey",
+     "votes": 10639,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 20,
+    "formal": 25007,
+    "now": {
+     "other": 1564,
+     "alp": 3130,
+     "greens": 2405,
+     "coalition": 8002,
+     "one_nation": 9906
+    },
+    "then": {
+     "alp": 7807.7,
+     "coalition": 9705.1,
+     "greens": 1033.4,
+     "ind": 2422.3,
+     "one_nation": 1520.5,
+     "other": 2518.0
+    },
+    "base": {
+     "alp": 31.34,
+     "coalition": 38.48,
+     "greens": 4.24,
+     "ind": 9.71,
+     "one_nation": 6.1,
+     "other": 10.13
+    },
+    "coverage": 63.9
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "mulgrave",
+   "name": "Mulgrave",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 69.0,
+   "expectedTotal": 42319,
+   "enrolment": 48090,
+   "votesCounted": 29201,
+   "boothsReturned": 24,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ON",
+     "name": "REBBECHI, Cody",
+     "candidateId": "REBBECHI, Cody",
+     "votes": 4015,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "SCHOFIELD, Paul J",
+     "candidateId": "SCHOFIELD, Paul J",
+     "votes": 2920,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "TRAN, Charles",
+     "candidateId": "TRAN, Charles",
+     "votes": 9196,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "FOSTER, Eden",
+     "candidateId": "FOSTER, Eden",
+     "votes": 7688,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "THEODOSSOPOULOU, Fotini",
+     "candidateId": "THEODOSSOPOULOU, Fotini",
+     "votes": 291,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "DOBRZYNSKI, Stewart",
+     "candidateId": "DOBRZYNSKI, Stewart",
+     "votes": 432,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "COOK, Ian",
+     "candidateId": "COOK, Ian",
+     "votes": 2208,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "BUCHANAN, Connor",
+     "candidateId": "BUCHANAN, Connor",
+     "votes": 620,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 26845,
+    "now": {
+     "one_nation": 3930,
+     "greens": 2857,
+     "coalition": 9010,
+     "alp": 7546,
+     "other": 1323,
+     "ind": 2179
+    },
+    "then": {
+     "alp": 13671.4,
+     "coalition": 4643.9,
+     "greens": 1310.6,
+     "ind": 5635.5,
+     "other": 1583.6
+    },
+    "base": {
+     "alp": 50.85,
+     "coalition": 17.18,
+     "greens": 5.02,
+     "ind": 20.83,
+     "other": 6.12
+    },
+    "coverage": 74.6
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "murray_plains",
+   "name": "Murray Plains",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 90.51,
+   "expectedTotal": 42566,
+   "enrolment": 48371,
+   "votesCounted": 38526,
+   "boothsReturned": 41,
+   "boothsExpected": 44,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "AJP",
+     "name": "COLLARD, Peita",
+     "candidateId": "COLLARD, Peita",
+     "votes": 822,
+     "pct": null
+    },
+    {
+     "party": "NP",
+     "name": "HOSKING, Brett",
+     "candidateId": "HOSKING, Brett",
+     "votes": 14294,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "MCDONALD, Ewan",
+     "candidateId": "MCDONALD, Ewan",
+     "votes": 733,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "SMITH, Garner",
+     "candidateId": "SMITH, Garner",
+     "votes": 16438,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "GRUNDY, Christine",
+     "candidateId": "GRUNDY, Christine",
+     "votes": 2249,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "SANIF, Asyiqin",
+     "candidateId": "SANIF, Asyiqin",
+     "votes": 338,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "COOK, Zoe",
+     "candidateId": "COOK, Zoe",
+     "votes": 1937,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 37,
+    "formal": 35813,
+    "now": {
+     "other": 1821,
+     "coalition": 13979,
+     "one_nation": 16000,
+     "alp": 2184,
+     "greens": 1829
+    },
+    "then": {
+     "alp": 6560.6,
+     "coalition": 22673.3,
+     "greens": 1236.5,
+     "ind": 892.9,
+     "other": 4449.8
+    },
+    "base": {
+     "alp": 18.6,
+     "coalition": 62.25,
+     "greens": 3.75,
+     "ind": 2.52,
+     "other": 12.88
+    },
+    "coverage": 91.2
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "narracan",
+   "name": "Narracan",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 38.88,
+   "expectedTotal": 48624,
+   "enrolment": 55254,
+   "votesCounted": 18905,
+   "boothsReturned": 37,
+   "boothsExpected": 41,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "FFV",
+     "name": "DETHLEFS, Geoff",
+     "candidateId": "DETHLEFS, Geoff",
+     "votes": 647,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "FARNHAM, Wayne",
+     "candidateId": "FARNHAM, Wayne",
+     "votes": 5826,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "WEAVER, Alyssa",
+     "candidateId": "WEAVER, Alyssa",
+     "votes": 1978,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "PAGE, Moss",
+     "candidateId": "PAGE, Moss",
+     "votes": 490,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "LUCAS, Ben",
+     "candidateId": "LUCAS, Ben",
+     "votes": 7586,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "LANGLEY, Jannette",
+     "candidateId": "LANGLEY, Jannette",
+     "votes": 1885,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": null,
+   "status": "in_progress"
+  },
+  {
+   "seatId": "narre_warren_north",
+   "name": "Narre Warren North",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 41.78,
+   "expectedTotal": 47074,
+   "enrolment": 53493,
+   "votesCounted": 19667,
+   "boothsReturned": 21,
+   "boothsExpected": 26,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LP",
+     "name": "NATHANIELSZ, Shemane",
+     "candidateId": "NATHANIELSZ, Shemane",
+     "votes": 5097,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "CRUTCHFIELD, Sebastian",
+     "candidateId": "CRUTCHFIELD, Sebastian",
+     "votes": 4475,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "UTOYO, Joshua",
+     "candidateId": "UTOYO, Joshua",
+     "votes": 151,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "EMMANUEL, Cristina",
+     "candidateId": "EMMANUEL, Cristina",
+     "votes": 436,
+     "pct": null
+    },
+    {
+     "party": "LCV",
+     "name": "LEAHY, Martin",
+     "candidateId": "LEAHY, Martin",
+     "votes": 464,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "WILSON, Belinda",
+     "candidateId": "WILSON, Belinda",
+     "votes": 4808,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "PERRY, Hayley",
+     "candidateId": "PERRY, Hayley",
+     "votes": 2512,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "McCRACKEN, Lachlan",
+     "candidateId": "McCRACKEN, Lachlan",
+     "votes": 361,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 17,
+    "formal": 18304,
+    "now": {
+     "coalition": 5097,
+     "one_nation": 4475,
+     "other": 1412,
+     "alp": 4808,
+     "greens": 2512
+    },
+    "then": {
+     "alp": 8769.9,
+     "coalition": 4883.7,
+     "greens": 1260.2,
+     "ind": 472.1,
+     "other": 2918.1
+    },
+    "base": {
+     "alp": 46.85,
+     "coalition": 27.22,
+     "greens": 6.8,
+     "ind": 2.19,
+     "other": 16.94
+    },
+    "coverage": 44.6
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "narre_warren_south",
+   "name": "Narre Warren South",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 35.15,
+   "expectedTotal": 50332,
+   "enrolment": 57195,
+   "votesCounted": 17690,
+   "boothsReturned": 23,
+   "boothsExpected": 28,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "McCRACKEN, Bailey",
+     "candidateId": "McCRACKEN, Bailey",
+     "votes": 400,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "CURRIE, Alan",
+     "candidateId": "CURRIE, Alan",
+     "votes": 451,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "HAMMOND, Trevor",
+     "candidateId": "HAMMOND, Trevor",
+     "votes": 3638,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "DENKER, Lydia",
+     "candidateId": "DENKER, Lydia",
+     "votes": 164,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "WATSON, Scott",
+     "candidateId": "WATSON, Scott",
+     "votes": 608,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "NAMBU, Jill",
+     "candidateId": "NAMBU, Jill",
+     "votes": 2376,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "KOOMEN, Stefan",
+     "candidateId": "KOOMEN, Stefan",
+     "votes": 4520,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "PETERSON, Norliah",
+     "candidateId": "PETERSON, Norliah",
+     "votes": 4211,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 14710,
+    "now": {
+     "other": 884,
+     "one_nation": 3287,
+     "ind": 561,
+     "greens": 2122,
+     "alp": 3984,
+     "coalition": 3872
+    },
+    "then": {
+     "alp": 7092.0,
+     "coalition": 4085.9,
+     "greens": 1017.7,
+     "ind": 97.3,
+     "other": 2417.1
+    },
+    "base": {
+     "alp": 48.0,
+     "coalition": 28.59,
+     "greens": 6.62,
+     "ind": 0.68,
+     "other": 16.1
+    },
+    "coverage": 40.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "nepean",
+   "name": "Nepean",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 27.44,
+   "expectedTotal": 45646,
+   "enrolment": 51871,
+   "votesCounted": 12525,
+   "boothsReturned": 17,
+   "boothsExpected": 21,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "GRN",
+     "name": "HEALY, Sianan",
+     "candidateId": "HEALY, Sianan",
+     "votes": 1890,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "SNOWBALL, Surbhi",
+     "candidateId": "SNOWBALL, Surbhi",
+     "votes": 1172,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "CHAMPION, Tamara",
+     "candidateId": "CHAMPION, Tamara",
+     "votes": 252,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "HERCUS, Darren",
+     "candidateId": "HERCUS, Darren",
+     "votes": 2216,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "ROBBINS, Kim",
+     "candidateId": "ROBBINS, Kim",
+     "votes": 763,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "TOSCANO, Joseph",
+     "candidateId": "TOSCANO, Joseph",
+     "votes": 43,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "WILLCOCKS, Seth",
+     "candidateId": "WILLCOCKS, Seth",
+     "votes": 158,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "MARSH, Anthony",
+     "candidateId": "MARSH, Anthony",
+     "votes": 5261,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "BROWN, Mike",
+     "candidateId": "BROWN, Mike",
+     "votes": 102,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 11857,
+    "now": {
+     "greens": 1890,
+     "alp": 1172,
+     "other": 512,
+     "one_nation": 2216,
+     "ind": 806,
+     "coalition": 5261
+    },
+    "then": {
+     "alp": 3697.4,
+     "coalition": 5757.5,
+     "greens": 1161.4,
+     "ind": 282.8,
+     "other": 958.0
+    },
+    "base": {
+     "alp": 32.59,
+     "coalition": 48.18,
+     "greens": 8.73,
+     "ind": 2.56,
+     "other": 7.94
+    },
+    "coverage": 29.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "niddrie",
+   "name": "Niddrie",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 67.35,
+   "expectedTotal": 46297,
+   "enrolment": 52610,
+   "votesCounted": 31179,
+   "boothsReturned": 23,
+   "boothsExpected": 27,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "SFAMENI, Sam",
+     "candidateId": "SFAMENI, Sam",
+     "votes": 288,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "CARROLL, Ben",
+     "candidateId": "CARROLL, Ben",
+     "votes": 6505,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "THEODOROU, George",
+     "candidateId": "THEODOROU, George",
+     "votes": 385,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "BYRNE, Samantha",
+     "candidateId": "BYRNE, Samantha",
+     "votes": 11255,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "METE, Domenic",
+     "candidateId": "METE, Domenic",
+     "votes": 108,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "LAWS, Brendan",
+     "candidateId": "LAWS, Brendan",
+     "votes": 1031,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "HASELGROVE, Salomae",
+     "candidateId": "HASELGROVE, Salomae",
+     "votes": 296,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "TAVERNA, Jason",
+     "candidateId": "TAVERNA, Jason",
+     "votes": 6113,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "NGUYEN, Lana",
+     "candidateId": "NGUYEN, Lana",
+     "votes": 2634,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "CHITTEDI, Karthik Reddy",
+     "candidateId": "CHITTEDI, Karthik Reddy",
+     "votes": 28,
+     "pct": null
+    },
+    {
+     "party": "TWP",
+     "name": "PATRIKEOS, Brett",
+     "candidateId": "PATRIKEOS, Brett",
+     "votes": 200,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 28211,
+    "now": {
+     "ind": 276,
+     "alp": 6389,
+     "other": 1997,
+     "coalition": 11059,
+     "one_nation": 5919,
+     "greens": 2571
+    },
+    "then": {
+     "alp": 12643.6,
+     "coalition": 9407.6,
+     "greens": 2101.7,
+     "other": 4058.2
+    },
+    "base": {
+     "alp": 44.08,
+     "coalition": 33.51,
+     "greens": 7.38,
+     "other": 15.03
+    },
+    "coverage": 65.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "northcote",
+   "name": "Northcote",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 31.57,
+   "expectedTotal": 47426,
+   "enrolment": 53893,
+   "votesCounted": 14974,
+   "boothsReturned": 23,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "FFV",
+     "name": "CIMBARO, Richard",
+     "candidateId": "CIMBARO, Richard",
+     "votes": 115,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "PENMAN, Jim",
+     "candidateId": "PENMAN, Jim",
+     "votes": 101,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "LARKIN, Kath",
+     "candidateId": "LARKIN, Kath",
+     "votes": 2174,
+     "pct": null
+    },
+    {
+     "party": "IVAF",
+     "name": "PILLEY, Clive",
+     "candidateId": "PILLEY, Clive",
+     "votes": 54,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "HILLMAN, Ian",
+     "candidateId": "HILLMAN, Ian",
+     "votes": 170,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BRADBURY, Christopher",
+     "candidateId": "BRADBURY, Christopher",
+     "votes": 703,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "AWAD, Lynda",
+     "candidateId": "AWAD, Lynda",
+     "votes": 2066,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "THEOPHANOUS, Kat",
+     "candidateId": "THEOPHANOUS, Kat",
+     "votes": 3424,
+     "pct": null
+    },
+    {
+     "party": "FP",
+     "name": "KAFEL, Hannah",
+     "candidateId": "KAFEL, Hannah",
+     "votes": 39,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "GOME, Campbell",
+     "candidateId": "GOME, Campbell",
+     "votes": 5503,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 12436,
+    "now": {
+     "other": 2094,
+     "ind": 156,
+     "one_nation": 628,
+     "coalition": 1849,
+     "alp": 3030,
+     "greens": 4679
+    },
+    "then": {
+     "alp": 5082.1,
+     "coalition": 1406.8,
+     "greens": 3792.1,
+     "ind": 170.1,
+     "other": 1984.9
+    },
+    "base": {
+     "alp": 40.55,
+     "coalition": 12.17,
+     "greens": 29.97,
+     "ind": 1.43,
+     "other": 15.88
+    },
+    "coverage": 34.8
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "oakleigh",
+   "name": "Oakleigh",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 62.57,
+   "expectedTotal": 47721,
+   "enrolment": 54228,
+   "votesCounted": 29858,
+   "boothsReturned": 29,
+   "boothsExpected": 35,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "H",
+     "name": "HSIEH, Hsiang",
+     "candidateId": "HSIEH, Hsiang",
+     "votes": 5847,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "DIMOPOULOS, Steve",
+     "candidateId": "DIMOPOULOS, Steve",
+     "votes": 7666,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "JUNG, Martin",
+     "candidateId": "JUNG, Martin",
+     "votes": 10215,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "CARTER, Brooke",
+     "candidateId": "CARTER, Brooke",
+     "votes": 3723,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "GRINTER, Matthew",
+     "candidateId": "GRINTER, Matthew",
+     "votes": 442,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "BUGTER, Rowdy",
+     "candidateId": "BUGTER, Rowdy",
+     "votes": 1161,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 18,
+    "formal": 26683,
+    "now": {
+     "other": 6777,
+     "alp": 7007,
+     "coalition": 9454,
+     "one_nation": 3445
+    },
+    "then": {
+     "alp": 12041.4,
+     "coalition": 7848.3,
+     "greens": 4440.9,
+     "ind": 803.8,
+     "other": 1548.6
+    },
+    "base": {
+     "alp": 45.07,
+     "coalition": 29.26,
+     "greens": 16.62,
+     "ind": 2.93,
+     "other": 6.12
+    },
+    "coverage": 67.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "ovens_valley",
+   "name": "Ovens Valley",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 42.56,
+   "expectedTotal": 43636,
+   "enrolment": 49586,
+   "votesCounted": 18572,
+   "boothsReturned": 38,
+   "boothsExpected": 41,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "NP",
+     "name": "McCURDY, Tim",
+     "candidateId": "McCURDY, Tim",
+     "votes": 6072,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "FIDGE, Julian",
+     "candidateId": "FIDGE, Julian",
+     "votes": 332,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "MURPHY, Bronwyn",
+     "candidateId": "MURPHY, Bronwyn",
+     "votes": 145,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "ROUEL, James",
+     "candidateId": "ROUEL, James",
+     "votes": 5734,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "MANNING, Steve",
+     "candidateId": "MANNING, Steve",
+     "votes": 3085,
+     "pct": null
+    },
+    {
+     "party": "SC",
+     "name": "NORTON",
+     "candidateId": "NORTON",
+     "votes": 192,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "SMITH, Jennifer",
+     "candidateId": "SMITH, Jennifer",
+     "votes": 908,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "GILBERT, Benjamin",
+     "candidateId": "GILBERT, Benjamin",
+     "votes": 776,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "LITCHFIELD, Sue",
+     "candidateId": "LITCHFIELD, Sue",
+     "votes": 191,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 30,
+    "formal": 16144,
+    "now": {
+     "coalition": 5733,
+     "other": 776,
+     "one_nation": 5383,
+     "ind": 2719,
+     "alp": 827,
+     "greens": 706
+    },
+    "then": {
+     "alp": 3127.8,
+     "coalition": 8543.4,
+     "greens": 1311.7,
+     "other": 3161.1
+    },
+    "base": {
+     "alp": 20.73,
+     "coalition": 52.17,
+     "greens": 8.87,
+     "other": 18.24
+    },
+    "coverage": 31.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "pakenham",
+   "name": "Pakenham",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 24.1,
+   "expectedTotal": 49201,
+   "enrolment": 55910,
+   "votesCounted": 11857,
+   "boothsReturned": 20,
+   "boothsExpected": 25,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "LD",
+     "name": "HAMALAINEN, Jesse",
+     "candidateId": "HAMALAINEN, Jesse",
+     "votes": 218,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "FRENCH, Raymond",
+     "candidateId": "FRENCH, Raymond",
+     "votes": 105,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "HANDS, Kate",
+     "candidateId": "HANDS, Kate",
+     "votes": 163,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "OGDEN, Lucas",
+     "candidateId": "OGDEN, Lucas",
+     "votes": 166,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "GRIGG, Stephanie",
+     "candidateId": "GRIGG, Stephanie",
+     "votes": 285,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "SOLIVEN, Alessandra",
+     "candidateId": "SOLIVEN, Alessandra",
+     "votes": 1574,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "DYSON, Radmila",
+     "candidateId": "DYSON, Radmila",
+     "votes": 3254,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "YAWARI, Nasser",
+     "candidateId": "YAWARI, Nasser",
+     "votes": 1421,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "PICKERING, Warren",
+     "candidateId": "PICKERING, Warren",
+     "votes": 3640,
+     "pct": null
+    },
+    {
+     "party": "IND#3",
+     "name": "DAVIES, Stephanie",
+     "candidateId": "DAVIES, Stephanie",
+     "votes": 147,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 9,
+    "formal": 9243,
+    "now": {
+     "other": 544,
+     "ind": 351,
+     "alp": 1323,
+     "coalition": 2651,
+     "greens": 1128,
+     "one_nation": 3246
+    },
+    "then": {
+     "alp": 3116.7,
+     "coalition": 2798.7,
+     "greens": 634.8,
+     "ind": 848.6,
+     "one_nation": 389.8,
+     "other": 1454.4
+    },
+    "base": {
+     "alp": 33.37,
+     "coalition": 32.95,
+     "greens": 6.61,
+     "ind": 8.8,
+     "one_nation": 3.36,
+     "other": 14.91
+    },
+    "coverage": 28.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "pascoe_vale",
+   "name": "Pascoe Vale",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 32.92,
+   "expectedTotal": 45909,
+   "enrolment": 52169,
+   "votesCounted": 15114,
+   "boothsReturned": 27,
+   "boothsExpected": 31,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "FP",
+     "name": "HICKEY, Amanda",
+     "candidateId": "HICKEY, Amanda",
+     "votes": 133,
+     "pct": null
+    },
+    {
+     "party": "CAN",
+     "name": "LAWRENCE, Stuart",
+     "candidateId": "LAWRENCE, Stuart",
+     "votes": 57,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "CIANFLONE, Anthony",
+     "candidateId": "CIANFLONE, Anthony",
+     "votes": 3348,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "GANCI, Rosemarie Pauline",
+     "candidateId": "GANCI, Rosemarie Pauline",
+     "votes": 1611,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "PANOPOULOS, Angelica",
+     "candidateId": "PANOPOULOS, Angelica",
+     "votes": 4497,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "ASHTON, Kathrine",
+     "candidateId": "ASHTON, Kathrine",
+     "votes": 124,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "ANDREWARTHA, Jacob",
+     "candidateId": "ANDREWARTHA, Jacob",
+     "votes": 261,
+     "pct": null
+    },
+    {
+     "party": "IVAF",
+     "name": "HAUPT, Kerry",
+     "candidateId": "HAUPT, Kerry",
+     "votes": 81,
+     "pct": null
+    },
+    {
+     "party": "VS#2",
+     "name": "SHAMSILI, Yasemin",
+     "candidateId": "SHAMSILI, Yasemin",
+     "votes": 1693,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "TAGGAR, Rohit",
+     "candidateId": "TAGGAR, Rohit",
+     "votes": 2476,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 12586,
+    "now": {
+     "other": 1987,
+     "alp": 2984,
+     "one_nation": 1491,
+     "greens": 3870,
+     "coalition": 2254
+    },
+    "then": {
+     "alp": 4883.6,
+     "coalition": 2522.4,
+     "greens": 2959.5,
+     "ind": 486.7,
+     "other": 1733.8
+    },
+    "base": {
+     "alp": 38.74,
+     "coalition": 21.01,
+     "greens": 22.4,
+     "ind": 4.19,
+     "other": 13.66
+    },
+    "coverage": 34.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "point_cook",
+   "name": "Point Cook",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 29.64,
+   "expectedTotal": 49065,
+   "enrolment": 55756,
+   "votesCounted": 14541,
+   "boothsReturned": 17,
+   "boothsExpected": 22,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "LAINE, Taylor",
+     "candidateId": "LAINE, Taylor",
+     "votes": 693,
+     "pct": null
+    },
+    {
+     "party": "TWP",
+     "name": "GRECH, Mark",
+     "candidateId": "GRECH, Mark",
+     "votes": 429,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "KELLY, Paul",
+     "candidateId": "KELLY, Paul",
+     "votes": 173,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "HILAKARI, Mathew",
+     "candidateId": "HILAKARI, Mathew",
+     "votes": 3637,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "ALLE, Kirti",
+     "candidateId": "ALLE, Kirti",
+     "votes": 25,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "KRISHNA PANDI, Ponraj",
+     "candidateId": "KRISHNA PANDI, Ponraj",
+     "votes": 1660,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "MEURE, Keith",
+     "candidateId": "MEURE, Keith",
+     "votes": 251,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "REDDY, Raja",
+     "candidateId": "REDDY, Raja",
+     "votes": 3970,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "REID, Cameron",
+     "candidateId": "REID, Cameron",
+     "votes": 2805,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 10,
+    "formal": 12923,
+    "now": {
+     "other": 1486,
+     "alp": 3481,
+     "greens": 1553,
+     "coalition": 3738,
+     "one_nation": 2665
+    },
+    "then": {
+     "alp": 5287.5,
+     "coalition": 3241.4,
+     "greens": 916.0,
+     "ind": 1167.7,
+     "other": 2310.3
+    },
+    "base": {
+     "alp": 39.88,
+     "coalition": 24.69,
+     "greens": 6.83,
+     "ind": 10.22,
+     "other": 18.38
+    },
+    "coverage": 33.6
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "polwarth",
+   "name": "Polwarth",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 23.6,
+   "expectedTotal": 48471,
+   "enrolment": 55081,
+   "votesCounted": 11439,
+   "boothsReturned": 37,
+   "boothsExpected": 40,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "TOLLEY, Lula",
+     "candidateId": "TOLLEY, Lula",
+     "votes": 289,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "RIORDAN, Richard",
+     "candidateId": "RIORDAN, Richard",
+     "votes": 4593,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "HUSSEIN, Hutch",
+     "candidateId": "HUSSEIN, Hutch",
+     "votes": 1311,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "HOLDEN, Jesse",
+     "candidateId": "HOLDEN, Jesse",
+     "votes": 1909,
+     "pct": null
+    },
+    {
+     "party": "CP",
+     "name": "CARBINS, Brenton",
+     "candidateId": "CARBINS, Brenton",
+     "votes": 70,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "MALCOLM, Anna",
+     "candidateId": "MALCOLM, Anna",
+     "votes": 2474,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "COLLA, Vince",
+     "candidateId": "COLLA, Vince",
+     "votes": 210,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 21,
+    "formal": 10269,
+    "now": {
+     "other": 539,
+     "coalition": 4356,
+     "alp": 1233,
+     "greens": 1847,
+     "one_nation": 2294
+    },
+    "then": {
+     "alp": 2777.2,
+     "coalition": 4443.6,
+     "greens": 1704.7,
+     "ind": 568.5,
+     "other": 774.9
+    },
+    "base": {
+     "alp": 29.23,
+     "coalition": 42.52,
+     "greens": 16.63,
+     "ind": 4.43,
+     "other": 7.19
+    },
+    "coverage": 24.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "prahran",
+   "name": "Prahran",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 28.52,
+   "expectedTotal": 43717,
+   "enrolment": 49678,
+   "votesCounted": 12468,
+   "boothsReturned": 25,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "J",
+     "name": "FINNIGAN, Tosh",
+     "candidateId": "FINNIGAN, Tosh",
+     "votes": 65,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "O'NEILL, G. Daniel",
+     "candidateId": "O'NEILL, G. Daniel",
+     "votes": 222,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "LEETON WATTS, George",
+     "candidateId": "LEETON WATTS, George",
+     "votes": 106,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "WESTAWAY, Rachel",
+     "candidateId": "WESTAWAY, Rachel",
+     "votes": 4417,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "MENADUE, Alan",
+     "candidateId": "MENADUE, Alan",
+     "votes": 26,
+     "pct": null
+    },
+    {
+     "party": "CAN",
+     "name": "WONG, Nicholas",
+     "candidateId": "WONG, Nicholas",
+     "votes": 34,
+     "pct": null
+    },
+    {
+     "party": "FP",
+     "name": "JONES, Daniel",
+     "candidateId": "JONES, Daniel",
+     "votes": 40,
+     "pct": null
+    },
+    {
+     "party": "IND#3",
+     "name": "DICKS, Max",
+     "candidateId": "DICKS, Max",
+     "votes": 94,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "DOUEIHI, Clayton",
+     "candidateId": "DOUEIHI, Clayton",
+     "votes": 581,
+     "pct": null
+    },
+    {
+     "party": "SVVCP",
+     "name": "JONAS, Morgan",
+     "candidateId": "JONAS, Morgan",
+     "votes": 76,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "VIRSU, Shaun",
+     "candidateId": "VIRSU, Shaun",
+     "votes": 753,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "HOPPER, Meghan",
+     "candidateId": "HOPPER, Meghan",
+     "votes": 1519,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "DI CAMILLO, Angelica",
+     "candidateId": "DI CAMILLO, Angelica",
+     "votes": 3847,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 9043,
+    "now": {
+     "other": 744,
+     "ind": 171,
+     "coalition": 3600,
+     "one_nation": 570,
+     "alp": 1129,
+     "greens": 2829
+    },
+    "then": {
+     "alp": 2371.0,
+     "coalition": 2709.3,
+     "greens": 3417.1,
+     "ind": 105.6,
+     "other": 440.0
+    },
+    "base": {
+     "alp": 26.58,
+     "coalition": 31.04,
+     "greens": 36.4,
+     "ind": 1.13,
+     "other": 4.84
+    },
+    "coverage": 34.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "preston",
+   "name": "Preston",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 28.24,
+   "expectedTotal": 47120,
+   "enrolment": 53545,
+   "votesCounted": 13307,
+   "boothsReturned": 24,
+   "boothsExpected": 28,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IVAF",
+     "name": "DATE, Tim",
+     "candidateId": "DATE, Tim",
+     "votes": 232,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "CHIN, Zheng",
+     "candidateId": "CHIN, Zheng",
+     "votes": 690,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "AL KATRANJI, Hamza",
+     "candidateId": "AL KATRANJI, Hamza",
+     "votes": 2250,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "VALENCIA, Julio",
+     "candidateId": "VALENCIA, Julio",
+     "votes": 171,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "FOWLES, William",
+     "candidateId": "FOWLES, William",
+     "votes": 34,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "SANGARYA, Loki",
+     "candidateId": "SANGARYA, Loki",
+     "votes": 2490,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "ASHMORE, Serena",
+     "candidateId": "ASHMORE, Serena",
+     "votes": 1734,
+     "pct": null
+    },
+    {
+     "party": "FP",
+     "name": "BRYANT, Mark",
+     "candidateId": "BRYANT, Mark",
+     "votes": 83,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "GUARDIANI, Franco",
+     "candidateId": "GUARDIANI, Franco",
+     "votes": 1496,
+     "pct": null
+    },
+    {
+     "party": "CAN",
+     "name": "DOWER, Simon",
+     "candidateId": "DOWER, Simon",
+     "votes": 46,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "LAMBERT, Nathan",
+     "candidateId": "LAMBERT, Nathan",
+     "votes": 2990,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 16,
+    "formal": 12216,
+    "now": {
+     "other": 2266,
+     "ind": 724,
+     "coalition": 2250,
+     "greens": 2490,
+     "one_nation": 1496,
+     "alp": 2990
+    },
+    "then": {
+     "alp": 4688.3,
+     "coalition": 1916.4,
+     "greens": 1977.2,
+     "ind": 1751.0,
+     "other": 1883.1
+    },
+    "base": {
+     "alp": 37.64,
+     "coalition": 17.23,
+     "greens": 15.06,
+     "ind": 14.52,
+     "other": 15.55
+    },
+    "coverage": 36.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "richmond",
+   "name": "Richmond",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 42.08,
+   "expectedTotal": 43912,
+   "enrolment": 49900,
+   "votesCounted": 18479,
+   "boothsReturned": 21,
+   "boothsExpected": 26,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ON",
+     "name": "RINDFLEISH, Harrison",
+     "candidateId": "RINDFLEISH, Harrison",
+     "votes": 846,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "APONSO, Charles",
+     "candidateId": "APONSO, Charles",
+     "votes": 3216,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "DITE, Chris",
+     "candidateId": "DITE, Chris",
+     "votes": 2218,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "MCKENZIE, Sarah",
+     "candidateId": "MCKENZIE, Sarah",
+     "votes": 3297,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "MAYNARD, Christine",
+     "candidateId": "MAYNARD, Christine",
+     "votes": 91,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "GRAY, Bernadette",
+     "candidateId": "GRAY, Bernadette",
+     "votes": 69,
+     "pct": null
+    },
+    {
+     "party": "PJ",
+     "name": "PEAD",
+     "candidateId": "PEAD",
+     "votes": 265,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "de VIETRI, Gabrielle",
+     "candidateId": "de VIETRI, Gabrielle",
+     "votes": 7371,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "MEYER, David",
+     "candidateId": "MEYER, David",
+     "votes": 250,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 11,
+    "formal": 15643,
+    "now": {
+     "one_nation": 749,
+     "coalition": 2766,
+     "other": 2313,
+     "alp": 2947,
+     "ind": 283,
+     "greens": 6585
+    },
+    "then": {
+     "alp": 5173.1,
+     "coalition": 2787.1,
+     "greens": 5440.0,
+     "ind": 174.3,
+     "other": 2068.5
+    },
+    "base": {
+     "alp": 32.82,
+     "coalition": 18.77,
+     "greens": 34.58,
+     "ind": 1.08,
+     "other": 12.75
+    },
+    "coverage": 43.4
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "ringwood",
+   "name": "Ringwood",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 63.71,
+   "expectedTotal": 48322,
+   "enrolment": 54911,
+   "votesCounted": 30786,
+   "boothsReturned": 28,
+   "boothsExpected": 35,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "HALSE, Rachel",
+     "candidateId": "HALSE, Rachel",
+     "votes": 5451,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "McGOWAN, Nick",
+     "candidateId": "McGOWAN, Nick",
+     "votes": 12062,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "NORTON, Christopher William",
+     "candidateId": "NORTON, Christopher William",
+     "votes": 141,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "HUANG, Elaine",
+     "candidateId": "HUANG, Elaine",
+     "votes": 559,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "CUTTS, Prue",
+     "candidateId": "CUTTS, Prue",
+     "votes": 1927,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "MILLS, Amy",
+     "candidateId": "MILLS, Amy",
+     "votes": 4784,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "O'CONNOR, John",
+     "candidateId": "O'CONNOR, John",
+     "votes": 3141,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "WALKER, Lyndon",
+     "candidateId": "WALKER, Lyndon",
+     "votes": 371,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "GARDNER, Jack",
+     "candidateId": "GARDNER, Jack",
+     "votes": 1000,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 23,
+    "formal": 28674,
+    "now": {
+     "alp": 5315,
+     "coalition": 11817,
+     "other": 2006,
+     "ind": 1848,
+     "greens": 4625,
+     "one_nation": 3063
+    },
+    "then": {
+     "alp": 11412.7,
+     "coalition": 9335.3,
+     "greens": 4586.6,
+     "other": 3339.5
+    },
+    "base": {
+     "alp": 39.64,
+     "coalition": 33.12,
+     "greens": 15.53,
+     "other": 11.7
+    },
+    "coverage": 65.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "ripon",
+   "name": "Ripon",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 49.13,
+   "expectedTotal": 47982,
+   "enrolment": 54525,
+   "votesCounted": 23572,
+   "boothsReturned": 43,
+   "boothsExpected": 48,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "SFF",
+     "name": "WOJTKOWSKI, Krzysztof",
+     "candidateId": "WOJTKOWSKI, Krzysztof",
+     "votes": 540,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "QUINCE, Bernard",
+     "candidateId": "QUINCE, Bernard",
+     "votes": 86,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "MCGRATH, Mark",
+     "candidateId": "MCGRATH, Mark",
+     "votes": 303,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "SKRUZNY, Ronald",
+     "candidateId": "SKRUZNY, Ronald",
+     "votes": 106,
+     "pct": null
+    },
+    {
+     "party": "JT",
+     "name": "BRENNAN",
+     "candidateId": "BRENNAN",
+     "votes": 426,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "BARRY, Jeff",
+     "candidateId": "BARRY, Jeff",
+     "votes": 78,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "ANDREI, Trevor Scott",
+     "candidateId": "ANDREI, Trevor Scott",
+     "votes": 84,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "HAYLETT, Martha",
+     "candidateId": "HAYLETT, Martha",
+     "votes": 3508,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "DRYLIE, Tim",
+     "candidateId": "DRYLIE, Tim",
+     "votes": 2190,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BUXTON, Donna",
+     "candidateId": "BUXTON, Donna",
+     "votes": 7529,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "READ, Megan",
+     "candidateId": "READ, Megan",
+     "votes": 4952,
+     "pct": null
+    },
+    {
+     "party": "NP",
+     "name": "ARMSTRONG, Jo",
+     "candidateId": "ARMSTRONG, Jo",
+     "votes": 1718,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 35,
+    "formal": 20485,
+    "now": {
+     "other": 1356,
+     "ind": 154,
+     "alp": 3353,
+     "greens": 2092,
+     "one_nation": 7134,
+     "coalition": 6396
+    },
+    "then": {
+     "alp": 7659.9,
+     "coalition": 7401.4,
+     "greens": 1195.3,
+     "ind": 766.1,
+     "other": 3462.3
+    },
+    "base": {
+     "alp": 38.55,
+     "coalition": 36.13,
+     "greens": 5.93,
+     "ind": 2.83,
+     "other": 16.56
+    },
+    "coverage": 44.8
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "rowville",
+   "name": "Rowville",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 63.59,
+   "expectedTotal": 44496,
+   "enrolment": 50564,
+   "votesCounted": 28296,
+   "boothsReturned": 20,
+   "boothsExpected": 25,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "GRN",
+     "name": "MASSEY, David",
+     "candidateId": "MASSEY, David",
+     "votes": 3300,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "WILLIAMS, Max",
+     "candidateId": "WILLIAMS, Max",
+     "votes": 13267,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "DOBRZYNSKI, Fiona",
+     "candidateId": "DOBRZYNSKI, Fiona",
+     "votes": 745,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "SHAHBAZ, Muhammad",
+     "candidateId": "SHAHBAZ, Muhammad",
+     "votes": 4205,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "WATT, Bradley",
+     "candidateId": "WATT, Bradley",
+     "votes": 4702,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "ROBSON, Scott",
+     "candidateId": "ROBSON, Scott",
+     "votes": 213,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "HIEMSTRA, Lars",
+     "candidateId": "HIEMSTRA, Lars",
+     "votes": 627,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 26687,
+    "now": {
+     "greens": 3234,
+     "coalition": 13112,
+     "other": 1565,
+     "alp": 4156,
+     "one_nation": 4620
+    },
+    "then": {
+     "alp": 8783.5,
+     "coalition": 10810.1,
+     "greens": 1817.8,
+     "ind": 3338.3,
+     "other": 1937.3
+    },
+    "base": {
+     "alp": 32.89,
+     "coalition": 40.63,
+     "greens": 7.04,
+     "ind": 12.06,
+     "other": 7.38
+    },
+    "coverage": 69.8
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "sandringham",
+   "name": "Sandringham",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 87.27,
+   "expectedTotal": 43861,
+   "enrolment": 49842,
+   "votesCounted": 38279,
+   "boothsReturned": 22,
+   "boothsExpected": 27,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "STEVENSON, Lauren",
+     "candidateId": "STEVENSON, Lauren",
+     "votes": 1287,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "FOTAKIS, Timon",
+     "candidateId": "FOTAKIS, Timon",
+     "votes": 6366,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "ROWSWELL, Brad",
+     "candidateId": "ROWSWELL, Brad",
+     "votes": 21005,
+     "pct": null
+    },
+    {
+     "party": "DA",
+     "name": "SAGRIS",
+     "candidateId": "SAGRIS",
+     "votes": 5291,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BLIGHT, Anthony",
+     "candidateId": "BLIGHT, Anthony",
+     "votes": 3734,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 17,
+    "formal": 37101,
+    "now": {
+     "other": 6499,
+     "greens": 6246,
+     "coalition": 20693,
+     "one_nation": 3663
+    },
+    "then": {
+     "alp": 9500.2,
+     "coalition": 17321.9,
+     "greens": 5339.7,
+     "ind": 2778.1,
+     "other": 2161.1
+    },
+    "base": {
+     "alp": 25.69,
+     "coalition": 46.4,
+     "greens": 14.67,
+     "ind": 7.21,
+     "other": 6.03
+    },
+    "coverage": 86.4
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "shepparton",
+   "name": "Shepparton",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 51.1,
+   "expectedTotal": 46311,
+   "enrolment": 52626,
+   "votesCounted": 23665,
+   "boothsReturned": 35,
+   "boothsExpected": 39,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "NP",
+     "name": "SALI, Shane",
+     "candidateId": "SALI, Shane",
+     "votes": 8985,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "WHITE, Alison",
+     "candidateId": "WHITE, Alison",
+     "votes": 354,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "VERNEY, Grace",
+     "candidateId": "VERNEY, Grace",
+     "votes": 876,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "HOCKING, Karen",
+     "candidateId": "HOCKING, Karen",
+     "votes": 245,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "COSTA, Lou",
+     "candidateId": "COSTA, Lou",
+     "votes": 2609,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "FIN, Cayla",
+     "candidateId": "FIN, Cayla",
+     "votes": 1097,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BRYANT, Phillip",
+     "candidateId": "BRYANT, Phillip",
+     "votes": 7553,
+     "pct": null
+    },
+    {
+     "party": "GF",
+     "name": "MURPHY",
+     "candidateId": "MURPHY",
+     "votes": 200,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "VARKEY, Johnson",
+     "candidateId": "VARKEY, Johnson",
+     "votes": 132,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 25,
+    "formal": 20400,
+    "now": {
+     "coalition": 8408,
+     "other": 726,
+     "greens": 772,
+     "ind": 2556,
+     "alp": 996,
+     "one_nation": 6942
+    },
+    "then": {
+     "alp": 1518.2,
+     "coalition": 10739.2,
+     "greens": 509.0,
+     "ind": 6086.7,
+     "other": 1546.8
+    },
+    "base": {
+     "alp": 7.98,
+     "coalition": 52.68,
+     "greens": 2.58,
+     "ind": 29.29,
+     "other": 7.48
+    },
+    "coverage": 52.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "south_barwon",
+   "name": "South Barwon",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 31.65,
+   "expectedTotal": 53712,
+   "enrolment": 61036,
+   "votesCounted": 16998,
+   "boothsReturned": 26,
+   "boothsExpected": 32,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "THISTLETON, Rebecca",
+     "candidateId": "THISTLETON, Rebecca",
+     "votes": 2712,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "NELSON, Ron",
+     "candidateId": "NELSON, Ron",
+     "votes": 958,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "BARRON, Alan",
+     "candidateId": "BARRON, Alan",
+     "votes": 341,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "HEDLEY, Freya",
+     "candidateId": "HEDLEY, Freya",
+     "votes": 137,
+     "pct": null
+    },
+    {
+     "party": "VS#2",
+     "name": "GORMAN, Madilyn",
+     "candidateId": "GORMAN, Madilyn",
+     "votes": 437,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "GEARD, Josh",
+     "candidateId": "GEARD, Josh",
+     "votes": 3131,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "SCHERRER, Izzy",
+     "candidateId": "SCHERRER, Izzy",
+     "votes": 3288,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "PETTIT, Libby",
+     "candidateId": "PETTIT, Libby",
+     "votes": 5163,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 15109,
+    "now": {
+     "alp": 2567,
+     "ind": 891,
+     "other": 849,
+     "one_nation": 2950,
+     "greens": 3033,
+     "coalition": 4819
+    },
+    "then": {
+     "alp": 6821.0,
+     "coalition": 4503.3,
+     "greens": 2072.3,
+     "other": 1712.4
+    },
+    "base": {
+     "alp": 44.21,
+     "coalition": 32.1,
+     "greens": 12.64,
+     "other": 11.05
+    },
+    "coverage": 31.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "south_west_coast",
+   "name": "South-West Coast",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 78.67,
+   "expectedTotal": 47897,
+   "enrolment": 54428,
+   "votesCounted": 37682,
+   "boothsReturned": 39,
+   "boothsExpected": 42,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "FFV",
+     "name": "BUCHAN, Tamhas",
+     "candidateId": "BUCHAN, Tamhas",
+     "votes": 910,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "HUGHES, Richard",
+     "candidateId": "HUGHES, Richard",
+     "votes": 9564,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "GOVANSTONE, Andrew",
+     "candidateId": "GOVANSTONE, Andrew",
+     "votes": 4091,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "WATTS, Silver Rose",
+     "candidateId": "WATTS, Silver Rose",
+     "votes": 4353,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "BRITNELL, Roma",
+     "candidateId": "BRITNELL, Roma",
+     "votes": 16730,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "SHEPPARD, Hera",
+     "candidateId": "SHEPPARD, Hera",
+     "votes": 885,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 35,
+    "formal": 36077,
+    "now": {
+     "other": 1766,
+     "one_nation": 9421,
+     "alp": 4051,
+     "greens": 4302,
+     "coalition": 16537
+    },
+    "then": {
+     "alp": 7586.9,
+     "coalition": 15477.2,
+     "greens": 1888.0,
+     "ind": 9502.7,
+     "other": 1622.3
+    },
+    "base": {
+     "alp": 21.18,
+     "coalition": 42.93,
+     "greens": 5.39,
+     "ind": 25.86,
+     "other": 4.63
+    },
+    "coverage": 81.2
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "st_albans",
+   "name": "St Albans",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 45.1,
+   "expectedTotal": 42086,
+   "enrolment": 47825,
+   "votesCounted": 18982,
+   "boothsReturned": 18,
+   "boothsExpected": 22,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "TWP",
+     "name": "WALKER, Luân",
+     "candidateId": "WALKER, Luân",
+     "votes": 666,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "HUYNH, Thuc Bao",
+     "candidateId": "HUYNH, Thuc Bao",
+     "votes": 1852,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "NGUYEN, Leanna",
+     "candidateId": "NGUYEN, Leanna",
+     "votes": 1192,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "SULEYMAN, Natalie",
+     "candidateId": "SULEYMAN, Natalie",
+     "votes": 5636,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "DUNSTAN, Rob",
+     "candidateId": "DUNSTAN, Rob",
+     "votes": 4244,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "JANTEN, Kerry",
+     "candidateId": "JANTEN, Kerry",
+     "votes": 119,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "HAKIZIMANA, Alex",
+     "candidateId": "HAKIZIMANA, Alex",
+     "votes": 277,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "COWELL, John",
+     "candidateId": "COWELL, John",
+     "votes": 3117,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "DAVINDER KAUR",
+     "candidateId": "DAVINDER KAUR",
+     "votes": 73,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 14,
+    "formal": 16843,
+    "now": {
+     "other": 2139,
+     "greens": 1813,
+     "alp": 5550,
+     "coalition": 4158,
+     "ind": 113,
+     "one_nation": 3070
+    },
+    "then": {
+     "alp": 7102.4,
+     "coalition": 4290.8,
+     "greens": 1143.1,
+     "ind": 600.0,
+     "other": 3706.7
+    },
+    "base": {
+     "alp": 42.22,
+     "coalition": 25.35,
+     "greens": 6.77,
+     "ind": 3.24,
+     "other": 22.42
+    },
+    "coverage": 50.3
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "sunbury",
+   "name": "Sunbury",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 28.13,
+   "expectedTotal": 45464,
+   "enrolment": 51664,
+   "votesCounted": 12787,
+   "boothsReturned": 19,
+   "boothsExpected": 24,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "BREMNER, Adam",
+     "candidateId": "BREMNER, Adam",
+     "votes": 849,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "DABROWSKI, Elita",
+     "candidateId": "DABROWSKI, Elita",
+     "votes": 3571,
+     "pct": null
+    },
+    {
+     "party": "TWP",
+     "name": "VINE, Geoff",
+     "candidateId": "VINE, Geoff",
+     "votes": 69,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "COTTOM, Simmone",
+     "candidateId": "COTTOM, Simmone",
+     "votes": 3166,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "BULL, Josh",
+     "candidateId": "BULL, Josh",
+     "votes": 2150,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "MOHR, Rohanna",
+     "candidateId": "MOHR, Rohanna",
+     "votes": 220,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "BETHI, Bhasker Reddy",
+     "candidateId": "BETHI, Bhasker Reddy",
+     "votes": 19,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "STAFFORD, John",
+     "candidateId": "STAFFORD, John",
+     "votes": 96,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "MEDCRAFT, Steve Jack",
+     "candidateId": "MEDCRAFT, Steve Jack",
+     "votes": 145,
+     "pct": null
+    },
+    {
+     "party": "BL",
+     "name": "GRANGER",
+     "candidateId": "GRANGER",
+     "votes": 1306,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "BATRES, Elmer",
+     "candidateId": "BATRES, Elmer",
+     "votes": 261,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 11775,
+    "now": {
+     "other": 2804,
+     "one_nation": 3544,
+     "coalition": 3147,
+     "alp": 2136,
+     "ind": 144
+    },
+    "then": {
+     "alp": 5172.7,
+     "coalition": 3488.1,
+     "greens": 883.6,
+     "ind": 448.7,
+     "other": 1781.9
+    },
+    "base": {
+     "alp": 43.02,
+     "coalition": 31.53,
+     "greens": 6.53,
+     "ind": 3.79,
+     "other": 15.12
+    },
+    "coverage": 34.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "sydenham",
+   "name": "Sydenham",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 26.41,
+   "expectedTotal": 57019,
+   "enrolment": 64794,
+   "votesCounted": 15056,
+   "boothsReturned": 20,
+   "boothsExpected": 26,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "VANDENBERG, Ashleigh",
+     "candidateId": "VANDENBERG, Ashleigh",
+     "votes": 283,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "CROES, Nancy G",
+     "candidateId": "CROES, Nancy G",
+     "votes": 370,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "LANKALA KENDERLA, Laxmi",
+     "candidateId": "LANKALA KENDERLA, Laxmi",
+     "votes": 51,
+     "pct": null
+    },
+    {
+     "party": "TWP",
+     "name": "LANCASHIRE, Bruce",
+     "candidateId": "LANCASHIRE, Bruce",
+     "votes": 117,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "KERR, Maria",
+     "candidateId": "KERR, Maria",
+     "votes": 322,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BAUCH, Joh",
+     "candidateId": "BAUCH, Joh",
+     "votes": 3516,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "MOUSSI, Nathalie",
+     "candidateId": "MOUSSI, Nathalie",
+     "votes": 3791,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "SINCLAIR, Brandon",
+     "candidateId": "SINCLAIR, Brandon",
+     "votes": 143,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "POON, Bruce",
+     "candidateId": "POON, Bruce",
+     "votes": 168,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "RASIC, Uros",
+     "candidateId": "RASIC, Uros",
+     "votes": 2933,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "JANE, Maggie",
+     "candidateId": "JANE, Maggie",
+     "votes": 1346,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "KHAN, Shania",
+     "candidateId": "KHAN, Shania",
+     "votes": 546,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 12,
+    "formal": 11667,
+    "now": {
+     "ind": 507,
+     "other": 1147,
+     "one_nation": 3028,
+     "coalition": 3283,
+     "alp": 2591,
+     "greens": 1111
+    },
+    "then": {
+     "alp": 5061.9,
+     "coalition": 3360.5,
+     "greens": 716.3,
+     "other": 2528.3
+    },
+    "base": {
+     "alp": 43.49,
+     "coalition": 28.97,
+     "greens": 5.81,
+     "other": 21.73
+    },
+    "coverage": 32.8
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "tarneit",
+   "name": "Tarneit",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 30.5,
+   "expectedTotal": 53464,
+   "enrolment": 60755,
+   "votesCounted": 16309,
+   "boothsReturned": 22,
+   "boothsExpected": 26,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "IND",
+     "name": "MOINUDDIN, Aijaz",
+     "candidateId": "MOINUDDIN, Aijaz",
+     "votes": 208,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "WIGHT, Dylan",
+     "candidateId": "WIGHT, Dylan",
+     "votes": 3212,
+     "pct": null
+    },
+    {
+     "party": "IND#2",
+     "name": "ISLAM, SM Zaberul",
+     "candidateId": "ISLAM, SM Zaberul",
+     "votes": 87,
+     "pct": null
+    },
+    {
+     "party": "TWP",
+     "name": "ELSBURY, Andrew",
+     "candidateId": "ELSBURY, Andrew",
+     "votes": 551,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "VAN KEULEN, Leah",
+     "candidateId": "VAN KEULEN, Leah",
+     "votes": 701,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "NIYONGABIRE, Horizana",
+     "candidateId": "NIYONGABIRE, Horizana",
+     "votes": 288,
+     "pct": null
+    },
+    {
+     "party": "IND#3",
+     "name": "AHMED, Rahima Ibrahim",
+     "candidateId": "AHMED, Rahima Ibrahim",
+     "votes": 94,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "RAHN, Maurita",
+     "candidateId": "RAHN, Maurita",
+     "votes": 150,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "VILLAGONZALO, Walter",
+     "candidateId": "VILLAGONZALO, Walter",
+     "votes": 2752,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "RIFAI, A. Raheem",
+     "candidateId": "RIFAI, A. Raheem",
+     "votes": 2738,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "UPPARLAPALLE, Venkat Ram",
+     "candidateId": "UPPARLAPALLE, Venkat Ram",
+     "votes": 3806,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "SUDHAGANI, Sindhu",
+     "candidateId": "SUDHAGANI, Sindhu",
+     "votes": 88,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 11480,
+    "now": {
+     "ind": 284,
+     "alp": 2541,
+     "other": 1500,
+     "one_nation": 2433,
+     "greens": 1973,
+     "coalition": 2749
+    },
+    "then": {
+     "alp": 5275.6,
+     "coalition": 3020.8,
+     "greens": 906.1,
+     "ind": 176.6,
+     "other": 2100.9
+    },
+    "base": {
+     "alp": 46.65,
+     "coalition": 26.74,
+     "greens": 7.36,
+     "ind": 1.49,
+     "other": 17.76
+    },
+    "coverage": 37.1
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "thomastown",
+   "name": "Thomastown",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 24.7,
+   "expectedTotal": 49447,
+   "enrolment": 56190,
+   "votesCounted": 12211,
+   "boothsReturned": 22,
+   "boothsExpected": 25,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "FFV",
+     "name": "RANCIE, Rob",
+     "candidateId": "RANCIE, Rob",
+     "votes": 466,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "STOJCEVSKI, Belinda",
+     "candidateId": "STOJCEVSKI, Belinda",
+     "votes": 3003,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "ANTHONY, Nadia",
+     "candidateId": "ANTHONY, Nadia",
+     "votes": 2325,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "REDDY, Priya",
+     "candidateId": "REDDY, Priya",
+     "votes": 1201,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "HALFPENNY, Bronwyn",
+     "candidateId": "HALFPENNY, Bronwyn",
+     "votes": 3355,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "TREWELLA, Gavin",
+     "candidateId": "TREWELLA, Gavin",
+     "votes": 1180,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 11,
+    "formal": 10353,
+    "now": {
+     "other": 1456,
+     "coalition": 2666,
+     "one_nation": 2120,
+     "alp": 3065,
+     "greens": 1046
+    },
+    "then": {
+     "alp": 5422.6,
+     "coalition": 2420.9,
+     "greens": 777.5,
+     "other": 1731.9
+    },
+    "base": {
+     "alp": 51.63,
+     "coalition": 24.1,
+     "greens": 6.84,
+     "other": 17.43
+    },
+    "coverage": 26.8
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "warrandyte",
+   "name": "Warrandyte",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 30.48,
+   "expectedTotal": 45820,
+   "enrolment": 52068,
+   "votesCounted": 13965,
+   "boothsReturned": 28,
+   "boothsExpected": 34,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "STANLEY, John",
+     "candidateId": "STANLEY, John",
+     "votes": 411,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "WERNER, Nicole",
+     "candidateId": "WERNER, Nicole",
+     "votes": 7370,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "PATERSON, Rebecca",
+     "candidateId": "PATERSON, Rebecca",
+     "votes": 1963,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "SCHWAB, Caleb",
+     "candidateId": "SCHWAB, Caleb",
+     "votes": 128,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "MURADIAN, Vanessa",
+     "candidateId": "MURADIAN, Vanessa",
+     "votes": 1948,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "BURNSIDE, Mark",
+     "candidateId": "BURNSIDE, Mark",
+     "votes": 1777,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 18,
+    "formal": 12457,
+    "now": {
+     "other": 481,
+     "coalition": 6756,
+     "alp": 1807,
+     "greens": 1789,
+     "one_nation": 1624
+    },
+    "then": {
+     "alp": 4189.5,
+     "coalition": 5789.2,
+     "greens": 1501.8,
+     "ind": 200.6,
+     "other": 776.0
+    },
+    "base": {
+     "alp": 33.24,
+     "coalition": 47.3,
+     "greens": 11.7,
+     "ind": 1.45,
+     "other": 6.31
+    },
+    "coverage": 32.7
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "wendouree",
+   "name": "Wendouree",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 45.36,
+   "expectedTotal": 47151,
+   "enrolment": 53581,
+   "votesCounted": 21388,
+   "boothsReturned": 22,
+   "boothsExpected": 27,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "ADDISON, Juliana",
+     "candidateId": "ADDISON, Juliana",
+     "votes": 5047,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "ROBINSON, Stuart",
+     "candidateId": "ROBINSON, Stuart",
+     "votes": 4656,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "BYRNE, Ruth",
+     "candidateId": "BYRNE, Ruth",
+     "votes": 529,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "MEAGHER, Chris",
+     "candidateId": "MEAGHER, Chris",
+     "votes": 654,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "RONAN, Gav",
+     "candidateId": "RONAN, Gav",
+     "votes": 5747,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "COLLINS, Melissa",
+     "candidateId": "COLLINS, Melissa",
+     "votes": 452,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "BURNS, Ellen",
+     "candidateId": "BURNS, Ellen",
+     "votes": 3433,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 16,
+    "formal": 20236,
+    "now": {
+     "alp": 5004,
+     "one_nation": 4585,
+     "other": 1609,
+     "coalition": 5681,
+     "greens": 3357
+    },
+    "then": {
+     "alp": 9924.5,
+     "coalition": 5588.6,
+     "greens": 2198.8,
+     "ind": 215.5,
+     "other": 2308.7
+    },
+    "base": {
+     "alp": 48.95,
+     "coalition": 28.3,
+     "greens": 10.42,
+     "ind": 1.08,
+     "other": 11.25
+    },
+    "coverage": 50.2
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "werribee",
+   "name": "Werribee",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 29.02,
+   "expectedTotal": 55265,
+   "enrolment": 62801,
+   "votesCounted": 16037,
+   "boothsReturned": 22,
+   "boothsExpected": 26,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "TWP",
+     "name": "HOPPER, Paul",
+     "candidateId": "HOPPER, Paul",
+     "votes": 1204,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "KUMAR, Tushar",
+     "candidateId": "KUMAR, Tushar",
+     "votes": 1734,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "PATERAS, Paul",
+     "candidateId": "PATERAS, Paul",
+     "votes": 3435,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "CLARK, Reece",
+     "candidateId": "CLARK, Reece",
+     "votes": 3638,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "EMERSON, Matt",
+     "candidateId": "EMERSON, Matt",
+     "votes": 419,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "LISTER, John",
+     "candidateId": "LISTER, John",
+     "votes": 3240,
+     "pct": null
+    },
+    {
+     "party": "LD",
+     "name": "ORCHARD, Jeremy",
+     "candidateId": "ORCHARD, Jeremy",
+     "votes": 129,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "MUNRO, Sue",
+     "candidateId": "MUNRO, Sue",
+     "votes": 909,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "RAIZADA, Monica Sharma",
+     "candidateId": "RAIZADA, Monica Sharma",
+     "votes": 108,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "KAYAGURLA, Sandhya",
+     "candidateId": "KAYAGURLA, Sandhya",
+     "votes": 59,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 13,
+    "formal": 11442,
+    "now": {
+     "other": 2116,
+     "greens": 1287,
+     "one_nation": 2724,
+     "coalition": 2685,
+     "alp": 2550,
+     "ind": 80
+    },
+    "then": {
+     "alp": 5176.5,
+     "coalition": 2533.6,
+     "greens": 921.9,
+     "ind": 856.6,
+     "other": 1953.5
+    },
+    "base": {
+     "alp": 45.49,
+     "coalition": 25.17,
+     "greens": 6.74,
+     "ind": 6.6,
+     "other": 16.0
+    },
+    "coverage": 34.5
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "williamstown",
+   "name": "Williamstown",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 47.16,
+   "expectedTotal": 44356,
+   "enrolment": 50405,
+   "votesCounted": 20920,
+   "boothsReturned": 24,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "VS",
+     "name": "MARTIN, Oskar",
+     "candidateId": "MARTIN, Oskar",
+     "votes": 1412,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "HOCKING, Ben",
+     "candidateId": "HOCKING, Ben",
+     "votes": 3295,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "O'REGAN, Bruce",
+     "candidateId": "O'REGAN, Bruce",
+     "votes": 264,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "LOUGHNAN, Catherine",
+     "candidateId": "LOUGHNAN, Catherine",
+     "votes": 3091,
+     "pct": null
+    },
+    {
+     "party": "TR",
+     "name": "YARRA, Sagar Reddy",
+     "candidateId": "YARRA, Sagar Reddy",
+     "votes": 40,
+     "pct": null
+    },
+    {
+     "party": "TWP",
+     "name": "GANNON, Gill",
+     "candidateId": "GANNON, Gill",
+     "votes": 1346,
+     "pct": null
+    },
+    {
+     "party": "ALP",
+     "name": "HORNE, Melissa",
+     "candidateId": "HORNE, Melissa",
+     "votes": 4231,
+     "pct": null
+    },
+    {
+     "party": "IND",
+     "name": "BRIFFA, Tony",
+     "candidateId": "BRIFFA, Tony",
+     "votes": 1772,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "LINDEMANN, Paul",
+     "candidateId": "LINDEMANN, Paul",
+     "votes": 4209,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 15,
+    "formal": 18228,
+    "now": {
+     "other": 2762,
+     "greens": 3019,
+     "one_nation": 2927,
+     "alp": 3930,
+     "ind": 1668,
+     "coalition": 3922
+    },
+    "then": {
+     "alp": 7421.3,
+     "coalition": 5060.7,
+     "greens": 2993.0,
+     "other": 2753.0
+    },
+    "base": {
+     "alp": 41.15,
+     "coalition": 28.04,
+     "greens": 15.4,
+     "other": 15.41
+    },
+    "coverage": 52.0
+   },
+   "status": "in_progress"
+  },
+  {
+   "seatId": "yan_yean",
+   "name": "Yan Yean",
+   "region": null,
+   "districtId": null,
+   "elected": null,
+   "countedPct": 22.58,
+   "expectedTotal": 50419,
+   "enrolment": 57294,
+   "votesCounted": 11383,
+   "boothsReturned": 22,
+   "boothsExpected": 29,
+   "lastUpdated": "2026-11-28T12:08:57+00:00",
+   "fp": [
+    {
+     "party": "ALP",
+     "name": "KATHAGE, Lauren",
+     "candidateId": "KATHAGE, Lauren",
+     "votes": 2034,
+     "pct": null
+    },
+    {
+     "party": "ON",
+     "name": "JOHNSON, Jeremy",
+     "candidateId": "JOHNSON, Jeremy",
+     "votes": 3168,
+     "pct": null
+    },
+    {
+     "party": "VS",
+     "name": "BELL, Andrew",
+     "candidateId": "BELL, Andrew",
+     "votes": 238,
+     "pct": null
+    },
+    {
+     "party": "FFV",
+     "name": "HALL, James",
+     "candidateId": "HALL, James",
+     "votes": 266,
+     "pct": null
+    },
+    {
+     "party": "AJP",
+     "name": "OKATAN, Sinan",
+     "candidateId": "OKATAN, Sinan",
+     "votes": 245,
+     "pct": null
+    },
+    {
+     "party": "LP",
+     "name": "DOW, Amanda",
+     "candidateId": "DOW, Amanda",
+     "votes": 3601,
+     "pct": null
+    },
+    {
+     "party": "GRN",
+     "name": "MOHAMMED, Gufran",
+     "candidateId": "MOHAMMED, Gufran",
+     "votes": 1197,
+     "pct": null
+    },
+    {
+     "party": "LDP",
+     "name": "CHEERS, Troy",
+     "candidateId": "CHEERS, Troy",
+     "votes": 53,
+     "pct": null
+    }
+   ],
+   "tcp": null,
+   "tcpState": "none",
+   "matched": {
+    "parcels": 9,
+    "formal": 7378,
+    "now": {
+     "alp": 1351,
+     "one_nation": 2091,
+     "other": 538,
+     "coalition": 2641,
+     "greens": 757
+    },
+    "then": {
+     "alp": 3161.2,
+     "coalition": 2451.8,
+     "greens": 502.6,
+     "other": 1262.4
+    },
+    "base": {
+     "alp": 41.48,
+     "coalition": 33.81,
+     "greens": 6.42,
+     "other": 18.29
+    },
+    "coverage": 24.9
+   },
+   "status": "in_progress"
+  }
+ ]
+}
