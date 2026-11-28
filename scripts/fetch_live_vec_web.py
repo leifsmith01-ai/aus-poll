@@ -54,7 +54,9 @@ import fetch_live_vec as core  # noqa: E402  (shared contract, party codes, boot
 
 SITE = "https://www.vec.vic.gov.au"
 STATE_RESULTS = SITE + "/results/state-election-results"
-DEFAULT_INDEX = STATE_RESULTS + "/2026-state-election-results"
+# Where the VEC actually published 2026 (found on the night; the 2022 pattern
+# /results/state-election-results/2022-state-election-results was not reused).
+DEFAULT_INDEX = SITE + "/results/2026-results/district-election-page"
 USER_AGENT = "aus-poll-live/1.0 (election results dashboard)"
 ATTRIBUTION = "© Victorian Electoral Commission, CC BY 4.0"
 
@@ -197,7 +199,9 @@ def parse_summary(page: str) -> dict:
                 if _num(nxt) is not None:
                     out["enrolment"] = _num(nxt)
                     break
-        if low == "elected member" and k + 1 < len(lines):
+        # 2022 pages say "Elected member"; 2026 pages "Successful candidate" (with
+        # placeholder text, no comma, until the seat is declared).
+        if low in ("elected member", "successful candidate") and k + 1 < len(lines):
             nxt = lines[k + 1]
             if "," in nxt and not nxt.lower().startswith(("votes counted", "total")):
                 out["elected"] = nxt
@@ -523,8 +527,11 @@ def results_index_candidates(page: str, base: str, year: str) -> list[str]:
     out = []
     for href in re.findall(r'href="([^"#?]+)"', page):
         low = href.lower()
-        if (year in low and "/results/" in low and "state-election" in low
-                and "by-election" not in low and "council" not in low
+        # 2022 style: /results/state-election-results/2022-state-election-results
+        # 2026 style: /results/2026-results/district-election-page
+        if (year in low and "/results/" in low
+                and ("state-election" in low or "district-election" in low or low.rstrip("/").endswith(f"{year}-results"))
+                and "by-election" not in low and "council" not in low and "region" not in low
                 and "/results-by-district/" not in low):
             url = urljoin(base, href)
             if url not in out:

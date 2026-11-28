@@ -15,7 +15,7 @@
 set -u
 
 MODE=${MODE:-website}
-RESULTS_URL=${RESULTS_URL:-https://www.vec.vic.gov.au/results/state-election-results/2026-state-election-results}
+RESULTS_URL=${RESULTS_URL:-https://www.vec.vic.gov.au/results/2026-results/district-election-page}
 INTERVAL=${INTERVAL:-300}
 DURATION_MIN=${DURATION_MIN:-0}
 DRY_RUN=${DRY_RUN:-0}
